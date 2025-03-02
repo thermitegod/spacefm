@@ -61,3 +61,22 @@ vfs::utils::split_basename_extension(const std::filesystem::path& filename) noex
     // No valid extension found, return the whole filename as the basename
     return {filename.string(), "", false};
 }
+
+std::filesystem::path
+vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem::path& filename,
+                        const std::string_view tag) noexcept
+{
+    assert(!path.empty());
+    assert(!filename.empty());
+
+    const auto parts = split_basename_extension(filename);
+
+    u32 n = 0;
+    auto unique_path = path / std::format("{}{}", parts.basename, parts.extension);
+    while (std::filesystem::exists(unique_path))
+    { // need to see broken symlinks
+        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, ++n, parts.extension);
+    }
+
+    return unique_path;
+}

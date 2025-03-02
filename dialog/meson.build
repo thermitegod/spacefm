@@ -1,3 +1,19 @@
+# shared code
+sources_vfs = files(
+    'lib/logger.cxx',
+
+    'lib/utils/misc.cxx',
+
+    'lib/vfs/vfs-file.cxx',
+    'lib/vfs/vfs-mime-type.cxx',
+    'lib/vfs/vfs-user-dirs.cxx',
+
+    'lib/vfs/utils/vfs-utils.cxx',
+
+	'lib/vfs/mime-type/chrome/mime-utils.cxx',
+	'lib/vfs/mime-type/mime-type.cxx',
+)
+
 # About
 incdir_about = include_directories('about')
 sources_about = files(
@@ -17,27 +33,15 @@ spacefm = build_target(
         glibmm4_dep,
         giomm4_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # App Chooser
-incdir_chooser = include_directories(['app-chooser', '../src/datatypes'])
+incdir_chooser = include_directories(['app-chooser', 'lib', '../src/datatypes'])
 sources_chooser = files(
     'app-chooser/main.cxx',
     'app-chooser/app-chooser.cxx',
-
-    'app-chooser/logger.cxx',
-
-    'app-chooser/utils/misc.cxx',
-
-    'app-chooser/vfs/vfs-mime-type.cxx',
-    'app-chooser/vfs/vfs-user-dirs.cxx',
-
-    'app-chooser/vfs/utils/vfs-utils.cxx',
-
-	'app-chooser/vfs/mime-type/chrome/mime-utils.cxx',
-	'app-chooser/vfs/mime-type/mime-type.cxx',
 )
+sources_chooser += sources_vfs
 
 spacefm = build_target(
     'spacefm_app_chooser',
@@ -55,7 +59,6 @@ spacefm = build_target(
         concurrencpp_dep,
         pugixml_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Error
@@ -80,7 +83,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # File Action
@@ -103,7 +105,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Keybinding
@@ -127,7 +128,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Keybinding Set Key
@@ -151,7 +151,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Message
@@ -174,7 +173,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Pattern
@@ -197,7 +195,6 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Preference
@@ -220,32 +217,20 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
 # Properties
-incdir_properties = include_directories(['properties', '../src/datatypes'])
+incdir_properties = include_directories(['properties', 'lib', '../src/datatypes'])
 sources_properties = files(
     'properties/main.cxx',
     'properties/properties.cxx',
 
     'properties/concurrency.cxx',
-    'properties/logger.cxx',
-
-    'properties/utils/misc.cxx',
-
-    'properties/vfs/vfs-file.cxx',
-    'properties/vfs/vfs-mime-type.cxx',
-    'properties/vfs/vfs-user-dirs.cxx',
-
-    'properties/vfs/utils/vfs-utils.cxx',
-
-	'properties/vfs/mime-type/chrome/mime-utils.cxx',
-	'properties/vfs/mime-type/mime-type.cxx',
 
     'properties/media/audio-video-metadata.cxx',
     'properties/media/image-metadata.cxx',
 )
+sources_properties += sources_vfs
 
 spacefm = build_target(
     'spacefm_properties',
@@ -264,5 +249,4 @@ spacefm = build_target(
         pugixml_dep,
         media_dependencies,
     ],
-    # cpp_pch: 'pch/cxx_pch.hxx',
 )

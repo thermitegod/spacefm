@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -13,12 +15,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <format>
+#include <string>
+#include <string_view>
 
-#include <filesystem>
+#include <ztd/ztd.hxx>
 
-namespace utils
+#include "utils/shell-quote.hxx"
+
+std::string
+utils::shell_quote(const std::string_view str) noexcept
 {
-bool have_rw_access(const std::filesystem::path& path) noexcept;
-bool have_x_access(const std::filesystem::path& path) noexcept;
-} // namespace utils
+    if (str.empty())
+    {
+        return R"("")";
+    }
+    return std::format(R"("{}")", ztd::replace(str, "\"", "\\\""));
+}
