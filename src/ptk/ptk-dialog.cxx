@@ -100,12 +100,18 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
 
     const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
+    std::int32_t exit_status = 0;
     std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output);
+    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
 
     // Result
 
+#if defined(HAVE_DEV) && __has_feature(address_sanitizer)
+    // AddressSanitizer does not like GTK
     if (standard_output.empty())
+#else
+    if (exit_status != 0 || standard_output.empty())
+#endif
     {
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
