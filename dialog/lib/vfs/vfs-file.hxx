@@ -57,8 +57,6 @@ struct file : public std::enable_shared_from_this<file>
 
     [[nodiscard]] u64 blocks() const noexcept;
 
-    [[nodiscard]] std::filesystem::perms permissions() const noexcept;
-
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
 
     [[nodiscard]] std::string_view display_owner() const noexcept;
@@ -101,8 +99,7 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] bool update() noexcept;
 
   private:
-    ztd::statx file_stat_;
-    std::filesystem::file_status status_;
+    ztd::statx stat_;
 
     std::filesystem::path path_; // real path on file system
 

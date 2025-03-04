@@ -96,12 +96,9 @@ vfs::file::update() noexcept
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         return false;
     }
-    this->file_stat_ = stat.value();
+    this->stat_ = stat.value();
 
     // logger::debug<logger::domain::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
-
-    // this->status = std::filesystem::status(file_path);
-    this->status_ = std::filesystem::symlink_status(this->path_);
 
     this->mime_type_ = vfs::mime_type::create_from_file(this->path_, this->settings_);
 
@@ -113,14 +110,14 @@ vfs::file::update() noexcept
     this->display_disk_size_ = vfs::utils::format_file_size(this->size_on_disk());
 
     // owner
-    const auto pw = ztd::passwd::create(this->file_stat_.uid());
+    const auto pw = ztd::passwd::create(this->stat_.uid());
     if (pw)
     {
         this->display_owner_ = pw->name();
     }
 
     // group
-    const auto gr = ztd::group::create(this->file_stat_.gid());
+    const auto gr = ztd::group::create(this->stat_.gid());
     if (gr)
     {
         this->display_group_ = gr->name();
@@ -165,13 +162,13 @@ vfs::file::uri() const noexcept
 u64
 vfs::file::size() const noexcept
 {
-    return this->file_stat_.size();
+    return this->stat_.size();
 }
 
 u64
 vfs::file::size_on_disk() const noexcept
 {
-    return this->file_stat_.size_on_disk();
+    return this->stat_.size_on_disk();
 }
 
 std::string_view
@@ -195,7 +192,7 @@ vfs::file::display_size_on_disk() const noexcept
 u64
 vfs::file::blocks() const noexcept
 {
-    return this->file_stat_.blocks();
+    return this->stat_.blocks();
 }
 
 const std::shared_ptr<vfs::mime_type>&
@@ -365,25 +362,25 @@ vfs::file::display_mtime() const noexcept
 std::chrono::system_clock::time_point
 vfs::file::atime() const noexcept
 {
-    return this->file_stat_.atime();
+    return this->stat_.atime();
 }
 
 std::chrono::system_clock::time_point
 vfs::file::btime() const noexcept
 {
-    return this->file_stat_.btime();
+    return this->stat_.btime();
 }
 
 std::chrono::system_clock::time_point
 vfs::file::ctime() const noexcept
 {
-    return this->file_stat_.ctime();
+    return this->stat_.ctime();
 }
 
 std::chrono::system_clock::time_point
 vfs::file::mtime() const noexcept
 {
-    return this->file_stat_.mtime();
+    return this->stat_.mtime();
 }
 
 std::string
@@ -407,36 +404,36 @@ vfs::file::create_file_perm_string() const noexcept
     std::string perm = "----------";
 
     // File Type Permissions
-    if (std::filesystem::is_regular_file(this->status_))
+    if (this->is_regular_file())
     {
         perm[file_type] = '-';
     }
-    else if (std::filesystem::is_directory(this->status_))
+    else if (this->is_directory())
     {
         perm[file_type] = 'd';
     }
-    else if (std::filesystem::is_symlink(this->status_))
+    else if (this->is_symlink())
     {
         perm[file_type] = 'l';
     }
-    else if (std::filesystem::is_character_file(this->status_))
+    else if (this->is_character_file())
     {
         perm[file_type] = 'c';
     }
-    else if (std::filesystem::is_block_file(this->status_))
+    else if (this->is_block_file())
     {
         perm[file_type] = 'b';
     }
-    else if (std::filesystem::is_fifo(this->status_))
+    else if (this->is_fifo())
     {
         perm[file_type] = 'p';
     }
-    else if (std::filesystem::is_socket(this->status_))
+    else if (this->is_socket())
     {
         perm[file_type] = 's';
     }
 
-    const std::filesystem::perms p = this->status_.permissions();
+    const auto p = std::filesystem::symlink_status(this->path_).permissions();
 
     // Owner
     if ((p & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
@@ -544,9 +541,7 @@ vfs::file::display_permissions() noexcept
 bool
 vfs::file::is_directory() const noexcept
 {
-    // return std::filesystem::is_directory(this->status);
-
-    if (std::filesystem::is_symlink(this->status_))
+    if (this->stat_.is_symlink())
     {
         std::error_code ec;
         const auto symlink_path = std::filesystem::read_symlink(this->path_, ec);
@@ -555,43 +550,43 @@ vfs::file::is_directory() const noexcept
             return std::filesystem::is_directory(symlink_path);
         }
     }
-    return std::filesystem::is_directory(this->status_);
+    return this->stat_.is_directory();
 }
 
 bool
 vfs::file::is_regular_file() const noexcept
 {
-    return std::filesystem::is_regular_file(this->status_);
+    return this->stat_.is_regular_file();
 }
 
 bool
 vfs::file::is_symlink() const noexcept
 {
-    return std::filesystem::is_symlink(this->status_);
+    return this->stat_.is_symlink();
 }
 
 bool
 vfs::file::is_socket() const noexcept
 {
-    return std::filesystem::is_socket(this->status_);
+    return this->stat_.is_socket();
 }
 
 bool
 vfs::file::is_fifo() const noexcept
 {
-    return std::filesystem::is_fifo(this->status_);
+    return this->stat_.is_fifo();
 }
 
 bool
 vfs::file::is_block_file() const noexcept
 {
-    return std::filesystem::is_block_file(this->status_);
+    return this->stat_.is_block_file();
 }
 
 bool
 vfs::file::is_character_file() const noexcept
 {
-    return std::filesystem::is_character_file(this->status_);
+    return this->stat_.is_character_file();
 }
 
 bool
@@ -615,61 +610,55 @@ vfs::file::is_desktop_entry() const noexcept
 bool
 vfs::file::is_compressed() const noexcept
 {
-    return this->file_stat_.is_compressed();
+    return this->stat_.is_compressed();
 }
 
 bool
 vfs::file::is_immutable() const noexcept
 {
-    return this->file_stat_.is_immutable();
+    return this->stat_.is_immutable();
 }
 
 bool
 vfs::file::is_append() const noexcept
 {
-    return this->file_stat_.is_append();
+    return this->stat_.is_append();
 }
 
 bool
 vfs::file::is_nodump() const noexcept
 {
-    return this->file_stat_.is_nodump();
+    return this->stat_.is_nodump();
 }
 
 bool
 vfs::file::is_encrypted() const noexcept
 {
-    return this->file_stat_.is_encrypted();
+    return this->stat_.is_encrypted();
 }
 
 bool
 vfs::file::is_automount() const noexcept
 {
-    return this->file_stat_.is_automount();
+    return this->stat_.is_automount();
 }
 
 bool
 vfs::file::is_mount_root() const noexcept
 {
-    return this->file_stat_.is_mount_root();
+    return this->stat_.is_mount_root();
 }
 
 bool
 vfs::file::is_verity() const noexcept
 {
-    return this->file_stat_.is_verity();
+    return this->stat_.is_verity();
 }
 
 bool
 vfs::file::is_dax() const noexcept
 {
-    return this->file_stat_.is_dax();
-}
-
-std::filesystem::perms
-vfs::file::permissions() const noexcept
-{
-    return this->status_.permissions();
+    return this->stat_.is_dax();
 }
 
 bool

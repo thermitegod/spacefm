@@ -64,8 +64,6 @@ class file final : public std::enable_shared_from_this<file>
 
     [[nodiscard]] u64 blocks() const noexcept;
 
-    [[nodiscard]] std::filesystem::perms permissions() const noexcept;
-
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
 
     [[nodiscard]] std::string_view display_owner() const noexcept;
@@ -122,8 +120,7 @@ class file final : public std::enable_shared_from_this<file>
     [[nodiscard]] bool update() noexcept;
 
   private:
-    ztd::statx file_stat_; // cached copy of struct statx()
-    std::filesystem::file_status status_;
+    ztd::statx stat_;
 
     std::filesystem::path path_; // real path on file system
     std::string uri_;            // uri of the real path on file system

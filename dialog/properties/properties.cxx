@@ -842,7 +842,7 @@ PropertiesDialog::init_permissions_tab() noexcept
 
     // Set/unset the permission
 
-    const auto& permissions = selected_file->permissions();
+    const auto permissions = std::filesystem::symlink_status(selected_file->path()).permissions();
 
     // Owner
     if ((permissions & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
