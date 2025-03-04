@@ -32,6 +32,7 @@ class CreateDialog : public Gtk::ApplicationWindow
 {
   public:
     CreateDialog(const std::string_view json_data);
+    ~CreateDialog();
 
   private:
     datatype::create::settings_data settings_;

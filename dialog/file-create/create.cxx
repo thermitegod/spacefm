@@ -343,6 +343,14 @@ CreateDialog::CreateDialog(const std::string_view json_data)
     this->input_full_name_.grab_focus();
 }
 
+CreateDialog::~CreateDialog()
+{
+    // fix warning on close
+    // Finalizing gtkmm__GtkButton 0x51400003b9b0, but it still has children left:
+    //    - GtkPopoverMenu 0x516000036e70
+    this->context_menu_.unparent();
+}
+
 bool
 CreateDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state)
 {
@@ -532,11 +540,6 @@ CreateDialog::on_button_ok_clicked()
         }
     }
 
-    // fix warning on close
-    // Finalizing gtkmm__GtkButton 0x51400003b9b0, but it still has children left:
-    //    - GtkPopoverMenu 0x516000036e70
-    this->context_menu_.unparent();
-
     this->close();
 }
 
@@ -557,11 +560,6 @@ CreateDialog::on_button_cancel_clicked()
     {
         std::println("{}", buffer.value());
     }
-
-    // fix warning on close
-    // Finalizing gtkmm__GtkButton 0x51400003b9b0, but it still has children left:
-    //    - GtkPopoverMenu 0x516000036e70
-    this->context_menu_.unparent();
 
     this->close();
 }

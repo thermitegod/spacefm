@@ -31,6 +31,7 @@ class RenameDialog : public Gtk::ApplicationWindow
 {
   public:
     RenameDialog(const std::string_view json_data);
+    ~RenameDialog();
 
   private:
     datatype::rename::settings_data settings_;
