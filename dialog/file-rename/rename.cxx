@@ -548,6 +548,8 @@ RenameDialog::on_button_ok_clicked()
         {
             std::println("{}", buffer.value());
         }
+
+        this->close();
     }
 
     // determine job
