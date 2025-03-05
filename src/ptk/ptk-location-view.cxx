@@ -39,7 +39,6 @@
 #include "settings/settings.hxx"
 
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -1123,7 +1122,7 @@ on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         msg = set->desc.value();
     }
     const auto [response, answer] =
-        xset_text_dialog(view, set->title.value(), msg, "", set->s.value(), "", false);
+        ptk::dialog::text(view, set->title.value(), msg, set->s.value(), "");
     set->s = answer;
     if (response)
     {
@@ -1163,7 +1162,7 @@ on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
     }
 
     const auto [response, answer] =
-        xset_text_dialog(view, set->title.value(), msg, "", set->s.value(), "", false);
+        ptk::dialog::text(view, set->title.value(), msg, set->s.value(), "");
     set->s = answer;
     if (response)
     {

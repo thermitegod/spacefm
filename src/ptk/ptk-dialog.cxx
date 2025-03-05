@@ -24,6 +24,26 @@
 
 #include "ptk/ptk-dialog.hxx"
 
+std::tuple<bool, std::string>
+ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::string_view message,
+                  const std::string_view defstring, const std::string_view defreset) noexcept
+{
+    (void)parent;
+
+    const auto response = datatype::run_dialog_sync<datatype::text::response>(
+        DIALOG_TEXT,
+        datatype::text::request{.title = title.data(),
+                                .message = message.data(),
+                                .text = defreset.data(),
+                                .text_default = defreset.data()});
+    if (!response)
+    {
+        return {false, defstring.data()};
+    }
+
+    return {true, response->text};
+}
+
 void
 ptk::dialog::error(GtkWindow* parent, const std::string_view title,
                    const std::string_view message) noexcept

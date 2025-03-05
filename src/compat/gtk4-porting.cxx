@@ -22,45 +22,6 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#if (GTK_MAJOR_VERSION == 4)
-
-#include <cassert>
-
-static void
-dialog_response_cb(GObject* object, i32 response_id, void* user_data) noexcept
-{
-    GTask* task = (GTask*)user_data;
-
-    assert(GTK_IS_DIALOG(object) || GTK_IS_NATIVE_DIALOG(object));
-    assert(G_IS_TASK(task));
-
-    g_task_return_int(task, response_id);
-}
-
-i32
-gtk_dialog_run(GtkDialog* dialog) noexcept
-{
-    assert(GTK_IS_DIALOG(dialog));
-
-    g_autoptr(GTask) task = g_task_new(dialog, nullptr, nullptr, nullptr);
-
-    gtk_widget_show(GTK_WIDGET(dialog));
-
-    // clang-format off
-    g_signal_connect_object(G_OBJECT(dialog), "response", G_CALLBACK(dialog_response_cb), task, GConnectFlags::G_CONNECT_AFTER);
-    // clang-format on
-
-    // Wait until the task is completed
-    while (!g_task_get_completed(task))
-    {
-        g_main_context_iteration(nullptr, true);
-    }
-
-    return (i32)g_task_propagate_int(task, nullptr);
-}
-
-#endif
-
 #if (GTK_MAJOR_VERSION == 3)
 
 guint

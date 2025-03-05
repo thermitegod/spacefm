@@ -262,6 +262,7 @@ preprocessor = [
     '-DDIALOG_PATTERN="spacefm_pattern"',
     '-DDIALOG_PREFERENCE="spacefm_preference"',
     '-DDIALOG_PROPERTIES="spacefm_properties"',
+    '-DDIALOG_TEXT="spacefm_text"',
 
     '-DMAGIC_ENUM_RANGE_MIN=0',
     '-DMAGIC_ENUM_RANGE_MAX=2000',

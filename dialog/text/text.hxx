@@ -15,13 +15,32 @@
 
 #pragma once
 
-#include <filesystem>
-#include <optional>
-#include <string_view>
-
 #include <gtkmm.h>
 
-std::optional<std::filesystem::path>
-xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
-                 const std::optional<std::filesystem::path>& deffolder,
-                 const std::optional<std::filesystem::path>& deffile) noexcept;
+class TextDialog : public Gtk::ApplicationWindow
+{
+  public:
+    TextDialog(const std::string_view json_data);
+
+  protected:
+    std::string default_text_;
+
+    Gtk::Box box_;
+
+    Gtk::Label message_label_;
+
+    Gtk::TextView input_;
+    Glib::RefPtr<Gtk::TextBuffer> buf_;
+    Gtk::ScrolledWindow scroll_;
+
+    Gtk::Box button_box_;
+    Gtk::Button button_ok_;
+    Gtk::Button button_cancel_;
+    Gtk::Button button_reset_;
+
+    // Signal Handlers
+    bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);
+    void on_button_ok_clicked();
+    void on_button_cancel_clicked();
+    void on_button_reset_clicked();
+};

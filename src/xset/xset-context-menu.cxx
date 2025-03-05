@@ -30,9 +30,9 @@
 
 #include "xset/utils/xset-utils.hxx"
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset.hxx"
 
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
@@ -298,7 +298,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             const auto default_str = set->z.value();
 
             const auto [response, answer] =
-                xset_text_dialog(parent, title, msg, "", set->s.value(), default_str, false);
+                ptk::dialog::text(parent, title, msg, set->s.value(), default_str);
             set->s = answer;
             if (response)
             {

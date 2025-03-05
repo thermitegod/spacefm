@@ -15,7 +15,9 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
+#include <tuple>
 
 #include <gtkmm.h>
 
@@ -23,6 +25,10 @@
 
 namespace ptk::dialog
 {
+std::tuple<bool, std::string> text(GtkWidget* parent, const std::string_view title,
+                                   const std::string_view message, const std::string_view defstring,
+                                   const std::string_view defreset) noexcept;
+
 i32 message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
             GtkButtonsType buttons, const std::string_view message,
             const std::string_view secondary_message = "") noexcept;

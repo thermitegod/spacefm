@@ -13,15 +13,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <filesystem>
-#include <optional>
-#include <string_view>
-
+#include <glibmm.h>
 #include <gtkmm.h>
 
-std::optional<std::filesystem::path>
-xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
-                 const std::optional<std::filesystem::path>& deffolder,
-                 const std::optional<std::filesystem::path>& deffile) noexcept;
+#include <CLI/CLI.hpp>
+
+#include "text.hxx"
+
+int
+main(int argc, char* argv[])
+{
+    CLI::App capp{"Spacefm Dialog"};
+
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.text",
+                                        Gio::Application::Flags::NON_UNIQUE);
+
+    return app->make_window_and_run<TextDialog>(0, nullptr, json_data);
+}

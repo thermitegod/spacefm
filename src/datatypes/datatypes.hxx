@@ -275,4 +275,20 @@ struct response
     settings_data settings;
 };
 } // namespace rename
+
+namespace text
+{
+struct request
+{
+    std::string title;
+    std::string message;
+    std::string text;
+    std::string text_default;
+};
+
+struct response
+{
+    std::string text;
+};
+} // namespace text
 } // namespace datatype

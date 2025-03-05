@@ -21,8 +21,6 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 
-i32 gtk_dialog_run(GtkDialog* dialog) noexcept;
-
 // TODO
 //  - rename accel_group to shortcut_controller or controller. reusing the old name to avoid even more #if blocks.
 

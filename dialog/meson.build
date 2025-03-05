@@ -300,3 +300,25 @@ spacefm = build_target(
         media_dependencies,
     ],
 )
+
+# Text
+incdir_text = include_directories(['text', '../src/datatypes'])
+sources_text = files(
+    'text/main.cxx',
+    'text/text.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_text',
+    sources_text,
+    target_type: 'executable',
+    include_directories: incdir_text,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+)
