@@ -203,6 +203,10 @@ struct browser
 
     void rename_selected_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                                const std::filesystem::path& cwd) noexcept;
+    void
+    batch_rename_selected_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                                const std::filesystem::path& cwd) noexcept;
+
     void hide_selected(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                        const std::filesystem::path& cwd) noexcept;
 

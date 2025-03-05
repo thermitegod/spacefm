@@ -1707,6 +1707,13 @@ xset_defaults() noexcept
     }
 
     {
+        const auto set = xset::set::get(xset::name::edit_batch_rename);
+        set->menu.label = "_Batch Rename";
+        set->icon = "document-edit-symbolic";
+        set->keybinding.type = xset::set::keybinding_type::editing;
+    }
+
+    {
         const auto set = xset::set::get(xset::name::edit_delete);
         set->menu.label = "_Delete";
         set->icon = "edit-delete-symbolic";
@@ -2646,6 +2653,7 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::edit_copy, GDK_KEY_c, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::edit_paste, GDK_KEY_v, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::edit_rename, GDK_KEY_F2, 0);
+    def_key(keysets, xset::name::edit_batch_rename, GDK_KEY_F2, GdkModifierType::GDK_SHIFT_MASK);
     def_key(keysets, xset::name::edit_delete, GDK_KEY_Delete, GdkModifierType::GDK_SHIFT_MASK);
     def_key(keysets, xset::name::edit_trash, GDK_KEY_Delete, 0);
 #if (GTK_MAJOR_VERSION == 4)

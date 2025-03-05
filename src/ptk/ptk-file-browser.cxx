@@ -67,6 +67,7 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"
+#include "ptk/ptk-file-action-batch-rename.hxx"
 #include "ptk/ptk-file-action-open.hxx"
 #include "ptk/ptk-file-action-paste.hxx"
 #include "ptk/ptk-file-action-rename.hxx"
@@ -3274,6 +3275,21 @@ ptk::browser::rename_selected_files(
             break;
         }
     }
+}
+
+void
+ptk::browser::batch_rename_selected_files(
+    const std::span<const std::shared_ptr<vfs::file>> selected_files,
+    const std::filesystem::path& cwd) noexcept
+{
+    if (selected_files.empty())
+    {
+        return;
+    }
+
+    gtk_widget_grab_focus(this->folder_view_);
+
+    ptk::action::batch_rename_files(this, cwd, selected_files);
 }
 
 void

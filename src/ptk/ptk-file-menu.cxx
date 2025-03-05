@@ -92,6 +92,7 @@ static void on_popup_paste_as_activate(GtkMenuItem* menuitem, ptk::file_menu* da
 static void on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 static void on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 static void on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_batch_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 static void on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 static void on_popup_extract_here_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 static void on_popup_extract_to_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
@@ -1780,6 +1781,13 @@ ptk_file_menu_new(ptk::browser* browser,
     }
 
     {
+        const auto set = xset::set::get(xset::name::edit_batch_rename);
+        xset_set_cb(set, (GFunc)on_popup_batch_rename_activate, data);
+        set->disable = set_disable;
+        xset_add_menuitem(browser, popup, accel_group, set);
+    }
+
+    {
         const auto set = xset::set::get(xset::name::edit_trash);
         xset_set_cb(set, (GFunc)on_popup_trash_activate, data);
         set->disable = set_disable || no_write_access;
@@ -2742,6 +2750,16 @@ on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
+on_popup_batch_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+{
+    (void)menuitem;
+    if (data->browser)
+    {
+        data->browser->batch_rename_selected_files(data->selected_files, data->cwd);
+    }
+}
+
+static void
 on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
@@ -3029,6 +3047,10 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         else if (set->xset_name == xset::name::edit_rename)
         {
             on_popup_rename_activate(nullptr, data);
+        }
+        else if (set->xset_name == xset::name::edit_batch_rename)
+        {
+            on_popup_batch_rename_activate(nullptr, data);
         }
         else if (set->xset_name == xset::name::edit_delete)
         {

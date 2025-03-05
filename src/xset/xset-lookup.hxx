@@ -309,6 +309,7 @@ enum class name : std::uint16_t
     edit_copy,
     edit_paste,
     edit_rename,
+    edit_batch_rename,
     edit_delete,
     edit_trash,
 

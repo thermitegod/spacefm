@@ -460,6 +460,7 @@ sources += files(
     'src/ptk/ptk-dialog.cxx',
     'src/ptk/ptk-dir-tree.cxx',
     'src/ptk/ptk-dir-tree-view.cxx',
+    'src/ptk/ptk-file-action-batch-rename.cxx',
     'src/ptk/ptk-file-action-create.cxx',
     'src/ptk/ptk-file-action-misc.cxx',
     'src/ptk/ptk-file-action-open.cxx',
