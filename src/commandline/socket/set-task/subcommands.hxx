@@ -34,5 +34,4 @@ void curremain(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void avgspeed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void avgremain(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void queue_state(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
-
 } // namespace commandline::socket::set_task

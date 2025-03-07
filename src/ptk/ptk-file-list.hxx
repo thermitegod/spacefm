@@ -29,7 +29,7 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 
-#define PTK_FILE_LIST(obj)             (static_cast<ptk::file_list*>(obj))
+#define PTK_FILE_LIST(obj) (static_cast<ptk::file_list*>(obj))
 #define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<ptk::file_list*>(obj))
 
 namespace ptk
