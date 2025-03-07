@@ -47,15 +47,15 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
     this->title_.set_label("Choose an application or enter a command:");
     this->title_.set_xalign(0.0f);
-    this->vbox_.append(this->title_);
+    this->box_.append(this->title_);
 
     this->file_type_hbox_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
     this->file_type_label_.set_label("File Type:");
@@ -63,7 +63,7 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
         std::format(" {}\n ( {} )", this->type_->description(), this->type_->type()));
     this->file_type_hbox_.append(this->file_type_label_);
     this->file_type_hbox_.append(this->file_type_);
-    this->vbox_.append(this->file_type_hbox_);
+    this->box_.append(this->file_type_hbox_);
 
     if (opts.show_command)
     {
@@ -73,10 +73,10 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
         this->entry_.set_hexpand(true);
         this->entry_hbox_.append(this->entry_label_);
         this->entry_hbox_.append(this->entry_);
-        this->vbox_.append(this->entry_hbox_);
+        this->box_.append(this->entry_hbox_);
     }
 
-    this->vbox_.append(this->notebook_);
+    this->box_.append(this->notebook_);
 
     this->page_associated_.init(this, this->type_);
     this->page_all_.init(this, nullptr);
@@ -85,11 +85,11 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
     this->notebook_.append_page(this->page_all_, this->label_all_);
 
     this->btn_open_in_terminal_.set_label("Open in a terminal");
-    this->vbox_.append(this->btn_open_in_terminal_);
+    this->box_.append(this->btn_open_in_terminal_);
     if (opts.show_default)
     {
         this->btn_set_as_default_.set_label("Set as the default application for this file type");
-        this->vbox_.append(this->btn_set_as_default_);
+        this->box_.append(this->btn_set_as_default_);
     }
 
     //////////////////
@@ -108,14 +108,14 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
     this->button_box_.set_halign(Gtk::Align::END);
     this->button_box_.append(this->button_close_);
     this->button_box_.append(this->button_ok_);
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
 
     this->button_ok_.signal_clicked().connect(
         sigc::mem_fun(*this, &AppChooserDialog::on_button_ok_clicked));
     this->button_close_.signal_clicked().connect(
         sigc::mem_fun(*this, &AppChooserDialog::on_button_close_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 

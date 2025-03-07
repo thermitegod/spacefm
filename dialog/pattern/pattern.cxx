@@ -51,11 +51,11 @@ PatternDialog::PatternDialog()
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
     this->expand_.set_label("Show Pattern Matching Help");
     this->expand_.set_expanded(false);
@@ -63,7 +63,7 @@ PatternDialog::PatternDialog()
     this->expand_data_.set_label(FNMATCH_HELP);
     this->expand_data_.set_single_line_mode(false);
     this->expand_.set_child(this->expand_data_);
-    this->vbox_.append(this->expand_);
+    this->box_.append(this->expand_);
 
     this->buf_ = Gtk::TextBuffer::create();
     this->input_.set_buffer(this->buf_);
@@ -72,7 +72,7 @@ PatternDialog::PatternDialog()
     this->input_.set_size_request(-1, 300);
     this->scroll_.set_child(this->input_);
     this->scroll_.set_size_request(-1, 300);
-    this->vbox_.append(this->scroll_);
+    this->box_.append(this->scroll_);
 
     auto key_controller = Gtk::EventControllerKey::create();
     key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &PatternDialog::on_key_press),
@@ -85,7 +85,7 @@ PatternDialog::PatternDialog()
     this->button_ok_ = Gtk::Button("_Ok", true);
     this->button_cancel_ = Gtk::Button("_Close", true);
 
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
     this->button_box_.set_halign(Gtk::Align::END);
     this->button_box_.append(this->button_cancel_);
     this->button_box_.append(this->button_ok_);
@@ -95,7 +95,7 @@ PatternDialog::PatternDialog()
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &PatternDialog::on_button_cancel_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 

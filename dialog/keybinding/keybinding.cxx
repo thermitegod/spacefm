@@ -46,16 +46,16 @@ KeybindingDialog::KeybindingDialog(const std::string_view json_data)
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
     // this->notebook_.set_margin(5);
     this->notebook_.set_vexpand(true);
     this->notebook_.set_hexpand(true);
-    this->vbox_.append(this->notebook_);
+    this->box_.append(this->notebook_);
 
     this->page_navigation_.init(this, this->keybindings_data_, "navigation");
     this->page_editing_.init(this, this->keybindings_data_, "editing");
@@ -75,7 +75,7 @@ KeybindingDialog::KeybindingDialog(const std::string_view json_data)
     key_controller->signal_key_pressed().connect(
         sigc::mem_fun(*this, &KeybindingDialog::on_key_press),
         false);
-    this->vbox_.add_controller(key_controller);
+    this->box_.add_controller(key_controller);
 
     // Buttons //
 
@@ -84,7 +84,7 @@ KeybindingDialog::KeybindingDialog(const std::string_view json_data)
     this->button_ok_.set_sensitive(false);
     this->button_cancel_ = Gtk::Button("_Close", true);
 
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
     this->button_box_.set_halign(Gtk::Align::END);
     this->button_box_.append(this->button_cancel_);
     this->button_box_.append(this->button_ok_);
@@ -94,7 +94,7 @@ KeybindingDialog::KeybindingDialog(const std::string_view json_data)
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &KeybindingDialog::on_button_cancel_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 }

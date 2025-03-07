@@ -46,7 +46,7 @@ class PreferenceDialog : public Gtk::ApplicationWindow
         }
     };
 
-    Gtk::Box vbox_;
+    Gtk::Box box_;
     Gtk::Notebook notebook_;
 
     Gtk::Label total_size_label_;

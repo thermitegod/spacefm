@@ -26,7 +26,7 @@ class ErrorDialog : public Gtk::ApplicationWindow
     ErrorDialog(const std::string_view json_data);
 
   protected:
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::Box hbox_;
     Gtk::Image icon_;

@@ -58,25 +58,25 @@ SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_vi
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
     this->title_.set_markup(std::format("<big>{}</big>", "Set Key"));
-    this->vbox_.append(this->title_);
+    this->box_.append(this->title_);
 
     this->message_.set_label(
         std::format("Press your key combination for item '{}' then click Set.\n"
                     "To remove the current key assignment, click Unset.",
                     this->keybinding_data_.label));
     this->message_.set_single_line_mode(false);
-    this->vbox_.append(this->message_);
+    this->box_.append(this->message_);
 
     this->keybinding_.set_label("");
     this->keybinding_.set_single_line_mode(false);
-    this->vbox_.append(this->keybinding_);
+    this->box_.append(this->keybinding_);
 
     auto key_controller = Gtk::EventControllerKey::create();
     key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &SetKeyDialog::on_key_press),
@@ -96,7 +96,7 @@ SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_vi
     this->button_box_.append(this->button_unset_);
     this->button_box_.append(this->button_set_);
 
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
 
     this->button_set_.signal_clicked().connect(
         sigc::mem_fun(*this, &SetKeyDialog::on_button_set_clicked));
@@ -105,7 +105,7 @@ SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_vi
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &SetKeyDialog::on_button_cancel_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 }

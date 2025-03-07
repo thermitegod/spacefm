@@ -41,24 +41,24 @@ MessageDialog::MessageDialog(const std::string_view json_data)
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
     this->title_.set_markup(std::format("<big>{}</big>", opts.title));
-    this->vbox_.append(this->title_);
+    this->box_.append(this->title_);
 
     this->message_.set_label(opts.message);
     this->message_.set_single_line_mode(false);
-    this->vbox_.append(this->message_);
+    this->box_.append(this->message_);
 
     if (!opts.secondary_message.empty())
     {
         this->secondary_message_.set_label(opts.secondary_message);
         this->secondary_message_.set_single_line_mode(false);
-        this->vbox_.append(this->secondary_message_);
+        this->box_.append(this->secondary_message_);
     }
 
     auto key_controller = Gtk::EventControllerKey::create();
@@ -98,7 +98,7 @@ MessageDialog::MessageDialog(const std::string_view json_data)
         this->button_box_.append(this->button_ok_);
     }
 
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
 
     this->button_ok_.signal_clicked().connect(
         sigc::mem_fun(*this, &MessageDialog::on_button_ok_clicked));
@@ -111,7 +111,7 @@ MessageDialog::MessageDialog(const std::string_view json_data)
     this->button_close_.signal_clicked().connect(
         sigc::mem_fun(*this, &MessageDialog::on_button_close_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 }

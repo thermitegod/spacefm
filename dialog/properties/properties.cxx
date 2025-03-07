@@ -150,13 +150,13 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
-    this->vbox_.append(this->notebook_);
+    this->box_.append(this->notebook_);
 
     this->init_file_info_tab();
     this->init_media_info_tab();
@@ -175,12 +175,12 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
     this->button_close_ = Gtk::Button("_Close", true);
     this->button_box_.set_halign(Gtk::Align::END);
     this->button_box_.append(this->button_close_);
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
 
     this->button_close_.signal_clicked().connect(
         sigc::mem_fun(*this, &PropertiesDialog::on_button_close_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 

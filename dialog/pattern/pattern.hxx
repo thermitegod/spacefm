@@ -23,7 +23,7 @@ class PatternDialog : public Gtk::ApplicationWindow
     PatternDialog();
 
   protected:
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::Expander expand_;
     Gtk::Label expand_data_;

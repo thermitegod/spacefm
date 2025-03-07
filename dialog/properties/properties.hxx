@@ -31,7 +31,7 @@ class PropertiesDialog : public Gtk::ApplicationWindow
     PropertiesDialog(const std::string_view json_data);
 
   protected:
-    Gtk::Box vbox_;
+    Gtk::Box box_;
     Gtk::Notebook notebook_;
 
     Gtk::Label total_size_label_;

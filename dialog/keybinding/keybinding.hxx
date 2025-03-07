@@ -119,7 +119,7 @@ class KeybindingDialog : public Gtk::ApplicationWindow
         void on_columnview_row_activate(std::uint32_t pos);
     };
 
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::Notebook notebook_;
 

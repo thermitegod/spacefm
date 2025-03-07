@@ -137,13 +137,13 @@ PreferenceDialog::PreferenceDialog(const std::string_view json_data)
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin_start(5);
-    this->vbox_.set_margin_end(5);
-    this->vbox_.set_margin_top(5);
-    this->vbox_.set_margin_bottom(5);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin_start(5);
+    this->box_.set_margin_end(5);
+    this->box_.set_margin_top(5);
+    this->box_.set_margin_bottom(5);
 
-    this->vbox_.append(this->notebook_);
+    this->box_.append(this->notebook_);
 
     this->init_general_tab();
     this->init_interface_tab();
@@ -165,7 +165,7 @@ PreferenceDialog::PreferenceDialog(const std::string_view json_data)
     this->button_box_.append(this->button_cancel_);
     // this->button_box_.append(this->button_reset_); // TODO
     this->button_box_.append(this->button_apply_);
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
 
     this->button_apply_.signal_clicked().connect(
         sigc::mem_fun(*this, &PreferenceDialog::on_button_apply_clicked));
@@ -174,7 +174,7 @@ PreferenceDialog::PreferenceDialog(const std::string_view json_data)
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &PreferenceDialog::on_button_cancel_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 }

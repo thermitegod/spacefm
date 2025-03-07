@@ -53,7 +53,7 @@ class ActionDialog : public Gtk::ApplicationWindow
         }
     };
 
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::ScrolledWindow scrolled_window_;
     Gtk::Label label_;

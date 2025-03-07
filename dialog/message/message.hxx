@@ -26,7 +26,7 @@ class MessageDialog : public Gtk::ApplicationWindow
     MessageDialog(const std::string_view json_data);
 
   protected:
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::Label title_;
     Gtk::Label message_;

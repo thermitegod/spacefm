@@ -43,17 +43,17 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
 
     // Content //
 
-    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->vbox_.set_margin(5);
-    this->set_child(this->vbox_);
+    this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->box_.set_margin(5);
+    this->set_child(this->box_);
 
     this->label_ = Gtk::Label(header.data());
-    this->vbox_.append(this->label_);
+    this->box_.append(this->label_);
 
     this->scrolled_window_.set_has_frame(true);
     this->scrolled_window_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
     this->scrolled_window_.set_expand(true);
-    this->vbox_.append(this->scrolled_window_);
+    this->box_.append(this->scrolled_window_);
 
     // create model
     this->create_model();
@@ -71,7 +71,7 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
     const auto total_size =
         std::format("Total Size: {}", ztd::format_filesize(this->total_size_, ztd::base::iec));
     this->total_size_label_ = Gtk::Label(total_size);
-    this->vbox_.append(this->total_size_label_);
+    this->box_.append(this->total_size_label_);
 
     // keybindings
     auto key_controller = Gtk::EventControllerKey::create();
@@ -85,7 +85,7 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
     this->button_ok_ = Gtk::Button("Confirm", true);
     this->button_cancel_ = Gtk::Button("Cancel", true);
 
-    this->vbox_.append(this->button_box_);
+    this->box_.append(this->button_box_);
     this->button_box_.set_halign(Gtk::Align::END);
     this->button_box_.append(this->button_cancel_);
     this->button_box_.append(this->button_ok_);
@@ -95,7 +95,7 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &ActionDialog::on_button_cancel_clicked));
 
-    this->set_child(this->vbox_);
+    this->set_child(this->box_);
 
     this->set_visible(true);
 

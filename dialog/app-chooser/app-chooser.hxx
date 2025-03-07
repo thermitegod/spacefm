@@ -47,7 +47,7 @@ class AppChooserDialog : public Gtk::ApplicationWindow
         AppChooserDialog* parent_;
     };
 
-    Gtk::Box vbox_;
+    Gtk::Box box_;
 
     Gtk::Label title_;
 
