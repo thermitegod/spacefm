@@ -24,8 +24,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <ztd/ztd.hxx>
-
 #include "datatypes.hxx"
 #include "preference.hxx"
 

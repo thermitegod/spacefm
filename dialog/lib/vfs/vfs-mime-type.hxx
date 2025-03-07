@@ -24,8 +24,6 @@
 
 #include <gdkmm.h>
 
-#include <ztd/ztd.hxx>
-
 namespace vfs
 {
 namespace constants::mime_type

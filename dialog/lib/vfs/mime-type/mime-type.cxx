@@ -31,8 +31,6 @@
 
 #include <glibmm.h>
 
-#include <ztd/ztd.hxx>
-
 #include "utils/misc.hxx"
 
 #include "vfs/mime-type/chrome/mime-utils.hxx"

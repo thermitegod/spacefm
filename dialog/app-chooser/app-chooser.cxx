@@ -22,8 +22,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <ztd/ztd.hxx>
-
 #include "vfs/vfs-mime-type.hxx"
 
 #include "app-chooser.hxx"

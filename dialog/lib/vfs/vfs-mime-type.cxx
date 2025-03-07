@@ -25,8 +25,6 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
-#include <ztd/ztd.hxx>
-
 #include "vfs/mime-type/mime-type.hxx"
 #include "vfs/vfs-mime-type.hxx"
 

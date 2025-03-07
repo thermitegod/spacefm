@@ -22,15 +22,10 @@
 
 #include <glaze/glaze.hpp>
 
-#include <magic_enum/magic_enum.hpp>
-
-#include <ztd/ztd.hxx>
-
 #include "vfs/utils/vfs-utils.hxx"
 #include "vfs/vfs-file.hxx"
 
 #include "datatypes.hxx"
-#include "logger.hxx"
 #include "rename.hxx"
 
 RenameDialog::RenameDialog(const std::string_view json_data)

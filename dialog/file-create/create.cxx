@@ -23,8 +23,6 @@
 
 #include <glaze/glaze.hpp>
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "vfs/utils/vfs-utils.hxx"
