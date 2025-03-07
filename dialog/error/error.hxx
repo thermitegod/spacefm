@@ -20,7 +20,7 @@
 #include <gtkmm.h>
 
 // TODO maybe convert to Gtk::AlertDialog when reintegrating
-class ErrorDialog : public Gtk::Window
+class ErrorDialog : public Gtk::ApplicationWindow
 {
   public:
     ErrorDialog(const std::string_view json_data);

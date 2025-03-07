@@ -25,7 +25,7 @@
 
 #include "concurrency.hxx"
 
-class PropertiesDialog : public Gtk::Window
+class PropertiesDialog : public Gtk::ApplicationWindow
 {
   public:
     PropertiesDialog(const std::string_view json_data);

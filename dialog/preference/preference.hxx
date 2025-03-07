@@ -21,7 +21,7 @@
 
 #include "datatypes.hxx"
 
-class PreferenceDialog : public Gtk::Window
+class PreferenceDialog : public Gtk::ApplicationWindow
 {
   public:
     PreferenceDialog(const std::string_view json_data);

@@ -22,7 +22,7 @@
 
 #include "datatypes.hxx"
 
-class SetKeyDialog : public Gtk::Window
+class SetKeyDialog : public Gtk::ApplicationWindow
 {
   public:
     SetKeyDialog(const std::string_view key_name, const std::string_view json_data);

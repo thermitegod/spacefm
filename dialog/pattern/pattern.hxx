@@ -17,7 +17,7 @@
 
 #include <gtkmm.h>
 
-class PatternDialog : public Gtk::Window
+class PatternDialog : public Gtk::ApplicationWindow
 {
   public:
     PatternDialog();

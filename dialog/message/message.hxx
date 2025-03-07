@@ -20,7 +20,7 @@
 #include <gtkmm.h>
 
 // TODO maybe convert to Gtk::AlertDialog when reintegrating
-class MessageDialog : public Gtk::Window
+class MessageDialog : public Gtk::ApplicationWindow
 {
   public:
     MessageDialog(const std::string_view json_data);

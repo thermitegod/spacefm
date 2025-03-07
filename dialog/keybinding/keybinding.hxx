@@ -24,7 +24,7 @@
 
 #include "datatypes.hxx"
 
-class KeybindingDialog : public Gtk::Window
+class KeybindingDialog : public Gtk::ApplicationWindow
 {
   public:
     KeybindingDialog(const std::string_view json_data);

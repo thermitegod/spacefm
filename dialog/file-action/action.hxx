@@ -26,7 +26,7 @@
 
 // https://github.com/GNOME/gtkmm/blob/master/demos/gtk-demo/example_listview_liststore.cc
 
-class ActionDialog : public Gtk::Window
+class ActionDialog : public Gtk::ApplicationWindow
 {
   public:
     ActionDialog(const std::string_view header, const std::string_view json_data);

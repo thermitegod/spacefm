@@ -23,7 +23,7 @@
 
 // https://github.com/GNOME/gtkmm/blob/master/demos/gtk-demo/example_listview_applauncher.cc
 
-class AppChooserDialog : public Gtk::Window
+class AppChooserDialog : public Gtk::ApplicationWindow
 {
   public:
     AppChooserDialog(const std::string_view json_data);
