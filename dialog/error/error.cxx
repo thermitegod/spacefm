@@ -44,10 +44,7 @@ ErrorDialog::ErrorDialog(const std::string_view json_data)
     // Content //
 
     this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->box_.set_margin_start(5);
-    this->box_.set_margin_end(5);
-    this->box_.set_margin_top(5);
-    this->box_.set_margin_bottom(5);
+    this->box_.set_margin(5);
 
     this->hbox_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
     this->icon_ = vfs::utils::load_icon("dialog-error", 64);

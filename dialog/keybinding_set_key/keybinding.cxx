@@ -59,10 +59,7 @@ SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_vi
     // Content //
 
     this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->box_.set_margin_start(5);
-    this->box_.set_margin_end(5);
-    this->box_.set_margin_top(5);
-    this->box_.set_margin_bottom(5);
+    this->box_.set_margin(5);
 
     this->title_.set_markup(std::format("<big>{}</big>", "Set Key"));
     this->box_.append(this->title_);

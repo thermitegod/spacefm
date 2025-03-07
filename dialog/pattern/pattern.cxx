@@ -52,10 +52,7 @@ PatternDialog::PatternDialog()
     // Content //
 
     this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->box_.set_margin_start(5);
-    this->box_.set_margin_end(5);
-    this->box_.set_margin_top(5);
-    this->box_.set_margin_bottom(5);
+    this->box_.set_margin(5);
 
     this->expand_.set_label("Show Pattern Matching Help");
     this->expand_.set_expanded(false);

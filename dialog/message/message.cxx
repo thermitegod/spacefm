@@ -42,10 +42,7 @@ MessageDialog::MessageDialog(const std::string_view json_data)
     // Content //
 
     this->box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
-    this->box_.set_margin_start(5);
-    this->box_.set_margin_end(5);
-    this->box_.set_margin_top(5);
-    this->box_.set_margin_bottom(5);
+    this->box_.set_margin(5);
 
     this->title_.set_markup(std::format("<big>{}</big>", opts.title));
     this->box_.append(this->title_);
