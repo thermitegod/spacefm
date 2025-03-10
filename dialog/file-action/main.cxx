@@ -33,10 +33,8 @@ main(int argc, char* argv[])
 
     CLI11_PARSE(capp, argc, argv);
 
-    auto app = Gtk::Application::create("org.thermitegod.spacefm.action");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.action",
+                                        Gio::Application::Flags::NON_UNIQUE);
 
-    return app->make_window_and_run<ActionDialog>(0,       // Gtk does not handle cli
-                                                  nullptr, // Gtk does not handle cli
-                                                  header,
-                                                  json_data);
+    return app->make_window_and_run<ActionDialog>(0, nullptr, header, json_data);
 }

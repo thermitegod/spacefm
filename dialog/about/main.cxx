@@ -21,7 +21,8 @@
 int
 main(int argc, char* argv[])
 {
-    auto app = Gtk::Application::create("org.thermitegod.spacefm.about");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.about",
+                                        Gio::Application::Flags::NON_UNIQUE);
 
     return app->make_window_and_run<AboutDialog>(argc, argv);
 }

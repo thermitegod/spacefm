@@ -33,9 +33,8 @@ main(int argc, char* argv[])
 
     logger::initialize();
 
-    auto app = Gtk::Application::create("org.thermitegod.spacefm.create");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.create",
+                                        Gio::Application::Flags::NON_UNIQUE);
 
-    return app->make_window_and_run<CreateDialog>(0,       // Gtk does not handle cli
-                                                  nullptr, // Gtk does not handle cli
-                                                  json_data);
+    return app->make_window_and_run<CreateDialog>(0, nullptr, json_data);
 }

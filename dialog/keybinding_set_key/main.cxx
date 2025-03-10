@@ -33,10 +33,8 @@ main(int argc, char* argv[])
 
     CLI11_PARSE(capp, argc, argv);
 
-    auto app = Gtk::Application::create("org.thermitegod.spacefm.keybinding-set-key");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.keybinding-set-key",
+                                        Gio::Application::Flags::NON_UNIQUE);
 
-    return app->make_window_and_run<SetKeyDialog>(0,       // Gtk does not handle cli
-                                                  nullptr, // Gtk does not handle cli
-                                                  key_name,
-                                                  json_data);
+    return app->make_window_and_run<SetKeyDialog>(0, nullptr, key_name, json_data);
 }

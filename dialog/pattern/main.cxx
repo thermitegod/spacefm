@@ -21,7 +21,8 @@
 int
 main(int argc, char* argv[])
 {
-    auto app = Gtk::Application::create("org.thermitegod.spacefm.pattern");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.pattern",
+                                        Gio::Application::Flags::NON_UNIQUE);
 
     return app->make_window_and_run<PatternDialog>(argc, argv);
 }
