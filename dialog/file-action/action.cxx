@@ -27,18 +27,20 @@
 #include "action.hxx"
 #include "datatypes.hxx"
 
-ActionDialog::ActionDialog(const std::string_view header, const std::string_view json_data)
+ActionDialog::ActionDialog(const std::string_view json_data)
 {
-    const auto data = glz::read_json<std::vector<datatype::file_action::request>>(json_data);
+    const auto data = glz::read_json<datatype::file_action::request>(json_data);
     if (!data)
     {
         std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
         std::exit(EXIT_FAILURE);
     }
-    this->file_data_ = data.value();
+    const auto& opts = data.value();
+
+    this->file_data_ = opts.data;
 
     this->set_size_request(800, 800);
-    this->set_title(header.data());
+    this->set_title(opts.header.data());
     this->set_resizable(false);
 
     // Content //
@@ -47,7 +49,7 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
     this->box_.set_margin(5);
     this->set_child(this->box_);
 
-    this->label_ = Gtk::Label(header.data());
+    this->label_ = Gtk::Label(opts.header.data());
     this->box_.append(this->label_);
 
     this->scrolled_window_.set_has_frame(true);
@@ -122,7 +124,7 @@ ActionDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mod
 void
 ActionDialog::on_button_ok_clicked()
 {
-    const auto buffer = glz::write_json(datatype::file_action::response{.result = "Confirm"});
+    const auto buffer = glz::write_json(datatype::file_action::response{.result = true});
     if (buffer)
     {
         std::println("{}", buffer.value());
@@ -134,7 +136,7 @@ ActionDialog::on_button_ok_clicked()
 void
 ActionDialog::on_button_cancel_clicked()
 {
-    const auto buffer = glz::write_json(datatype::file_action::response{.result = "Cancel"});
+    const auto buffer = glz::write_json(datatype::file_action::response{.result = false});
     if (buffer)
     {
         std::println("{}", buffer.value());

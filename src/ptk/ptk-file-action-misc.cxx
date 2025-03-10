@@ -13,24 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <format>
 #include <memory>
 #include <span>
-#include <string>
 #include <string_view>
 #include <vector>
 
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
-
-#include <magic_enum/magic_enum.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-
-#include "utils/shell-quote.hxx"
+#include "datatypes/external-dialog.hxx"
 
 #include "settings/settings.hxx"
 
@@ -40,67 +33,29 @@
 #include "vfs/vfs-file.hxx"
 
 #include "logger.hxx"
-
 static bool
-create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
+create_file_action_dialog(GtkWindow* parent, const std::string_view header,
                           const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)parent;
 
     // Create
 
-    std::vector<datatype::file_action::request> file_data;
+    std::vector<datatype::file_action::data> file_data;
     for (const auto& file : selected_files)
     {
         file_data.push_back({file->name().data(), file->size(), file->is_directory()});
     }
 
-    const auto buffer = glz::write_json(file_data);
-    if (!buffer)
-    {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return false;
-    }
-
-    // Run
-
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_FILE_ACTION);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_FILE_ACTION);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find file action dialog binary: {}", DIALOG_FILE_ACTION);
-        return false;
-    }
-
-    const auto command = std::format(R"({} --header '{}' --json {})",
-                                     binary,
-                                     header_text,
-                                     utils::shell_quote(buffer.value()));
-
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output);
-
-    // Result
-
-    if (standard_output.empty())
-    {
-        logger::error<logger::domain::ptk>("Bad response from file action dialog with command: {}",
-                                           command);
-        return false;
-    }
-
-    const auto response = glz::read_json<datatype::file_action::response>(standard_output);
+    const auto response = datatype::run_dialog_sync<datatype::file_action::response>(
+        DIALOG_FILE_ACTION,
+        datatype::file_action::request{.header = header.data(), .data = file_data});
     if (!response)
     {
-        logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(response.error(), standard_output));
         return false;
     }
 
-    return response->result == "Confirm";
+    return response->result;
 }
 
 void

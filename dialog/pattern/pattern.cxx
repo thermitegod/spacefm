@@ -43,8 +43,16 @@ inline constexpr auto FNMATCH_HELP =
     "The pattern matches if the input string cannot be matched with any of the patterns in the "
     "pattern-list.\n";
 
-PatternDialog::PatternDialog()
+PatternDialog::PatternDialog(const std::string_view json_data)
 {
+    const auto data = glz::read_json<datatype::pattern::request>(json_data);
+    if (!data)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    const auto& opts = data.value();
+
     this->set_size_request(600, 300);
     this->set_title("Select By Pattern");
     this->set_resizable(false);
@@ -63,6 +71,7 @@ PatternDialog::PatternDialog()
     this->box_.append(this->expand_);
 
     this->buf_ = Gtk::TextBuffer::create();
+    this->buf_->set_text(opts.pattern);
     this->input_.set_buffer(this->buf_);
     this->input_.set_wrap_mode(Gtk::WrapMode::WORD_CHAR);
     this->input_.set_monospace(true);
@@ -120,7 +129,7 @@ void
 PatternDialog::on_button_ok_clicked()
 {
     const auto buffer =
-        glz::write_json(datatype::pattern::response{.result = this->buf_->get_text().data()});
+        glz::write_json(datatype::pattern::response{.pattern = this->buf_->get_text().data()});
     if (buffer)
     {
         std::println("{}", buffer.value());

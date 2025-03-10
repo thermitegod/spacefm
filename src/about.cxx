@@ -15,24 +15,14 @@
 
 #include <gtkmm.h>
 
+#include "datatypes/external-dialog.hxx"
+
 #include "about.hxx"
-#include "logger.hxx"
 
 void
 show_about_dialog(GtkWindow* parent) noexcept
 {
     (void)parent;
 
-#if defined(HAVE_DEV)
-    const auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ABOUT);
-#else
-    const auto command = Glib::find_program_in_path(DIALOG_ABOUT);
-#endif
-    if (command.empty())
-    {
-        logger::error("Failed to find about dialog binary: {}", DIALOG_ABOUT);
-        return;
-    }
-
-    Glib::spawn_command_line_async(command);
+    datatype::run_dialog_async(DIALOG_ABOUT);
 }

@@ -16,13 +16,22 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
+#include <CLI/CLI.hpp>
+
 #include "pattern.hxx"
 
 int
 main(int argc, char* argv[])
 {
+    CLI::App capp{"Spacefm Dialog"};
+
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
     auto app = Gtk::Application::create("org.thermitegod.spacefm.pattern",
                                         Gio::Application::Flags::NON_UNIQUE);
 
-    return app->make_window_and_run<PatternDialog>(argc, argv);
+    return app->make_window_and_run<PatternDialog>(0, nullptr, json_data);
 }

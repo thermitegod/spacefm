@@ -103,10 +103,10 @@ class KeybindingDialog : public Gtk::ApplicationWindow
         Glib::RefPtr<Gtk::SingleSelection> selection_model_;
 
         void init(KeybindingDialog* parent,
-                  const std::span<const datatype::keybinding::request> keybindings,
+                  const std::span<const datatype::keybinding::request_data> keybindings,
                   const std::string_view category);
 
-        void create_model(const std::span<const datatype::keybinding::request> keybindings,
+        void create_model(const std::span<const datatype::keybinding::request_data> keybindings,
                           const std::string_view category);
         void add_columns();
         void liststore_add_item(const std::string_view name, const std::uint32_t key,
@@ -154,6 +154,6 @@ class KeybindingDialog : public Gtk::ApplicationWindow
     void on_button_cancel_clicked();
 
   private:
-    std::vector<datatype::keybinding::request> keybindings_data_;
-    std::vector<datatype::keybinding::response> changed_keybindings_data_;
+    std::vector<datatype::keybinding::request_data> keybindings_data_;
+    std::vector<datatype::keybinding::response_data> changed_keybindings_data_;
 };

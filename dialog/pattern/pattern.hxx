@@ -20,7 +20,7 @@
 class PatternDialog : public Gtk::ApplicationWindow
 {
   public:
-    PatternDialog();
+    PatternDialog(const std::string_view json_data);
 
   protected:
     Gtk::Box box_;

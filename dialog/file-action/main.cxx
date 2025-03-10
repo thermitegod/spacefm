@@ -25,9 +25,6 @@ main(int argc, char* argv[])
 {
     CLI::App capp{"Spacefm Dialog"};
 
-    std::string header;
-    capp.add_option("--header", header, "Set header")->required();
-
     std::string json_data;
     capp.add_option("--json", json_data, "json data")->required();
 
@@ -36,5 +33,5 @@ main(int argc, char* argv[])
     auto app = Gtk::Application::create("org.thermitegod.spacefm.action",
                                         Gio::Application::Flags::NON_UNIQUE);
 
-    return app->make_window_and_run<ActionDialog>(0, nullptr, header, json_data);
+    return app->make_window_and_run<ActionDialog>(0, nullptr, json_data);
 }

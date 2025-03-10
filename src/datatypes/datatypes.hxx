@@ -102,22 +102,27 @@ struct request
 
 namespace file_action
 {
-struct request
+struct data
 {
     std::string name;
     std::uint64_t size;
     bool is_dir;
 };
+struct request
+{
+    std::string header;
+    std::vector<data> data;
+};
 
 struct response
 {
-    std::string result;
+    bool result;
 };
 } // namespace file_action
 
 namespace keybinding
 {
-struct request
+struct request_data
 {
     std::string name;
     std::string label;
@@ -127,11 +132,21 @@ struct request
     std::uint32_t modifier;
 };
 
-struct response
+struct request
+{
+    std::vector<request_data> data;
+};
+
+struct response_data
 {
     std::string name;
     std::uint32_t key;
     std::uint32_t modifier;
+};
+
+struct response
+{
+    std::vector<response_data> data;
 };
 } // namespace keybinding
 
@@ -157,9 +172,14 @@ struct response
 
 namespace pattern
 {
+struct request
+{
+    std::string pattern;
+};
+
 struct response
 {
-    std::string result;
+    std::string pattern;
 };
 } // namespace pattern
 

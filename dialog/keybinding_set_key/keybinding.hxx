@@ -46,11 +46,10 @@ class SetKeyDialog : public Gtk::ApplicationWindow
     void on_button_cancel_clicked();
 
   private:
-    datatype::keybinding::request keybinding_data_; // keybinding getting changed
+    datatype::keybinding::request_data keybinding_data_; // keybinding getting changed
 
-    std::vector<datatype::keybinding::request> keybindings_data_;
-    std::vector<datatype::keybinding::response> changed_keybindings_data_;
+    std::vector<datatype::keybinding::request_data> keybindings_data_;
 
     // New Keybindings data
-    datatype::keybinding::response result;
+    datatype::keybinding::response_data result;
 };

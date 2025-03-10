@@ -14,26 +14,20 @@
  */
 
 #include <filesystem>
-#include <format>
 #include <span>
 #include <string>
 #include <vector>
 
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-
-#include "utils/shell-quote.hxx"
+#include "datatypes/external-dialog.hxx"
 
 #include "ptk/ptk-file-properties.hxx"
 
 #include "vfs/vfs-file.hxx"
-
-#include "logger.hxx"
 
 static void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
@@ -42,43 +36,19 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 {
     (void)parent;
 
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_PROPERTIES);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_PROPERTIES);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find pattern dialog binary: {}", DIALOG_PROPERTIES);
-        return;
-    }
-
-    // clang-format off
-    const auto request = datatype::properties::request{
-        .cwd = cwd,
-        .page = (std::uint32_t)page,
-        .files = [selected_files]()
-        {
-            std::vector<std::string> result;
-            for (const auto& file : selected_files)
-            {
-                result.push_back(file->path());
-            }
-            return result;
-        }()
-    };
-    // clang-format on
-
-    const auto buffer = glz::write_json(request);
-    if (!buffer)
-    {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return;
-    }
-    // logger::trace("{}", buffer);
-
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-    Glib::spawn_command_line_async(command);
+    datatype::run_dialog_async(DIALOG_PROPERTIES,
+                               datatype::properties::request{.cwd = cwd,
+                                                             .page = (std::uint32_t)page,
+                                                             .files = [selected_files]()
+                                                             {
+                                                                 std::vector<std::string> result;
+                                                                 for (const auto& file :
+                                                                      selected_files)
+                                                                 {
+                                                                     result.push_back(file->path());
+                                                                 }
+                                                                 return result;
+                                                             }()});
 }
 
 void

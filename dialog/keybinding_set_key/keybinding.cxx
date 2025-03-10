@@ -36,13 +36,15 @@ get_keymod(Gdk::ModifierType event) noexcept
 
 SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_view json_data)
 {
-    const auto data = glz::read_json<decltype(this->keybindings_data_)>(json_data);
+    const auto data = glz::read_json<datatype::keybinding::request>(json_data);
     if (!data)
     {
         std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
         std::exit(EXIT_FAILURE);
     }
-    this->keybindings_data_ = data.value();
+    const auto& opts = data.value();
+
+    this->keybindings_data_ = opts.data;
     for (const auto& key_data : this->keybindings_data_)
     {
         if (key_data.name == key_name)

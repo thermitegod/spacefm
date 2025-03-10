@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -21,21 +20,14 @@
 
 #include <glibmm.h>
 
-#include <glaze/glaze.hpp>
-
-#include <magic_enum/magic_enum.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-
-#include "utils/shell-quote.hxx"
+#include "datatypes/external-dialog.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 
 #include "vfs/vfs-mime-type.hxx"
-
-#include "logger.hxx"
 
 std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
@@ -51,55 +43,17 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
     dir_default         Show 'Set as default' also for type dir
     */
 
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_APP_CHOOSER);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_APP_CHOOSER);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find pattern dialog binary: {}", DIALOG_APP_CHOOSER);
-        return std::nullopt;
-    }
-
-    // clang-format off
-    const auto request = datatype::app_chooser::request{
-        .mime_type = mime_type->type().data(),
-        .focus_all_apps = focus_all_apps,
-        .show_command = show_command,
-        .show_default = show_default,
-        .dir_default = dir_default,
-    };
-    // clang-format on
-
-    const auto buffer = glz::write_json(request);
-    if (!buffer)
-    {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return std::nullopt;
-    }
-    // logger::trace("{}", buffer);
-
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    std::int32_t exit_status = 0;
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
-#if defined(HAVE_DEV) && __has_feature(address_sanitizer)
-    // AddressSanitizer does not like GTK
-    if (standard_output.empty())
-#else
-    if (exit_status != 0 || standard_output.empty())
-#endif
-    {
-        return std::nullopt;
-    }
-
-    const auto response = glz::read_json<datatype::app_chooser::response>(standard_output);
+    const auto response = datatype::run_dialog_sync<datatype::app_chooser::response>(
+        DIALOG_APP_CHOOSER,
+        datatype::app_chooser::request{
+            .mime_type = mime_type->type().data(),
+            .focus_all_apps = focus_all_apps,
+            .show_command = show_command,
+            .show_default = show_default,
+            .dir_default = dir_default,
+        });
     if (!response)
     {
-        logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(response.error(), standard_output));
         return std::nullopt;
     }
 

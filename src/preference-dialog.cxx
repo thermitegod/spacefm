@@ -15,18 +15,14 @@
 
 #include <memory>
 #include <ranges>
-#include <string>
 
 #include <glibmm.h>
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-
-#include "utils/shell-quote.hxx"
+#include "datatypes/external-dialog.hxx"
 
 #include "settings/settings.hxx"
 
@@ -470,80 +466,46 @@ show_preference_dialog(GtkWindow* parent,
 {
     (void)parent;
 
-    const auto buffer = glz::write_json(datatype::settings_extended{
-        .settings = *settings,
-        .drag_action = xset_get_int(xset::name::drag_action, xset::var::x),
-        .editor = xset_get_s(xset::name::editor).value_or(""),
-        .terminal = xset_get_s(xset::name::main_terminal).value_or(""),
-        .details = {.supported_terminals = vfs::terminals::supported_names()}});
-    if (!buffer)
+    const auto response = datatype::run_dialog_sync<datatype::settings_extended>(
+        DIALOG_PREFERENCE,
+        datatype::settings_extended{
+            .settings = *settings,
+            .drag_action = xset_get_int(xset::name::drag_action, xset::var::x),
+            .editor = xset_get_s(xset::name::editor).value_or(""),
+            .terminal = xset_get_s(xset::name::main_terminal).value_or(""),
+            .details = {.supported_terminals = vfs::terminals::supported_names()}});
+    if (!response)
     {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return;
-    }
-    // logger::trace("{}", buffer.value());
-
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_PREFERENCE);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_PREFERENCE);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find preference dialog binary: {}", DIALOG_PREFERENCE);
-        return;
-    }
-
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    std::int32_t exit_status = 0;
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
-#if defined(HAVE_DEV) && __has_feature(address_sanitizer)
-    // AddressSanitizer does not like GTK
-    if (standard_output.empty())
-#else
-    if (exit_status != 0 || standard_output.empty())
-#endif
-    {
-        return;
-    }
-
-    const auto results = glz::read_json<datatype::settings_extended>(standard_output);
-    if (!results)
-    {
-        logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(results.error(), standard_output));
         return;
     }
 
     // update changed settings
 
     // General
-    update_big_icons(settings, results.value());
-    update_small_icons(settings, results.value());
-    update_tool_icons(settings, results.value());
-    update_thumbnail_show(settings, results.value());
-    update_thumbnail_size_limits(settings, results.value());
-    update_thumbnail_max_size(settings, results.value());
+    update_big_icons(settings, response.value());
+    update_small_icons(settings, response.value());
+    update_tool_icons(settings, response.value());
+    update_thumbnail_show(settings, response.value());
+    update_thumbnail_size_limits(settings, response.value());
+    update_thumbnail_max_size(settings, response.value());
 
     // Interface
-    update_show_toolbar_home(settings, results.value());
-    update_show_toolbar_refresh(settings, results.value());
-    update_show_toolbar_search(settings, results.value());
-    update_show_tab_bar(settings, results.value());
-    update_hide_close_tab(settings, results.value());
-    update_new_tab(settings, results.value());
-    update_confirm(settings, results.value());
-    update_confirm_trash(settings, results.value());
-    update_confirm_delete(settings, results.value());
-    update_si_prefix(settings, results.value());
-    update_click_executes(settings, results.value());
-    update_drag_actions(settings, results.value());
+    update_show_toolbar_home(settings, response.value());
+    update_show_toolbar_refresh(settings, response.value());
+    update_show_toolbar_search(settings, response.value());
+    update_show_tab_bar(settings, response.value());
+    update_hide_close_tab(settings, response.value());
+    update_new_tab(settings, response.value());
+    update_confirm(settings, response.value());
+    update_confirm_trash(settings, response.value());
+    update_confirm_delete(settings, response.value());
+    update_si_prefix(settings, response.value());
+    update_click_executes(settings, response.value());
+    update_drag_actions(settings, response.value());
 
     // Advanced
-    update_editor(settings, results.value());
-    update_terminal(settings, results.value());
+    update_editor(settings, response.value());
+    update_terminal(settings, response.value());
 
     autosave::request_add();
 }

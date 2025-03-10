@@ -29,7 +29,7 @@
 class ActionDialog : public Gtk::ApplicationWindow
 {
   public:
-    ActionDialog(const std::string_view header, const std::string_view json_data);
+    ActionDialog(const std::string_view json_data);
 
   protected:
     class ModelColumns : public Glib::Object
@@ -82,6 +82,6 @@ class ActionDialog : public Gtk::ApplicationWindow
     void on_bind_size(const Glib::RefPtr<Gtk::ListItem>& list_item);
 
   private:
-    std::vector<datatype::file_action::request> file_data_;
+    std::vector<datatype::file_action::data> file_data_;
     std::uint64_t total_size_ = 0;
 };

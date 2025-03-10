@@ -17,17 +17,12 @@
 
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-
-#include "utils/shell-quote.hxx"
+#include "datatypes/external-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-
-#include "logger.hxx"
 
 void
 ptk::dialog::error(GtkWindow* parent, const std::string_view title,
@@ -35,29 +30,9 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
 {
     (void)parent;
 
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ERROR);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_ERROR);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find error dialog binary: {}", DIALOG_ERROR);
-        return;
-    }
-
-    const auto request = datatype::error::request{.title = title.data(), .message = message.data()};
-    const auto buffer = glz::write_json(request);
-    if (!buffer)
-    {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return;
-    }
-    // logger::trace("{}", buffer);
-
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    Glib::spawn_command_line_async(command);
+    datatype::run_dialog_async(
+        DIALOG_ERROR,
+        datatype::error::request{.title = title.data(), .message = message.data()});
 }
 
 i32
@@ -70,57 +45,19 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
 
     assert(buttons != GtkButtonsType::GTK_BUTTONS_NONE);
 
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_MESSAGE);
-#else
-    const auto binary = Glib::find_program_in_path(DIALOG_MESSAGE);
-#endif
-    if (binary.empty())
-    {
-        logger::error("Failed to find message dialog binary: {}", DIALOG_MESSAGE);
-        return GtkResponseType::GTK_RESPONSE_NONE;
-    }
-
-    const auto request = datatype::message::request{
-        .title = title.data(),
-        .message = message.data(),
-        .secondary_message = secondary_message.data(),
-        .button_ok = buttons == GtkButtonsType::GTK_BUTTONS_OK,
-        .button_cancel = buttons == GtkButtonsType::GTK_BUTTONS_CANCEL,
-        .button_close = buttons == GtkButtonsType::GTK_BUTTONS_CLOSE,
-        .button_yes_no = buttons == GtkButtonsType::GTK_BUTTONS_YES_NO,
-        .button_ok_cancel = buttons == GtkButtonsType::GTK_BUTTONS_OK_CANCEL};
-    const auto buffer = glz::write_json(request);
-    if (!buffer)
-    {
-        logger::error("Failed to create json: {}", glz::format_error(buffer));
-        return GtkResponseType::GTK_RESPONSE_NONE;
-    }
-    // logger::trace("{}", buffer);
-
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    std::int32_t exit_status = 0;
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
-
-    // Result
-
-#if defined(HAVE_DEV) && __has_feature(address_sanitizer)
-    // AddressSanitizer does not like GTK
-    if (standard_output.empty())
-#else
-    if (exit_status != 0 || standard_output.empty())
-#endif
-    {
-        return GtkResponseType::GTK_RESPONSE_NONE;
-    }
-
-    const auto response = glz::read_json<datatype::message::response>(standard_output);
+    const auto response = datatype::run_dialog_sync<datatype::message::response>(
+        DIALOG_MESSAGE,
+        datatype::message::request{.title = title.data(),
+                                   .message = message.data(),
+                                   .secondary_message = secondary_message.data(),
+                                   .button_ok = buttons == GtkButtonsType::GTK_BUTTONS_OK,
+                                   .button_cancel = buttons == GtkButtonsType::GTK_BUTTONS_CANCEL,
+                                   .button_close = buttons == GtkButtonsType::GTK_BUTTONS_CLOSE,
+                                   .button_yes_no = buttons == GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                   .button_ok_cancel =
+                                       buttons == GtkButtonsType::GTK_BUTTONS_OK_CANCEL});
     if (!response)
     {
-        logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(response.error(), standard_output));
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
 

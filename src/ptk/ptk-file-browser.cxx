@@ -37,11 +37,11 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
+#include "datatypes/external-dialog.hxx"
+
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 3)
 #include <exo/exo.h>
 #endif
-
-#include <glaze/glaze.hpp>
 
 #include <magic_enum/magic_enum.hpp>
 
@@ -3880,34 +3880,15 @@ select_pattern_dialog(GtkWidget* parent) noexcept
 {
     (void)parent;
 
-#if defined(HAVE_DEV)
-    const auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_PATTERN);
-#else
-    const auto command = Glib::find_program_in_path(DIALOG_PATTERN);
-#endif
-    if (command.empty())
-    {
-        logger::error("Failed to find pattern dialog binary: {}", DIALOG_PATTERN);
-        return "";
-    }
-
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output);
-    if (standard_output.empty())
-    {
-        // an empty pattern will do nothing
-        return "";
-    }
-
-    const auto response = glz::read_json<datatype::pattern::response>(standard_output);
+    const auto response = datatype::run_dialog_sync<datatype::pattern::response>(
+        DIALOG_PATTERN,
+        datatype::pattern::request{.pattern = ""});
     if (!response)
     {
-        logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(response.error(), standard_output));
         return "";
     }
 
-    return response->result;
+    return response->pattern;
 }
 
 void
