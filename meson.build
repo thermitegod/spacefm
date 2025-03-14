@@ -254,6 +254,7 @@ preprocessor = [
     '-DDIALOG_APP_CHOOSER="spacefm_app_chooser"',
     '-DDIALOG_ERROR="spacefm_error"',
     '-DDIALOG_FILE_ACTION="spacefm_action"',
+    '-DDIALOG_FILE_CHOOSER="spacefm_chooser"',
     '-DDIALOG_FILE_CREATE="spacefm_create"',
     '-DDIALOG_FILE_RENAME="spacefm_rename"',
     '-DDIALOG_KEYBINDINGS="spacefm_keybindings"',
@@ -470,7 +471,6 @@ sources += files(
     'src/xset/xset.cxx',
     'src/xset/xset-context-menu.cxx',
     'src/xset/xset-defaults.cxx',
-    'src/xset/xset-dialog.cxx',
     'src/xset/xset-lookup.cxx',
 
     'src/xset/utils/xset-utils.cxx',

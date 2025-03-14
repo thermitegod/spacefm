@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -28,6 +30,11 @@ namespace ptk::dialog
 std::tuple<bool, std::string> text(GtkWidget* parent, const std::string_view title,
                                    const std::string_view message, const std::string_view defstring,
                                    const std::string_view defreset) noexcept;
+
+std::optional<std::filesystem::path>
+file_chooser(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
+             const std::optional<std::filesystem::path>& deffolder,
+             const std::optional<std::filesystem::path>& deffile) noexcept;
 
 i32 message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
             GtkButtonsType buttons, const std::string_view message,

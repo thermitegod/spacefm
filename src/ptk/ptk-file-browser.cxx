@@ -58,7 +58,6 @@
 #include "settings/settings.hxx"
 
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
@@ -3591,11 +3590,11 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
             folder = cwd;
         }
         const auto path =
-            xset_file_dialog(GTK_WIDGET(this),
-                             GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                             "Choose Location",
-                             folder,
-                             std::nullopt);
+            ptk::dialog::file_chooser(GTK_WIDGET(this),
+                                      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                      "Choose Location",
+                                      folder,
+                                      std::nullopt);
         if (path && std::filesystem::is_directory(path.value()))
         {
             if (setname == xset::name::copy_loc || setname == xset::name::copy_loc_last)

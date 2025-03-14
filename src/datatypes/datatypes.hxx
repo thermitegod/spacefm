@@ -120,6 +120,28 @@ struct response
 };
 } // namespace file_action
 
+namespace file_chooser
+{
+enum class mode : std::uint8_t
+{
+    file,
+    dir,
+};
+
+struct request
+{
+    std::string title;
+    mode mode;
+    std::string default_path;
+    std::string default_file;
+};
+
+struct response
+{
+    std::string path;
+};
+} // namespace file_chooser
+
 namespace keybinding
 {
 struct request_data

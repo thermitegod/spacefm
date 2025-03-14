@@ -107,6 +107,28 @@ spacefm = build_target(
     ],
 )
 
+# File Chooser
+incdir_chooser = include_directories(['file-chooser', '../src/datatypes'])
+sources_chooser = files(
+    'file-chooser/main.cxx',
+    'file-chooser/chooser.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_chooser',
+    sources_chooser,
+    target_type: 'executable',
+    include_directories: incdir_chooser,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+)
+
 # File Create
 incdir_create = include_directories(['file-create', 'lib', '../src/datatypes'])
 sources_create = files(

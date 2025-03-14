@@ -13,6 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <optional>
+#include <print>
 #include <string_view>
 
 #include <gtkmm.h>
@@ -42,6 +45,31 @@ ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::st
     }
 
     return {true, response->text};
+}
+
+std::optional<std::filesystem::path>
+ptk::dialog::file_chooser(GtkWidget* parent, GtkFileChooserAction action,
+                          const std::string_view title,
+                          const std::optional<std::filesystem::path>& deffolder,
+                          const std::optional<std::filesystem::path>& deffile) noexcept
+{
+    (void)parent;
+
+    const auto response = datatype::run_dialog_sync<datatype::file_chooser::response>(
+        DIALOG_FILE_CHOOSER,
+        datatype::file_chooser::request{
+            .title = title.data(),
+            .mode = (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER)
+                        ? datatype::file_chooser::mode::dir
+                        : datatype::file_chooser::mode::file,
+            .default_path = deffolder.value_or(""),
+            .default_file = deffile.value_or("")});
+    if (!response)
+    {
+        return std::nullopt;
+    }
+
+    return response->path;
 }
 
 void
