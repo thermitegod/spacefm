@@ -13,16 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#include <filesystem>
+#include <memory>
+#include <span>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
 #include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+#include "gui/task.hxx"
+
+#include "vfs/task/task.hxx"
+
+gui::task::task()
+{
+    set_orientation(Gtk::Orientation::VERTICAL);
+}

@@ -13,16 +13,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
+#include <string>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
 #include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+namespace gui
+{
+class search final : public Gtk::Entry
+{
+  public:
+    search();
+
+  private:
+    bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);
+
+  public:
+    [[nodiscard]] auto
+    signal_confirm() noexcept
+    {
+        return signal_confirm_;
+    }
+
+  private:
+    sigc::signal<void(std::string)> signal_confirm_;
+};
+} // namespace gui

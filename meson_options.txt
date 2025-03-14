@@ -27,6 +27,13 @@ option(
 )
 
 option(
+    'gtk4',
+    type : 'boolean',
+    value: false,
+    description : 'Build the experimental Gtk4 version'
+)
+
+option(
     'socket',
     type : 'boolean',
     value: true,

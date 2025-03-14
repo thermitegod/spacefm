@@ -1,7 +1,7 @@
 project(
     'spacefm',
     ['c', 'cpp'],
-    version: '3.0.0-dev',
+    version: '4.0.0-dev',
     license: 'GPL3',
     default_options: [
         'c_std=c23',
@@ -191,7 +191,9 @@ endif
 
 # Disabled Clang Warnings
 if cpp.get_id() == 'clang'
-    flags += cpp.get_supported_arguments([])
+    flags += cpp.get_supported_arguments([
+        '-Wno-cast-qual',
+    ])
 endif
 
 # Linker
@@ -379,6 +381,6 @@ endif
 ## Install
 install_subdir('data/applications', install_dir: datadir)
 install_subdir('data/icons', install_dir: datadir)
-if get_option('rewrite')
+if get_option('gtk4')
     install_subdir('data/images', install_dir: datadir / 'spacefm')
 endif

@@ -13,16 +13,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
-#include <gtkmm.h>
+#pragma once
+
 #include <gdkmm.h>
-#include <giomm.h>
 #include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+#include <gtkmm.h>
+
+namespace gui
+{
+class menubar : public Gtk::PopoverMenuBar
+{
+  public:
+    menubar();
+
+  private:
+    Glib::RefPtr<Gio::Menu> create_file() noexcept;
+    Glib::RefPtr<Gio::Menu> create_view() noexcept;
+    Glib::RefPtr<Gio::Menu> create_device() noexcept;
+    Glib::RefPtr<Gio::Menu> create_bookmarks() noexcept;
+    Glib::RefPtr<Gio::Menu> create_help() noexcept;
+};
+} // namespace gui

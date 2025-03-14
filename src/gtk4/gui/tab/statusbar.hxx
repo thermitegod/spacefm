@@ -13,16 +13,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
+#include <memory>
+#include <span>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
 #include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+#include "settings/settings.hxx"
+
+#include "vfs/dir.hxx"
+#include "vfs/file.hxx"
+
+namespace gui
+{
+class statusbar final : public Gtk::Box
+{
+  public:
+    statusbar(const std::shared_ptr<config::settings>& settings);
+
+    void update(const std::shared_ptr<vfs::dir>& dir,
+                const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                const bool show_hidden_files) noexcept;
+
+  private:
+    std::shared_ptr<config::settings> settings_;
+
+    Gtk::Label statusbar_;
+};
+} // namespace gui

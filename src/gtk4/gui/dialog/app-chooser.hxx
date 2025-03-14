@@ -1,0 +1,105 @@
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include <memory>
+
+#include <gtkmm.h>
+
+#include "vfs/file.hxx"
+
+// https://github.com/GNOME/gtkmm/blob/master/demos/gtk-demo/example_listview_applauncher.cc
+
+namespace gui::dialog
+{
+struct chooser_response final
+{
+    std::shared_ptr<vfs::file> file;
+    std::string app;
+    bool is_desktop;
+    bool set_default;
+};
+
+class app_chooser : public Gtk::ApplicationWindow
+{
+  public:
+    app_chooser(Gtk::ApplicationWindow& parent, const std::shared_ptr<vfs::file>& file,
+                bool focus_all_apps, bool show_command, bool show_default);
+
+  protected:
+    class page : public Gtk::ScrolledWindow
+    {
+      public:
+        void init(app_chooser* parent, const std::shared_ptr<vfs::mime_type>& mime_type);
+        std::uint32_t position_ = 0; // selected item
+
+      protected:
+        Glib::RefPtr<Gio::ListModel>
+        create_application_list(const std::shared_ptr<vfs::mime_type>& mime_type);
+        void setup_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item);
+        void bind_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item);
+        void activate(const std::uint32_t position);
+
+        Gtk::ListView* list_;
+        app_chooser* parent_;
+    };
+
+    Gtk::Box box_;
+
+    Gtk::Label title_;
+
+    Gtk::Box file_type_hbox_;
+    Gtk::Label file_type_label_;
+    Gtk::Label file_type_;
+
+    Gtk::Box entry_hbox_;
+    Gtk::Label entry_label_;
+    Gtk::Entry entry_;
+
+    Gtk::Notebook notebook_;
+
+    Gtk::CheckButton btn_open_in_terminal_;
+    Gtk::CheckButton btn_set_as_default_;
+
+    Gtk::Label label_associated_ = Gtk::Label("Associated Apps");
+    page page_associated_;
+
+    Gtk::Label label_all_ = Gtk::Label("All Apps");
+    page page_all_;
+
+    Gtk::Box button_box_;
+    Gtk::Button button_ok_;
+    Gtk::Button button_close_;
+
+    // Signal Handlers
+    bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);
+    void on_button_ok_clicked();
+    void on_button_close_clicked();
+
+  private:
+    std::shared_ptr<vfs::file> file_;
+
+  public:
+    [[nodiscard]] auto
+    signal_confirm() noexcept
+    {
+        return signal_confirm_;
+    }
+
+  private:
+    sigc::signal<void(chooser_response)> signal_confirm_;
+};
+} // namespace gui::dialog

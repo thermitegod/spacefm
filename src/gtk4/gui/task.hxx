@@ -13,16 +13,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
+#include <filesystem>
+#include <memory>
+#include <span>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
 #include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+#include "vfs/task/task.hxx"
+
+namespace gui
+{
+class task : public Gtk::Box
+{
+  public:
+    task();
+};
+} // namespace gui

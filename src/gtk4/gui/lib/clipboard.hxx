@@ -13,16 +13,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
+#include <memory>
+#include <span>
+#include <vector>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+#include "vfs/file.hxx"
+
+namespace gui::clipboard
+{
+[[nodiscard]] bool is_valid() noexcept;
+
+void copy_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
+void cut_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
+void
+paste_files(const std::function<void(const std::vector<std::string>&, bool)>& callback) noexcept;
+
+void set_text(const std::string_view text) noexcept;
+} // namespace gui::clipboard

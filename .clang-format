@@ -156,7 +156,7 @@ IncludeCategories:
   - Regex: '^<[^.]*>$'
     Priority: 1
   # GTK
-  - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h)>'
+  - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h|giomm.h)>'
     Priority: 10
   - Regex: '^<sigc\+\+/sigc\+\+\.h>'
     Priority: 10

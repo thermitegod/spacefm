@@ -13,16 +13,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
-#include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+#pragma once
+
+#include <expected>
+#include <filesystem>
+#include <string>
+#include <vector>
+
+namespace commandline
+{
+struct opts final
+{
+    std::vector<std::filesystem::path> files;
+    bool new_tab{true};
+    bool reuse_tab{false};
+    bool no_tabs{false};
+    bool new_window{false};
+    std::int32_t panel{0};
+};
+
+std::expected<opts, std::string> run(int argc, char* argv[]) noexcept;
+} // namespace commandline

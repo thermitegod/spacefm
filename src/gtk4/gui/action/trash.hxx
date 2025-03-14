@@ -13,16 +13,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
+#include <memory>
+#include <span>
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+#include "settings/settings.hxx"
+
+#include "vfs/file.hxx"
+
+namespace gui::action
+{
+void trash_files(Gtk::ApplicationWindow& parent,
+                 const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                 const std::shared_ptr<config::settings>& settings) noexcept;
+} // namespace gui::action

@@ -13,16 +13,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
+#pragma once
+
 #include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+
+namespace gui::dialog
+{
+class about final : public Gtk::AboutDialog
+{
+  public:
+    about(Gtk::ApplicationWindow& parent);
+};
+} // namespace gui::dialog

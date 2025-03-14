@@ -13,16 +13,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#endif
-#include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
+#include <print>
+
+#include <cstdlib>
+
 #include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
+#include <gtkmm.h>
+
+#include <CLI/CLI.hpp>
+
+#include "commandline/commandline.hxx"
+
+#include "gui/main-window.hxx"
+
+int
+main(int argc, char* argv[])
+{
+    const auto opts = commandline::run(argc, argv);
+    if (!opts)
+    {
+        std::println(stderr, "{}", opts.error());
+        return EXIT_FAILURE;
+    }
+
+    auto app = Gtk::Application::create("org.thermitegod.experimental.spacefm");
+    return app->make_window_and_run<gui::main_window>(0, nullptr, app);
+}

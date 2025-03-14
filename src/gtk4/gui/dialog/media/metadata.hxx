@@ -13,16 +13,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma once
+
+#if defined(HAVE_MEDIA)
+
+#include <filesystem>
+#include <vector>
+
+struct metadata_data
+{
+    std::string description;
+    std::string value;
+};
+
+[[nodiscard]] std::vector<metadata_data> image_metadata(const std::filesystem::path& path) noexcept;
+
+[[nodiscard]] std::vector<metadata_data>
+audio_video_metadata(const std::filesystem::path& path) noexcept;
+
 #endif
-#include <gtkmm.h>
-#include <gdkmm.h>
-#include <giomm.h>
-#include <glibmm.h>
-#include <sigc++/sigc++.h>
-#pragma GCC diagnostic pop
