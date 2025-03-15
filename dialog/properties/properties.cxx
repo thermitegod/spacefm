@@ -208,40 +208,6 @@ PropertiesDialog::on_button_close_clicked()
     this->close();
 }
 
-/////////////////////////////////////////////////////////
-
-std::vector<std::filesystem::path>
-PropertiesDialog::find_subdirectories(const std::filesystem::path& directory) noexcept
-{
-    std::vector<std::filesystem::path> subdirectories;
-
-    if (this->abort_)
-    {
-        return subdirectories;
-    }
-
-    for (const auto& entry : std::filesystem::directory_iterator(directory))
-    {
-        if (this->abort_)
-        {
-            return subdirectories;
-        }
-
-        if (entry.is_directory() && !entry.is_symlink())
-        {
-            const std::filesystem::path& subdirectory = entry.path();
-
-            subdirectories.push_back(subdirectory);
-            const auto nested_subdirectories = find_subdirectories(subdirectory);
-            subdirectories.insert(subdirectories.cend(),
-                                  nested_subdirectories.cbegin(),
-                                  nested_subdirectories.cend());
-        }
-    }
-
-    return subdirectories;
-}
-
 // Recursively count total size of all files in the specified directory.
 // If the path specified is a file, the size of the file is directly returned.
 // cancel is used to cancel the operation. This function will check the value
@@ -270,31 +236,23 @@ PropertiesDialog::calc_total_size_of_files(const std::filesystem::path& path) no
         return;
     }
 
-    // recursion time
-    std::vector<std::filesystem::path> subdirectories{path};
-    const auto found_subdirectories = find_subdirectories(path);
-    subdirectories.insert(subdirectories.cend(),
-                          found_subdirectories.cbegin(),
-                          found_subdirectories.cend());
-
-    for (const auto& directory : subdirectories)
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
     {
         if (this->abort_)
         {
             return;
         }
 
-        for (const auto& directory_file : std::filesystem::directory_iterator(directory))
+        const auto stat = ztd::lstat(entry);
+
+        this->total_size_ += stat.size();
+        this->size_on_disk_ += stat.size_on_disk();
+        if (stat.is_directory())
         {
-            if (this->abort_)
-            {
-                return;
-            }
-
-            const auto directory_file_stat = ztd::lstat(directory_file);
-
-            this->total_size_ += directory_file_stat.size();
-            this->size_on_disk_ += directory_file_stat.size_on_disk();
+            ++this->total_count_dir_;
+        }
+        else
+        {
             ++this->total_count_file_;
         }
     }

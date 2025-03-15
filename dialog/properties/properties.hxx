@@ -46,8 +46,6 @@ class PropertiesDialog : public Gtk::ApplicationWindow
     void on_button_close_clicked();
 
   private:
-    std::vector<std::filesystem::path>
-    find_subdirectories(const std::filesystem::path& directory) noexcept;
     void calc_total_size_of_files(const std::filesystem::path& path) noexcept;
     concurrencpp::result<void> calc_size() noexcept;
     void on_update_labels() noexcept;
