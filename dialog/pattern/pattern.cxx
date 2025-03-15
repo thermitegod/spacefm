@@ -14,6 +14,7 @@
  */
 
 #include <print>
+#include <unordered_map>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -53,7 +54,7 @@ PatternDialog::PatternDialog(const std::string_view json_data)
     }
     const auto& opts = data.value();
 
-    this->set_size_request(600, 300);
+    this->set_size_request(600, 600);
     this->set_title("Select By Pattern");
     this->set_resizable(false);
 
@@ -75,9 +76,11 @@ PatternDialog::PatternDialog(const std::string_view json_data)
     this->input_.set_buffer(this->buf_);
     this->input_.set_wrap_mode(Gtk::WrapMode::WORD_CHAR);
     this->input_.set_monospace(true);
-    this->input_.set_size_request(-1, 300);
+    // this->input_.set_size_request(-1, 300);
     this->scroll_.set_child(this->input_);
-    this->scroll_.set_size_request(-1, 300);
+    this->scroll_.set_hexpand(true);
+    this->scroll_.set_vexpand(true);
+    // this->scroll_.set_size_request(-1, 300);
     this->box_.append(this->scroll_);
 
     auto key_controller = Gtk::EventControllerKey::create();
@@ -88,25 +91,76 @@ PatternDialog::PatternDialog(const std::string_view json_data)
     // Buttons //
 
     this->button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    this->button_ok_ = Gtk::Button("_Ok", true);
+    this->button_select_ = Gtk::Button("_Select", true);
     this->button_cancel_ = Gtk::Button("_Close", true);
+    this->button_patterns_ = Gtk::Button("_Patterns", true);
 
     this->box_.append(this->button_box_);
     this->button_box_.set_halign(Gtk::Align::END);
+    this->button_box_.append(this->button_patterns_);
     this->button_box_.append(this->button_cancel_);
-    this->button_box_.append(this->button_ok_);
+    this->button_box_.append(this->button_select_);
 
-    this->button_ok_.signal_clicked().connect(
-        sigc::mem_fun(*this, &PatternDialog::on_button_ok_clicked));
+    this->button_select_.signal_clicked().connect(
+        sigc::mem_fun(*this, &PatternDialog::on_button_select_clicked));
     this->button_cancel_.signal_clicked().connect(
         sigc::mem_fun(*this, &PatternDialog::on_button_cancel_clicked));
+    this->button_patterns_.signal_clicked().connect(
+        sigc::mem_fun(*this, &PatternDialog::on_button_patterns_clicked));
+
+    // Pattern button context menu //
+    auto submenu_model_image = Gio::Menu::create();
+    submenu_model_image->append("JPG", "app.jpg");
+    submenu_model_image->append("PNG", "app.png");
+    submenu_model_image->append("GIF", "app.gif");
+
+    auto submenu_model_video = Gio::Menu::create();
+    submenu_model_video->append("MP4", "app.mp4");
+    submenu_model_video->append("MKV", "app.mkv");
+
+    auto submenu_model_archive = Gio::Menu::create();
+    submenu_model_archive->append("TAR", "app.tar");
+    submenu_model_archive->append("7Z", "app.szip");
+    submenu_model_archive->append("RAR", "app.rar");
+    submenu_model_archive->append("ZIP", "app.zip");
+
+    auto menu_model = Gio::Menu::create();
+    menu_model->append_submenu("Image", submenu_model_image);
+    menu_model->append_submenu("Video", submenu_model_video);
+    menu_model->append_submenu("Archive", submenu_model_archive);
+
+    this->context_menu_.set_menu_model(menu_model);
+    this->context_menu_.set_parent(this->button_patterns_);
+
+    auto action_group = Gio::SimpleActionGroup::create();
+    // Image
+    action_group->add_action("jpg", [this]() { this->on_context_menu_set_pattern(patterns::jpg); });
+    action_group->add_action("png", [this]() { this->on_context_menu_set_pattern(patterns::png); });
+    action_group->add_action("gif", [this]() { this->on_context_menu_set_pattern(patterns::gif); });
+    // Video
+    action_group->add_action("mp4", [this]() { this->on_context_menu_set_pattern(patterns::mp4); });
+    action_group->add_action("mkv", [this]() { this->on_context_menu_set_pattern(patterns::mkv); });
+    // Archive
+    action_group->add_action("tar", [this]() { this->on_context_menu_set_pattern(patterns::tar); });
+    action_group->add_action("szip",
+                             [this]() { this->on_context_menu_set_pattern(patterns::szip); });
+    action_group->add_action("rar", [this]() { this->on_context_menu_set_pattern(patterns::rar); });
+    action_group->add_action("zip", [this]() { this->on_context_menu_set_pattern(patterns::zip); });
+
+    this->insert_action_group("app", action_group);
 
     this->set_child(this->box_);
-
     this->set_visible(true);
 
-    // Set default focus to the text input
     this->input_.grab_focus();
+}
+
+PatternDialog::~PatternDialog()
+{
+    // fix warning on close
+    // Finalizing gtkmm__GtkButton 0x51400003b9b0, but it still has children left:
+    //    - GtkPopoverMenu 0x516000036e70
+    this->context_menu_.unparent();
 }
 
 bool
@@ -116,7 +170,7 @@ PatternDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mo
     (void)state;
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
-        this->on_button_ok_clicked();
+        this->on_button_select_clicked();
     }
     if (keyval == GDK_KEY_Escape)
     {
@@ -126,7 +180,7 @@ PatternDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mo
 }
 
 void
-PatternDialog::on_button_ok_clicked()
+PatternDialog::on_button_select_clicked()
 {
     const auto buffer =
         glz::write_json(datatype::pattern::response{.pattern = this->buf_->get_text().data()});
@@ -142,4 +196,31 @@ void
 PatternDialog::on_button_cancel_clicked()
 {
     this->close();
+}
+
+void
+PatternDialog::on_button_patterns_clicked()
+{
+    this->context_menu_.popup();
+}
+
+void
+PatternDialog::on_context_menu_set_pattern(const patterns pattern)
+{
+    using namespace std::string_literals;
+
+    static const std::unordered_map<patterns, std::string> patterns{
+        {patterns::jpg, "*.jp*g"},
+        {patterns::png, "*.png"},
+        {patterns::gif, "*.gif"},
+        {patterns::mp4, "*.mp4"},
+        {patterns::mkv, "*.mkv"},
+        {patterns::tar, "*.tar*"},
+        {patterns::szip, "*.7z"},
+        {patterns::rar, "*.rar"},
+        {patterns::zip, "*.zip"},
+    };
+
+    this->buf_->set_text("");
+    this->buf_->set_text(patterns.at(pattern));
 }

@@ -21,6 +21,7 @@ class PatternDialog : public Gtk::ApplicationWindow
 {
   public:
     PatternDialog(const std::string_view json_data);
+    ~PatternDialog();
 
   protected:
     Gtk::Box box_;
@@ -33,11 +34,35 @@ class PatternDialog : public Gtk::ApplicationWindow
     Gtk::ScrolledWindow scroll_;
 
     Gtk::Box button_box_;
-    Gtk::Button button_ok_;
+    Gtk::Button button_select_;
     Gtk::Button button_cancel_;
+    Gtk::Button button_patterns_;
+
+    // Option button items
+    enum class patterns : std::uint8_t
+    {
+        jpg,
+        png,
+        gif,
+        mp4,
+        mkv,
+        tar,
+        szip,
+        rar,
+        zip,
+    };
+    Gtk::PopoverMenu context_menu_;
+    Glib::RefPtr<Gio::SimpleActionGroup> context_action_group_;
+    Glib::RefPtr<Gio::SimpleAction> action_filename_;
+    Glib::RefPtr<Gio::SimpleAction> action_parent_;
+    Glib::RefPtr<Gio::SimpleAction> action_path_;
+    Glib::RefPtr<Gio::SimpleAction> action_confirm_;
+
+    void on_context_menu_set_pattern(const patterns pattern);
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);
-    void on_button_ok_clicked();
+    void on_button_select_clicked();
     void on_button_cancel_clicked();
+    void on_button_patterns_clicked();
 };
