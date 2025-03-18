@@ -508,6 +508,7 @@ sources += files(
     'src/ptk/ptk-search-bar.cxx',
 
     'src/ptk/utils/ptk-utils.cxx',
+    'src/ptk/utils/history.cxx',
 
     'src/ptk/natsort/strnatcmp.cxx',
 

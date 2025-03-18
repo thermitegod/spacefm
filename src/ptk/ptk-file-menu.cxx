@@ -1437,13 +1437,13 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             const auto set = xset::set::get(xset::name::go_back);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_back, browser);
-            set->disable = !browser->navigation_history->has_back();
+            set->disable = !browser->history_->has_back();
         }
 
         {
             const auto set = xset::set::get(xset::name::go_forward);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_forward, browser);
-            set->disable = !browser->navigation_history->has_forward();
+            set->disable = !browser->history_->has_forward();
         }
 
         {

@@ -17,6 +17,7 @@ test_sources += files(
 
     # PTK
     'spacefm/ptk/natsort/strnatcmp.cxx',
+    'spacefm/ptk/utils/history.cxx',
 
     # VFS
     'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
@@ -34,6 +35,7 @@ test_sources += files(
 
     # PTK
     'src/ptk/natsort/test-natsort.cxx',
+    'src/ptk/utils/test-history.cxx',
 
     # VFS
     'src/vfs/mime-type/chrome/mime-utils.cxx',

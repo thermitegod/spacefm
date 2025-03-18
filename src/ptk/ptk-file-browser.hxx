@@ -20,7 +20,6 @@
 #include <optional>
 #include <span>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <gtkmm.h>
@@ -32,8 +31,9 @@
 
 #include "xset/xset.hxx"
 
+#include "ptk/utils/history.hxx"
+
 #include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"
@@ -68,13 +68,6 @@ struct browser
         btime,
         ctime,
         mtime,
-    };
-
-    enum class chdir_mode : std::uint8_t
-    {
-        normal,
-        back,
-        forward,
     };
 
     enum class open_action : std::uint8_t
@@ -164,40 +157,11 @@ struct browser
     GtkEntry* search_bar_{nullptr};
 
     // private:
-    struct navigation_history_data
-    {
-        void go_back() noexcept;
-        [[nodiscard]] bool has_back() const noexcept;
-        [[nodiscard]] std::span<const std::filesystem::path> get_back() const noexcept;
-
-        void go_forward() noexcept;
-        [[nodiscard]] bool has_forward() const noexcept;
-        [[nodiscard]] std::span<const std::filesystem::path> get_forward() const noexcept;
-
-        void new_forward(const std::filesystem::path& path) noexcept;
-
-        void reset() noexcept;
-
-        [[nodiscard]] const std::filesystem::path&
-        path(const ptk::browser::chdir_mode mode = ptk::browser::chdir_mode::normal) const noexcept;
-
-      private:
-        std::vector<std::filesystem::path> forward_;
-        std::vector<std::filesystem::path> back_;
-        std::filesystem::path current_{vfs::user::home()};
-    };
-    std::unique_ptr<navigation_history_data> navigation_history;
-
-    struct selection_history_data
-    {
-        std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>>
-            selection_history;
-    };
-    std::unique_ptr<selection_history_data> selection_history;
+    std::unique_ptr<ptk::utils::history> history_;
 
   public:
     bool chdir(const std::filesystem::path& new_path,
-               const ptk::browser::chdir_mode mode = ptk::browser::chdir_mode::normal) noexcept;
+               const ptk::utils::history::mode mode = ptk::utils::history::mode::normal) noexcept;
 
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;
@@ -259,7 +223,7 @@ struct browser
     void select_last() const noexcept;
     void select_file(const std::filesystem::path& filename,
                      const bool unselect_others = true) const noexcept;
-    void select_files(const std::span<std::filesystem::path> select_filenames) const noexcept;
+    void select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename,
                        const bool unselect_others = true) const noexcept;
     void select_pattern(const std::string_view search_key = "") noexcept;

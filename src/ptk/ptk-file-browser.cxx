@@ -39,6 +39,8 @@
 
 #include "datatypes/external-dialog.hxx"
 
+#include "ptk/utils/history.hxx"
+
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 3)
 #include <exo/exo.h>
 #endif
@@ -171,93 +173,6 @@ static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GT
 
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
-
-void
-ptk::browser::navigation_history_data::go_back() noexcept
-{
-    if (this->back_.empty())
-    {
-        // logger::debug<logger::domain::ptk>("Back navigation history is empty");
-        return;
-    }
-    this->forward_.push_back(this->current_);
-    this->current_ = this->back_.back();
-    this->back_.pop_back();
-}
-
-bool
-ptk::browser::navigation_history_data::has_back() const noexcept
-{
-    return !this->back_.empty();
-}
-
-std::span<const std::filesystem::path>
-ptk::browser::navigation_history_data::get_back() const noexcept
-{
-    return this->back_;
-}
-
-void
-ptk::browser::navigation_history_data::go_forward() noexcept
-{
-    if (this->forward_.empty())
-    {
-        // logger::debug<logger::domain::ptk>("Forward navigation history is empty");
-        return;
-    }
-    this->back_.push_back(this->current_);
-    this->current_ = this->forward_.back();
-    this->forward_.pop_back();
-}
-
-bool
-ptk::browser::navigation_history_data::has_forward() const noexcept
-{
-    return !this->forward_.empty();
-}
-
-std::span<const std::filesystem::path>
-ptk::browser::navigation_history_data::get_forward() const noexcept
-{
-    return this->forward_;
-}
-
-void
-ptk::browser::navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
-{
-    // logger::debug<logger::domain::ptk>("New Forward navigation history");
-    if (!this->current_.empty())
-    {
-        this->back_.push_back(this->current_);
-    }
-    this->current_ = path;
-    this->forward_.clear();
-}
-
-void
-ptk::browser::navigation_history_data::reset() noexcept
-{
-    this->back_.clear();
-    this->forward_.clear();
-}
-
-const std::filesystem::path&
-ptk::browser::navigation_history_data::path(const ptk::browser::chdir_mode mode) const noexcept
-{
-    switch (mode)
-    {
-        case ptk::browser::chdir_mode::normal:
-            return this->current_;
-        case ptk::browser::chdir_mode::back:
-            assert(!this->back_.empty());
-            return this->back_.back();
-        case ptk::browser::chdir_mode::forward:
-            assert(!this->forward_.empty());
-            return this->forward_.back();
-        default:
-            return this->current_;
-    }
-}
 
 struct column_data
 {
@@ -874,8 +789,7 @@ ptk_browser_init(ptk::browser* browser) noexcept
     g_signal_connect(G_OBJECT(browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk::wrapper::browser::slider_release), browser);
     // clang-format on
 
-    browser->selection_history = std::make_unique<ptk::browser::selection_history_data>();
-    browser->navigation_history = std::make_unique<ptk::browser::navigation_history_data>();
+    browser->history_ = std::make_unique<ptk::utils::history>();
 }
 
 static void
@@ -2641,7 +2555,7 @@ file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept
 
 bool
 ptk::browser::chdir(const std::filesystem::path& new_path,
-                    const ptk::browser::chdir_mode mode) noexcept
+                    const ptk::utils::history::mode mode) noexcept
 {
     // logger::debug<logger::domain::ptk>("ptk::browser::chdir");
 
@@ -2705,17 +2619,17 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 
     switch (mode)
     {
-        case ptk::browser::chdir_mode::normal:
-            if (!std::filesystem::equivalent(this->navigation_history->path(), path))
+        case ptk::utils::history::mode::normal:
+            if (this->history_->path() != path)
             {
-                this->navigation_history->new_forward(path);
+                this->history_->new_forward(path);
             }
             break;
-        case ptk::browser::chdir_mode::back:
-            this->navigation_history->go_back();
+        case ptk::utils::history::mode::history_back:
+            this->history_->go_back();
             break;
-        case ptk::browser::chdir_mode::forward:
-            this->navigation_history->go_forward();
+        case ptk::utils::history::mode::history_forward:
+            this->history_->go_forward();
             break;
     }
 
@@ -2762,9 +2676,8 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 #endif
     }
 
-    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_back), this->navigation_history->has_back());
-    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_forward),
-                             this->navigation_history->has_forward());
+    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_back), this->history_->has_back());
+    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_forward), this->history_->has_forward());
     gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_up), this->cwd() != "/");
 
     return true;
@@ -2773,7 +2686,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 const std::filesystem::path&
 ptk::browser::cwd() const noexcept
 {
-    return this->navigation_history->path();
+    return this->history_->path();
 }
 
 void
@@ -3074,10 +2987,10 @@ void
 ptk::browser::go_back() noexcept
 {
     this->focus_folder_view();
-    if (this->navigation_history->has_back())
+    if (this->history_->has_back())
     {
-        const auto mode = ptk::browser::chdir_mode::back;
-        this->chdir(this->navigation_history->path(mode), mode);
+        const auto mode = ptk::utils::history::mode::history_back;
+        this->chdir(this->history_->path(mode), mode);
     }
 }
 
@@ -3085,10 +2998,10 @@ void
 ptk::browser::go_forward() noexcept
 {
     this->focus_folder_view();
-    if (this->navigation_history->has_forward())
+    if (this->history_->has_forward())
     {
-        const auto mode = ptk::browser::chdir_mode::forward;
-        this->chdir(this->navigation_history->path(mode), mode);
+        const auto mode = ptk::utils::history::mode::history_forward;
+        this->chdir(this->history_->path(mode), mode);
     }
 }
 
@@ -3866,12 +3779,11 @@ void
 ptk::browser::select_last() const noexcept
 {
     // logger::debug<logger::domain::ptk>("select_last");
-    const auto& cwd = this->cwd();
-    if (this->selection_history->selection_history.contains(cwd))
+    const auto selected_files = this->history_->get_selection(this->cwd());
+    if (selected_files && !selected_files->empty())
     {
-        this->select_files(this->selection_history->selection_history.at(cwd));
+        this->select_files(*selected_files);
     }
-    this->selection_history->selection_history.erase(cwd);
 }
 
 static std::string
@@ -4592,12 +4504,7 @@ ptk::browser::rebuild_toolbars() const noexcept
 void
 ptk::browser::update_selection_history() const noexcept
 {
-    const auto& cwd = this->cwd();
     // logger::debug<logger::domain::ptk>("selection history: {}", cwd.string());
-    this->selection_history->selection_history.contains(cwd);
-    {
-        this->selection_history->selection_history.erase(cwd);
-    }
 
     const auto selected_files = this->selected_files();
     if (selected_files.empty())
@@ -4607,12 +4514,11 @@ ptk::browser::update_selection_history() const noexcept
 
     std::vector<std::filesystem::path> selected_filenames;
     selected_filenames.reserve(selected_files.size());
-
     for (const auto& file : selected_files)
     {
         selected_filenames.emplace_back(file->name());
     }
-    this->selection_history->selection_history.insert({cwd, selected_filenames});
+    this->history_->set_selection(this->cwd(), selected_filenames);
 }
 
 std::vector<GtkTreePath*>
@@ -4751,7 +4657,8 @@ ptk::browser::select_file(const std::filesystem::path& filename,
 }
 
 void
-ptk::browser::select_files(const std::span<std::filesystem::path> select_filenames) const noexcept
+ptk::browser::select_files(
+    const std::span<const std::filesystem::path> select_filenames) const noexcept
 {
     this->unselect_all();
 
