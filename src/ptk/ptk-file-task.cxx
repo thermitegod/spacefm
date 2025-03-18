@@ -41,7 +41,6 @@
 
 #include "ptk/ptk-file-task-view.hxx"
 #include "ptk/ptk-file-task.hxx"
-#include "ptk/utils/multi-input.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/utils/vfs-utils.hxx"
@@ -1758,6 +1757,114 @@ ptk::file_task::update() noexcept
     // logger::info<logger::domain::ptk>("ptk::file_task::update({}) DONE", logger::utils::ptr(this));
 }
 
+static void
+on_multi_input_insert(GtkTextBuffer* buf) noexcept
+{ // remove linefeeds from pasted text
+    GtkTextIter iter;
+    GtkTextIter siter;
+
+    // buffer contains linefeeds?
+    gtk_text_buffer_get_start_iter(buf, &siter);
+    gtk_text_buffer_get_end_iter(buf, &iter);
+    const std::string all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    if (!all.contains("\n"))
+    {
+        return;
+    }
+
+    // delete selected text that was pasted over
+    if (gtk_text_buffer_get_selection_bounds(buf, &siter, &iter))
+    {
+        gtk_text_buffer_delete(buf, &siter, &iter);
+    }
+
+    GtkTextMark* insert = gtk_text_buffer_get_insert(buf);
+    gtk_text_buffer_get_iter_at_mark(buf, &iter, insert);
+    gtk_text_buffer_get_start_iter(buf, &siter);
+    std::string b = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    gtk_text_buffer_get_end_iter(buf, &siter);
+    std::string a = gtk_text_buffer_get_text(buf, &iter, &siter, false);
+
+    a = ztd::replace(a, "\n", " ");
+    b = ztd::replace(b, "\n", " ");
+
+    g_signal_handlers_block_matched(buf,
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
+                                    0,
+                                    0,
+                                    nullptr,
+                                    (void*)on_multi_input_insert,
+                                    nullptr);
+
+    gtk_text_buffer_set_text(buf, b.data(), -1);
+    gtk_text_buffer_get_end_iter(buf, &iter);
+    GtkTextMark* mark = gtk_text_buffer_create_mark(buf, nullptr, &iter, true);
+    gtk_text_buffer_get_end_iter(buf, &iter);
+    gtk_text_buffer_insert(buf, &iter, a.data(), -1);
+    gtk_text_buffer_get_iter_at_mark(buf, &iter, mark);
+    gtk_text_buffer_place_cursor(buf, &iter);
+
+    g_signal_handlers_unblock_matched(buf,
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
+                                      0,
+                                      0,
+                                      nullptr,
+                                      (void*)on_multi_input_insert,
+                                      nullptr);
+}
+
+static GtkTextView*
+multi_input_new(GtkScrolledWindow* scrolled, const std::string_view text = "") noexcept
+{
+    gtk_scrolled_window_set_policy(scrolled,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC);
+    GtkTextView* input = GTK_TEXT_VIEW(gtk_text_view_new());
+    // ubuntu shows input too small so use mininum height
+    gtk_widget_set_size_request(GTK_WIDGET(input), -1, 50);
+    gtk_widget_set_size_request(GTK_WIDGET(scrolled), -1, 50);
+
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), GTK_WIDGET(input));
+    GtkTextBuffer* buf = gtk_text_view_get_buffer(input);
+    gtk_text_view_set_wrap_mode(input,
+                                GtkWrapMode::GTK_WRAP_CHAR); // GtkWrapMode::GTK_WRAP_WORD_CHAR
+
+    gtk_text_buffer_set_text(buf, text.data(), -1);
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(buf, &iter);
+    gtk_text_buffer_place_cursor(buf, &iter);
+    GtkTextMark* insert = gtk_text_buffer_get_insert(buf);
+    gtk_text_view_scroll_to_mark(input, insert, 0.0, false, 0, 0);
+    gtk_text_view_set_accepts_tab(input, false);
+
+    // clang-format off
+    g_signal_connect_after(G_OBJECT(buf), "insert-text", G_CALLBACK(on_multi_input_insert), nullptr);
+    // clang-format on
+
+    return input;
+}
+
+static std::optional<std::string>
+multi_input_get_text(GtkWidget* input) noexcept
+{
+    if (!GTK_IS_TEXT_VIEW(input))
+    {
+        return std::nullopt;
+    }
+
+    GtkTextIter iter;
+    GtkTextIter siter;
+    GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
+    gtk_text_buffer_get_start_iter(buf, &siter);
+    gtk_text_buffer_get_end_iter(buf, &iter);
+    const char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    if (text == nullptr)
+    {
+        return std::nullopt;
+    }
+    return text;
+}
+
 static bool
 on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                           const vfs::file_task::state state, void* state_data,
@@ -1853,7 +1960,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptas
             case GDK_KEY_KP_Enter:
             {
                 // User pressed enter in rename/overwrite dialog
-                const auto new_name = ptk::utils::multi_input_get_text(widget);
+                const auto new_name = multi_input_get_text(widget);
                 const char* old_name =
                     static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
 
@@ -1887,7 +1994,7 @@ static void
 on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
 {
     (void)input_buf;
-    const auto new_name = ptk::utils::multi_input_get_text(query_input);
+    const auto new_name = multi_input_get_text(query_input);
     const char* old_name =
         static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
     const bool can_rename = new_name && old_name && (new_name.value() != old_name);
@@ -1975,7 +2082,7 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             {
                 GtkWidget* query_input =
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
-                str = ptk::utils::multi_input_get_text(query_input);
+                str = multi_input_get_text(query_input);
             }
             const auto filename = std::filesystem::path(str.value());
             if (str && !filename.empty() && ptask->task->current_dest)
@@ -2408,7 +2515,7 @@ ptk::file_task::query_overwrite() noexcept
 
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    GtkWidget* query_input = GTK_WIDGET(ptk::utils::multi_input_new(scroll, filename));
+    GtkWidget* query_input = GTK_WIDGET(multi_input_new(scroll, filename));
     g_object_set_data_full(G_OBJECT(query_input),
                            "old_name",
                            ::utils::strdup(filename.data()),
