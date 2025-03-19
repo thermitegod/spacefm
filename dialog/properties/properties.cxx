@@ -93,6 +93,7 @@ class PropertiesPage : public Gtk::Box
         Gtk::Label left_item(left_item_name.data());
 
         Gtk::Entry entry;
+        entry.set_margin(2);
         entry.set_text(text.data());
         entry.set_editable(false);
         entry.set_hexpand(true);
