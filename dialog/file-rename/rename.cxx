@@ -416,8 +416,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->insert_action_group("app", this->context_action_group_);
 
     // Pack
-    this->set_margin(10);
-    this->box_.set_margin(10);
+    this->box_.set_margin(5);
 
     this->box_.append(this->label_full_name_);
     this->box_.append(this->scroll_full_name_);
