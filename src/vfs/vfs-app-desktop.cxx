@@ -113,19 +113,11 @@ vfs::desktop::parse_desktop_file() noexcept
 
     bool loaded = false;
 
-#if (GTK_MAJOR_VERSION == 4)
-    const auto kf = Glib::KeyFile::create();
-#elif (GTK_MAJOR_VERSION == 3)
     Glib::KeyFile kf;
-#endif
 
     if (this->path_.is_absolute())
     {
-#if (GTK_MAJOR_VERSION == 4)
-        loaded = kf->load_from_file(this->path_, Glib::KeyFile::Flags::NONE);
-#elif (GTK_MAJOR_VERSION == 3)
         loaded = kf.load_from_file(this->path_, Glib::KEY_FILE_NONE);
-#endif
     }
     else
     {
@@ -133,11 +125,7 @@ vfs::desktop::parse_desktop_file() noexcept
         std::string relative_full_path;
         try
         {
-#if (GTK_MAJOR_VERSION == 4)
-            loaded = kf->load_from_data_dirs(relative_path, relative_full_path);
-#elif (GTK_MAJOR_VERSION == 3)
             loaded = kf.load_from_data_dirs(relative_path, relative_full_path);
-#endif
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
@@ -163,88 +151,6 @@ vfs::desktop::parse_desktop_file() noexcept
     // - URL
     // - PrefersNonDefaultGPU
     // - SingleMainWindow
-
-#if (GTK_MAJOR_VERSION == 4)
-
-    // clang-format off
-
-    // Required Keys, must fail if missing
-
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
-    {
-        this->desktop_entry_.type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
-    }
-    else
-    {
-        return vfs::error_code::key_not_found;
-    }
-
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
-    {
-        this->desktop_entry_.name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
-    }
-    else
-    {
-        return vfs::error_code::key_not_found;
-    }
-
-    // Optional Keys
-
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
-    {
-        this->desktop_entry_.generic_name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY))
-    {
-        this->desktop_entry_.no_display = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT))
-    {
-        this->desktop_entry_.comment = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON))
-    {
-        this->desktop_entry_.icon = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC))
-    {
-        this->desktop_entry_.try_exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC))
-    {
-        this->desktop_entry_.exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH))
-    {
-        this->desktop_entry_.path = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL))
-    {
-         this->desktop_entry_.terminal = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS))
-    {
-        this->desktop_entry_.actions = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE))
-    {
-        this->desktop_entry_.mime_type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES))
-    {
-        this->desktop_entry_.categories = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS))
-    {
-        this->desktop_entry_.keywords = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
-    }
-    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY))
-    {
-        this->desktop_entry_.startup_notify = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
-    }
-    // clang-format on
-
-#elif (GTK_MAJOR_VERSION == 3)
 
     // clang-format off
 
@@ -323,8 +229,6 @@ vfs::desktop::parse_desktop_file() noexcept
         this->desktop_entry_.startup_notify = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
     }
     // clang-format on
-
-#endif
 
     return loaded ? vfs::error_code::none : vfs::error_code::parse_error;
 }
@@ -615,13 +519,8 @@ vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
                 !this->desktop_entry_.path.empty() ? this->desktop_entry_.path
                                                    : working_dir.string(),
                 argv,
-#if (GTK_MAJOR_VERSION == 4)
-                Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
-                    Glib::SpawnFlags::STDERR_TO_DEV_NULL,
-#elif (GTK_MAJOR_VERSION == 3)
                 Glib::SpawnFlags::SPAWN_SEARCH_PATH | Glib::SpawnFlags::SPAWN_STDOUT_TO_DEV_NULL |
                     Glib::SpawnFlags::SPAWN_STDERR_TO_DEV_NULL,
-#endif
                 Glib::SlotSpawnChildSetup(),
                 nullptr,
                 nullptr,
