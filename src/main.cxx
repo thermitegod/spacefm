@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <format>
 #include <memory>
+#include <print>
 #include <string>
 
 #include <cassert>
@@ -23,8 +24,6 @@
 #include <gdkmm.h>
 #include <glibmm.h>
 #include <gtkmm.h>
-
-#include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
 
@@ -59,8 +58,8 @@
 // This is easier with gtkmm, can just pass shared_ptr
 struct app_data : public std::enable_shared_from_this<app_data>
 {
-    std::shared_ptr<commandline_opt_data> opt = nullptr;
-    std::shared_ptr<config::settings> settings = nullptr;
+    commandline::opts opts;
+    std::shared_ptr<config::settings> settings{nullptr};
 };
 
 static void
@@ -99,17 +98,17 @@ open_file(const std::filesystem::path& path) noexcept
 
 static void
 open_in_tab(MainWindow* main_window, const std::filesystem::path& path,
-            const commandline_opt_data_t& opt) noexcept
+            commandline::opts& opts) noexcept
 {
     // existing window
     bool tab_added = false;
-    if (is_valid_panel(opt->panel))
+    if (is_valid_panel(opts.panel))
     {
         // change to user-specified panel
-        if (!gtk_notebook_get_n_pages(main_window->get_panel_notebook(opt->panel)))
+        if (!gtk_notebook_get_n_pages(main_window->get_panel_notebook(opts.panel)))
         {
             // set panel to load path on panel load
-            const auto set = xset::set::get(xset::panel::show, opt->panel);
+            const auto set = xset::set::get(xset::panel::show, opts.panel);
             if (set->s)
             {
                 set->s = std::format("{}{}{}",
@@ -125,22 +124,22 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& path,
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
-        else if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
+        else if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opts.panel))))
         {
             // show panel
-            const auto set = xset::set::get(xset::panel::show, opt->panel);
+            const auto set = xset::set::get(xset::panel::show, opts.panel);
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
-        main_window->curpanel = opt->panel;
-        main_window->notebook = main_window->get_panel_notebook(opt->panel);
+        main_window->curpanel = opts.panel;
+        main_window->notebook = main_window->get_panel_notebook(opts.panel);
     }
     if (!tab_added)
     {
-        if (opt->reuse_tab)
+        if (opts.reuse_tab)
         {
             main_window->open_path_in_current_tab(path);
-            opt->reuse_tab = false;
+            opts.reuse_tab = false;
         }
         else
         {
@@ -167,10 +166,10 @@ activate(GtkApplication* app, void* user_data) noexcept
 
     const auto data = static_cast<app_data*>(user_data)->shared_from_this();
 
-    const auto opt = data->opt;
+    auto& opts = data->opts;
     const auto settings = data->settings;
 
-    settings->load_saved_tabs = !opt->no_tabs;
+    settings->load_saved_tabs = !opts.no_tabs;
 
     MainWindow* main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
@@ -183,13 +182,13 @@ activate(GtkApplication* app, void* user_data) noexcept
     //                    opt->reuse_tab ? "reuse_tab" : "");
 
     // open files passed in command line arguments
-    for (const auto& file : opt->files)
+    for (const auto& file : opts.files)
     {
         const auto real_path = std::filesystem::absolute(file);
 
         if (std::filesystem::is_directory(real_path))
         {
-            open_in_tab(main_window, real_path, opt);
+            open_in_tab(main_window, real_path, opts);
         }
         else if (std::filesystem::exists(real_path))
         {
@@ -215,17 +214,17 @@ activate(GtkApplication* app, void* user_data) noexcept
         }
     }
 
-    if (is_valid_panel(opt->panel))
+    if (is_valid_panel(opts.panel))
     {
         // user specified a panel with no file, let's show the panel
-        if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
+        if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opts.panel))))
         {
             // show panel
-            const auto set = xset::set::get(xset::panel::show, opt->panel);
+            const auto set = xset::set::get(xset::panel::show, opts.panel);
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
-        main_window->focus_panel(opt->panel);
+        main_window->focus_panel(opts.panel);
     }
 
     settings->load_saved_tabs = true;
@@ -236,13 +235,12 @@ activate(GtkApplication* app, void* user_data) noexcept
 int
 main(int argc, char* argv[]) noexcept
 {
-    // CLI11
-    CLI::App cli_app{PACKAGE_NAME_FANCY, "A multi-panel tabbed file manager"};
-
-    auto opt = std::make_shared<commandline_opt_data>();
-    setup_commandline(cli_app, opt);
-
-    CLI11_PARSE(cli_app, argc, argv);
+    const auto opts = commandline::run(argc, argv);
+    if (!opts)
+    {
+        std::println(stderr, "{}", opts.error());
+        return EXIT_FAILURE;
+    }
 
     // Gtk
     Glib::set_prgname(PACKAGE_NAME);
@@ -275,7 +273,7 @@ main(int argc, char* argv[]) noexcept
     {
         // if another instance is running then open a tab in the
         // existing instance for each passed directory
-        for (const auto& file : opt->files)
+        for (const auto& file : opts->files)
         {
             if (!std::filesystem::is_directory(file))
             {
@@ -321,7 +319,7 @@ main(int argc, char* argv[]) noexcept
     std::atexit(save_bookmarks);
 
     const auto data = std::make_shared<app_data>();
-    data->opt = opt;
+    data->opts = opts.value();
     data->settings = settings;
 
     GtkApplication* app =

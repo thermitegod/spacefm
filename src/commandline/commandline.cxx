@@ -34,8 +34,29 @@
 #include "logger.hxx"
 #include "types.hxx"
 
+struct opts_data final
+{
+    std::vector<std::filesystem::path> files;
+
+    bool new_tab{true};
+    bool reuse_tab{false};
+    bool no_tabs{false};
+    bool new_window{false};
+
+    panel_t panel{0};
+
+    std::filesystem::path config_dir;
+
+    std::vector<std::string> raw_log_levels;
+    std::unordered_map<std::string, std::string> log_levels;
+    // std::filesystem::path logfile{"/tmp/test.log"};
+    std::filesystem::path logfile;
+
+    bool version{false};
+};
+
 static void
-run_commandline(const commandline_opt_data_t& opt) noexcept
+run_commandline(const std::shared_ptr<opts_data>& opt) noexcept
 {
     (void)opt;
 
@@ -63,7 +84,7 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
 }
 
 void
-setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
+setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
 {
     app.add_flag("-t,--new-tab",
                  opt->new_tab,
@@ -150,4 +171,29 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
     app.add_option("files", opt->files, "[DIR | FILE | URL]...")->expected(0, -1);
 
     app.callback([opt]() { run_commandline(opt); });
+}
+
+std::expected<commandline::opts, std::string>
+commandline::run(int argc, char* argv[]) noexcept
+{
+    CLI::App app{PACKAGE_NAME_FANCY, "A multi-panel tabbed file manager"};
+
+    auto opt = std::make_shared<opts_data>();
+    setup_commandline(app, opt);
+
+    try
+    {
+        app.parse(argc, argv);
+    }
+    catch (const CLI::ParseError& e)
+    {
+        return std::unexpected{e.what()};
+    }
+
+    return commandline::opts{.files = opt->files,
+                             .new_tab = opt->new_tab,
+                             .reuse_tab = opt->reuse_tab,
+                             .no_tabs = opt->no_tabs,
+                             .new_window = opt->new_window,
+                             .panel = opt->panel};
 }
