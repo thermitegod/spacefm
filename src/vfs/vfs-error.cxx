@@ -16,6 +16,10 @@
 #include <string>
 #include <system_error>
 
+#include <magic_enum/magic_enum.hpp>
+
+#include <ztd/ztd.hxx>
+
 #include "vfs/vfs-error.hxx"
 
 const std::error_category&
@@ -32,37 +36,7 @@ vfs::error_category() noexcept
         std::string
         message(int c) const override final
         {
-            switch (static_cast<vfs::error_code>(c))
-            {
-                case vfs::error_code::none:
-                    return "no error";
-                case vfs::error_code::parse_error:
-                    return "parse error";
-                case vfs::error_code::key_not_found:
-                    return "key not found";
-                case vfs::error_code::unknown_key:
-                    return "unknown key";
-                case vfs::error_code::missing_key:
-                    return "missing key";
-                case vfs::error_code::file_not_found:
-                    return "file not found";
-                case vfs::error_code::file_too_large:
-                    return "file too large";
-                case vfs::error_code::file_open_failure:
-                    return "file open failure";
-                case vfs::error_code::file_read_failure:
-                    return "file read failure";
-                case vfs::error_code::file_write_failure:
-                    return "file write failure";
-                case vfs::error_code::file_close_failure:
-                    return "file close failure";
-                case vfs::error_code::program_unknown:
-                    return "program unknown";
-                case vfs::error_code::program_not_in_path:
-                    return "program not in path";
-                default:
-                    return "unknown error";
-            }
+            return ztd::replace(magic_enum::enum_name(static_cast<vfs::error_code>(c)), "_", " ");
         }
     };
     static const category instance{};

@@ -30,7 +30,7 @@ TEST_SUITE("vfs::error_code" * doctest::description(""))
             CHECK_EQ(ec.category().name(), "vfs::error_category()");
 
             CHECK_EQ(bool(ec), false);
-            CHECK_EQ(ec.message(), "no error");
+            CHECK_EQ(ec.message(), "none");
             CHECK_EQ(ec == vfs::error_code::none, true);
         }
 
