@@ -1064,7 +1064,7 @@ RenameDialog::on_opt_toggled()
     }
 
     // Window Icon
-    this->set_icon_name("gtk-edit");
+    this->set_icon_name("document-edit-symbolic");
 
     // title
     if (desc.empty())

@@ -40,25 +40,25 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::dev_menu_remove);
         set->menu.label = "Remo_ve / Eject";
-        set->icon = "gtk-disconnect";
+        set->icon = "media-eject-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_unmount);
         set->menu.label = "_Unmount";
-        set->icon = "gtk-remove";
+        set->icon = "list-remove-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_open);
         set->menu.label = "_Open";
-        set->icon = "gtk-open";
+        set->icon = "document-open-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_tab);
         set->menu.label = "Open In _Tab";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
     }
 
     {
@@ -70,13 +70,13 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::dev_menu_mark);
         set->menu.label = "_Bookmark";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_settings);
         set->menu.label = "Setti_ngs";
-        set->icon = "gtk-properties";
+        set->icon = "document-properties-symbolic";
         set->menu.type = xset::set::menu_type::submenu;
         set->context_menu_entries = {
             xset::name::dev_show,
@@ -170,7 +170,7 @@ xset_defaults() noexcept
                     "---\n\t%%i\tdevice ID\n\t%%n\tmajor:minor device numbers (eg 15:3)\n";
         set->s = "%v %s %l %m";
         set->z = "%v %s %l %m";
-        set->icon = "gtk-edit";
+        set->icon = "document-edit-symbolic";
     }
 
     {
@@ -259,7 +259,7 @@ xset_defaults() noexcept
             "filesystems.  Loading of thumbnails and subdirectory sizes will also be disabled.";
         set->menu.type = xset::set::menu_type::string;
         set->title = "Change Detection Blacklist";
-        set->icon = "gtk-edit";
+        set->icon = "document-edit-symbolic";
         set->s = "cifs curlftpfs ftpfs fuse.sshfs nfs smbfs";
         set->z = set->s;
     }
@@ -268,20 +268,20 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::book_open);
         set->menu.label = "_Open";
-        set->icon = "gtk-open";
+        set->icon = "document-open-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::book_settings);
         set->menu.label = "_Settings";
         set->menu.type = xset::set::menu_type::submenu;
-        set->icon = "gtk-properties";
+        set->icon = "document-properties-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::book_add);
         set->menu.label = "New _Bookmark";
-        set->icon = "gtk-jump-to";
+        set->icon = "go-jump-symbolic";
     }
 
     {
@@ -438,7 +438,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::main_search);
         set->menu.label = "_File Search";
-        set->icon = "gtk-find";
+        set->icon = "edit-find-symbolic";
         set->keybinding.type = xset::set::keybinding_type::general;
     }
 
@@ -454,7 +454,7 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::main_save_session);
         set->menu.label = "Open _URL";
         set->menu.type = xset::set::menu_type::string;
-        set->icon = "gtk-network";
+        set->icon = "network-server-symbolic";
         set->title = "Open URL";
         set->desc = "Enter URL in the "
                     "format:\n\tPROTOCOL://USERNAME:PASSWORD@HOST:PORT/SHARE\n\nExamples:\n\tftp://"
@@ -473,7 +473,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::main_exit);
         set->menu.label = "E_xit";
-        set->icon = "gtk-quit";
+        set->icon = "application-exit-symbolic";
         set->keybinding.type = xset::set::keybinding_type::general;
     }
 
@@ -520,7 +520,7 @@ xset_defaults() noexcept
             xset::name::panel_3,
             xset::name::panel_4,
         };
-        set->icon = "gtk-go-forward";
+        set->icon = "go-next-symbolic";
     }
 
     {
@@ -582,14 +582,14 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::main_keybindings);
         set->menu.label = "Keybindings";
-        set->icon = "gtk-preferences";
+        set->icon = "preferences-other-symbolic";
         set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
         const auto set = xset::set::get(xset::name::main_prefs);
         set->menu.label = "_Preferences";
-        set->icon = "gtk-preferences";
+        set->icon = "preferences-other-symbolic";
         set->keybinding.type = xset::set::keybinding_type::general;
     }
 
@@ -608,7 +608,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::main_about);
         set->menu.label = "_About";
-        set->icon = "gtk-about";
+        set->icon = "help-about-symbolic";
     }
 
     {
@@ -748,25 +748,25 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::task_stop);
         set->menu.label = "_Stop";
-        set->icon = "gtk-stop";
+        set->icon = "process-stop-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_pause);
         set->menu.label = "Pa_use";
-        set->icon = "gtk-media-pause";
+        set->icon = "media-playback-pause-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_que);
         set->menu.label = "_Queue";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_resume);
         set->menu.label = "_Resume";
-        set->icon = "gtk-media-play";
+        set->icon = "media-playback-start-symbolic";
     }
 
     {
@@ -789,25 +789,25 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::task_stop_all);
         set->menu.label = "_Stop";
-        set->icon = "gtk-stop";
+        set->icon = "process-stop-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_pause_all);
         set->menu.label = "Pa_use";
-        set->icon = "gtk-media-pause";
+        set->icon = "media-playback-pause-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_que_all);
         set->menu.label = "_Queue";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::task_resume_all);
         set->menu.label = "_Resume";
-        set->icon = "gtk-media-play";
+        set->icon = "media-playback-start-symbolic";
     }
 
     {
@@ -980,25 +980,25 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::con_open);
         set->menu.label = "_Open";
         set->menu.type = xset::set::menu_type::submenu;
-        set->icon = "gtk-open";
+        set->icon = "document-open-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::open_execute);
         set->menu.label = "E_xecute";
-        set->icon = "gtk-execute";
+        set->icon = "application-x-executable";
     }
 
     {
         const auto set = xset::set::get(xset::name::open_edit);
         set->menu.label = "Edi_t";
-        set->icon = "gtk-edit";
+        set->icon = "document-edit-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::open_other);
         set->menu.label = "_Choose...";
-        set->icon = "gtk-open";
+        set->icon = "document-open-symbolic";
     }
 
     {
@@ -1140,19 +1140,19 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::archive_extract);
         set->menu.label = "Archive Extract";
-        set->icon = "gtk-convert";
+        set->icon = "document-save-as-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::archive_extract_to);
         set->menu.label = "Archive Extract To";
-        set->icon = "gtk-convert";
+        set->icon = "document-save-as-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::archive_open);
         set->menu.label = "Archive Open";
-        set->icon = "gtk-file";
+        set->icon = "text-x-generic";
     }
 
     {
@@ -1206,13 +1206,13 @@ xset_defaults() noexcept
             xset::name::tab_new_here,
             xset::name::new_bookmark,
         };
-        set->icon = "gtk-new";
+        set->icon = "tab-new-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::new_file);
         set->menu.label = "_File";
-        set->icon = "gtk-file";
+        set->icon = "text-x-generic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1226,7 +1226,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::new_link);
         set->menu.label = "_Link";
-        set->icon = "gtk-file";
+        set->icon = "text-x-generic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1234,14 +1234,14 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::new_bookmark);
         set->menu.label = "_Bookmark";
         set->shared_key = xset::set::get(xset::name::book_add);
-        set->icon = "gtk-jump-to";
+        set->icon = "go-jump-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::new_archive);
         set->menu.label = "_Archive";
-        set->icon = "gtk-save-as";
+        set->icon = "document-save-as-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1255,21 +1255,21 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::tab_new);
         set->menu.label = "_Tab";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::tab_new_here);
         set->menu.label = "Tab _Here";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::new_app);
         set->menu.label = "_Desktop Application";
-        set->icon = "gtk-add";
+        set->icon = "list-add-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1287,34 +1287,34 @@ xset_defaults() noexcept
             xset::name::go_tab,
             xset::name::go_focus,
         };
-        set->icon = "gtk-go-forward";
+        set->icon = "go-next-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::go_back);
         set->menu.label = "_Back";
-        set->icon = "gtk-go-back";
+        set->icon = "go-previous-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::go_forward);
         set->menu.label = "_Forward";
-        set->icon = "gtk-go-forward";
+        set->icon = "go-next-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::go_up);
         set->menu.label = "_Up";
-        set->icon = "gtk-go-up";
+        set->icon = "go-up-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::go_home);
         set->menu.label = "_Home";
-        set->icon = "gtk-home";
+        set->icon = "go-home-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
@@ -1339,21 +1339,21 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::focus_path_bar);
         set->menu.label = "_Path Bar";
-        set->icon = "gtk-dialog-question";
+        set->icon = "dialog-question-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::focus_search_bar);
         set->menu.label = "_Search Bar";
-        set->icon = "gtk-dialog-question";
+        set->icon = "dialog-question-symbolic";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset::set::get(xset::name::focus_filelist);
         set->menu.label = "_File List";
-        set->icon = "gtk-file";
+        set->icon = "text-x-generic";
     }
 
     {
@@ -1365,7 +1365,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::focus_device);
         set->menu.label = "De_vices";
-        set->icon = "gtk-harddisk";
+        set->icon = "drive-harddisk";
     }
 
     {
@@ -1478,7 +1478,7 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::con_view);
         set->menu.label = "_View";
         set->menu.type = xset::set::menu_type::submenu;
-        set->icon = "gtk-preferences";
+        set->icon = "preferences-other-symbolic";
     }
 
     {
@@ -1659,7 +1659,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::view_refresh);
         set->menu.label = "Re_fresh";
-        set->icon = "gtk-refresh";
+        set->icon = "view-refresh-symbolic";
         set->keybinding.type = xset::set::keybinding_type::view;
     }
 
@@ -1681,42 +1681,42 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::edit_cut);
         set->menu.label = "Cu_t";
-        set->icon = "gtk-cut";
+        set->icon = "edit-cut-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::edit_copy);
         set->menu.label = "_Copy";
-        set->icon = "gtk-copy";
+        set->icon = "edit-copy-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::edit_paste);
         set->menu.label = "_Paste";
-        set->icon = "gtk-paste";
+        set->icon = "edit-paste-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::edit_rename);
         set->menu.label = "_Rename";
-        set->icon = "gtk-edit";
+        set->icon = "document-edit-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::edit_delete);
         set->menu.label = "_Delete";
-        set->icon = "gtk-delete";
+        set->icon = "edit-delete-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::edit_trash);
         set->menu.label = "_Trash";
-        set->icon = "gtk-delete";
+        set->icon = "edit-delete-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1742,48 +1742,48 @@ xset_defaults() noexcept
             xset::name::select_invert,
             xset::name::select_un,
         };
-        set->icon = "gtk-edit";
+        set->icon = "document-edit-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::copy_name);
         set->menu.label = "Copy _Name";
-        set->icon = "gtk-copy";
+        set->icon = "edit-copy-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::copy_path);
         set->menu.label = "Copy _Path";
-        set->icon = "gtk-copy";
+        set->icon = "edit-copy-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::copy_parent);
         set->menu.label = "Copy Pa_rent";
-        set->icon = "gtk-copy";
+        set->icon = "edit-copy-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::paste_link);
         set->menu.label = "Paste _Link";
-        set->icon = "gtk-paste";
+        set->icon = "edit-paste-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::paste_target);
         set->menu.label = "Paste _Target";
-        set->icon = "gtk-paste";
+        set->icon = "edit-paste-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::paste_as);
         set->menu.label = "Paste _As";
-        set->icon = "gtk-paste";
+        set->icon = "edit-paste-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1809,7 +1809,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::copy_loc_last);
         set->menu.label = "L_ast Location";
-        set->icon = "gtk-redo";
+        set->icon = "edit-redo-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -1958,7 +1958,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::move_loc_last);
         set->menu.label = "L_ast Location";
-        set->icon = "gtk-redo";
+        set->icon = "edit-redo-symbolic";
     }
 
     {
@@ -2093,7 +2093,7 @@ xset_defaults() noexcept
     {
         const auto set = xset::set::get(xset::name::select_all);
         set->menu.label = "_Select All";
-        set->icon = "gtk-select-all";
+        set->icon = "edit-select-all-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
@@ -2126,20 +2126,20 @@ xset_defaults() noexcept
             xset::name::prop_perm,
             xset::name::prop_quick,
         };
-        set->icon = "gtk-properties";
+        set->icon = "document-properties-symbolic";
     }
 
     {
         const auto set = xset::set::get(xset::name::prop_info);
         set->menu.label = "_Info";
-        set->icon = "gtk-dialog-info";
+        set->icon = "dialog-information-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset::set::get(xset::name::prop_attr);
         set->menu.label = "_Attributes";
-        set->icon = "gtk-dialog-info";
+        set->icon = "dialog-information-symbolic";
         set->keybinding.type = xset::set::keybinding_type::editing;
     }
 

@@ -867,7 +867,7 @@ CreateDialog::on_opt_toggled()
     }
 
     // Window Icon
-    this->set_icon_name("gtk-new");
+    this->set_icon_name("tab-new-symbolic");
 
     // title
     this->set_title(std::format("Create New {}", desc));

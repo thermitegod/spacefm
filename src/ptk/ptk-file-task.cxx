@@ -693,7 +693,7 @@ ptk::file_task::set_progress_icon() noexcept
     }
     else
     {
-        icon = "gtk-execute";
+        icon = "application-x-executable";
     }
     gtk_window_set_icon_name(GTK_WINDOW(this->progress_dlg_), icon.data());
 }

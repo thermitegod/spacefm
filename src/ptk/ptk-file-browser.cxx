@@ -527,8 +527,8 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
     else
     {
         logger::warn<logger::domain::ptk>("set missing icon {}", set->name());
-        // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
-        image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
+        // image = xset_get_image("application-x-executable", (GtkIconSize)icon_size);
+        image = gtk_image_new_from_icon_name("application-x-executable", (GtkIconSize)icon_size);
     }
 
     GtkButton* button = GTK_BUTTON(gtk_button_new());

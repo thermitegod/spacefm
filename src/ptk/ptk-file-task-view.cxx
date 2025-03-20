@@ -1222,12 +1222,12 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
             }
             else
             {
-                pixbuf = vfs::utils::load_icon("gtk-execute", 22);
+                pixbuf = vfs::utils::load_icon("application-x-executable", 22);
             }
 
             if (!pixbuf)
             {
-                pixbuf = vfs::utils::load_icon("gtk-execute", 22);
+                pixbuf = vfs::utils::load_icon("application-x-executable", 22);
             }
             ptask->pause_change_view_ = false;
         }

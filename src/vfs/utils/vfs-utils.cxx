@@ -29,7 +29,7 @@
 GdkPixbuf*
 vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
 {
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
+    static GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     GtkIconInfo* icon_info = gtk_icon_theme_lookup_icon(
         icon_theme,
