@@ -38,6 +38,7 @@ inline constexpr std::string_view unknown{"application/octet-stream"};
 inline constexpr std::string_view directory{"inode/directory"};
 inline constexpr std::string_view executable{"application/x-executable"};
 inline constexpr std::string_view plain_text{"text/plain"};
+inline constexpr std::string_view zerosize{"application/x-zerosize"};
 } // namespace constants::mime_type
 
 class mime_type final

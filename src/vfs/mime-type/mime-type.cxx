@@ -67,11 +67,14 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
         return type;
     }
 
-    const auto file_size = std::filesystem::file_size(path);
-    if (file_size == 0 || std::filesystem::is_other(status))
+    if (std::filesystem::is_other(status))
     {
-        // empty file can be viewed as text file
         return vfs::constants::mime_type::plain_text.data();
+    }
+
+    if (std::filesystem::file_size(path) == 0)
+    {
+        return vfs::constants::mime_type::zerosize.data();
     }
 
     /* Check for executable file */
