@@ -28,7 +28,6 @@
 #include <sys/inotify.h>
 
 #include <glibmm.h>
-#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <magic_enum/magic_enum.hpp>
@@ -39,8 +38,7 @@
 
 #include "logger.hxx"
 
-vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false)
-    : path_(path), callback_(callback)
+vfs::monitor::monitor(const std::filesystem::path& path) : path_(path)
 {
     this->inotify_fd_ = inotify_init();
     if (this->inotify_fd_ == -1)
@@ -95,7 +93,7 @@ vfs::monitor::dispatch_event(const vfs::monitor::event event,
                              const std::filesystem::path& path) const noexcept
 {
     // logger::debug<logger::domain::vfs>("vfs::monitor::dispatch_event({})  {}   {}", logger::utils::ptr(this), magic_enum::enum_name(event), path.string());
-    this->callback_(event, path);
+    this->signal_filesystem_event_.emit(event, path);
 }
 
 bool

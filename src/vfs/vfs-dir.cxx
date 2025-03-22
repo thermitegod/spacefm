@@ -30,6 +30,7 @@
 #include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
+#include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-volume.hxx"
 
@@ -46,6 +47,9 @@ vfs::dir::dir(const std::filesystem::path& path,
     : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
+
+    this->monitor_.signal_filesystem_event().connect([this](auto e, auto p)
+                                                     { this->on_monitor_event(e, p); });
 
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
                                                           { this->emit_thumbnail_loaded(a); });

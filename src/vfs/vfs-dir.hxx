@@ -121,9 +121,7 @@ class dir final : public std::enable_shared_from_this<dir>
     std::vector<std::shared_ptr<vfs::file>> files_;
 
     vfs::thumbnailer thumbnailer_;
-    const vfs::monitor monitor_{
-        this->path_,
-        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2)};
+    vfs::monitor monitor_{this->path_};
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_;
     std::vector<std::filesystem::path> created_files_;

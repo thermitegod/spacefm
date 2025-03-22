@@ -18,10 +18,8 @@
 #pragma once
 
 #include <filesystem>
-#include <functional>
 
 #include <glibmm.h>
-#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
@@ -39,17 +37,19 @@ class monitor final
         other,
     };
 
-    // Callback function which will be called when monitored events happen
-    using callback_t =
-        std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
-
     monitor() = default;
-    monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false);
+    monitor(const std::filesystem::path& path);
     ~monitor() noexcept;
     monitor(const monitor& other) = delete;
     monitor(monitor&& other) = delete;
     monitor& operator=(const monitor& other) = delete;
-    monitor& operator=(monitor&& other) = default;
+    monitor& operator=(monitor&& other) noexcept = default;
+
+    [[nodiscard]] auto
+    signal_filesystem_event()
+    {
+        return this->signal_filesystem_event_;
+    }
 
   private:
     [[nodiscard]] bool on_inotify_event(const Glib::IOCondition condition) const noexcept;
@@ -63,6 +63,7 @@ class monitor final
     Glib::RefPtr<Glib::IOChannel> inotify_io_channel_;
     sigc::connection signal_io_handler_;
 
-    callback_t callback_;
+    sigc::signal<void(const vfs::monitor::event event, const std::filesystem::path& path)>
+        signal_filesystem_event_;
 };
 } // namespace vfs
