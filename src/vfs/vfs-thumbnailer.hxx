@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <queue>
 
@@ -34,10 +33,7 @@ namespace vfs
 class thumbnailer final
 {
   public:
-    using callback_t = std::function<void(const std::shared_ptr<vfs::file>& file)>;
-
-    thumbnailer() = delete;
-    thumbnailer(const callback_t& callback) noexcept;
+    thumbnailer() noexcept;
     ~thumbnailer() noexcept;
     thumbnailer(const thumbnailer& other) = delete;
     thumbnailer(thumbnailer&& other) = delete;
@@ -51,6 +47,12 @@ class thumbnailer final
     };
     concurrencpp::result<void> request(const request_data request) noexcept;
 
+    [[nodiscard]] auto
+    signal_thumbnail_created()
+    {
+        return this->signal_thumbnail_created_;
+    }
+
   private:
     concurrencpp::result<bool> thumbnailer_thread() noexcept;
 
@@ -62,6 +64,7 @@ class thumbnailer final
     concurrencpp::async_lock lock_;
     bool abort_{false};
 
-    callback_t callback_;
+    // Signals
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_thumbnail_created_;
 };
 } // namespace vfs

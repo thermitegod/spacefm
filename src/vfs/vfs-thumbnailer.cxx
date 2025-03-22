@@ -26,7 +26,7 @@
 
 #include "concurrency.hxx"
 
-vfs::thumbnailer::thumbnailer(const callback_t& callback) noexcept : callback_(callback)
+vfs::thumbnailer::thumbnailer() noexcept
 {
     // logger::debug<logger::domain::vfs>("vfs::thumbnailer::thumbnailer({})", logger::utils::ptr(this));
     this->executor_ = global::runtime.thread_executor();
@@ -88,7 +88,8 @@ vfs::thumbnailer::thumbnailer_thread() noexcept
             // needs to be another abort check before calling the callback.
             break;
         }
-        this->callback_(request.file);
+
+        this->signal_thumbnail_created_.emit(request.file);
     }
 
     co_return true;

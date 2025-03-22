@@ -46,6 +46,9 @@ vfs::dir::dir(const std::filesystem::path& path,
     : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
+
+    this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
+                                                          { this->emit_thumbnail_loaded(a); });
 }
 
 vfs::dir::~dir() noexcept

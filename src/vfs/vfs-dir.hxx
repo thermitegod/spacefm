@@ -120,8 +120,7 @@ class dir final : public std::enable_shared_from_this<dir>
     std::filesystem::path path_;
     std::vector<std::shared_ptr<vfs::file>> files_;
 
-    vfs::thumbnailer thumbnailer_{
-        std::bind(&vfs::dir::emit_thumbnail_loaded, this, std::placeholders::_1)};
+    vfs::thumbnailer thumbnailer_;
     const vfs::monitor monitor_{
         this->path_,
         std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2)};
