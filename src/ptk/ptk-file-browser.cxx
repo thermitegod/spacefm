@@ -88,7 +88,6 @@
 #include "autosave.hxx"
 #include "logger.hxx"
 #include "main-window.hxx"
-#include "signals.hxx"
 #include "types.hxx"
 
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 4)
@@ -951,7 +950,7 @@ ptk::browser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file) 
     }
     else
     {
-        this->run_event<spacefm::signal::change_content>();
+        this->signal_change_content_.emit(this);
     }
 }
 
@@ -1058,22 +1057,22 @@ ptk::browser::on_dir_file_listed() noexcept
 {
     this->n_selected_files_ = 0;
 
-    this->signal_file_created.disconnect();
-    this->signal_file_changed.disconnect();
-    this->signal_file_deleted.disconnect();
+    this->signal_file_created_.disconnect();
+    this->signal_file_changed_.disconnect();
+    this->signal_file_deleted_.disconnect();
 
-    this->signal_file_created = this->dir_->signal_file_created().connect(
+    this->signal_file_created_ = this->dir_->signal_file_created().connect(
         [this](auto a) { this->on_folder_content_changed(a); });
-    this->signal_file_changed = this->dir_->signal_file_changed().connect(
+    this->signal_file_changed_ = this->dir_->signal_file_changed().connect(
         [this](auto a) { this->on_folder_content_changed(a); });
-    this->signal_file_deleted = this->dir_->signal_file_deleted().connect(
+    this->signal_file_deleted_ = this->dir_->signal_file_deleted().connect(
         [this](auto a) { this->on_folder_content_changed(a); });
 
     this->update_model();
 
-    this->run_event<spacefm::signal::chdir_after>();
-    this->run_event<spacefm::signal::change_content>();
-    this->run_event<spacefm::signal::change_sel>();
+    this->signal_chdir_after_.emit(this);
+    this->signal_change_content_.emit(this);
+    this->signal_change_selection_.emit(this);
 
     if (this->side_dir)
     {
@@ -1147,7 +1146,7 @@ on_folder_view_item_sel_change_idle(ptk::browser* browser) noexcept
 
     std::ranges::for_each(selected_files, gtk_tree_path_free);
 
-    browser->run_event<spacefm::signal::change_sel>();
+    browser->signal_change_selection().emit(browser);
     browser->sel_change_idle_ = 0;
     return false;
 }
@@ -1319,8 +1318,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             /* open in new tab if its a directory */
             if (file->is_directory())
             {
-                browser->run_event<spacefm::signal::open_item>(file->path(),
-                                                               ptk::browser::open_action::new_tab);
+                browser->signal_open_file().emit(browser,
+                                                 file->path(),
+                                                 ptk::browser::open_action::new_tab);
             }
             ret = true;
         }
@@ -2492,9 +2492,9 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser
                     const auto file_path = ptk::view::dir_tree::dir_path(model, &it);
                     if (file_path)
                     {
-                        browser->run_event<spacefm::signal::open_item>(
-                            file_path.value(),
-                            ptk::browser::open_action::new_tab);
+                        browser->signal_open_file().emit(browser,
+                                                         file_path.value(),
+                                                         ptk::browser::open_action::new_tab);
                     }
                 }
             }
@@ -2613,7 +2613,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    // this->run_event<spacefm::signal::chdir_before>();
+    this->signal_chdir_before_.emit(this);
 
     this->update_selection_history();
 
@@ -2650,12 +2650,12 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 
     // load new dir
 
-    this->signal_file_listed.disconnect();
+    this->signal_file_listed_.disconnect();
     this->dir_ = vfs::dir::create(path, this->settings_);
 
-    this->run_event<spacefm::signal::chdir_begin>();
+    this->signal_chdir_begin_.emit(this);
 
-    this->signal_file_listed =
+    this->signal_file_listed_ =
         this->dir_->signal_file_listed().connect([this]() { this->on_dir_file_listed(); });
 
     if (this->dir_->is_loaded())
@@ -3040,7 +3040,7 @@ ptk::browser::refresh(const bool update_selected_files) noexcept
     this->update_model();
 
     // begin reload dir
-    this->run_event<spacefm::signal::chdir_begin>();
+    this->signal_chdir_begin_.emit(this);
 
     this->dir_->refresh();
 }
@@ -3058,7 +3058,7 @@ ptk::browser::show_hidden_files(bool show) noexcept
     {
         this->update_model();
 
-        this->run_event<spacefm::signal::change_sel>();
+        this->signal_change_selection_.emit(this);
     }
 
     if (this->side_dir)
@@ -3075,12 +3075,11 @@ ptk::browser::new_tab() noexcept
 
     if (!std::filesystem::is_directory(vfs::user::home()))
     {
-        this->run_event<spacefm::signal::open_item>("/", ptk::browser::open_action::new_tab);
+        this->signal_open_file_.emit(this, "/", ptk::browser::open_action::new_tab);
     }
     else
     {
-        this->run_event<spacefm::signal::open_item>(vfs::user::home(),
-                                                    ptk::browser::open_action::new_tab);
+        this->signal_open_file_.emit(this, vfs::user::home(), ptk::browser::open_action::new_tab);
     }
 }
 
@@ -3096,11 +3095,11 @@ ptk::browser::new_tab_here() noexcept
     }
     if (!std::filesystem::is_directory(dir_path))
     {
-        this->run_event<spacefm::signal::open_item>("/", ptk::browser::open_action::new_tab);
+        this->signal_open_file_.emit(this, "/", ptk::browser::open_action::new_tab);
     }
     else
     {
-        this->run_event<spacefm::signal::open_item>(dir_path, ptk::browser::open_action::new_tab);
+        this->signal_open_file_.emit(this, dir_path, ptk::browser::open_action::new_tab);
     }
 }
 
@@ -4397,7 +4396,7 @@ ptk::browser::focus(const ptk::browser::focus_widget item) noexcept
 void
 ptk::browser::focus_me() noexcept
 {
-    this->run_event<spacefm::signal::change_pane>();
+    this->signal_change_pane_.emit(this);
 }
 
 void
@@ -5628,7 +5627,7 @@ ptk::browser::focus_folder_view() noexcept
 {
     gtk_widget_grab_focus(GTK_WIDGET(this->folder_view_));
 
-    this->run_event<spacefm::signal::change_pane>();
+    this->signal_change_pane_.emit(this);
 }
 
 bool

@@ -36,7 +36,6 @@
 #include "vfs/vfs-dir.hxx"
 
 #include "logger.hxx"
-#include "signals.hxx"
 #include "types.hxx"
 
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))
@@ -304,126 +303,65 @@ struct browser
 
     // Signals
 
-    template<spacefm::signal evt, typename bind_fun>
-    sigc::connection
-    add_event(bind_fun fun) noexcept
+    [[nodiscard]] auto
+    signal_chdir_before()
     {
-        logger::trace<logger::domain::signals>("Connect({}): {}",
-                                               logger::utils::ptr(this),
-                                               magic_enum::enum_name(evt));
-
-        if constexpr (evt == spacefm::signal::chdir_before)
-        {
-            return this->evt_chdir_before.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::chdir_begin)
-        {
-            return this->evt_chdir_begin.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::chdir_after)
-        {
-            return this->evt_chdir_after.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::open_item)
-        {
-            return this->evt_open_file.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::change_content)
-        {
-            return this->evt_change_content.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::change_sel)
-        {
-            return this->evt_change_sel.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::change_pane)
-        {
-            return this->evt_change_pane_mode.connect(fun);
-        }
-        else
-        {
-            static_assert(always_false<bind_fun>::value, "Unsupported signal type");
-        }
+        return this->signal_chdir_before_;
     }
 
-    template<spacefm::signal evt, typename... Args>
-    void
-    run_event(Args&&... args) noexcept
+    [[nodiscard]] auto
+    signal_chdir_begin()
     {
-        logger::trace<logger::domain::signals>("Execute({}): {}",
-                                               logger::utils::ptr(this),
-                                               magic_enum::enum_name(evt));
+        return this->signal_chdir_begin_;
+    }
 
-        if constexpr (evt == spacefm::signal::chdir_before)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_chdir_before.emit(this);
-        }
-        else if constexpr (evt == spacefm::signal::chdir_begin)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_chdir_begin.emit(this);
-        }
-        else if constexpr (evt == spacefm::signal::chdir_after)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_chdir_after.emit(this);
-        }
-        else if constexpr (evt == spacefm::signal::open_item)
-        {
-            static_assert(
-                sizeof...(args) == 2 &&
-                std::is_constructible_v<
-                    std::filesystem::path,
-                    std::decay_t<typename std::tuple_element<0, std::tuple<Args...>>::type>> &&
-                std::is_same_v<
-                    ptk::browser::open_action,
-                    std::decay_t<typename std::tuple_element<1, std::tuple<Args...>>::type>>);
-            this->evt_open_file.emit(this, std::forward<Args>(args)...);
-        }
-        else if constexpr (evt == spacefm::signal::change_content)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_change_content.emit(this);
-        }
-        else if constexpr (evt == spacefm::signal::change_sel)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_change_sel.emit(this);
-        }
-        else if constexpr (evt == spacefm::signal::change_pane)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_change_pane_mode.emit(this);
-        }
-        else
-        {
-            static_assert(always_false<decltype(evt)>::value,
-                          "Unsupported signal type or incorrect number of arguments.");
-        }
+    [[nodiscard]] auto
+    signal_chdir_after()
+    {
+        return this->signal_chdir_after_;
+    }
+
+    [[nodiscard]] auto
+    signal_open_file()
+    {
+        return this->signal_open_file_;
+    }
+
+    [[nodiscard]] auto
+    signal_change_content()
+    {
+        return this->signal_change_content_;
+    }
+
+    [[nodiscard]] auto
+    signal_change_selection()
+    {
+        return this->signal_change_selection_;
+    }
+
+    [[nodiscard]] auto
+    signal_change_pane()
+    {
+        return this->signal_change_pane_;
     }
 
   private:
     // Signals
-    template<typename T> struct always_false : std::false_type
-    {
-    };
-
-    sigc::signal<void(ptk::browser*)> evt_chdir_before;
-    sigc::signal<void(ptk::browser*)> evt_chdir_begin;
-    sigc::signal<void(ptk::browser*)> evt_chdir_after;
+    sigc::signal<void(ptk::browser*)> signal_chdir_before_;
+    sigc::signal<void(ptk::browser*)> signal_chdir_begin_;
+    sigc::signal<void(ptk::browser*)> signal_chdir_after_;
     sigc::signal<void(ptk::browser*, const std::filesystem::path&, ptk::browser::open_action)>
-        evt_open_file;
-    sigc::signal<void(ptk::browser*)> evt_change_content;
-    sigc::signal<void(ptk::browser*)> evt_change_sel;
-    sigc::signal<void(ptk::browser*)> evt_change_pane_mode;
+        signal_open_file_;
+    sigc::signal<void(ptk::browser*)> signal_change_content_;
+    sigc::signal<void(ptk::browser*)> signal_change_selection_;
+    sigc::signal<void(ptk::browser*)> signal_change_pane_;
 
   public:
     // Signals we connect to
-    sigc::connection signal_file_created;
-    sigc::connection signal_file_deleted;
-    sigc::connection signal_file_changed;
-    sigc::connection signal_file_listed;
+    sigc::connection signal_file_created_;
+    sigc::connection signal_file_deleted_;
+    sigc::connection signal_file_changed_;
+    sigc::connection signal_file_listed_;
 };
 } // namespace ptk
 

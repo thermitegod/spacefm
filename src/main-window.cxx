@@ -1789,23 +1789,15 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 
     gtk_widget_show(GTK_WIDGET(browser));
 
-    browser->add_event<spacefm::signal::chdir_before>(
-        std::bind(&MainWindow::on_browser_before_chdir, this, std::placeholders::_1));
-    browser->add_event<spacefm::signal::chdir_begin>(
-        std::bind(&MainWindow::on_browser_begin_chdir, this, std::placeholders::_1));
-    browser->add_event<spacefm::signal::chdir_after>(
-        std::bind(&MainWindow::on_browser_after_chdir, this, std::placeholders::_1));
-    browser->add_event<spacefm::signal::open_item>(std::bind(&MainWindow::on_browser_open_item,
-                                                             this,
-                                                             std::placeholders::_1,
-                                                             std::placeholders::_2,
-                                                             std::placeholders::_3));
-    browser->add_event<spacefm::signal::change_content>(
-        std::bind(&MainWindow::on_browser_content_change, this, std::placeholders::_1));
-    browser->add_event<spacefm::signal::change_sel>(
-        std::bind(&MainWindow::on_browser_sel_change, this, std::placeholders::_1));
-    browser->add_event<spacefm::signal::change_pane>(
-        std::bind(&MainWindow::on_browser_panel_change, this, std::placeholders::_1));
+    browser->signal_chdir_before().connect([this](auto a) { this->on_browser_before_chdir(a); });
+    browser->signal_chdir_begin().connect([this](auto a) { this->on_browser_begin_chdir(a); });
+    browser->signal_chdir_after().connect([this](auto a) { this->on_browser_after_chdir(a); });
+    browser->signal_open_file().connect([this](auto a, auto b, auto c)
+                                        { this->on_browser_open_item(a, b, c); });
+    browser->signal_change_content().connect([this](auto a)
+                                             { this->on_browser_content_change(a); });
+    browser->signal_change_selection().connect([this](auto a) { this->on_browser_sel_change(a); });
+    browser->signal_change_pane().connect([this](auto a) { this->on_browser_panel_change(a); });
 
     GtkWidget* tab_label = this->create_tab_label(browser);
     const i32 idx =

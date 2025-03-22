@@ -370,8 +370,10 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     {
         if (xset_get_b(xset::name::dev_newtab))
         {
-            browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                           ptk::browser::open_action::new_tab);
+            browser->signal_open_file().emit(browser,
+                                             vol->mount_point(),
+                                             ptk::browser::open_action::new_tab);
+
             ptk::view::location::chdir(view, browser->cwd());
         }
         else
@@ -868,7 +870,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
                 ptk::browser* browser = ao->browser;
                 if (GTK_IS_WIDGET(browser))
                 {
-                    browser->run_event<spacefm::signal::open_item>(volume->mount_point(), ao->job);
+                    browser->signal_open_file().emit(browser, volume->mount_point(), ao->job);
                 }
                 else
                 {
@@ -1006,8 +1008,9 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     }
     else
     {
-        browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                       ptk::browser::open_action::new_tab);
+        browser->signal_open_file().emit(browser,
+                                         vol->mount_point(),
+                                         ptk::browser::open_action::new_tab);
     }
 }
 
@@ -1079,8 +1082,9 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     else if (browser)
     {
-        browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                       ptk::browser::open_action::dir);
+        browser->signal_open_file().emit(browser,
+                                         vol->mount_point(),
+                                         ptk::browser::open_action::dir);
     }
     else
     {

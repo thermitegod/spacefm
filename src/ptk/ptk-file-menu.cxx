@@ -2035,9 +2035,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
 
             if (data->browser)
             {
-                data->browser->run_event<spacefm::signal::open_item>(
-                    path,
-                    ptk::browser::open_action::new_tab);
+                data->browser->signal_open_file().emit(data->browser,
+                                                       path,
+                                                       ptk::browser::open_action::new_tab);
             }
             break;
         }
@@ -2055,9 +2055,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             }
             if (data->browser)
             {
-                data->browser->run_event<spacefm::signal::open_item>(
-                    path,
-                    ptk::browser::open_action::new_tab);
+                data->browser->signal_open_file().emit(data->browser,
+                                                       path,
+                                                       ptk::browser::open_action::new_tab);
             }
         }
         break;
@@ -2217,9 +2217,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             if (data->browser)
             {
                 const std::filesystem::path path = "/usr/share/mime/packages";
-                data->browser->run_event<spacefm::signal::open_item>(
-                    path,
-                    ptk::browser::open_action::new_tab);
+                data->browser->signal_open_file().emit(data->browser,
+                                                       path,
+                                                       ptk::browser::open_action::new_tab);
             }
             break;
         }
@@ -2230,9 +2230,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
             {
-                data->browser->run_event<spacefm::signal::open_item>(
-                    path,
-                    ptk::browser::open_action::new_tab);
+                data->browser->signal_open_file().emit(data->browser,
+                                                       path,
+                                                       ptk::browser::open_action::new_tab);
             }
             vfs::mime_monitor();
             break;
@@ -2555,16 +2555,17 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
         {
             if (data->browser && std::filesystem::is_directory(file->path()))
             {
-                data->browser->run_event<spacefm::signal::open_item>(
-                    file->path(),
-                    ptk::browser::open_action::new_tab);
+                data->browser->signal_open_file().emit(data->browser,
+                                                       file->path(),
+                                                       ptk::browser::open_action::new_tab);
             }
         }
     }
     else if (data->browser)
     {
-        data->browser->run_event<spacefm::signal::open_item>(data->cwd,
-                                                             ptk::browser::open_action::new_tab);
+        data->browser->signal_open_file().emit(data->browser,
+                                               data->cwd,
+                                               ptk::browser::open_action::new_tab);
     }
 }
 
@@ -2574,8 +2575,9 @@ on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data) noexc
     (void)menuitem;
     if (data->browser && std::filesystem::is_directory(data->cwd))
     {
-        data->browser->run_event<spacefm::signal::open_item>(data->file_path,
-                                                             ptk::browser::open_action::new_tab);
+        data->browser->signal_open_file().emit(data->browser,
+                                               data->file_path,
+                                               ptk::browser::open_action::new_tab);
     }
 }
 

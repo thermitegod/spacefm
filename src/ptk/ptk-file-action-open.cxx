@@ -171,8 +171,9 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             Glib::spawn_command_line_async(file->path());
             if (browser)
             {
-                browser->run_event<spacefm::signal::open_item>(file->path(),
-                                                               ptk::browser::open_action::file);
+                browser->signal_open_file().emit(browser,
+                                                 file->path(),
+                                                 ptk::browser::open_action::file);
             }
             continue;
         }
@@ -285,15 +286,15 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
     {
         if (dirs_to_open.size() == 1)
         {
-            browser->run_event<spacefm::signal::open_item>(dirs_to_open.front(),
-                                                           ptk::browser::open_action::dir);
+            browser->signal_open_file().emit(browser,
+                                             dirs_to_open.front(),
+                                             ptk::browser::open_action::dir);
         }
         else
         {
             for (const auto& dir : dirs_to_open)
             {
-                browser->run_event<spacefm::signal::open_item>(dir,
-                                                               ptk::browser::open_action::new_tab);
+                browser->signal_open_file().emit(browser, dir, ptk::browser::open_action::new_tab);
             }
         }
     }
