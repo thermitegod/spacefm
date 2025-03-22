@@ -795,9 +795,9 @@ ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
     {
         g_list_free(this->files);
 
+        this->signal_file_changed.disconnect();
         this->signal_file_created.disconnect();
         this->signal_file_deleted.disconnect();
-        this->signal_file_changed.disconnect();
         this->signal_file_thumbnail_loaded.disconnect();
     }
 
@@ -808,12 +808,12 @@ ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
         return;
     }
 
-    this->signal_file_created = this->dir->add_event<spacefm::signal::file_created>(
-        std::bind(&ptk::file_list::on_file_list_file_created, this, std::placeholders::_1));
-    this->signal_file_deleted = this->dir->add_event<spacefm::signal::file_deleted>(
-        std::bind(&ptk::file_list::on_file_list_file_deleted, this, std::placeholders::_1));
-    this->signal_file_changed = this->dir->add_event<spacefm::signal::file_changed>(
-        std::bind(&ptk::file_list::on_file_list_file_changed, this, std::placeholders::_1));
+    this->signal_file_changed = this->dir->signal_file_changed().connect(
+        [this](auto f) { this->on_file_list_file_changed(f); });
+    this->signal_file_created = this->dir->signal_file_created().connect(
+        [this](auto f) { this->on_file_list_file_created(f); });
+    this->signal_file_deleted = this->dir->signal_file_deleted().connect(
+        [this](auto f) { this->on_file_list_file_deleted(f); });
 
     for (const auto& file : new_dir->files())
     {
@@ -1013,11 +1013,8 @@ ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
         return;
     }
 
-    this->signal_file_thumbnail_loaded =
-        this->dir->add_event<spacefm::signal::file_thumbnail_loaded>(
-            std::bind(&ptk::file_list::on_file_list_file_thumbnail_loaded,
-                      this,
-                      std::placeholders::_1));
+    this->signal_file_thumbnail_loaded = this->dir->signal_thumbnail_loaded().connect(
+        [this](auto f) { this->on_file_list_file_thumbnail_loaded(f); });
 
     for (GList* l = this->files; l; l = g_list_next(l))
     {

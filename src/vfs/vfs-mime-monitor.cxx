@@ -115,10 +115,10 @@ vfs::mime_monitor() noexcept
     global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path, nullptr));
 
     // logger::debug<logger::domain::vfs>("MIME-UPDATE watch started");
-    global::user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
-        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
-    global::user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(
-        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
-    global::user_mime_monitor->dir->add_event<spacefm::signal::file_deleted>(
-        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
+    global::user_mime_monitor->dir->signal_file_created().connect(
+        [](auto f) { mime_monitor::on_mime_change(f); });
+    global::user_mime_monitor->dir->signal_file_changed().connect(
+        [](auto f) { mime_monitor::on_mime_change(f); });
+    global::user_mime_monitor->dir->signal_file_deleted().connect(
+        [](auto f) { mime_monitor::on_mime_change(f); });
 }

@@ -1059,15 +1059,15 @@ ptk::browser::on_dir_file_listed() noexcept
     this->n_selected_files_ = 0;
 
     this->signal_file_created.disconnect();
-    this->signal_file_deleted.disconnect();
     this->signal_file_changed.disconnect();
+    this->signal_file_deleted.disconnect();
 
-    this->signal_file_created = this->dir_->add_event<spacefm::signal::file_created>(
-        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
-    this->signal_file_deleted = this->dir_->add_event<spacefm::signal::file_deleted>(
-        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
-    this->signal_file_changed = this->dir_->add_event<spacefm::signal::file_changed>(
-        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
+    this->signal_file_created = this->dir_->signal_file_created().connect(
+        [this](auto a) { this->on_folder_content_changed(a); });
+    this->signal_file_changed = this->dir_->signal_file_changed().connect(
+        [this](auto a) { this->on_folder_content_changed(a); });
+    this->signal_file_deleted = this->dir_->signal_file_deleted().connect(
+        [this](auto a) { this->on_folder_content_changed(a); });
 
     this->update_model();
 
@@ -2655,8 +2655,9 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 
     this->run_event<spacefm::signal::chdir_begin>();
 
-    this->signal_file_listed = this->dir_->add_event<spacefm::signal::file_listed>(
-        std::bind(&ptk::browser::on_dir_file_listed, this));
+    this->signal_file_listed =
+        this->dir_->signal_file_listed().connect([this]() { this->on_dir_file_listed(); });
+
     if (this->dir_->is_loaded())
     {
         // TODO - if the dir is loaded from cache then it will not run the file_listed signal.

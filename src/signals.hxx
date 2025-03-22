@@ -21,14 +21,6 @@ namespace spacefm
 {
 enum class signal : std::uint8_t
 {
-    // vfs::dir
-    file_created,
-    file_changed,
-    file_deleted,
-    file_listed,
-    file_thumbnail_loaded,
-    // file_load_complete,
-
     // vfs::file_task
     task_finish,
 

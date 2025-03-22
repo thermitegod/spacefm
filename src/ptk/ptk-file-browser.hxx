@@ -36,6 +36,7 @@
 #include "vfs/vfs-dir.hxx"
 
 #include "logger.hxx"
+#include "signals.hxx"
 #include "types.hxx"
 
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))

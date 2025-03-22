@@ -54,13 +54,11 @@ vfs::dir::~dir() noexcept
 
     this->shutdown_ = true;
 
-    this->signal_task_load_dir.disconnect();
-
-    this->evt_file_created.clear();
-    this->evt_file_changed.clear();
-    this->evt_file_deleted.clear();
-    this->evt_file_listed.clear();
-    this->evt_file_thumbnail_loaded.clear();
+    this->signal_file_created_.clear();
+    this->signal_file_changed_.clear();
+    this->signal_file_deleted_.clear();
+    this->signal_file_listed_.clear();
+    this->signal_file_thumbnail_loaded_.clear();
 
     this->executor_result_.get().get();
 }
@@ -216,7 +214,7 @@ vfs::dir::load_thread() noexcept
         }
     }
 
-    this->run_event<spacefm::signal::file_listed>();
+    this->signal_file_listed_.emit();
 
     this->load_complete_ = true;
     this->load_complete_initial_ = true;
@@ -404,7 +402,7 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
                                this->files_.end());
             if (file)
             {
-                this->run_event<spacefm::signal::file_deleted>(file);
+                this->signal_file_deleted_.emit(file);
             }
         }
     }
@@ -445,7 +443,7 @@ vfs::dir::update_changed_files() noexcept
     {
         if (this->update_file_info(file))
         {
-            this->run_event<spacefm::signal::file_changed>(file);
+            this->signal_file_changed_.emit(file);
         }
         // else was deleted, signaled, and unrefed in update_file_info
     }
@@ -482,7 +480,7 @@ vfs::dir::update_created_files() noexcept
                 const auto file = vfs::file::create(full_path, this->settings_);
                 this->files_.push_back(file);
 
-                this->run_event<spacefm::signal::file_created>(file);
+                this->signal_file_created_.emit(file);
             }
             // else file does not exist in filesystem
         }
@@ -491,7 +489,7 @@ vfs::dir::update_created_files() noexcept
             // file already exists in dir this->files_
             if (this->update_file_info(file_found))
             {
-                this->run_event<spacefm::signal::file_changed>(file_found);
+                this->signal_file_changed_.emit(file_found);
             }
             // else was deleted, signaled, and unrefed in update_file_info
         }
@@ -553,7 +551,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
         /* clear the whole list */
         this->files_.clear();
 
-        this->run_event<spacefm::signal::file_deleted>(nullptr);
+        this->signal_file_deleted_.emit(nullptr);
 
         return;
     }
@@ -590,7 +588,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
     if (path == this->path_)
     {
         // Special Case: The directory itself was changed
-        this->run_event<spacefm::signal::file_changed>(nullptr);
+        this->signal_file_changed_.emit(nullptr);
         return;
     }
 
@@ -613,7 +611,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 
                 this->notify_file_change(std::chrono::milliseconds(500));
 
-                this->run_event<spacefm::signal::file_changed>(file_found);
+                this->signal_file_changed_.emit(file_found);
             }
         }
     }
@@ -631,6 +629,6 @@ vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 
     if (std::ranges::contains(this->files_, file))
     {
-        this->run_event<spacefm::signal::file_thumbnail_loaded>(file);
+        this->signal_file_thumbnail_loaded_.emit(file);
     }
 }

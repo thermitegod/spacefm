@@ -37,8 +37,6 @@
 #include "vfs/vfs-thumbnailer.hxx"
 
 #include "concurrency.hxx"
-#include "logger.hxx"
-#include "signals.hxx"
 
 namespace vfs
 {
@@ -158,103 +156,42 @@ class dir final : public std::enable_shared_from_this<dir>
   public:
     // Signals
 
-    template<spacefm::signal evt, typename bind_fun>
-    sigc::connection
-    add_event(const bind_fun& fun) noexcept
+    [[nodiscard]] auto
+    signal_file_changed()
     {
-        logger::trace<logger::domain::signals>("Connect({}): {}",
-                                               logger::utils::ptr(this),
-                                               magic_enum::enum_name(evt));
-
-        if constexpr (evt == spacefm::signal::file_created)
-        {
-            return this->evt_file_created.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::file_changed)
-        {
-            return this->evt_file_changed.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::file_deleted)
-        {
-            return this->evt_file_deleted.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::file_listed)
-        {
-            return this->evt_file_listed.connect(fun);
-        }
-        else if constexpr (evt == spacefm::signal::file_thumbnail_loaded)
-        {
-            return this->evt_file_thumbnail_loaded.connect(fun);
-        }
-        else
-        {
-            static_assert(always_false<bind_fun>::value, "Unsupported signal type");
-        }
+        return this->signal_file_changed_;
     }
 
-    template<spacefm::signal evt, typename... Args>
-    void
-    run_event(Args&&... args) noexcept
+    [[nodiscard]] auto
+    signal_file_created()
     {
-        logger::trace<logger::domain::signals>("Execute({}): {}",
-                                               logger::utils::ptr(this),
-                                               magic_enum::enum_name(evt));
+        return this->signal_file_created_;
+    }
 
-        if constexpr (evt == spacefm::signal::file_created)
-        {
-            static_assert(sizeof...(args) == 1 &&
-                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
-                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
-            this->evt_file_created.emit(std::forward<Args>(args)...);
-        }
-        else if constexpr (evt == spacefm::signal::file_changed)
-        {
-            static_assert(sizeof...(args) == 1 &&
-                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
-                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
-            this->evt_file_changed.emit(std::forward<Args>(args)...);
-        }
-        else if constexpr (evt == spacefm::signal::file_deleted)
-        {
-            static_assert(sizeof...(args) == 1 &&
-                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
-                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
-            this->evt_file_deleted.emit(std::forward<Args>(args)...);
-        }
-        else if constexpr (evt == spacefm::signal::file_listed)
-        {
-            static_assert(sizeof...(args) == 0);
-            this->evt_file_listed.emit(std::forward<Args>(args)...);
-        }
-        else if constexpr (evt == spacefm::signal::file_thumbnail_loaded)
-        {
-            static_assert(sizeof...(args) == 1 &&
-                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
-                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
-            this->evt_file_thumbnail_loaded.emit(std::forward<Args>(args)...);
-        }
-        else
-        {
-            static_assert(always_false<decltype(evt)>::value,
-                          "Unsupported signal type or incorrect number of arguments.");
-        }
+    [[nodiscard]] auto
+    signal_file_deleted()
+    {
+        return this->signal_file_deleted_;
+    }
+
+    [[nodiscard]] auto
+    signal_file_listed()
+    {
+        return this->signal_file_listed_;
+    }
+
+    [[nodiscard]] auto
+    signal_thumbnail_loaded()
+    {
+        return this->signal_file_thumbnail_loaded_;
     }
 
   private:
     // Signals
-    template<typename T> struct always_false : std::false_type
-    {
-    };
-
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_created;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_changed;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_deleted;
-    sigc::signal<void()> evt_file_listed;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_thumbnail_loaded;
-
-  public:
-    // private:
-    // Signals we connect to
-    sigc::connection signal_task_load_dir;
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_created_;
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_changed_;
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_deleted_;
+    sigc::signal<void()> signal_file_listed_;
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
 };
 } // namespace vfs
