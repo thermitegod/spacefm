@@ -117,5 +117,32 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
             REQUIRE_EQ(result.extension, ".txt");
             REQUIRE_EQ(result.is_multipart_extension, false);
         }
+
+        SUBCASE("hidden")
+        {
+            const auto result = vfs::utils::split_basename_extension(".hidden");
+
+            REQUIRE_EQ(result.basename, ".hidden");
+            REQUIRE_EQ(result.extension, "");
+            REQUIRE_EQ(result.is_multipart_extension, false);
+        }
+
+        SUBCASE("hidden single extension")
+        {
+            const auto result = vfs::utils::split_basename_extension(".hidden.txt");
+
+            REQUIRE_EQ(result.basename, ".hidden");
+            REQUIRE_EQ(result.extension, ".txt");
+            REQUIRE_EQ(result.is_multipart_extension, false);
+        }
+
+        SUBCASE("hidden multiple extension")
+        {
+            const auto result = vfs::utils::split_basename_extension(".hidden.tar.zst");
+
+            REQUIRE_EQ(result.basename, ".hidden");
+            REQUIRE_EQ(result.extension, ".tar.zst");
+            REQUIRE_EQ(result.is_multipart_extension, true);
+        }
     }
 }

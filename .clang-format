@@ -146,7 +146,7 @@ IfMacros:
 IncludeBlocks:   Regroup
 IncludeCategories:
   # C
-  - Regex: '^<(cassert|csignal|cstdint|cmath|cstring)>'
+  - Regex: '^<(cassert|csignal|cstdint|cmath|cstring|cstdlib|cctype)>'
     Priority: 2
   # STL
   - Regex: '^<[^.]*>$'

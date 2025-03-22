@@ -606,26 +606,16 @@ static i32
 compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
                   ptk::file_list* list) noexcept
 {
-    i32 result = 0;
-    // by display name
     if (list->sort_natural)
     {
         // natural
-        if (list->sort_case)
-        {
-            result = strnatcmp(a->name(), b->name());
-        }
-        else
-        {
-            result = strnatcasecmp(a->name(), b->name());
-        }
+        return strnatcmp(a->name(), b->name(), list->sort_case);
     }
     else
     {
         // non-natural
-        result = a->name().compare(b->name());
+        return a->name().compare(b->name());
     }
-    return result;
 }
 
 static i32
@@ -641,7 +631,7 @@ compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
                   ptk::file_list* list) noexcept
 {
     (void)list;
-    return a->mime_type()->description().compare(b->mime_type()->description());
+    return a->mime_type()->type().compare(b->mime_type()->type());
 }
 
 static i32
@@ -765,8 +755,7 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
     }(list->files);
 
     std::ranges::sort(
-        file_list.begin(),
-        file_list.end(),
+        file_list,
         [&list](const auto& a, const auto& b)
         { return compare_file(a, b, list, compare_function_ptr_table.at(list->sort_col)) < 0; });
 

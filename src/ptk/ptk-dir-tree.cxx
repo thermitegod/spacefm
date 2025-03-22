@@ -508,7 +508,7 @@ ptk::dir_tree::node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
     {
         return 0;
     }
-    return strnatcasecmp(file2->name(), file1->name());
+    return strnatcmp(file2->name(), file1->name(), false);
 }
 
 void
@@ -520,7 +520,7 @@ ptk::dir_tree::insert_child(const std::shared_ptr<ptk::dir_tree::node>& parent_n
         ptk::dir_tree::node::create(this, parent_node, file_path);
     for (node = parent_node->children; node; node = node->next)
     {
-        if (this->node_compare(child_node, node) >= 0)
+        if (ptk::dir_tree::node_compare(child_node, node) >= 0)
         {
             break;
         }

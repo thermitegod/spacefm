@@ -23,5 +23,5 @@
 
 #include <ztd/ztd.hxx>
 
-[[nodiscard]] i32 strnatcmp(const std::string_view a, const std::string_view b) noexcept;
-[[nodiscard]] i32 strnatcasecmp(const std::string_view a, const std::string_view b) noexcept;
+[[nodiscard]] i32 strnatcmp(const std::string_view lhs, const std::string_view rhs,
+                            const bool fold_case = false) noexcept;
