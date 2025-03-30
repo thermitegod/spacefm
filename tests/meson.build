@@ -12,6 +12,8 @@ test_sources += files(
     'spacefm/concurrency.cxx',
     'spacefm/types.cxx',
 
+    'spacefm/utils/permissions.cxx',
+
     # Settings
     'spacefm/settings/settings.cxx',
 
@@ -29,6 +31,8 @@ test_sources += files(
 # Test Source Files
 test_sources += files(
     'src/main.cxx',
+
+    'src/utils/test-permissions.cxx',
 
     # SFM
     'src/base/test-types.cxx',

@@ -28,7 +28,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/misc.hxx"
+#include "utils/permissions.hxx"
 
 #include "xset/xset.hxx"
 
@@ -67,7 +67,8 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
     const bool extract_here = xset_get_b(xset::name::archive_default_extract);
 
     // determine default archive action in this dir
-    if (extract_here && ::utils::have_rw_access(parent->cwd))
+    if (extract_here &&
+        (::utils::has_read_permission(parent->cwd) && ::utils::has_write_permission(parent->cwd)))
     {
         // Extract Here
         ptk::archiver::extract(parent->browser, selected_files, parent->cwd);

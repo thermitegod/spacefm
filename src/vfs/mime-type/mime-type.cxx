@@ -31,7 +31,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/misc.hxx"
+#include "utils/permissions.hxx"
 
 #include "vfs/mime-type/chrome/mime-utils.hxx"
 #include "vfs/mime-type/mime-type.hxx"
@@ -78,7 +78,7 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
     }
 
     /* Check for executable file */
-    if (::utils::have_x_access(path))
+    if (::utils::has_execute_permission(path))
     {
         return vfs::constants::mime_type::executable.data();
     }

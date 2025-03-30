@@ -53,7 +53,7 @@
 
 #include "datatypes/datatypes.hxx"
 
-#include "utils/misc.hxx"
+#include "utils/permissions.hxx"
 #include "utils/shell-quote.hxx"
 #include "utils/strdup.hxx"
 
@@ -2595,7 +2595,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    if (!::utils::have_x_access(path))
+    if (!::utils::check_directory_permissions(path))
     {
         if (!this->inhibit_focus_)
         {

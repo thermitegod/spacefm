@@ -13,12 +13,38 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include <filesystem>
 
-namespace utils
+#include <ztd/ztd.hxx>
+
+#include "utils/permissions.hxx"
+
+bool
+utils::has_execute_permission(const std::filesystem::path& path) noexcept
 {
-bool have_rw_access(const std::filesystem::path& path) noexcept;
-bool have_x_access(const std::filesystem::path& path) noexcept;
-} // namespace utils
+    if (!std::filesystem::exists(path))
+    {
+        return false;
+    }
+
+    const auto stat = ztd::stat::create(path);
+    if (!stat)
+    {
+        return false;
+    }
+
+    const auto uid = getuid();
+    const auto gid = getgid();
+
+    if (stat->uid() == uid)
+    {
+        return stat->mode() & S_IXUSR;
+    }
+
+    if (stat->gid() == gid)
+    {
+        return stat->mode() & S_IXGRP;
+    }
+
+    return stat->mode() & S_IXOTH;
+}

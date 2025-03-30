@@ -483,9 +483,9 @@ sources += files(
 
     'src/settings/upgrade/config-upgrade.cxx',
 
+    'src/utils/permissions.cxx',
     'src/utils/shell-quote.cxx',
     'src/utils/strdup.cxx',
-    'src/utils/misc.cxx',
 
     'src/ptk/ptk-app-chooser.cxx',
     'src/ptk/ptk-archiver.cxx',

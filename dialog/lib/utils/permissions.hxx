@@ -19,6 +19,5 @@
 
 namespace utils
 {
-bool have_rw_access(const std::filesystem::path& path) noexcept;
-bool have_x_access(const std::filesystem::path& path) noexcept;
+[[nodiscard]] bool has_execute_permission(const std::filesystem::path& path) noexcept;
 } // namespace utils

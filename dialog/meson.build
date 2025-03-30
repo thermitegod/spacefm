@@ -2,7 +2,7 @@
 sources_vfs = files(
     'lib/logger.cxx',
 
-    'lib/utils/misc.cxx',
+    'lib/utils/permissions.cxx',
 
     'lib/vfs/vfs-file.cxx',
     'lib/vfs/vfs-mime-type.cxx',
