@@ -603,119 +603,90 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 }
 
 static i32
-compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list) noexcept
+compare_files(const std::shared_ptr<vfs::file>& lhs, const std::shared_ptr<vfs::file>& rhs,
+              ptk::file_list* list) noexcept
 {
-    if (list->sort_natural)
-    {
-        // natural
-        return strnatcmp(a->name(), b->name(), list->sort_case);
-    }
-    else
-    {
-        // non-natural
-        return a->name().compare(b->name());
-    }
-}
+    i32 result{0};
 
-static i32
-compare_file_size(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list) noexcept
-{
-    (void)list;
-    return (a->size() > b->size()) ? 1 : ((a->size() == b->size()) ? 0 : -1);
-}
-
-static i32
-compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list) noexcept
-{
-    (void)list;
-    return a->mime_type()->type().compare(b->mime_type()->type());
-}
-
-static i32
-compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list) noexcept
-{
-    (void)list;
-    return a->mime_type()->description().compare(b->mime_type()->description());
-}
-
-static i32
-compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list) noexcept
-{
-    (void)list;
-    return a->display_permissions().compare(b->display_permissions());
-}
-
-static i32
-compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return a->display_owner().compare(b->display_owner());
-}
-
-static i32
-compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return a->display_group().compare(b->display_group());
-}
-
-static i32
-compare_file_atime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return (a->atime() > b->atime()) ? 1 : ((a->atime() == b->atime()) ? 0 : -1);
-}
-
-static i32
-compare_file_btime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return (a->btime() > b->btime()) ? 1 : ((a->btime() == b->btime()) ? 0 : -1);
-}
-
-static i32
-compare_file_ctime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return (a->ctime() > b->ctime()) ? 1 : ((a->ctime() == b->ctime()) ? 0 : -1);
-}
-
-static i32
-compare_file_mtime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list) noexcept
-{
-    (void)list;
-    return (a->mtime() > b->mtime()) ? 1 : ((a->mtime() == b->mtime()) ? 0 : -1);
-}
-
-using compare_function_t = std::function<i32(const std::shared_ptr<vfs::file>&,
-                                             const std::shared_ptr<vfs::file>&, ptk::file_list*)>;
-
-static i32
-compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-             ptk::file_list* list, const compare_function_t& func) noexcept
-{
-    // dirs before/after files
     if (list->sort_dir_ != ptk::file_list::sort_dir::mixed)
     {
-        const auto result = a->is_directory() - b->is_directory();
+        result = lhs->is_directory() - rhs->is_directory();
         if (result != 0)
         {
             return list->sort_dir_ == ptk::file_list::sort_dir::first ? -result : result;
         }
     }
 
-    const auto result = func(a, b, list);
+    switch (list->sort_col)
+    {
+        case ptk::file_list::column::name:
+        {
+            if (list->sort_natural)
+            {
+                result = strnatcmp(lhs->name(), rhs->name(), list->sort_case);
+            }
+            else
+            {
+                result = lhs->name().compare(rhs->name());
+            }
+            break;
+        }
+        case ptk::file_list::column::size:
+        case ptk::file_list::column::bytes:
+        {
+            result = (lhs->size() > rhs->size()) ? 1 : (lhs->size() == rhs->size()) ? 0 : -1;
+            break;
+        }
+        case ptk::file_list::column::type:
+        {
+            result = lhs->mime_type()->type().compare(rhs->mime_type()->type());
+            break;
+        }
+        case ptk::file_list::column::mime:
+        {
+            result = lhs->mime_type()->description().compare(rhs->mime_type()->description());
+            break;
+        }
+        case ptk::file_list::column::perm:
+        {
+            result = lhs->display_permissions().compare(rhs->display_permissions());
+            break;
+        }
+        case ptk::file_list::column::owner:
+        {
+            result = lhs->display_owner().compare(rhs->display_owner());
+            break;
+        }
+        case ptk::file_list::column::group:
+        {
+            result = lhs->display_group().compare(rhs->display_group());
+            break;
+        }
+        case ptk::file_list::column::atime:
+        {
+            result = (lhs->atime() > rhs->atime()) ? 1 : (lhs->atime() == rhs->atime()) ? 0 : -1;
+            break;
+        }
+        case ptk::file_list::column::btime:
+        {
+            result = (lhs->btime() > rhs->btime()) ? 1 : (lhs->btime() == rhs->btime()) ? 0 : -1;
+            break;
+        }
+        case ptk::file_list::column::ctime:
+        {
+            result = (lhs->ctime() > rhs->ctime()) ? 1 : (lhs->ctime() == rhs->ctime()) ? 0 : -1;
+            break;
+        }
+        case ptk::file_list::column::mtime:
+        {
+            result = (lhs->mtime() > rhs->mtime()) ? 1 : (lhs->mtime() == rhs->mtime()) ? 0 : -1;
+            break;
+        }
+        case ptk::file_list::column::big_icon:
+        case ptk::file_list::column::small_icon:
+        case ptk::file_list::column::info:
+            result = 0;
+    };
 
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
@@ -726,22 +697,6 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
     assert(list->sort_col != ptk::file_list::column::big_icon);
     assert(list->sort_col != ptk::file_list::column::small_icon);
     assert(list->sort_col != ptk::file_list::column::info);
-
-    static const ztd::map<ptk::file_list::column, compare_function_t, 12>
-        compare_function_ptr_table{{
-            {ptk::file_list::column::name, &compare_file_name},
-            {ptk::file_list::column::size, &compare_file_size},
-            {ptk::file_list::column::bytes, &compare_file_size},
-            {ptk::file_list::column::type, &compare_file_type},
-            {ptk::file_list::column::mime, &compare_file_mime},
-            {ptk::file_list::column::perm, &compare_file_perm},
-            {ptk::file_list::column::owner, &compare_file_owner},
-            {ptk::file_list::column::group, &compare_file_group},
-            {ptk::file_list::column::atime, &compare_file_atime},
-            {ptk::file_list::column::btime, &compare_file_btime},
-            {ptk::file_list::column::ctime, &compare_file_ctime},
-            {ptk::file_list::column::mtime, &compare_file_mtime},
-        }};
 
     auto file_list = [](GList* list)
     {
@@ -754,10 +709,9 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
         return vec;
     }(list->files);
 
-    std::ranges::sort(
-        file_list,
-        [&list](const auto& a, const auto& b)
-        { return compare_file(a, b, list, compare_function_ptr_table.at(list->sort_col)) < 0; });
+    std::ranges::sort(file_list,
+                      [&list](const auto& a, const auto& b)
+                      { return compare_files(a, b, list) < 0; });
 
     return [](const std::span<const std::shared_ptr<vfs::file>> list)
     {
