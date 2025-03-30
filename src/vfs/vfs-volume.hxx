@@ -24,6 +24,8 @@
 #include <string>
 #include <string_view>
 
+#include <sigc++/sigc++.h>
+
 #include <ztd/ztd.hxx>
 
 namespace vfs
@@ -63,7 +65,7 @@ class volume final : public std::enable_shared_from_this<volume>
     create(const std::shared_ptr<vfs::device>& device) noexcept;
 
     using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
-                                const vfs::volume::state state, void* user_data);
+                                const vfs::volume::state state);
 
     [[nodiscard]] std::string_view display_name() const noexcept;
     [[nodiscard]] std::string_view mount_point() const noexcept;
@@ -127,8 +129,8 @@ void volume_finalize() noexcept;
 
 std::span<const std::shared_ptr<vfs::volume>> volume_get_all_volumes() noexcept;
 
-void volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
-void volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
+void volume_add_callback(vfs::volume::callback_t cb) noexcept;
+void volume_remove_callback(vfs::volume::callback_t cb) noexcept;
 
 std::shared_ptr<vfs::volume> volume_get_by_device(const std::string_view device_file) noexcept;
 

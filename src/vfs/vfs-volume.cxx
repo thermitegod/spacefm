@@ -51,23 +51,8 @@ static void call_callbacks(const std::shared_ptr<vfs::volume>& vol,
 
 struct volume_callback_data final
 {
-    volume_callback_data() = delete;
-    volume_callback_data(vfs::volume::callback_t callback, void* callback_data) noexcept;
-    ~volume_callback_data() = default;
-    volume_callback_data(const volume_callback_data& other) = delete;
-    volume_callback_data(volume_callback_data&& other) = delete;
-    volume_callback_data& operator=(const volume_callback_data& other) = delete;
-    volume_callback_data& operator=(volume_callback_data&& other) = delete;
-
     vfs::volume::callback_t cb{nullptr};
-    void* user_data{nullptr};
 };
-
-volume_callback_data::volume_callback_data(vfs::volume::callback_t callback,
-                                           void* callback_data) noexcept
-    : cb(callback), user_data(callback_data)
-{
-}
 
 using volume_callback_data_t = std::shared_ptr<volume_callback_data>;
 
@@ -615,29 +600,24 @@ call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state
 {
     for (const auto& callback : global::callbacks)
     {
-        callback->cb(vol, state, callback->user_data);
+        callback->cb(vol, state);
     }
 }
 
 void
-vfs::volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept
+vfs::volume_add_callback(vfs::volume::callback_t cb) noexcept
 {
-    if (cb == nullptr)
-    {
-        return;
-    }
-
-    const volume_callback_data_t data = std::make_shared<volume_callback_data>(cb, user_data);
+    const volume_callback_data_t data = std::make_shared<volume_callback_data>(cb);
 
     global::callbacks.push_back(data);
 }
 
 void
-vfs::volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept
+vfs::volume_remove_callback(vfs::volume::callback_t cb) noexcept
 {
     for (const auto& callback : global::callbacks)
     {
-        if (callback->cb == cb && callback->user_data == user_data)
+        if (callback->cb == cb)
         {
             std::ranges::remove(global::callbacks, callback);
             break;

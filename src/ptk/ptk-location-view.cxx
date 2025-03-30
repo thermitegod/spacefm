@@ -61,8 +61,8 @@ static GtkTreeModel* model = nullptr;
 
 static void ptk_location_view_init_model(GtkListStore* list) noexcept;
 
-static void on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
-                            void* user_data) noexcept;
+static void on_volume_event(const std::shared_ptr<vfs::volume>& vol,
+                            const vfs::volume::state state) noexcept;
 
 static void add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept;
 static void remove_volume(const std::shared_ptr<vfs::volume>& vol) noexcept;
@@ -131,7 +131,8 @@ static void
 on_model_destroy(void* data, GObject* object) noexcept
 {
     (void)data;
-    vfs::volume_remove_callback(on_volume_event, (void*)object);
+    (void)object;
+    vfs::volume_remove_callback(on_volume_event);
 
     model = nullptr;
 }
@@ -422,7 +423,7 @@ ptk_location_view_init_model(GtkListStore* list) noexcept
 {
     (void)list;
 
-    vfs::volume_add_callback(on_volume_event, model);
+    vfs::volume_add_callback(on_volume_event);
 
     for (const auto& volume : vfs::volume_get_all_volumes())
     {
@@ -506,10 +507,8 @@ ptk::view::location::create(ptk::browser* browser) noexcept
 }
 
 static void
-on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
-                void* user_data) noexcept
+on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state) noexcept
 {
-    (void)user_data;
     switch (state)
     {
         case vfs::volume::state::added:
