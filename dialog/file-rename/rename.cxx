@@ -349,7 +349,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_type_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.type = !this->settings_.type;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_type_);
@@ -359,7 +359,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_target_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.target = !this->settings_.target;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_target_);
@@ -370,7 +370,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_copy_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.copy = !this->settings_.copy;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_copy_);
@@ -379,7 +379,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_link_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.link = !this->settings_.link;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_link_);
@@ -389,7 +389,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_copy_target_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.copyt = !this->settings_.copyt;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_copy_target_);
@@ -399,7 +399,7 @@ RenameDialog::RenameDialog(const std::string_view json_data)
     this->action_link_target_->signal_activate().connect(
         [this](const auto& /*value*/)
         {
-            this->settings_.parent = !this->settings_.parent;
+            this->settings_.linkt = !this->settings_.linkt;
             this->on_toggled();
         });
     this->context_action_group_->add_action(this->action_link_target_);
