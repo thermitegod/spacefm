@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "ptk/utils/history.hxx"
@@ -98,6 +99,7 @@ ptk::utils::history::path(const mode mode) const noexcept
             return this->forward_.back();
         }
     }
+    std::unreachable();
 }
 
 std::optional<std::vector<std::filesystem::path>>

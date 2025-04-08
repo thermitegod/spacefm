@@ -34,7 +34,7 @@ using xsetpak_t = std::map<std::string_view, setvars_t>;
 struct config_file_data
 {
     u64 version;
-    settings settings;
+    datatype::settings settings;
     xsetpak_t xset;
 };
 

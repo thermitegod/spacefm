@@ -59,7 +59,7 @@ struct settings
 // Only to be used by preference dialog
 struct settings_extended
 {
-    settings settings;
+    datatype::settings settings;
 
     // xset settings
     std::int32_t drag_action;
@@ -111,7 +111,7 @@ struct data
 struct request
 {
     std::string header;
-    std::vector<data> data;
+    std::vector<file_action::data> data;
 };
 
 struct response
@@ -131,7 +131,7 @@ enum class mode : std::uint8_t
 struct request
 {
     std::string title;
-    mode mode;
+    file_chooser::mode mode;
     std::string default_path;
     std::string default_file;
 };
@@ -238,7 +238,7 @@ struct request
 {
     std::string cwd;
     std::string file; // used to create a new symlink to the selected file
-    mode mode;
+    create::mode mode;
     settings_data settings;
 };
 
@@ -246,7 +246,7 @@ struct response
 {
     std::string target; // only used when creating a symlink
     std::string dest;
-    mode mode;
+    create::mode mode;
     bool overwrite;
     bool auto_open; // open file / chdir into dest
     settings_data settings;
@@ -292,7 +292,7 @@ struct response
 {
     std::string source;
     std::string dest;
-    mode mode;
+    rename::mode mode;
     bool overwrite;
     settings_data settings;
 };
