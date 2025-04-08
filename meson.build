@@ -6,7 +6,7 @@ project(
     default_options: [
         'c_std=c23',
         'cpp_std=c++23',
-        'buildtype=debug',
+        'buildtype=debugoptimized',
         'warning_level=3',
         'optimization=2',
         'prefix=/usr',
@@ -43,56 +43,110 @@ cpp = meson.get_compiler('cpp')
 # message(cpp.get_id())
 
 flags = []
-link_flags = []
 
-debug_flags = [
-    '-ggdb3',
-    '-pedantic',
-    '-pedantic-errors',
-    '-fno-omit-frame-pointer',
-    '-mno-omit-leaf-frame-pointer',
-    '-fasynchronous-unwind-tables',
-    # '-Wfatal-errors',
-    # '-ftime-trace',
-    # '-fsave-optimization-record',
-]
+if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
+    flags += cpp.get_supported_arguments([
+        '-ggdb3',
+        '-pedantic',
+        '-pedantic-errors',
+        '-fno-omit-frame-pointer',
+        '-mno-omit-leaf-frame-pointer',
+        '-fasynchronous-unwind-tables',
+        # '-ftime-trace',
+        # '-fsave-optimization-record',
 
-if get_option('buildtype') == 'debug'
-    flags += cpp.get_supported_arguments(debug_flags)
+        # '-Werror',
+        '-Wfatal-errors',
+    ])
 endif
-
-release_flags = []
 
 if get_option('buildtype') == 'release'
-    flags += cpp.get_supported_arguments(release_flags)
+    flags += cpp.get_supported_arguments([])
 endif
 
-# Warnings
+# Default
+flags += cpp.get_supported_arguments([
+    '-fexceptions',
 
-default_warning_flags = [
+    '-finput-charset=UTF-8',
+    '-fexec-charset=UTF-8',
+
+    '-fno-delete-null-pointer-checks',
+    '-fno-strict-aliasing',
+    '-fno-strict-overflow',
+
+    '-ftrivial-auto-var-init=zero',
+    '-fzero-init-padding-bits=all',
+])
+
+# Hardening
+flags += cpp.get_supported_arguments([
+    '-Wformat=2',
+    '-Wformat-overflow=2',
+    '-Wformat-truncation',
+    '-Werror=format-security',
+
+    '-fstack-protector-strong',
+    '-fstack-clash-protection',
+    '-fcf-protection=full',
+
+    '-Wp,-U_FORTIFY_SOURCE,-D_FORTIFY_SOURCE=3',
+
+    # GCC libstdc++
+    # '-Wp,-D_GLIBCXX_DEBUG',
+    '-Wp,-D_GLIBCXX_ASSERTIONS',
+
+    # LLVM libc++
+    # '-Wp,-D_LIBCPP_ASSERT',
+    # '-Wp,-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST',
+])
+
+# Warnings
+flags += cpp.get_supported_arguments([
+    '-Walloca',
+    '-Walloc-zero',
+    '-Warray-bounds=2',
+    '-Warray-compare',
+    '-Wattribute-alias=2',
+    '-Wbidi-chars=any',
+    '-Wcast-align',
     '-Wcast-qual',
     '-Wchar-subscripts',
     '-Wcomment',
+    '-Wconversion',
+    '-Wdate-time',
     '-Wdisabled-optimization',
-    # '-Wdouble-promotion', # warns when using NAN
+    '-Wdouble-promotion',
+    '-Wduplicated-branches',
+    '-Wduplicated-cond',
+    # '-Wextra-semi', // TODO warnings from glibmm
     '-Wfloat-equal',
-    '-Wformat=2',
+    '-Wignored-qualifiers',
     '-Wimplicit-fallthrough',
     '-Wimport',
     '-Winit-self',
+    '-Wint-conversion',
     '-Wmissing-field-initializers',
     '-Wmissing-format-attribute',
     '-Wmissing-include-dirs',
     '-Wmissing-noreturn',
+    '-Wnon-virtual-dtor',
+    '-Wnull-dereference',
+    # '-Wold-style-cast', // TODO warnings from glibmm
+    '-Woverloaded-virtual',
     '-Wparentheses',
     '-Wpointer-arith',
     '-Wsequence-point',
     '-Wshadow',
     '-Wsign-compare',
+    '-Wsign-conversion',
     '-Wstack-protector',
     '-Wstrict-aliasing',
+    '-Wstring-compare',
+    # '-Wstringop-overflow=4',
     '-Wswitch',
     '-Wswitch-enum',
+    '-Wtrampolines',
     '-Wtrigraphs',
     '-Wundef',
     '-Wuninitialized',
@@ -101,100 +155,58 @@ default_warning_flags = [
     '-Wunused',
     '-Wunused-function',
     '-Wunused-label',
-    '-Wunused-parameter',
-    '-Wunused-value',
-    '-Wunused-result',
-    '-Wunused-variable',
     '-Wunused-macros',
+    '-Wunused-parameter',
+    '-Wunused-result',
+    '-Wunused-value',
+    '-Wunused-variable',
     '-Wvariadic-macros',
     '-Wvla',
     '-Wwrite-strings',
-    '-Wignored-qualifiers',
-    '-Wstring-compare',
-    '-Walloca',
-    '-Wdate-time',
+    '-Wzero-length-bounds',
+])
 
-    # Disabled Warnings
-    '-Wno-format-nonliteral',
+# Disabled Warnings
+flags += cpp.get_supported_arguments([
+    '-Wno-cast-align',
+    '-Wno-double-promotion', # warns when using NAN
     '-Wno-cast-function-type-mismatch',
-    '-Wno-missing-include-dirs',
 
-    # TODO
-    '-Wconversion',
-    '-Wno-sign-conversion',  # lots of errors in glibmm
+    '-Wno-sign-conversion',  # lots of warnings from glibmm
     '-Wno-shorten-64-to-32',
 
     # '-Wno-deprecated-declarations',
-]
+])
 
-flags += cpp.get_supported_arguments(default_warning_flags)
-
-if cpp.has_multi_arguments('-Wformat', '-Werror=format-security')
-    flags += '-Werror=format-security'
-endif
-
-# GCC only warning flags
+# Disabled GCC Warnings
 if cpp.get_id() == 'gcc'
-    default_warning_flags_gcc = [
-        '-Wformat-overflow=2',
-        '-Wformat-truncation',
-        '-Warray-bounds=2',
-        '-Warray-compare',
-        '-Wzero-length-bounds',
-        '-Wattribute-alias=2',
-        '-Wduplicated-branches',
-        '-Wduplicated-cond',
-        '-Wtrampolines',
-        '-Walloc-zero',
-        '-Wstringop-overflow=4',
-        # '-Weffc++',
-
-        # Disabled Warnings
-        '-Wno-shadow',  # gcc is a lot stricter than clang
-        '-Wno-maybe-uninitialized',
+    flags += cpp.get_supported_arguments([
         '-Wno-cast-function-type',
-    ]
-
-    flags += cpp.get_supported_arguments(default_warning_flags_gcc)
+        '-Wno-cast-qual',
+        '-Wno-conversion', # TODO
+        '-Wno-maybe-uninitialized',
+        '-Wno-shadow',  # gcc is a lot stricter than clang
+    ])
 endif
 
-# Clang only warning flags
+# Disabled Clang Warnings
 if cpp.get_id() == 'clang'
-    default_warning_flags_clang = [
-        '-Wint-conversion',
-
-        # Disabled Warnings
-    ]
-
-    flags += cpp.get_supported_arguments(default_warning_flags_clang)
+    flags += cpp.get_supported_arguments([])
 endif
-
-# Codegen
-
-default_codegen_flags = [
-    '-finput-charset=UTF-8',
-    '-fexec-charset=UTF-8',
-
-    '-fwrapv',
-    # '-fwrapv-pointer',
-    '-ftrivial-auto-var-init=zero',
-
-    '-fstack-protector-all',
-]
-
-flags += cpp.get_supported_arguments(default_codegen_flags)
 
 # Linker
 
-if cpp.has_link_argument('-Wl,--as-needed')
-    link_flags += '-Wl,--as-needed'
-endif
-
-noexecstack = false
-if cpp.has_link_argument('-Wl,-z,noexecstack')
-    link_flags += '-Wl,-z,noexecstack'
-    noexecstack = true
-endif
+link_flags = []
+link_flags += cpp.get_supported_link_arguments([
+    '-Wl,-O1',
+    '-Wl,--as-needed',
+    '-Wl,--sort-common',
+    '-Wl,-z,relro',
+    '-Wl,-z,now',
+    '-Wl,-z,pack-relative-relocs',
+    '-Wl,-z,noexecstack',
+    '-Wl,-z,defs',
+])
 
 add_global_arguments(flags, language: ['c', 'cpp'])
 add_global_link_arguments(link_flags, language: ['c', 'cpp'])
@@ -284,16 +296,6 @@ preprocessor = [
     '-DGLIBMM_DISABLE_DEPRECATED',
     '-DGIOMM_DISABLE_DEPRECATED',
 ]
-
-if get_option('buildtype') == 'debug'
-    # GCC libstdc++
-    # preprocessor += '-D_GLIBCXX_DEBUG'
-    # preprocessor += '-D_GLIBCXX_ASSERTIONS'
-
-    # LLVM libc++
-    # preprocessor += '-D_LIBCPP_ASSERT'
-    # preprocessor += '-D_LIBCPP_HARDENING_MODE_EXTENSIVE'
-endif
 
 if get_option('tests')
     preprocessor += '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data'))
