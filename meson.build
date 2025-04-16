@@ -5,7 +5,7 @@ project(
     license: 'GPL3',
     default_options: [
         'c_std=c23',
-        'cpp_std=c++23',
+        'cpp_std=c++26',
         'buildtype=debugoptimized',
         'warning_level=3',
         'optimization=2',
