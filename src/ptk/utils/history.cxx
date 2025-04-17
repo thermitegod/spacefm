@@ -68,6 +68,10 @@ ptk::utils::history::has_forward() const noexcept
 void
 ptk::utils::history::new_forward(const std::filesystem::path& path) noexcept
 {
+    if (this->current_ == path)
+    {
+        return;
+    }
     this->back_.push_back(this->current_);
     this->current_ = path;
     this->forward_.clear();

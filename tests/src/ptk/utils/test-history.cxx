@@ -309,4 +309,20 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
             CHECK_EQ(history.get_selection(p1).value(), p1_files_alt);
         }
     }
+
+    TEST_CASE("duplicate new_forward()")
+    {
+        ptk::utils::history history;
+
+        history.new_forward(p1);
+        CHECK_EQ(history.path(), p1);
+
+        history.new_forward(p2);
+        history.new_forward(p2);
+        history.new_forward(p2);
+        CHECK_EQ(history.path(), p2);
+
+        history.go_back();
+        CHECK_EQ(history.path(), p1);
+    }
 }
