@@ -323,7 +323,7 @@ main(int argc, char* argv[]) noexcept
     data->settings = settings;
 
     GtkApplication* app =
-        gtk_application_new(PACKAGE_APPLICATION_NAME, G_APPLICATION_DEFAULT_FLAGS);
+        gtk_application_new("com.thermitegod.spacefm", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), data.get());
     // Do not pass argc/argv, the CLI is not handled by GTK
     const auto status = g_application_run(G_APPLICATION(app), 0, nullptr);

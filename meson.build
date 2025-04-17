@@ -55,8 +55,11 @@ if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimi
         # '-ftime-trace',
         # '-fsave-optimization-record',
 
-        # '-Werror',
         '-Wfatal-errors',
+
+        # '-Werror',
+        '-Werror=date-time',
+        '-Werror=unguarded-availability-new',
     ])
 endif
 
@@ -252,7 +255,6 @@ preprocessor = [
     '-DPACKAGE_NAME="spacefm"',
     '-DPACKAGE_NAME_FANCY="SpaceFM"',
     '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
-    '-DPACKAGE_APPLICATION_NAME="com.thermitegod.spacefm"',
     '-DPACKAGE_GITHUB="https://www.github.com/thermitegod/spacefm"',
     '-DPACKAGE_BUGREPORT="https://www.github.com/thermitegod/spacefm/issues"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
@@ -261,41 +263,25 @@ preprocessor = [
     '-DPACKAGE_BUILD_ROOT="@0@"'.format(build_root),
     '-DDIALOG_BUILD_ROOT="@0@/dialog"'.format(build_root),
 
-    # Standalone dialog program names
-    '-DDIALOG_ABOUT="spacefm_about"',
-    '-DDIALOG_APP_CHOOSER="spacefm_app_chooser"',
-    '-DDIALOG_ERROR="spacefm_error"',
-    '-DDIALOG_FILE_ACTION="spacefm_action"',
-    '-DDIALOG_FILE_CHOOSER="spacefm_chooser"',
-    '-DDIALOG_FILE_CREATE="spacefm_create"',
-    '-DDIALOG_FILE_RENAME="spacefm_rename"',
-    '-DDIALOG_KEYBINDINGS="spacefm_keybindings"',
-    '-DDIALOG_KEYBINDING_SET="spacefm_keybinding_set_key"',
-    '-DDIALOG_MESSAGE="spacefm_message"',
-    '-DDIALOG_PATTERN="spacefm_pattern"',
-    '-DDIALOG_PREFERENCE="spacefm_preference"',
-    '-DDIALOG_PROPERTIES="spacefm_properties"',
-    '-DDIALOG_TEXT="spacefm_text"',
-
-    '-DMAGIC_ENUM_RANGE_MIN=0',
-    '-DMAGIC_ENUM_RANGE_MAX=2000',
-
-    '-DLIBDIR_PATH="@0@"'.format(libdir),
-
-    '-DG_DISABLE_ASSERT',
-    '-DG_DISABLE_CAST_CHECKS',
-    '-DG_DISABLE_CHECKS',
-    #'-DG_LOG_DOMAIN="SpaceFM"',
-    #'-DG_DEBUG=fatal_warnings',
-
-    '-DGTK_DISABLE_DEPRECATED',
-    '-DGDK_DISABLE_DEPRECATED',
-
-    '-DGTKMM_DISABLE_DEPRECATED',
-    '-DGDKMM_DISABLE_DEPRECATED',
-    '-DGLIBMM_DISABLE_DEPRECATED',
-    '-DGIOMM_DISABLE_DEPRECATED',
+    # data paths
+    '-DPACKAGE_IMAGES="/usr/share/spacefm/images"',
+    '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(join_paths(meson.current_source_dir(), 'data/images')),
+    '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'data/scripts')),
 ]
+
+if get_option('dev')
+    preprocessor += [
+        # GTK
+        '-DGTK_DISABLE_DEPRECATED',
+        '-DGDK_DISABLE_DEPRECATED',
+        '-DG_DISABLE_DEPRECATED',
+        # GTKMM
+        '-DGTKMM_DISABLE_DEPRECATED',
+        '-DGDKMM_DISABLE_DEPRECATED',
+        '-DGLIBMM_DISABLE_DEPRECATED',
+        '-DGIOMM_DISABLE_DEPRECATED',
+    ]
+endif
 
 if get_option('tests')
     preprocessor += '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data'))
@@ -308,12 +294,8 @@ endforeach
 ## preprocessor features
 features = []
 
-if get_option('deprecated')
-    features += '-DHAVE_DEPRECATED'
-endif
-
 if get_option('dev')
-    features += '-DHAVE_DEV'
+    features += '-DDEV_MODE'
 endif
 
 if get_option('exo')
@@ -403,6 +385,7 @@ if get_option('socket')
     )
 endif
 
+media_dependencies = []
 if get_option('media')
     # ffmpeg
     libavcodec_dep = dependency('libavcodec')
@@ -416,7 +399,7 @@ if get_option('media')
     gexiv_dep = dependency('gexiv2')
     gdkpixbuf_dep = dependency('gdk-pixbuf-2.0')
 
-    media_dependencies = [
+    media_dependencies += [
         libavcodec_dep,
         # libavdevice_dep,
         # libavfilter_dep,
@@ -428,25 +411,12 @@ if get_option('media')
         gdkpixbuf_dep,
     ]
 
+    dependencies += media_dependencies
     features += '-DHAVE_MEDIA'
-else
-    media_dependencies += []
 endif
 
 foreach a: features
     add_project_arguments(a, language: ['c', 'cpp'])
-endforeach
-
-## data paths
-
-data_args = [
-    '-DDATADIR="/usr/share"',
-    '-DSYSCONFDIR="/etc"',
-    '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"',
-]
-
-foreach a: data_args
-  add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
 
 ## Required Base Source files
@@ -572,4 +542,3 @@ endif
 
 install_subdir('data/applications', install_dir: datadir)
 install_subdir('data/icons', install_dir: datadir)
-install_subdir('data/scripts', install_dir: datadir / 'spacefm')

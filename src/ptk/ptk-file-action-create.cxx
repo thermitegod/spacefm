@@ -40,6 +40,8 @@
 
 #include "vfs/vfs-file.hxx"
 
+#include "package.hxx"
+
 i32
 ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file,
@@ -53,7 +55,7 @@ ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cw
                   magic_enum::enum_integer(datatype::create::mode::link));
 
     const auto response = datatype::run_dialog_sync<datatype::create::response>(
-        DIALOG_FILE_CREATE,
+        spacefm::package.dialog.file_create,
         datatype::create::request{
             .cwd = cwd,
             .file = file ? file->path() : "",

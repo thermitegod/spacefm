@@ -39,13 +39,16 @@
 #include "ptk/ptk-file-task.hxx"
 
 #include "vfs/vfs-file.hxx"
+
+#include "package.hxx"
+
 i32
 ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                           const bool clip_copy) noexcept
 {
     const auto response = datatype::run_dialog_sync<datatype::rename::response>(
-        DIALOG_FILE_RENAME,
+        spacefm::package.dialog.file_rename,
         datatype::rename::request{
             .cwd = cwd,
             .file = file->path(),

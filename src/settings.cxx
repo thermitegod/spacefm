@@ -64,9 +64,8 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
         std::filesystem::permissions(vfs::program::config(), std::filesystem::perms::owner_all);
     }
 
-#if defined(HAVE_DEV)
-    const auto command_script =
-        std::filesystem::path() / PACKAGE_SCRIPTS_PATH / "config-update-git";
+#if defined(DEV_MODE)
+    const auto command_script = std::filesystem::path() / DEV_SCRIPTS_PATH / "config-update-git";
     if (std::filesystem::exists(command_script))
     {
         const auto command_args =

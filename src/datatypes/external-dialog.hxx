@@ -29,6 +29,7 @@
 #include "utils/shell-quote.hxx"
 
 #include "logger.hxx"
+#include "package.hxx"
 
 namespace datatype
 {
@@ -36,8 +37,8 @@ template<typename Response = std::optional<std::monostate>>
 std::expected<Response, std::string>
 run_dialog_sync(const std::string_view program, const auto& request) noexcept
 {
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, program);
+#if defined(DEV_MODE)
+    const auto binary = std::format("{}/{}", spacefm::package.dialog.build_root, program);
 #else
     const auto binary = Glib::find_program_in_path(program.data());
 #endif
@@ -62,7 +63,7 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
 
-#if defined(HAVE_DEV) && __has_feature(address_sanitizer)
+#if defined(DEV_MODE) && __has_feature(address_sanitizer)
     if (standard_output.empty())
 #else
     if (exit_status != 0 || standard_output.empty())
@@ -90,8 +91,8 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
 inline void
 run_dialog_async(const std::string_view program, const auto& request) noexcept
 {
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, program);
+#if defined(DEV_MODE)
+    const auto binary = std::format("{}/{}", spacefm::package.dialog.build_root, program);
 #else
     const auto binary = Glib::find_program_in_path(program.data());
 #endif
@@ -118,8 +119,8 @@ run_dialog_async(const std::string_view program, const auto& request) noexcept
 inline void
 run_dialog_async(const std::string_view program) noexcept
 {
-#if defined(HAVE_DEV)
-    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, program);
+#if defined(DEV_MODE)
+    const auto binary = std::format("{}/{}", spacefm::package.dialog.build_root, program);
 #else
     const auto binary = Glib::find_program_in_path(program.data());
 #endif

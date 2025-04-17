@@ -29,6 +29,7 @@
 
 #include "autosave.hxx"
 #include "keybindings-dialog.hxx"
+#include "package.hxx"
 
 void
 show_keybindings_dialog(GtkWindow* parent) noexcept
@@ -52,7 +53,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
     }
 
     const auto response = datatype::run_dialog_sync<datatype::keybinding::response>(
-        DIALOG_KEYBINDINGS,
+        spacefm::package.dialog.keybindings,
         datatype::keybinding::request{.data = data});
     if (!response)
     {

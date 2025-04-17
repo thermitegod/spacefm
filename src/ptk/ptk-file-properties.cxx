@@ -29,6 +29,8 @@
 
 #include "vfs/vfs-file.hxx"
 
+#include "package.hxx"
+
 static void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
                             const std::span<const std::shared_ptr<vfs::file>> selected_files,
@@ -36,7 +38,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 {
     (void)parent;
 
-    datatype::run_dialog_async(DIALOG_PROPERTIES,
+    datatype::run_dialog_async(spacefm::package.dialog.properties,
                                datatype::properties::request{.cwd = cwd,
                                                              .page = (std::uint32_t)page,
                                                              .files = [selected_files]()

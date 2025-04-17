@@ -33,6 +33,8 @@
 #include "vfs/vfs-file.hxx"
 
 #include "logger.hxx"
+#include "package.hxx"
+
 static bool
 create_file_action_dialog(GtkWindow* parent, const std::string_view header,
                           const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
@@ -48,7 +50,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header,
     }
 
     const auto response = datatype::run_dialog_sync<datatype::file_action::response>(
-        DIALOG_FILE_ACTION,
+        spacefm::package.dialog.file_action,
         datatype::file_action::request{.header = header.data(), .data = file_data});
     if (!response)
     {

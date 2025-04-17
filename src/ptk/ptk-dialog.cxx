@@ -27,6 +27,8 @@
 
 #include "ptk/ptk-dialog.hxx"
 
+#include "package.hxx"
+
 std::tuple<bool, std::string>
 ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::string_view message,
                   const std::string_view defstring, const std::string_view defreset) noexcept
@@ -34,7 +36,7 @@ ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::st
     (void)parent;
 
     const auto response = datatype::run_dialog_sync<datatype::text::response>(
-        DIALOG_TEXT,
+        spacefm::package.dialog.text,
         datatype::text::request{.title = title.data(),
                                 .message = message.data(),
                                 .text = defreset.data(),
@@ -56,7 +58,7 @@ ptk::dialog::file_chooser(GtkWidget* parent, GtkFileChooserAction action,
     (void)parent;
 
     const auto response = datatype::run_dialog_sync<datatype::file_chooser::response>(
-        DIALOG_FILE_CHOOSER,
+        spacefm::package.dialog.file_chooser,
         datatype::file_chooser::request{
             .title = title.data(),
             .mode = (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER)
@@ -79,7 +81,7 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
     (void)parent;
 
     datatype::run_dialog_async(
-        DIALOG_ERROR,
+        spacefm::package.dialog.error,
         datatype::error::request{.title = title.data(), .message = message.data()});
 }
 
@@ -94,7 +96,7 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
     assert(buttons != GtkButtonsType::GTK_BUTTONS_NONE);
 
     const auto response = datatype::run_dialog_sync<datatype::message::response>(
-        DIALOG_MESSAGE,
+        spacefm::package.dialog.message,
         datatype::message::request{.title = title.data(),
                                    .message = message.data(),
                                    .secondary_message = secondary_message.data(),

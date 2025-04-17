@@ -88,6 +88,7 @@
 #include "autosave.hxx"
 #include "logger.hxx"
 #include "main-window.hxx"
+#include "package.hxx"
 #include "types.hxx"
 
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 4)
@@ -3792,7 +3793,7 @@ select_pattern_dialog(GtkWidget* parent) noexcept
     (void)parent;
 
     const auto response = datatype::run_dialog_sync<datatype::pattern::response>(
-        DIALOG_PATTERN,
+        spacefm::package.dialog.pattern,
         datatype::pattern::request{.pattern = ""});
     if (!response)
     {

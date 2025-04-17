@@ -18,11 +18,12 @@
 #include "datatypes/external-dialog.hxx"
 
 #include "about.hxx"
+#include "package.hxx"
 
 void
 show_about_dialog(GtkWindow* parent) noexcept
 {
     (void)parent;
 
-    datatype::run_dialog_async(DIALOG_ABOUT);
+    datatype::run_dialog_async(spacefm::package.dialog.about);
 }

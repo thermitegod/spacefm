@@ -47,7 +47,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
                               magic_enum::enum_count<logger::domain>()>
         default_logger_options{{
             {logger::domain::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
-#if defined(HAVE_DEV)
+#if defined(DEV_MODE)
             {logger::domain::dev, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 #else
             {logger::domain::dev, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},

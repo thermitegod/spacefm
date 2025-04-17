@@ -17,6 +17,8 @@
 
 #include <string_view>
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "types.hxx"
 
 namespace xset
@@ -1025,3 +1027,9 @@ xset::name get_name_from_panel_mode(const panel_t panel, const xset::panel name,
 // main window panel mode
 std::string_view get_window_panel_mode(xset::main_window_panel mode) noexcept;
 } // namespace xset
+
+template<> struct magic_enum::customize::enum_range<xset::name>
+{
+    static constexpr int min = 0;
+    static constexpr int max = 1000;
+};

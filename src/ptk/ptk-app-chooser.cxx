@@ -29,6 +29,8 @@
 
 #include "vfs/vfs-mime-type.hxx"
 
+#include "package.hxx"
+
 std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
                              bool focus_all_apps, bool show_command, bool show_default,
@@ -44,7 +46,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
     */
 
     const auto response = datatype::run_dialog_sync<datatype::app_chooser::response>(
-        DIALOG_APP_CHOOSER,
+        spacefm::package.dialog.app_chooser,
         datatype::app_chooser::request{
             .mime_type = mime_type->type().data(),
             .focus_all_apps = focus_all_apps,

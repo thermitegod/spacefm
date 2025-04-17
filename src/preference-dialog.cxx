@@ -36,6 +36,7 @@
 #include "autosave.hxx"
 #include "logger.hxx"
 #include "main-window.hxx"
+#include "package.hxx"
 #include "preference-dialog.hxx"
 #include "types.hxx"
 
@@ -467,7 +468,7 @@ show_preference_dialog(GtkWindow* parent,
     (void)parent;
 
     const auto response = datatype::run_dialog_sync<datatype::settings_extended>(
-        DIALOG_PREFERENCE,
+        spacefm::package.dialog.preference,
         datatype::settings_extended{
             .settings = *settings,
             .drag_action = xset_get_int(xset::name::drag_action, xset::var::x),

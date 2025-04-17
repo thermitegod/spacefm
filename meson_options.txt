@@ -6,13 +6,6 @@ option(
 )
 
 option(
-    'deprecated',
-    type : 'boolean',
-    value: true,
-    description : 'enable deprecated features'
-)
-
-option(
     'dev',
     type : 'boolean',
     value: false,

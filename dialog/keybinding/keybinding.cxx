@@ -178,15 +178,16 @@ KeybindingDialog::KeybindingPage::init(
                          mod.get_value());
 #endif
 
-#if defined(HAVE_DEV)
-            const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_KEYBINDING_SET);
+#if defined(DEV_MODE)
+            const auto binary =
+                std::format("{}/{}", DIALOG_BUILD_ROOT, "spacefm_keybinding_set_key");
 #else
-            const auto binary = Glib::find_program_in_path(DIALOG_KEYBINDING_SET);
+            const auto binary = Glib::find_program_in_path("spacefm_keybinding_set_key");
 #endif
             if (binary.empty())
             {
                 std::println("Failed to find keybinding set dialog binary: {}",
-                             DIALOG_KEYBINDING_SET);
+                             "spacefm_keybinding_set_key");
                 std::exit(EXIT_FAILURE);
             }
 
