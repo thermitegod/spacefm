@@ -21,7 +21,7 @@
 
 #include <zmq.hpp>
 
-namespace socket
+namespace spacefm::server
 {
 [[noreturn]] void server_thread() noexcept;
 

@@ -293,7 +293,7 @@ main(int argc, char* argv[]) noexcept
 
 #if defined(HAVE_SOCKET)
     // Start a thread to receive socket messages
-    const std::jthread socket_server(socket::server_thread);
+    const std::jthread socket_server(spacefm::server::server_thread);
 #endif
 
     // load config file

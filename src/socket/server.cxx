@@ -31,7 +31,7 @@
 #include "logger.hxx"
 
 void
-socket::server_thread() noexcept
+spacefm::server::server_thread() noexcept
 {
     zmq::context_t context{1};
     zmq::socket_t server(context, zmq::socket_type::pair);
@@ -72,7 +72,7 @@ socket::server_thread() noexcept
 }
 
 bool
-socket::send_command(zmq::socket_t& socket, const std::string_view command) noexcept
+spacefm::server::send_command(zmq::socket_t& socket, const std::string_view command) noexcept
 {
     zmq::message_t message(command.size());
     std::memcpy(message.data(), command.data(), command.size());
@@ -80,7 +80,7 @@ socket::send_command(zmq::socket_t& socket, const std::string_view command) noex
 }
 
 std::optional<std::string>
-socket::receive_response(zmq::socket_t& socket) noexcept
+spacefm::server::receive_response(zmq::socket_t& socket) noexcept
 {
     zmq::message_t message;
     if (socket.recv(message, zmq::recv_flags::none))

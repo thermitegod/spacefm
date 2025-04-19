@@ -59,7 +59,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     }
     // std::println("JSON : {}", buffer);
 
-    const bool sent = socket::send_command(socket, buffer.value());
+    const bool sent = spacefm::server::send_command(socket, buffer.value());
     if (!sent)
     {
         std::println("Failed to send command to server");
@@ -67,7 +67,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     }
 
     // server response
-    const auto server_response = socket::receive_response(socket);
+    const auto server_response = spacefm::server::receive_response(socket);
     if (!server_response)
     {
         std::println("Failed to receive response from server");
