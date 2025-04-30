@@ -6,7 +6,6 @@
 CC=clang CXX=clang++ meson setup \
     -Dtests=true \
     -Ddev=true \
-    -Ddeprecated=false \
     -Dwith-system-cli11=true \
     -Dwith-system-concurrencpp=true \
     -Dwith-system-glaze=true \
