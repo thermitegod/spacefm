@@ -292,10 +292,6 @@ struct browser
     GtkEntry* path_bar() const noexcept;
     GtkEntry* search_bar() const noexcept;
 
-  private:
-    u64 get_n_all_files() const noexcept;
-    u64 get_n_visible_files() const noexcept;
-
   public:
     // signal
     void on_folder_content_changed(const std::shared_ptr<vfs::file>& file) noexcept;

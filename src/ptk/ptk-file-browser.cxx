@@ -2923,20 +2923,6 @@ ptk::browser::get_tab_panel_counts() const noexcept
     return {panel_count, tab_count, tab_num};
 }
 
-u64
-ptk::browser::get_n_all_files() const noexcept
-{
-    return this->dir_ ? this->dir_->files().size() : 0;
-}
-
-u64
-ptk::browser::get_n_visible_files() const noexcept
-{
-    return this->file_list_ ? static_cast<std::uint64_t>(
-                                  gtk_tree_model_iter_n_children(this->file_list_, nullptr))
-                            : 0;
-}
-
 void
 ptk::browser::go_home() noexcept
 {
@@ -4977,8 +4963,9 @@ ptk::browser::update_statusbar() const noexcept
         return;
     }
 
-    // note: total size will not include content changes since last selection change
-    const auto num_vis = this->get_n_visible_files();
+    const u64 total_files = this->dir_->files().size();
+    const u64 total_hidden = this->dir_->hidden_files();
+    const u64 total_visible = this->show_hidden_files_ ? total_files : total_files - total_hidden;
 
     if (this->n_selected_files_ > 0)
     {
@@ -4993,7 +4980,7 @@ ptk::browser::update_statusbar() const noexcept
 
         statusbar_txt.append(std::format("{:L} / {:L} ({} / {})",
                                          this->n_selected_files_,
-                                         num_vis,
+                                         total_visible,
                                          file_size,
                                          disk_size));
 
@@ -5156,21 +5143,19 @@ ptk::browser::update_statusbar() const noexcept
         const std::string disk_size = vfs::utils::format_file_size(disk_size_disk);
 
         // count for .hidden files
-        const auto num_hid = this->get_n_all_files() - num_vis;
-        const auto num_hidx = this->dir_ ? this->dir_->hidden_files() : 0;
-        if (num_hid || num_hidx)
+        if (!this->show_hidden_files_ && total_hidden != 0)
         {
             statusbar_txt.append(std::format("{:L} visible ({:L} hidden)  ({} / {})",
-                                             num_vis,
-                                             num_hid,
+                                             total_visible,
+                                             total_hidden,
                                              file_size,
                                              disk_size));
         }
         else
         {
             statusbar_txt.append(std::format("{:L} {}  ({} / {})",
-                                             num_vis,
-                                             num_vis == 1 ? "item" : "items",
+                                             total_visible,
+                                             total_visible == 1 ? "item" : "items",
                                              file_size,
                                              disk_size));
         }
