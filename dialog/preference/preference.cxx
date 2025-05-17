@@ -595,10 +595,10 @@ PreferenceDialog::init_advanced_tab() noexcept
         for (const auto [idx, term] :
              std::ranges::enumerate_view(this->settings_.details.supported_terminals))
         {
-            store->append(ListColumns::create(term, idx));
+            store->append(ListColumns::create(term, static_cast<std::uint32_t>(idx)));
             if (this->settings_.terminal == term)
             {
-                position = idx;
+                position = static_cast<std::uint32_t>(idx);
             }
         }
 

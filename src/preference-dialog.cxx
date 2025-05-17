@@ -63,8 +63,8 @@ update_big_icons(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -102,8 +102,8 @@ update_small_icons(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -196,8 +196,8 @@ update_show_toolbar_home(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -231,8 +231,8 @@ update_show_toolbar_refresh(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -266,8 +266,8 @@ update_show_toolbar_search(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -330,8 +330,8 @@ update_hide_close_tab(const std::shared_ptr<config::settings>& settings,
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, total_pages))
+            const auto total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, total_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

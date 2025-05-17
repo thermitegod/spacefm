@@ -839,7 +839,7 @@ CreateDialog::select_input() noexcept
     {
         const auto [basename, ext, _] = vfs::utils::split_basename_extension(full_name);
 
-        end_iter = buf_full_name_->get_iter_at_offset(basename.size());
+        end_iter = buf_full_name_->get_iter_at_offset(static_cast<std::int32_t>(basename.size()));
     }
 
     this->buf_full_name_->select_range(start_iter, end_iter);

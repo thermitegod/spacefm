@@ -273,7 +273,7 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
             gtk_tree_path_free(path);
             return nullptr;
         }
-        gtk_tree_path_prepend_index(path, i);
+        gtk_tree_path_prepend_index(path, static_cast<std::int32_t>(i));
         node = node->parent;
     }
     return path;

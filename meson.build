@@ -176,7 +176,6 @@ flags += cpp.get_supported_arguments([
     '-Wno-cast-function-type-mismatch',
 
     '-Wno-sign-conversion',  # lots of warnings from glibmm
-    '-Wno-shorten-64-to-32',
 
     # '-Wno-deprecated-declarations',
 ])

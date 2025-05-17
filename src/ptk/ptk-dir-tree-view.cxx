@@ -647,16 +647,22 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     }
                     if (browser->drag_source_dev_tree_ != dest_stat->dev())
                     { // src and dest are on different devices
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                        gdk_drag_status(drag_context,
+                                        GdkDragAction::GDK_ACTION_COPY,
+                                        static_cast<guint32>(time));
                     }
                     else
                     {
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                        gdk_drag_status(drag_context,
+                                        GdkDragAction::GDK_ACTION_MOVE,
+                                        static_cast<guint32>(time));
                     }
                 }
                 else
                 { // stat failed
-                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                    gdk_drag_status(drag_context,
+                                    GdkDragAction::GDK_ACTION_COPY,
+                                    static_cast<guint32>(time));
                 }
 
                 g_strfreev(list);
@@ -671,9 +677,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                      (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |
                       GdkDragAction::GDK_ACTION_LINK)) == 0)
                 {
-                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                    gdk_drag_status(drag_context,
+                                    GdkDragAction::GDK_ACTION_MOVE,
+                                    static_cast<guint32>(time));
                 }
-                gtk_drag_finish(drag_context, true, false, time);
+                gtk_drag_finish(drag_context, true, false, static_cast<guint32>(time));
 
                 for (; *puri; ++puri)
                 {
@@ -727,7 +735,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         ptask->run();
                     }
                 }
-                gtk_drag_finish(drag_context, true, false, time);
+                gtk_drag_finish(drag_context, true, false, static_cast<guint32>(time));
                 return;
             }
         }
@@ -740,11 +748,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     /* If we are only getting drag status, not finished. */
     if (browser->pending_drag_status_tree())
     {
-        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, static_cast<guint32>(time));
         browser->pending_drag_status_tree(false);
         return;
     }
-    gtk_drag_finish(drag_context, false, false, time);
+    gtk_drag_finish(drag_context, false, false, static_cast<guint32>(time));
 }
 
 static bool
@@ -759,7 +767,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-drop");
 
-    gtk_drag_get_data(widget, drag_context, target, time);
+    gtk_drag_get_data(widget, drag_context, target, static_cast<guint32>(time));
     return true;
 }
 
@@ -777,7 +785,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
 
     if (target == GDK_NONE)
     {
-        gdk_drag_status(drag_context, (GdkDragAction)0, time);
+        gdk_drag_status(drag_context, (GdkDragAction)0, static_cast<guint32>(time));
     }
     else
     {
@@ -821,7 +829,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
             {
                 // automatic
                 browser->pending_drag_status_tree(true);
-                gtk_drag_get_data(widget, drag_context, target, time);
+                gtk_drag_get_data(widget, drag_context, target, static_cast<guint32>(time));
                 suggested_action = gdk_drag_context_get_selected_action(drag_context);
             }
         }

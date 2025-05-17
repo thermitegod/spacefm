@@ -1987,7 +1987,9 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 // logger::debug<logger::domain::ptk>("DnD DEFAULT");
 
                 // We only want to update drag status, not really want to drop
-                gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_DEFAULT, time);
+                gdk_drag_status(drag_context,
+                                GdkDragAction::GDK_ACTION_DEFAULT,
+                                static_cast<guint32>(time));
 
                 // DnD is still ongoing, do not continue
                 browser->pending_drag_status_ = false;
@@ -2044,13 +2046,17 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         browser->drag_source_inode_ == dest_inode)
                     { // src and dest are on different devices or same dir
                         // logger::debug<logger::domain::ptk>("DnD COPY");
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                        gdk_drag_status(drag_context,
+                                        GdkDragAction::GDK_ACTION_COPY,
+                                        static_cast<guint32>(time));
                         file_action = vfs::file_task::type::copy;
                     }
                     else
                     {
                         // logger::debug<logger::domain::ptk>("DnD MOVE");
-                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                        gdk_drag_status(drag_context,
+                                        GdkDragAction::GDK_ACTION_MOVE,
+                                        static_cast<guint32>(time));
                         file_action = vfs::file_task::type::move;
                     }
 
@@ -2089,7 +2095,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                                                   browser->task_view_);
                         ptask->run();
                     }
-                    gtk_drag_finish(drag_context, true, false, time);
+                    gtk_drag_finish(drag_context, true, false, static_cast<guint32>(time));
                     return;
                 }
             }
@@ -2102,7 +2108,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
         browser->pending_drag_status_ = false;
         return;
     }
-    gtk_drag_finish(drag_context, false, false, time);
+    gtk_drag_finish(drag_context, false, false, static_cast<guint32>(time));
 }
 
 static void
@@ -2337,7 +2343,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
 
     if (target == GDK_NONE)
     {
-        gdk_drag_status(drag_context, (GdkDragAction)0, time);
+        gdk_drag_status(drag_context, (GdkDragAction)0, static_cast<guint32>(time));
     }
     else
     {
@@ -2380,12 +2386,12 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
                 default:
                     // automatic
                     browser->pending_drag_status_ = true;
-                    gtk_drag_get_data(widget, drag_context, target, time);
+                    gtk_drag_get_data(widget, drag_context, target, static_cast<guint32>(time));
                     suggested_action = gdk_drag_context_get_selected_action(drag_context);
                     break;
             }
         }
-        gdk_drag_status(drag_context, suggested_action, time);
+        gdk_drag_status(drag_context, suggested_action, static_cast<guint32>(time));
     }
     return true;
 }
@@ -2418,7 +2424,7 @@ on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
     (void)browser;
     GdkAtom target = gdk_atom_intern("text/uri-list", false);
 
-    gtk_drag_get_data(widget, drag_context, target, time);
+    gtk_drag_get_data(widget, drag_context, target, static_cast<guint32>(time));
     return true;
 }
 

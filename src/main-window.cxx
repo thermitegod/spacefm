@@ -269,8 +269,8 @@ main_window_rubberband_all() noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, num_pages))
+            const auto num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, num_pages))
             {
                 ptk::browser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -292,8 +292,8 @@ main_window_refresh_all() noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, num_pages))
+            const auto num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, num_pages))
             {
                 ptk::browser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -318,8 +318,8 @@ main_window_close_all_invalid_tabs() noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto cur_tabx : std::views::iota(0z, pages))
+            const auto pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto cur_tabx : std::views::iota(0, pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
@@ -359,8 +359,8 @@ main_window_rebuild_all_toolbars(ptk::browser* browser) noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto cur_tabx : std::views::iota(0z, pages))
+            const auto pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto cur_tabx : std::views::iota(0, pages))
             {
                 ptk::browser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
@@ -418,8 +418,8 @@ main_window_reload_thumbnails_all_windows() noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, num_pages))
+            const auto num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, num_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

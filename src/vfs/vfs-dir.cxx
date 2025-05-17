@@ -431,7 +431,7 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
 
                 this->timer_running_ = false;
             },
-            timeout.count(),
+            static_cast<std::uint32_t>(timeout.count()),
             Glib::PRIORITY_LOW);
     }
 }

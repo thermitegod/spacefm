@@ -182,8 +182,8 @@ update_change_detection() noexcept
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : std::views::iota(0z, num_pages))
+            const auto num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0, num_pages))
             {
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

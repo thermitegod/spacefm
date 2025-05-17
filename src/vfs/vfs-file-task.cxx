@@ -144,7 +144,10 @@ vfs::file_task::append_add_log(const std::string_view msg) const noexcept
     this->lock();
     GtkTextIter iter;
     gtk_text_buffer_get_iter_at_mark(this->add_log_buf, &iter, this->add_log_end);
-    gtk_text_buffer_insert(this->add_log_buf, &iter, msg.data(), msg.length());
+    gtk_text_buffer_insert(this->add_log_buf,
+                           &iter,
+                           msg.data(),
+                           static_cast<std::int32_t>(msg.length()));
     this->unlock();
 }
 
