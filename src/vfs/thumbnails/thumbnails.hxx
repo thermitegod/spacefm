@@ -25,6 +25,6 @@
 
 namespace vfs::detail::thumbnail
 {
-GdkPixbuf* image(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept;
-GdkPixbuf* video(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept;
+GdkPixbuf* image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;
+GdkPixbuf* video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;
 } // namespace vfs::detail::thumbnail

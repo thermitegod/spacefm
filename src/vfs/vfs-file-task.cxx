@@ -580,11 +580,11 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                         break;
                     }
 
-                    const auto length = write(wfd, buffer, rsize);
+                    const auto length = write(wfd, buffer, static_cast<std::size_t>(rsize));
                     if (length > 0)
                     {
                         this->lock();
-                        this->progress += rsize;
+                        this->progress += static_cast<std::size_t>(rsize);
                         this->unlock();
                     }
                     else

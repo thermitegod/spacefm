@@ -262,7 +262,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
-    i32 n_targets = 0;
+    std::int32_t n_targets = 0;
 
     gtk_target_list_add_text_targets(target_list, 0);
     g_autofree GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -286,7 +286,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
 
     gtk_clipboard_set_with_data(clip,
                                 targets,
-                                n_targets,
+                                static_cast<std::uint32_t>(n_targets),
                                 clipboard_get_data,
                                 clipboard_clean_data,
                                 nullptr);
@@ -301,7 +301,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selecte
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
-    i32 n_targets = 0;
+    std::int32_t n_targets = 0;
 
     gtk_target_list_add_text_targets(target_list, 0);
     g_autofree GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
@@ -327,7 +327,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selecte
 
     gtk_clipboard_set_with_data(clip,
                                 targets,
-                                n_targets,
+                                static_cast<std::uint32_t>(n_targets),
                                 clipboard_get_data,
                                 clipboard_clean_data,
                                 nullptr);

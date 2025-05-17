@@ -254,9 +254,9 @@ PreferenceDialog::on_button_apply_clicked()
             auto object = this->drag_action_.get_selected_item();
             if (auto selected = std::dynamic_pointer_cast<ListColumns>(object))
             {
-                return (std::int32_t)selected->value_;
+                return selected->value_;
             }
-            return (std::int32_t)0; // failed to get value
+            return static_cast<std::uint32_t>(0); // failed to get value
         }(),
         .editor = this->editor_.get_text(),
         .terminal =
@@ -352,14 +352,14 @@ PreferenceDialog::init_general_tab() noexcept
 
         // this takes the icon size and finds the correct
         // position of the matching item in the store
-        const auto size_position = [&store](const std::uint32_t size)
+        const auto size_position = [&store](const std::int32_t size)
         {
             for (std::uint32_t i = 0; i < store->get_n_items(); ++i)
             {
                 auto item = store->get_item(i);
                 if (item)
                 {
-                    if (item->value_ == size)
+                    if (item->value_ == static_cast<std::uint32_t>(size))
                     {
                         return i;
                     }
@@ -399,14 +399,14 @@ PreferenceDialog::init_general_tab() noexcept
 
         // this takes the icon size and finds the correct
         // position of the matching item in the store
-        const auto size_position = [&store](const std::uint32_t size)
+        const auto size_position = [&store](const std::int32_t size)
         {
             for (std::uint32_t i = 0; i < store->get_n_items(); ++i)
             {
                 auto item = store->get_item(i);
                 if (item)
                 {
-                    if (item->value_ == size)
+                    if (item->value_ == static_cast<std::uint32_t>(size))
                     {
                         return i;
                     }
@@ -439,7 +439,8 @@ PreferenceDialog::init_general_tab() noexcept
 
         this->icon_size_tool_.set_model(store);
         this->icon_size_tool_.set_factory(factory);
-        this->icon_size_tool_.set_selected(this->settings_.settings.icon_size_tool);
+        this->icon_size_tool_.set_selected(
+            static_cast<std::uint32_t>(this->settings_.settings.icon_size_tool));
 
         page.add_row("Tool Icons:", this->icon_size_tool_);
     }

@@ -62,8 +62,8 @@
 #include "settings.hxx"
 #include "types.hxx"
 
-static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
-                                           void* user_data) noexcept;
+static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page,
+                                           std::int32_t page_num, void* user_data) noexcept;
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                std::time_t time, ptk::browser* browser) noexcept;
 
@@ -2064,7 +2064,7 @@ on_update_window_title(GtkMenuItem* item, MainWindow* main_window) noexcept
 }
 
 static void
-on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
+on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, std::int32_t page_num,
                                void* user_data) noexcept
 {
     (void)page;

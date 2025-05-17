@@ -294,7 +294,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     /* we do not allow children */
     assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
-    const u32 n = indices[0]; /* the n-th top level row */
+    const u32 n = static_cast<std::uint32_t>(indices[0]); /* the n-th top level row */
 
     if (n >= g_list_length(list->files) /* || n < 0 */)
     {
@@ -502,7 +502,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexc
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
     {
-        return g_list_length(list->files);
+        return static_cast<std::int32_t>(g_list_length(list->files));
     }
     return 0; /* otherwise, this is easy again for a list */
 }
@@ -528,7 +528,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
         return false;
     }
 
-    GList* l = g_list_nth(list->files, n);
+    GList* l = g_list_nth(list->files, static_cast<std::uint32_t>(n));
     assert(l != nullptr);
 
     iter->stamp = list->stamp;

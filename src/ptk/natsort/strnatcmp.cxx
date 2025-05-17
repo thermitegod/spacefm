@@ -48,8 +48,8 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
             const auto* end_lhs = std::ranges::find_if_not(std::string_view{&(*it_lhs)}, is_digit);
             const auto* end_rhs = std::ranges::find_if_not(std::string_view{&(*it_rhs)}, is_digit);
 
-            std::string_view num_lhs(it_lhs, end_lhs - it_lhs);
-            std::string_view num_rhs(it_rhs, end_rhs - it_rhs);
+            std::string_view num_lhs(it_lhs, std::string_view::size_type(end_lhs - it_lhs));
+            std::string_view num_rhs(it_rhs, std::string_view::size_type(end_rhs - it_rhs));
 
             f32 val_lhs{};
             f32 val_rhs{};

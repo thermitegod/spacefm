@@ -62,7 +62,7 @@ struct settings_extended
     datatype::settings settings;
 
     // xset settings
-    std::int32_t drag_action;
+    std::uint32_t drag_action;
     std::string editor;
     std::string terminal;
 

@@ -173,7 +173,8 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf.get_string_list(groups.at(k).data(), mime_type.data());
+                apps = kf.get_string_list(groups.at(static_cast<std::size_t>(k)).data(),
+                                          mime_type.data());
                 // if (apps.empty())
                 //     return nullptr;
             }
@@ -258,7 +259,7 @@ vfs::detail::mime_type::get_actions(const std::string_view mime_type) noexcept
             const auto index = std::ranges::distance(actions.cbegin(), it);
             if (index != 0)
             {
-                ztd::move(actions, index, 0);
+                ztd::move(actions, static_cast<std::size_t>(index), 0);
             }
         }
     }

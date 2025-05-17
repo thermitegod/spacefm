@@ -905,7 +905,7 @@ xset::get_name_from_panel(const panel_t panel, const xset::panel name) noexcept
 {
     assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
 
-    return xset_panel_lookup.at(name).panel[panel - 1];
+    return xset_panel_lookup.at(name).panel[static_cast<std::size_t>(panel - 1)];
 }
 
 // panel mode
@@ -917,7 +917,8 @@ xset::get_name_from_panel_mode(const panel_t panel, const xset::panel name,
     assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
     assert(name != xset::panel::show);
 
-    return xset_panel_lookup.at(name).panel_mode[panel - 1][magic_enum::enum_integer(mode)];
+    return xset_panel_lookup.at(name)
+        .panel_mode[static_cast<std::size_t>(panel - 1)][magic_enum::enum_integer(mode)];
 }
 
 // main window panel mode

@@ -390,7 +390,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (arg != "%c")
                 {
-                    argv[index] = this->display_name();
+                    argv[static_cast<std::size_t>(index)] = this->display_name();
                     break;
                 }
             }
@@ -405,7 +405,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (arg == "%k")
                 {
-                    argv[index] = this->path_;
+                    argv[static_cast<std::size_t>(index)] = this->path_;
                     break;
                 }
             }
@@ -420,7 +420,8 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (arg == "%i")
                 {
-                    argv[index] = std::format("--icon {}", this->icon_name());
+                    argv[static_cast<std::size_t>(index)] =
+                        std::format("--icon {}", this->icon_name());
                     break;
                 }
             }

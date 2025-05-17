@@ -423,7 +423,8 @@ update_drag_actions(const std::shared_ptr<config::settings>& settings,
 {
     (void)settings;
 
-    const auto current_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
+    const auto current_drag_action =
+        static_cast<std::uint32_t>(xset_get_int(xset::name::drag_action, xset::var::x));
     if (current_drag_action == new_settings.drag_action)
     {
         return;
@@ -471,7 +472,8 @@ show_preference_dialog(GtkWindow* parent,
         spacefm::package.dialog.preference,
         datatype::settings_extended{
             .settings = *settings,
-            .drag_action = xset_get_int(xset::name::drag_action, xset::var::x),
+            .drag_action =
+                static_cast<std::uint32_t>(xset_get_int(xset::name::drag_action, xset::var::x)),
             .editor = xset_get_s(xset::name::editor).value_or(""),
             .terminal = xset_get_s(xset::name::main_terminal).value_or(""),
             .details = {.supported_terminals = vfs::terminals::supported_names()}});

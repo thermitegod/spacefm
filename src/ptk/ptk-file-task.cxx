@@ -1439,7 +1439,8 @@ ptk::file_task::update() noexcept
             const auto since_last = elapsed - this->task->last_elapsed;
             if (since_last >= std::chrono::seconds(2))
             {
-                cur_speed = (this->task->progress - this->task->last_progress) / since_last.count();
+                cur_speed = (this->task->progress - this->task->last_progress) /
+                            static_cast<std::uint64_t>(since_last.count());
                 // logger::info<logger::domain::ptk>("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
                 this->task->last_elapsed = elapsed;
                 this->task->last_speed = cur_speed;
@@ -1447,7 +1448,8 @@ ptk::file_task::update() noexcept
             }
             else if (since_last > std::chrono::milliseconds(100))
             {
-                cur_speed = (this->task->progress - this->task->last_progress) / since_last.count();
+                cur_speed = (this->task->progress - this->task->last_progress) /
+                            static_cast<std::uint64_t>(since_last.count());
             }
             else
             {
@@ -1545,7 +1547,7 @@ ptk::file_task::update() noexcept
         u64 avg_speed = 0;
         if (elapsed > std::chrono::seconds::zero())
         {
-            avg_speed = this->task->progress / elapsed.count();
+            avg_speed = this->task->progress / static_cast<std::uint64_t>(elapsed.count());
         }
         else
         {
@@ -2356,9 +2358,10 @@ ptk::file_task::query_overwrite() noexcept
         !unique_name.empty() ? std::filesystem::path(unique_name).filename() : "";
     const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";
 
-    const auto pos = !filename_parts.extension.empty()
-                         ? filename.size() - filename_parts.extension.size() - 1
-                         : -1;
+    const std::int32_t pos =
+        !filename_parts.extension.empty()
+            ? static_cast<std::int32_t>(filename.size() - filename_parts.extension.size() - 1)
+            : -1;
 
     // create dialog
     if (this->progress_dlg_)
@@ -2524,9 +2527,7 @@ ptk::file_task::query_overwrite() noexcept
     g_signal_connect(G_OBJECT(query_input), "key-press-event", G_CALLBACK(on_query_input_keypress), this);
     // clang-format on
     GtkWidget* input_buf = GTK_WIDGET(gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input)));
-    gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(input_buf),
-                                       &iter,
-                                       static_cast<std::int32_t>(pos));
+    gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(input_buf), &iter, pos);
     gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(input_buf), &iter);
     // clang-format off
     g_signal_connect(G_OBJECT(input_buf), "changed", G_CALLBACK(on_multi_input_changed), query_input);

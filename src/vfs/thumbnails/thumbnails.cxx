@@ -51,7 +51,7 @@ enum class thumbnail_mode : std::uint8_t
 };
 
 static GdkPixbuf*
-thumbnail_create(const std::shared_ptr<vfs::file>& file, const u32 thumb_size,
+thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
                  const thumbnail_mode mode) noexcept
 {
     const auto [thumbnail_create_size, thumbnail_cache] =
@@ -196,11 +196,11 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const u32 thumb_size,
     }
 
     // Scale thumbnail to requested size from cached thumbnail
-    const auto fixed_size = thumb_size;
-    const auto original_width = gdk_pixbuf_get_width(thumbnail);
-    const auto original_height = gdk_pixbuf_get_height(thumbnail);
-    auto new_width = fixed_size;
-    auto new_height = fixed_size;
+    const i32 fixed_size = thumb_size;
+    const i32 original_width = gdk_pixbuf_get_width(thumbnail);
+    const i32 original_height = gdk_pixbuf_get_height(thumbnail);
+    i32 new_width = fixed_size;
+    i32 new_height = fixed_size;
     if (original_width > original_height)
     { // Scale by width
         new_height = (fixed_size * original_height) / original_width;
@@ -220,13 +220,13 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const u32 thumb_size,
 }
 
 GdkPixbuf*
-vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::image);
 }
 
 GdkPixbuf*
-vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::video);
 }

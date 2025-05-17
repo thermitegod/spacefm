@@ -1415,7 +1415,7 @@ ptk::view::file_task::create(MainWindow* main_window) noexcept
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
-        i64 j = 0;
+        u64 j = 0;
         for (const auto [index, value] : std::views::enumerate(task_names))
         {
             if (xset_get_int(value, xset::var::x) == static_cast<i32>(i))
@@ -1428,7 +1428,7 @@ ptk::view::file_task::create(MainWindow* main_window) noexcept
                 }
                 gtk_tree_view_column_set_fixed_width(col, width);
 
-                j = index;
+                j = static_cast<std::uint64_t>(index);
 
                 break;
             }

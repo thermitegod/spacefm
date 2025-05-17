@@ -175,8 +175,6 @@ flags += cpp.get_supported_arguments([
     '-Wno-double-promotion', # warns when using NAN
     '-Wno-cast-function-type-mismatch',
 
-    '-Wno-sign-conversion',  # lots of warnings from glibmm
-
     # '-Wno-deprecated-declarations',
 ])
 

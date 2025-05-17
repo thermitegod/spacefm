@@ -1767,8 +1767,8 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
         usize idx = 0;
         for (const auto [order_index, order_value] : std::views::enumerate(global::columns))
         {
-            idx = order_index;
-            if (xset_get_int_panel(p, global::columns.at(order_index).xset_name, xset::var::x) ==
+            idx = static_cast<std::size_t>(order_index);
+            if (xset_get_int_panel(p, global::columns.at(idx).xset_name, xset::var::x) ==
                 magic_enum::enum_integer(column.column))
             {
                 break;
@@ -2932,7 +2932,9 @@ ptk::browser::get_n_all_files() const noexcept
 u64
 ptk::browser::get_n_visible_files() const noexcept
 {
-    return this->file_list_ ? gtk_tree_model_iter_n_children(this->file_list_, nullptr) : 0;
+    return this->file_list_ ? static_cast<std::uint64_t>(
+                                  gtk_tree_model_iter_n_children(this->file_list_, nullptr))
+                            : 0;
 }
 
 void

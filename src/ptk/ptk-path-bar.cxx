@@ -314,7 +314,7 @@ insert_complete(GtkEntry* entry) noexcept
             }
             else
             {
-                i32 i = 0;
+                usize i = 0;
                 while (filename.string()[i] && filename.string()[i] == long_prefix[i])
                 {
                     i++;

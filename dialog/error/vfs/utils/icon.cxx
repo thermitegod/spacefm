@@ -20,7 +20,7 @@
 #include "icon.hxx"
 
 Gtk::Image
-vfs::utils::load_icon(const std::string_view icon_name, const std::uint32_t icon_size) noexcept
+vfs::utils::load_icon(const std::string_view icon_name, const std::int32_t icon_size) noexcept
 {
     Gtk::Image icon;
 

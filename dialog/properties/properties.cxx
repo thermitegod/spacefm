@@ -182,7 +182,7 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 
     this->set_visible(true);
 
-    this->notebook_.set_current_page(opts.page);
+    this->notebook_.set_current_page(static_cast<std::int32_t>(opts.page));
 }
 
 bool

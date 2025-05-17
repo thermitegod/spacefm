@@ -21,5 +21,5 @@
 
 namespace vfs::utils
 {
-Gtk::Image load_icon(const std::string_view icon_name, const std::uint32_t icon_size) noexcept;
+Gtk::Image load_icon(const std::string_view icon_name, const std::int32_t icon_size) noexcept;
 } // namespace vfs::utils

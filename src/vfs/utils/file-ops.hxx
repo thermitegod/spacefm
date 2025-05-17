@@ -58,8 +58,8 @@ read_file(const std::filesystem::path& path,
     {
         std::vector<char> buffer(CHUNK_SIZE, 0);
 
-        file.read(buffer.data(), buffer.size());
-        result.append(buffer.data(), file.gcount());
+        file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+        result.append(buffer.data(), static_cast<std::string::size_type>(file.gcount()));
         if (result.size() > max_size) [[unlikely]]
         {
             return std::unexpected{vfs::error_code::file_too_large};
@@ -104,8 +104,8 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
     std::string result;
     std::vector<char> buffer(size, 0);
 
-    file.read(buffer.data(), buffer.size());
-    result.append(buffer.data(), file.gcount());
+    file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+    result.append(buffer.data(), static_cast<std::string::size_type>(file.gcount()));
 
     if (file.fail() && !file.eof()) [[unlikely]]
     {
@@ -142,7 +142,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
         return {vfs::error_code::file_open_failure};
     }
 
-    file.write(buffer.data(), buffer.size());
+    file.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
 
     if (file.fail()) [[unlikely]]
     {
