@@ -17,6 +17,7 @@
 #include <print>
 #include <ranges>
 #include <string_view>
+#include <utility>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -362,7 +363,7 @@ PreferenceDialog::init_general_tab() noexcept
                 auto item = store->get_item(i);
                 if (item)
                 {
-                    if (item->value_ == static_cast<std::uint32_t>(size))
+                    if (std::cmp_equal(item->value_, size))
                     {
                         return i;
                     }
@@ -410,7 +411,7 @@ PreferenceDialog::init_general_tab() noexcept
                 auto item = store->get_item(i);
                 if (item)
                 {
-                    if (item->value_ == static_cast<std::uint32_t>(size))
+                    if (std::cmp_equal(item->value_, size))
                     {
                         return i;
                     }

@@ -120,7 +120,7 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
     }
 
     std::size_t i = 0;
-    while (i < length)
+    while (std::cmp_less(i, length))
     {
         auto* const event = (inotify_event*)&buffer[i];
         if (event->len)

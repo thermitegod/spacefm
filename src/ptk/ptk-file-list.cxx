@@ -20,6 +20,7 @@
 #include <functional>
 #include <span>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <cassert>
@@ -298,7 +299,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     const auto n = indices[0]; /* the n-th top level row */
 
-    if (static_cast<std::uint32_t>(n) >= g_list_length(list->files) /* || n < 0 */)
+    if (std::cmp_greater_equal(n, g_list_length(list->files) /* || n < 0 */))
     {
         return false;
     }
@@ -525,7 +526,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
     }
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (static_cast<u32>(n) >= g_list_length(list->files))
+    if (std::cmp_greater_equal(n, g_list_length(list->files)))
     { //  || n < 0)
         return false;
     }
