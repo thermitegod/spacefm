@@ -525,6 +525,7 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: dependencies,
+    cpp_pch: 'pch/pch.hxx',
 )
 
 ## Standalone Dialogs

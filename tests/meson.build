@@ -62,6 +62,7 @@ test_suite = build_target(
     include_directories: incdir_tests,
     install: false,
     dependencies: dependencies_tests,
+    cpp_pch: '../pch/pch.hxx',
 )
 
 test('SpaceFM Test Suite', test_suite)

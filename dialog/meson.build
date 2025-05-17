@@ -33,6 +33,7 @@ spacefm = build_target(
         glibmm4_dep,
         giomm4_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # App Chooser
@@ -59,6 +60,7 @@ spacefm = build_target(
         concurrencpp_dep,
         pugixml_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Error
@@ -83,6 +85,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # File Action
@@ -105,6 +108,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # File Chooser
@@ -127,6 +131,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # File Create
@@ -152,6 +157,7 @@ spacefm = build_target(
 
         pugixml_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # File Rename
@@ -177,6 +183,7 @@ spacefm = build_target(
 
         pugixml_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Keybinding
@@ -200,6 +207,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Keybinding Set Key
@@ -223,6 +231,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Message
@@ -245,6 +254,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Pattern
@@ -267,6 +277,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Preference
@@ -289,6 +300,7 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Properties
@@ -321,6 +333,7 @@ spacefm = build_target(
         pugixml_dep,
         media_dependencies,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
 
 # Text
@@ -343,4 +356,5 @@ spacefm = build_target(
         giomm4_dep,
         sigc_dep,
     ],
+    cpp_pch: '../pch/pch.hxx',
 )
