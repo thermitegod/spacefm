@@ -146,7 +146,8 @@ parse_mounts(const bool report) noexcept
                 if (subdir_mount)
                 {
                     // is a subdir mount - ignore if block device
-                    const dev_t devnum = makedev(mount.major, mount.minor);
+                    const dev_t devnum = makedev(static_cast<std::uint32_t>(mount.major),
+                                                 static_cast<std::uint32_t>(mount.minor));
                     const auto udevice = global::udev.device_from_devnum('b', devnum);
                     if (udevice)
                     {
@@ -165,7 +166,8 @@ parse_mounts(const bool report) noexcept
             else
             {
                 // initial load !report do not add non-block devices
-                const dev_t devnum = makedev(mount.major, mount.minor);
+                const dev_t devnum = makedev(static_cast<std::uint32_t>(mount.major),
+                                             static_cast<std::uint32_t>(mount.minor));
                 const auto udevice = global::udev.device_from_devnum('b', devnum);
                 if (udevice)
                 {
@@ -269,7 +271,8 @@ parse_mounts(const bool report) noexcept
     {
         for (const devmount_t& devmount : changed)
         {
-            const dev_t devnum = makedev(devmount->major, devmount->minor);
+            const dev_t devnum = makedev(static_cast<std::uint32_t>(devmount->major),
+                                         static_cast<std::uint32_t>(devmount->minor));
             const auto udevice = global::udev.device_from_devnum('b', devnum);
             if (!udevice)
             {
