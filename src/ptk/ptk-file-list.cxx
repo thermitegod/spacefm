@@ -166,7 +166,7 @@ static void
 ptk_file_list_init(ptk::file_list* list) noexcept
 {
     list->files = nullptr;
-    list->sort_order = (GtkSortType)-1;
+    list->sort_order = (GtkSortType)0;
     list->sort_col = ptk::file_list::column::name;
     list->stamp = ptk::utils::stamp();
 }

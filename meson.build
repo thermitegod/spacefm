@@ -183,7 +183,6 @@ if cpp.get_id() == 'gcc'
     flags += cpp.get_supported_arguments([
         '-Wno-cast-function-type',
         '-Wno-cast-qual',
-        '-Wno-conversion', # TODO
         '-Wno-maybe-uninitialized',
         '-Wno-shadow',  # gcc is a lot stricter than clang
     ])
