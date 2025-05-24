@@ -47,6 +47,7 @@ vfs::monitor::monitor(const std::filesystem::path& path) : path_(path)
     }
 
     this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_);
+    this->inotify_io_channel_->set_encoding();
     this->inotify_io_channel_->set_buffered(true);
     this->inotify_io_channel_->set_flags(Glib::IO_FLAG_NONBLOCK);
 
