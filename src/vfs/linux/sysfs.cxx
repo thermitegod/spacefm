@@ -69,19 +69,3 @@ vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
     }
     return std::nullopt;
 }
-
-std::optional<f64>
-vfs::linux::sysfs::get_f64(const std::filesystem::path& dir,
-                           const std::string_view attribute) noexcept
-{
-    const auto buffer = get_string(dir, attribute);
-    if (buffer)
-    {
-        const auto result = ztd::from_string<f64>(*buffer);
-        if (result)
-        {
-            return result.value();
-        }
-    }
-    return std::nullopt;
-}
