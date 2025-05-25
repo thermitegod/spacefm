@@ -38,7 +38,7 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
 
             const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-            REQUIRE_EQ(result, result_wanted);
+            CHECK_EQ(result, result_wanted);
         }
 
         SUBCASE("file multiple extension")
@@ -50,7 +50,7 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
 
             const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-            REQUIRE_EQ(result, result_wanted);
+            CHECK_EQ(result, result_wanted);
         }
 
         SUBCASE("file single extension")
@@ -62,7 +62,7 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
 
             const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-            REQUIRE_EQ(result, result_wanted);
+            CHECK_EQ(result, result_wanted);
         }
 
         SUBCASE("directory")
@@ -74,7 +74,7 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
 
             const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-            REQUIRE_EQ(result, result_wanted);
+            CHECK_EQ(result, result_wanted);
         }
     }
 
@@ -86,63 +86,63 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
         {
             const auto result = vfs::utils::split_basename_extension("");
 
-            REQUIRE_EQ(result.basename, "");
-            REQUIRE_EQ(result.extension, "");
-            REQUIRE_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(result.basename, "");
+            CHECK_EQ(result.extension, "");
+            CHECK_EQ(result.is_multipart_extension, false);
         }
 
         SUBCASE("missing extension")
         {
             const auto result = vfs::utils::split_basename_extension("test");
 
-            REQUIRE_EQ(result.basename, "test");
-            REQUIRE_EQ(result.extension, "");
-            REQUIRE_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(result.basename, "test");
+            CHECK_EQ(result.extension, "");
+            CHECK_EQ(result.is_multipart_extension, false);
         }
 
         SUBCASE("multiple extension")
         {
             const auto result = vfs::utils::split_basename_extension("test.tar.gz");
 
-            REQUIRE_EQ(result.basename, "test");
-            REQUIRE_EQ(result.extension, ".tar.gz");
-            REQUIRE_EQ(result.is_multipart_extension, true);
+            CHECK_EQ(result.basename, "test");
+            CHECK_EQ(result.extension, ".tar.gz");
+            CHECK_EQ(result.is_multipart_extension, true);
         }
 
         SUBCASE("single extension")
         {
             const auto result = vfs::utils::split_basename_extension("test.txt");
 
-            REQUIRE_EQ(result.basename, "test");
-            REQUIRE_EQ(result.extension, ".txt");
-            REQUIRE_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(result.basename, "test");
+            CHECK_EQ(result.extension, ".txt");
+            CHECK_EQ(result.is_multipart_extension, false);
         }
 
         SUBCASE("hidden")
         {
             const auto result = vfs::utils::split_basename_extension(".hidden");
 
-            REQUIRE_EQ(result.basename, ".hidden");
-            REQUIRE_EQ(result.extension, "");
-            REQUIRE_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(result.basename, ".hidden");
+            CHECK_EQ(result.extension, "");
+            CHECK_EQ(result.is_multipart_extension, false);
         }
 
         SUBCASE("hidden single extension")
         {
             const auto result = vfs::utils::split_basename_extension(".hidden.txt");
 
-            REQUIRE_EQ(result.basename, ".hidden");
-            REQUIRE_EQ(result.extension, ".txt");
-            REQUIRE_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(result.basename, ".hidden");
+            CHECK_EQ(result.extension, ".txt");
+            CHECK_EQ(result.is_multipart_extension, false);
         }
 
         SUBCASE("hidden multiple extension")
         {
             const auto result = vfs::utils::split_basename_extension(".hidden.tar.zst");
 
-            REQUIRE_EQ(result.basename, ".hidden");
-            REQUIRE_EQ(result.extension, ".tar.zst");
-            REQUIRE_EQ(result.is_multipart_extension, true);
+            CHECK_EQ(result.basename, ".hidden");
+            CHECK_EQ(result.extension, ".tar.zst");
+            CHECK_EQ(result.is_multipart_extension, true);
         }
     }
 }

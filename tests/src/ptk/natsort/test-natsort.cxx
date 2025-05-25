@@ -775,7 +775,7 @@ TEST_SUITE("natsort" * doctest::description(""))
 
         REQUIRE(!unsorted.empty());
         REQUIRE(!sorted.empty());
-        REQUIRE_EQ(unsorted.size(), sorted.size());
+        CHECK_EQ(unsorted.size(), sorted.size());
 
         std::ranges::sort(unsorted, sorter::natural{});
 
