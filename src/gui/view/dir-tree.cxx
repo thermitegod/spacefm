@@ -29,11 +29,12 @@
 
 #include "utils/strdup.hxx"
 
-#include "gui/dir-tree-view.hxx"
 #include "gui/dir-tree.hxx"
 #include "gui/file-menu.hxx"
 #include "gui/file-task.hxx"
 #include "gui/utils/utils.hxx"
+
+#include "gui/view/dir-tree.hxx"
 
 #include "logger.hxx"
 

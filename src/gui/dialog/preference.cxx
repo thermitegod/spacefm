@@ -29,8 +29,9 @@
 #include "xset/xset-lookup.hxx"
 
 #include "gui/file-browser.hxx"
-#include "gui/location-view.hxx"
 #include "gui/main-window.hxx"
+
+#include "gui/view/location.hxx"
 
 #include "gui/dialog/preference.hxx"
 

@@ -38,8 +38,9 @@
 #include "xset/xset.hxx"
 
 #include "gui/file-browser.hxx"
-#include "gui/file-task-view.hxx"
 #include "gui/main-window.hxx"
+
+#include "gui/view/file-task.hxx"
 
 #include "gui/dialog/text.hxx"
 

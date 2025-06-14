@@ -38,8 +38,9 @@
 #include "settings/config.hxx"
 #include "settings/settings.hxx"
 
-#include "gui/location-view.hxx"
 #include "gui/main-window.hxx"
+
+#include "gui/view/location.hxx"
 
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/text.hxx"

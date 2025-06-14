@@ -41,13 +41,14 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset.hxx"
 
-#include "gui/bookmark-view.hxx"
 #include "gui/file-browser.hxx"
 #include "gui/file-menu.hxx"
-#include "gui/file-task-view.hxx"
-#include "gui/location-view.hxx"
 #include "gui/main-window.hxx"
 #include "gui/utils/utils.hxx"
+
+#include "gui/view/bookmark.hxx"
+#include "gui/view/file-task.hxx"
+#include "gui/view/location.hxx"
 
 #include "gui/dialog/about.hxx"
 #include "gui/dialog/file-search.hxx"

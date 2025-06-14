@@ -42,9 +42,10 @@
 #include "xset/xset.hxx"
 
 #include "gui/file-task.hxx"
-#include "gui/location-view.hxx"
 #include "gui/main-window.hxx"
 #include "gui/utils/utils.hxx"
+
+#include "gui/view/location.hxx"
 
 #include "gui/dialog/text.hxx"
 

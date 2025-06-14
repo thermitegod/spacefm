@@ -38,11 +38,9 @@
 #include "xset/xset.hxx"
 
 #include "gui/archiver.hxx"
-#include "gui/bookmark-view.hxx"
 #include "gui/clipboard.hxx"
 #include "gui/file-list.hxx"
 #include "gui/file-menu.hxx"
-#include "gui/file-task-view.hxx"
 #include "gui/main-window.hxx"
 #include "gui/utils/utils.hxx"
 
@@ -50,6 +48,9 @@
 #include "gui/action/open.hxx"
 #include "gui/action/paste.hxx"
 #include "gui/action/trash.hxx"
+
+#include "gui/view/bookmark.hxx"
+#include "gui/view/file-task.hxx"
 
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/create.hxx"

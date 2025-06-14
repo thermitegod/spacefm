@@ -45,8 +45,9 @@
 
 #include "gui/clipboard.hxx"
 #include "gui/file-browser.hxx"
-#include "gui/file-task-view.hxx"
 #include "gui/main-window.hxx"
+
+#include "gui/view/file-task.hxx"
 
 #include "vfs/file-task.hxx"
 #include "vfs/terminals.hxx"

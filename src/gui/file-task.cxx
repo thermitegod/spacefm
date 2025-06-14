@@ -39,9 +39,10 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset.hxx"
 
-#include "gui/file-task-view.hxx"
 #include "gui/file-task.hxx"
 #include "gui/utils/utils.hxx"
+
+#include "gui/view/file-task.hxx"
 
 #include "vfs/utils/utils.hxx"
 

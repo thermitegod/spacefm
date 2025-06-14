@@ -189,11 +189,13 @@ IncludeCategories:
   - Regex: '^"xset/.*"'
     Priority: 56
   - Regex: '^"gui/action/.*"'
-    Priority: 58
+    Priority: 61
+  - Regex: '^"gui/view/.*"'
+    Priority: 62
   - Regex: '^"gui/dialog/.*"'
-    Priority: 59
+    Priority: 63
   - Regex: '^"gui/.*"'
-    Priority: 57
+    Priority: 60
   - Regex: '^"vfs/libudevpp/.*"'
     Priority: 71
   - Regex: '^"vfs/linux/.*"'

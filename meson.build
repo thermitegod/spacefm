@@ -449,16 +449,13 @@ sources += files(
     'src/utils/strdup.cxx',
 
     'src/gui/archiver.cxx',
-    'src/gui/bookmark-view.cxx',
     'src/gui/clipboard.cxx',
     'src/gui/dir-tree.cxx',
-    'src/gui/dir-tree-view.cxx',
     'src/gui/file-browser.cxx',
     'src/gui/file-list.cxx',
     'src/gui/file-menu.cxx',
     'src/gui/file-task.cxx',
-    'src/gui/file-task-view.cxx',
-    'src/gui/location-view.cxx',
+
     'src/gui/main-window.cxx',
     'src/gui/path-bar.cxx',
     'src/gui/search-bar.cxx',
@@ -479,6 +476,11 @@ sources += files(
     'src/gui/dialog/rename.cxx',
     'src/gui/dialog/rename-batch.cxx',
     'src/gui/dialog/text.cxx',
+
+    'src/gui/view/bookmark.cxx',
+    'src/gui/view/dir-tree.cxx',
+    'src/gui/view/file-task.cxx',
+    'src/gui/view/location.cxx',
 
     'src/gui/utils/utils.cxx',
     'src/gui/utils/history.cxx',

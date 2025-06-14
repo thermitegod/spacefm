@@ -15,8 +15,9 @@
 
 #include <filesystem>
 
-#include "gui/bookmark-view.hxx"
 #include "gui/file-browser.hxx"
+
+#include "gui/view/bookmark.hxx"
 
 #include "bookmarks.hxx"
 
