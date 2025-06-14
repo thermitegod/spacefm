@@ -42,7 +42,7 @@
 
 #include "logger.hxx"
 
-#define PTK_TYPE_DIR_TREE (ptk_dir_tree_get_type())
+#define PTK_TYPE_DIR_TREE (gui_dir_tree_get_type())
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
 
 struct PtkDirTreeClass
@@ -51,41 +51,41 @@ struct PtkDirTreeClass
     /* Default signal handlers */
 };
 
-static void ptk_dir_tree_init(ptk::dir_tree* tree) noexcept;
-static void ptk_dir_tree_class_init(PtkDirTreeClass* klass) noexcept;
-static void ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept;
-static void ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
-static void ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
-static void ptk_dir_tree_finalize(GObject* object) noexcept;
+static void gui_dir_tree_init(gui::dir_tree* tree) noexcept;
+static void gui_dir_tree_class_init(PtkDirTreeClass* klass) noexcept;
+static void gui_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept;
+static void gui_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
+static void gui_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
+static void gui_dir_tree_finalize(GObject* object) noexcept;
 
-static GtkTreeModelFlags ptk_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept;
-static std::int32_t ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept;
-static GType ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept;
-static gboolean ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static GtkTreeModelFlags gui_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept;
+static std::int32_t gui_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept;
+static GType gui_dir_tree_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept;
+static gboolean gui_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                       GtkTreePath* path) noexcept;
-static GtkTreePath* ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static void ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
+static GtkTreePath* gui_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static void gui_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
                                    GValue* value) noexcept;
-static gboolean ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static gboolean ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static gboolean gui_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                            GtkTreeIter* parent) noexcept;
-static gboolean ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static std::int32_t ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model,
+static gboolean gui_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static std::int32_t gui_dir_tree_iter_n_children(GtkTreeModel* tree_model,
                                                  GtkTreeIter* iter) noexcept;
-static gboolean ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                             GtkTreeIter* parent, std::int32_t n) noexcept;
-static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                          GtkTreeIter* child) noexcept;
 
 static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-static std::unordered_map<ptk::dir_tree::column, GType> column_types;
+static std::unordered_map<gui::dir_tree::column, GType> column_types;
 }
 
 static GType
-ptk_dir_tree_get_type() noexcept
+gui_dir_tree_get_type() noexcept
 {
     static GType type = 0;
     if (!type)
@@ -93,26 +93,26 @@ ptk_dir_tree_get_type() noexcept
         static const GTypeInfo type_info = {sizeof(PtkDirTreeClass),
                                             nullptr, /* base_init */
                                             nullptr, /* base_finalize */
-                                            (GClassInitFunc)ptk_dir_tree_class_init,
+                                            (GClassInitFunc)gui_dir_tree_class_init,
                                             nullptr, /* class finalize */
                                             nullptr, /* class_data */
-                                            sizeof(ptk::dir_tree),
+                                            sizeof(gui::dir_tree),
                                             0, /* n_preallocs */
-                                            (GInstanceInitFunc)ptk_dir_tree_init,
+                                            (GInstanceInitFunc)gui_dir_tree_init,
                                             nullptr /* value_table */};
 
         static const GInterfaceInfo tree_model_info = {
-            (GInterfaceInitFunc)ptk_dir_tree_tree_model_init,
+            (GInterfaceInitFunc)gui_dir_tree_tree_model_init,
             nullptr,
             nullptr};
 
         static const GInterfaceInfo drag_src_info = {
-            (GInterfaceInitFunc)ptk_dir_tree_drag_source_init,
+            (GInterfaceInitFunc)gui_dir_tree_drag_source_init,
             nullptr,
             nullptr};
 
         static const GInterfaceInfo drag_dest_info = {
-            (GInterfaceInitFunc)ptk_dir_tree_drag_dest_init,
+            (GInterfaceInitFunc)gui_dir_tree_drag_dest_init,
             nullptr,
             nullptr};
 
@@ -128,71 +128,71 @@ ptk_dir_tree_get_type() noexcept
 }
 
 static void
-ptk_dir_tree_init(ptk::dir_tree* tree) noexcept
+gui_dir_tree_init(gui::dir_tree* tree) noexcept
 {
-    tree->root = ptk::dir_tree::node::create();
+    tree->root = gui::dir_tree::node::create();
     tree->root->tree = tree;
     tree->root->n_children = 1;
-    const auto child = ptk::dir_tree::node::create(tree, tree->root, "/");
+    const auto child = gui::dir_tree::node::create(tree, tree->root, "/");
     tree->root->children = child;
-    tree->stamp = ptk::utils::stamp().data();
+    tree->stamp = gui::utils::stamp().data();
 }
 
 static void
-ptk_dir_tree_class_init(PtkDirTreeClass* klass) noexcept
+gui_dir_tree_class_init(PtkDirTreeClass* klass) noexcept
 {
     GObjectClass* object_class = nullptr;
 
     parent_class = (GObjectClass*)g_type_class_peek_parent(klass);
     object_class = (GObjectClass*)klass;
 
-    object_class->finalize = ptk_dir_tree_finalize;
+    object_class->finalize = gui_dir_tree_finalize;
 }
 
 static void
-ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept
+gui_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept
 {
-    iface->get_flags = ptk_dir_tree_get_flags;
-    iface->get_n_columns = ptk_dir_tree_get_n_columns;
-    iface->get_column_type = ptk_dir_tree_get_column_type;
-    iface->get_iter = ptk_dir_tree_get_iter;
-    iface->get_path = ptk_dir_tree_get_path;
-    iface->get_value = ptk_dir_tree_get_value;
-    iface->iter_next = ptk_dir_tree_iter_next;
-    iface->iter_children = ptk_dir_tree_iter_children;
-    iface->iter_has_child = ptk_dir_tree_iter_has_child;
-    iface->iter_n_children = ptk_dir_tree_iter_n_children;
-    iface->iter_nth_child = ptk_dir_tree_iter_nth_child;
-    iface->iter_parent = ptk_dir_tree_iter_parent;
+    iface->get_flags = gui_dir_tree_get_flags;
+    iface->get_n_columns = gui_dir_tree_get_n_columns;
+    iface->get_column_type = gui_dir_tree_get_column_type;
+    iface->get_iter = gui_dir_tree_get_iter;
+    iface->get_path = gui_dir_tree_get_path;
+    iface->get_value = gui_dir_tree_get_value;
+    iface->iter_next = gui_dir_tree_iter_next;
+    iface->iter_children = gui_dir_tree_iter_children;
+    iface->iter_has_child = gui_dir_tree_iter_has_child;
+    iface->iter_n_children = gui_dir_tree_iter_n_children;
+    iface->iter_nth_child = gui_dir_tree_iter_nth_child;
+    iface->iter_parent = gui_dir_tree_iter_parent;
 
-    global::column_types[ptk::dir_tree::column::icon] = GDK_TYPE_PIXBUF;
-    global::column_types[ptk::dir_tree::column::disp_name] = G_TYPE_STRING;
-    global::column_types[ptk::dir_tree::column::info] = G_TYPE_POINTER;
+    global::column_types[gui::dir_tree::column::icon] = GDK_TYPE_PIXBUF;
+    global::column_types[gui::dir_tree::column::disp_name] = G_TYPE_STRING;
+    global::column_types[gui::dir_tree::column::info] = G_TYPE_POINTER;
 }
 
 static void
-ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
-{
-    (void)iface;
-    /* FIXME: Unused. Will this cause any problem? */
-}
-
-static void
-ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
+gui_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_dir_tree_finalize(GObject* object) noexcept
+gui_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
+{
+    (void)iface;
+    /* FIXME: Unused. Will this cause any problem? */
+}
+
+static void
+gui_dir_tree_finalize(GObject* object) noexcept
 {
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
 }
 
 static GtkTreeModelFlags
-ptk_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept
+gui_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
@@ -200,28 +200,28 @@ ptk_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept
 }
 
 static std::int32_t
-ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept
+gui_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
-    return magic_enum::enum_count<ptk::dir_tree::column>();
+    return magic_enum::enum_count<gui::dir_tree::column>();
 }
 
 static GType
-ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept
+gui_dir_tree_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     // assert(index > (i32)G_N_ELEMENTS(column_types));
-    return global::column_types[ptk::dir_tree::column(index)];
+    return global::column_types[gui::dir_tree::column(index)];
 }
 
 static gboolean
-ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
+gui_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(path != nullptr);
 
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     if (!tree || !tree->root)
     {
         return false;
@@ -230,7 +230,7 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     const auto* indices = gtk_tree_path_get_indices(path);
     const auto depth = gtk_tree_path_get_depth(path);
 
-    std::shared_ptr<ptk::dir_tree::node> node = tree->root;
+    std::shared_ptr<gui::dir_tree::node> node = tree->root;
     assert(node != nullptr);
 
     for (const auto i : std::views::iota(0z, depth))
@@ -252,10 +252,10 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
 }
 
 static GtkTreePath*
-ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
     assert(iter != nullptr);
     // assert(iter->stamp != tree->stamp);
@@ -263,7 +263,7 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 
     GtkTreePath* path = gtk_tree_path_new();
 
-    auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
     assert(node->parent != nullptr);
 
@@ -282,21 +282,21 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 }
 
 static void
-ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
+gui_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
                        GValue* value) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(iter != nullptr);
     // assert(column > (i32)G_N_ELEMENTS(column_types));
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
 
-    g_value_init(value, global::column_types[ptk::dir_tree::column(column)]);
+    g_value_init(value, global::column_types[gui::dir_tree::column(column)]);
     const auto& file = node->file;
-    switch (ptk::dir_tree::column(column))
+    switch (gui::dir_tree::column(column))
     {
-        case ptk::dir_tree::column::icon:
+        case gui::dir_tree::column::icon:
         {
             if (!file)
             {
@@ -311,7 +311,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t
             }
             break;
         }
-        case ptk::dir_tree::column::disp_name:
+        case gui::dir_tree::column::disp_name:
         {
             if (file)
             {
@@ -323,7 +323,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t
             }
             break;
         }
-        case ptk::dir_tree::column::info:
+        case gui::dir_tree::column::info:
         {
             if (!file)
             {
@@ -336,7 +336,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t
 }
 
 static gboolean
-ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
 
@@ -345,10 +345,10 @@ ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
         return false;
     }
 
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
 
     /* Is this the last child in the parent node? */
@@ -366,20 +366,20 @@ ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 }
 
 static gboolean
-ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+gui_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
                            GtkTreeIter* parent) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(parent != nullptr);
     assert(parent->user_data != nullptr);
 
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
 
-    std::shared_ptr<ptk::dir_tree::node> parent_node;
+    std::shared_ptr<gui::dir_tree::node> parent_node;
     if (parent)
     {
-        parent_node = static_cast<ptk::dir_tree::node*>(parent->user_data)->shared_from_this();
+        parent_node = static_cast<gui::dir_tree::node*>(parent->user_data)->shared_from_this();
     }
     else
     {
@@ -401,54 +401,54 @@ ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
 }
 
 static gboolean
-ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     (void)tree_model;
     assert(iter != nullptr);
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
     return node->n_children != 0;
 }
 
 static std::int32_t
-ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
 
     /* special case: if iter == nullptr, return number of top-level rows */
-    std::shared_ptr<ptk::dir_tree::node> node;
+    std::shared_ptr<gui::dir_tree::node> node;
     if (!iter)
     {
         node = tree->root;
     }
     else
     {
-        node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+        node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     }
 
     if (!node)
     {
-        logger::error<logger::domain::ptk>("!node");
+        logger::error<logger::domain::gui>("!node");
         return -1;
     }
     return node->n_children;
 }
 
 static gboolean
-ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
+gui_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
                             std::int32_t n) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
 
-    std::shared_ptr<ptk::dir_tree::node> parent_node;
+    std::shared_ptr<gui::dir_tree::node> parent_node;
     if (parent)
     {
-        parent_node = static_cast<ptk::dir_tree::node*>(parent->user_data)->shared_from_this();
+        parent_node = static_cast<gui::dir_tree::node*>(parent->user_data)->shared_from_this();
         assert(parent_node != nullptr);
     }
     else
@@ -473,13 +473,13 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 }
 
 static gboolean
-ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
+gui_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
 {
     assert(iter != nullptr);
     assert(child != nullptr);
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
 
     if (node->parent != tree->root)
@@ -491,17 +491,17 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
     return false;
 }
 
-// ptk::dir_tree
+// gui::dir_tree
 
-ptk::dir_tree*
-ptk::dir_tree::create() noexcept
+gui::dir_tree*
+gui::dir_tree::create() noexcept
 {
     return PTK_DIR_TREE(g_object_new(PTK_TYPE_DIR_TREE, nullptr));
 }
 
 std::int32_t
-ptk::dir_tree::node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
-                            const std::shared_ptr<ptk::dir_tree::node>& b) noexcept
+gui::dir_tree::node_compare(const std::shared_ptr<gui::dir_tree::node>& a,
+                            const std::shared_ptr<gui::dir_tree::node>& b) noexcept
 {
     const auto& file1 = a->file;
     const auto& file2 = b->file;
@@ -514,15 +514,15 @@ ptk::dir_tree::node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
 }
 
 void
-ptk::dir_tree::insert_child(const std::shared_ptr<ptk::dir_tree::node>& parent_node,
+gui::dir_tree::insert_child(const std::shared_ptr<gui::dir_tree::node>& parent_node,
                             const std::filesystem::path& file_path) noexcept
 {
-    std::shared_ptr<ptk::dir_tree::node> node;
-    const std::shared_ptr<ptk::dir_tree::node> child_node =
-        ptk::dir_tree::node::create(this, parent_node, file_path);
+    std::shared_ptr<gui::dir_tree::node> node;
+    const std::shared_ptr<gui::dir_tree::node> child_node =
+        gui::dir_tree::node::create(this, parent_node, file_path);
     for (node = parent_node->children; node; node = node->next)
     {
-        if (ptk::dir_tree::node_compare(child_node, node) >= 0)
+        if (gui::dir_tree::node_compare(child_node, node) >= 0)
         {
             break;
         }
@@ -561,21 +561,21 @@ ptk::dir_tree::insert_child(const std::shared_ptr<ptk::dir_tree::node>& parent_n
     it.user_data = child_node.get();
     it.user_data2 = it.user_data3 = nullptr;
 
-    GtkTreePath* tree_path = ptk_dir_tree_get_path(GTK_TREE_MODEL(this), &it);
+    GtkTreePath* tree_path = gui_dir_tree_get_path(GTK_TREE_MODEL(this), &it);
     gtk_tree_model_row_inserted(GTK_TREE_MODEL(this), tree_path, &it);
     gtk_tree_model_row_has_child_toggled(GTK_TREE_MODEL(this), tree_path, &it);
     gtk_tree_path_free(tree_path);
 }
 
 void
-ptk::dir_tree::delete_child(const std::shared_ptr<ptk::dir_tree::node>& child) noexcept
+gui::dir_tree::delete_child(const std::shared_ptr<gui::dir_tree::node>& child) noexcept
 {
     GtkTreeIter child_it;
     child_it.stamp = this->stamp;
     child_it.user_data = child.get();
     child_it.user_data2 = child_it.user_data3 = nullptr;
 
-    GtkTreePath* tree_path = ptk_dir_tree_get_path(GTK_TREE_MODEL(this), &child_it);
+    GtkTreePath* tree_path = gui_dir_tree_get_path(GTK_TREE_MODEL(this), &child_it);
     gtk_tree_model_row_deleted(GTK_TREE_MODEL(this), tree_path);
     gtk_tree_path_free(tree_path);
 
@@ -610,11 +610,11 @@ ptk::dir_tree::delete_child(const std::shared_ptr<ptk::dir_tree::node>& child) n
 }
 
 void
-ptk::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
+gui::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
 {
     (void)tree_path;
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
     ++node->n_expand;
     if (node->n_expand > 1 || node->n_children > 1)
@@ -649,11 +649,11 @@ ptk::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
 }
 
 void
-ptk::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
+gui::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
 {
     (void)path;
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
     --node->n_expand;
 
@@ -674,8 +674,8 @@ ptk::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
         }
         node->monitor = vfs::monitor();
 
-        std::shared_ptr<ptk::dir_tree::node> child;
-        std::shared_ptr<ptk::dir_tree::node> next;
+        std::shared_ptr<gui::dir_tree::node> child;
+        std::shared_ptr<gui::dir_tree::node> next;
         for (child = node->children; child; child = next)
         {
             next = child->next;
@@ -685,11 +685,11 @@ ptk::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
 }
 
 std::optional<std::filesystem::path>
-ptk::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
+gui::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
 {
     assert(iter->user_data != nullptr);
 
-    const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
+    const auto node = static_cast<gui::dir_tree::node*>(iter->user_data)->shared_from_this();
     if (node != nullptr && node->file != nullptr)
     {
         return node->file->path();
@@ -697,40 +697,40 @@ ptk::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
     return std::nullopt;
 }
 
-// ptk::dir_tree::node
+// gui::dir_tree::node
 
-std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::create() noexcept
+std::shared_ptr<gui::dir_tree::node>
+gui::dir_tree::node::create() noexcept
 {
-    return std::make_shared<ptk::dir_tree::node>();
+    return std::make_shared<gui::dir_tree::node>();
 }
 
-std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::create(ptk::dir_tree* tree, const std::shared_ptr<ptk::dir_tree::node>& parent,
+std::shared_ptr<gui::dir_tree::node>
+gui::dir_tree::node::create(gui::dir_tree* tree, const std::shared_ptr<gui::dir_tree::node>& parent,
                             const std::filesystem::path& path) noexcept
 {
-    const auto node = ptk::dir_tree::node::create();
+    const auto node = gui::dir_tree::node::create();
     node->tree = tree;
     node->parent = parent;
     if (!path.empty())
     {
         node->file = vfs::file::create(path);
         node->n_children = 1;
-        node->children = ptk::dir_tree::node::create(tree, node, std::filesystem::path());
+        node->children = gui::dir_tree::node::create(tree, node, std::filesystem::path());
         node->last = node->children;
     }
     return node;
 }
 
-std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::get_nth_node(std::int32_t n) const noexcept
+std::shared_ptr<gui::dir_tree::node>
+gui::dir_tree::node::get_nth_node(std::int32_t n) const noexcept
 {
     if (n >= this->n_children || n < 0)
     {
         return nullptr;
     }
 
-    std::shared_ptr<ptk::dir_tree::node> node = this->children;
+    std::shared_ptr<gui::dir_tree::node> node = this->children;
     assert(node != nullptr);
 
     while (n > 0 && node)
@@ -742,8 +742,8 @@ ptk::dir_tree::node::get_nth_node(std::int32_t n) const noexcept
 }
 
 std::ptrdiff_t
-ptk::dir_tree::node::get_node_index(
-    const std::shared_ptr<ptk::dir_tree::node>& child) const noexcept
+gui::dir_tree::node::get_node_index(
+    const std::shared_ptr<gui::dir_tree::node>& child) const noexcept
 {
     if (!child)
     {
@@ -751,7 +751,7 @@ ptk::dir_tree::node::get_node_index(
     }
 
     std::int32_t i = 0;
-    std::shared_ptr<ptk::dir_tree::node> node;
+    std::shared_ptr<gui::dir_tree::node> node;
     for (node = this->children; node; node = node->next)
     {
         if (node == child)
@@ -763,10 +763,10 @@ ptk::dir_tree::node::get_node_index(
     return -1;
 }
 
-std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::find_node(const std::string_view name) const noexcept
+std::shared_ptr<gui::dir_tree::node>
+gui::dir_tree::node::find_node(const std::string_view name) const noexcept
 {
-    std::shared_ptr<ptk::dir_tree::node> child;
+    std::shared_ptr<gui::dir_tree::node> child;
     for (child = this->children; child; child = child->next)
     {
         if (child->file && child->file->name() == name)
@@ -778,7 +778,7 @@ ptk::dir_tree::node::find_node(const std::string_view name) const noexcept
 }
 
 void
-ptk::dir_tree::node::on_monitor_event(const vfs::monitor::event event,
+gui::dir_tree::node::on_monitor_event(const vfs::monitor::event event,
                                       const std::filesystem::path& path) noexcept
 {
     auto child = this->find_node(path.filename().string());

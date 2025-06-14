@@ -98,7 +98,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     const auto request_data = glz::read_json<socket::socket_request_data>(socket_commands_json);
     if (!request_data)
     {
-        logger::error<logger::domain::ptk>(
+        logger::error<logger::domain::gui>(
             "Failed to decode json: {}",
             glz::format_error(request_data.error(), socket_commands_json));
 
@@ -183,7 +183,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     {
         return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
-    ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
+    gui::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
         gtk_notebook_get_nth_page(main_window->get_panel_notebook(panel), tab.data() - 1));
 
     // command
@@ -533,7 +533,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, "invalid column width"};
             }
-            if (browser->is_view_mode(ptk::browser::view_mode::list_view))
+            if (browser->is_view_mode(gui::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
@@ -578,54 +578,54 @@ socket::command(const std::string_view socket_commands_json) noexcept
         { // COLUMN
             const auto subproperty = request_data->subproperty;
 
-            auto j = ptk::browser::sort_order::name;
+            auto j = gui::browser::sort_order::name;
             if (subproperty == "name")
             {
-                j = ptk::browser::sort_order::name;
+                j = gui::browser::sort_order::name;
             }
             else if (subproperty == "size")
             {
-                j = ptk::browser::sort_order::size;
+                j = gui::browser::sort_order::size;
             }
             else if (subproperty == "bytes")
             {
-                j = ptk::browser::sort_order::bytes;
+                j = gui::browser::sort_order::bytes;
             }
             else if (subproperty == "type")
             {
-                j = ptk::browser::sort_order::type;
+                j = gui::browser::sort_order::type;
             }
             else if (subproperty == "mime")
             {
-                j = ptk::browser::sort_order::mime;
+                j = gui::browser::sort_order::mime;
             }
             else if (subproperty == "permission")
             {
-                j = ptk::browser::sort_order::perm;
+                j = gui::browser::sort_order::perm;
             }
             else if (subproperty == "owner")
             {
-                j = ptk::browser::sort_order::owner;
+                j = gui::browser::sort_order::owner;
             }
             else if (subproperty == "group")
             {
-                j = ptk::browser::sort_order::group;
+                j = gui::browser::sort_order::group;
             }
             else if (subproperty == "accessed")
             {
-                j = ptk::browser::sort_order::atime;
+                j = gui::browser::sort_order::atime;
             }
             else if (subproperty == "created")
             {
-                j = ptk::browser::sort_order::btime;
+                j = gui::browser::sort_order::btime;
             }
             else if (subproperty == "metadata")
             {
-                j = ptk::browser::sort_order::ctime;
+                j = gui::browser::sort_order::ctime;
             }
             else if (subproperty == "modified")
             {
-                j = ptk::browser::sort_order::mtime;
+                j = gui::browser::sort_order::mtime;
             }
 
             else
@@ -705,7 +705,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const auto subproperty = request_data->subproperty;
 
-            if (!browser->is_view_mode(ptk::browser::view_mode::icon_view))
+            if (!browser->is_view_mode(gui::browser::view_mode::icon_view))
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
@@ -772,7 +772,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
         {
-            ptk::clipboard::cut_or_copy_file_list(data, property == "clipboard_copy_files");
+            gui::clipboard::cut_or_copy_file_list(data, property == "clipboard_copy_files");
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {
@@ -1079,7 +1079,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         { // COLUMN
             const auto subproperty = request_data->subproperty;
 
-            if (browser->is_view_mode(ptk::browser::view_mode::list_view))
+            if (browser->is_view_mode(gui::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
@@ -1350,13 +1350,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
         // find task
         GtkTreeIter it;
-        ptk::file_task* ptask = nullptr;
+        gui::file_task* ptask = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
         {
             do
             {
-                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, gui::view::file_task::column::data, &ptask, -1);
                 const std::string str = std::format("{}", logger::utils::ptr(ptask));
                 if (str == data[i.cast_unsigned().data()])
                 {
@@ -1388,19 +1388,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::count);
+            j = magic_enum::enum_integer(gui::view::file_task::column::count);
         }
         else if (property == "directory" || subproperty == "from")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::path);
+            j = magic_enum::enum_integer(gui::view::file_task::column::path);
         }
         else if (property == "item")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::file);
+            j = magic_enum::enum_integer(gui::view::file_task::column::file);
         }
         else if (property == "to")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::to);
+            j = magic_enum::enum_integer(gui::view::file_task::column::to);
         }
         else if (property == "progress")
         {
@@ -1419,23 +1419,23 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::total);
+            j = magic_enum::enum_integer(gui::view::file_task::column::total);
         }
         else if (property == "curspeed")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::curspeed);
+            j = magic_enum::enum_integer(gui::view::file_task::column::curspeed);
         }
         else if (property == "curremain")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::curest);
+            j = magic_enum::enum_integer(gui::view::file_task::column::curest);
         }
         else if (property == "avgspeed")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::avgspeed);
+            j = magic_enum::enum_integer(gui::view::file_task::column::avgspeed);
         }
         else if (property == "avgremain")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::avgest);
+            j = magic_enum::enum_integer(gui::view::file_task::column::avgest);
         }
         else if (property == "queue_state")
         {
@@ -1453,7 +1453,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (subproperty == "stop")
             {
-                ptk::view::file_task::stop(main_window->task_view,
+                gui::view::file_task::stop(main_window->task_view,
                                            xset::set::get(xset::name::task_stop_all),
                                            nullptr);
             }
@@ -1461,7 +1461,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("invalid queue_state '{}'", subproperty)};
             }
-            ptk::view::file_task::start_queued(main_window->task_view, nullptr);
+            gui::view::file_task::start_queued(main_window->task_view, nullptr);
             return {SOCKET_SUCCESS, ""};
         }
         else
@@ -1474,13 +1474,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
     { // TASKNUM PROPERTY
         // find task
         GtkTreeIter it;
-        ptk::file_task* ptask = nullptr;
+        gui::file_task* ptask = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
         {
             do
             {
-                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, gui::view::file_task::column::data, &ptask, -1);
                 const std::string str = std::format("{}", logger::utils::ptr(ptask));
                 if (str == property)
                 {
@@ -1508,19 +1508,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::count);
+            j = magic_enum::enum_integer(gui::view::file_task::column::count);
         }
         else if (property == "directory" || property == "from")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::path);
+            j = magic_enum::enum_integer(gui::view::file_task::column::path);
         }
         else if (property == "item")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::file);
+            j = magic_enum::enum_integer(gui::view::file_task::column::file);
         }
         else if (property == "to")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::to);
+            j = magic_enum::enum_integer(gui::view::file_task::column::to);
         }
         else if (property == "progress")
         {
@@ -1528,35 +1528,35 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::total);
+            j = magic_enum::enum_integer(gui::view::file_task::column::total);
         }
         else if (property == "curspeed")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::curspeed);
+            j = magic_enum::enum_integer(gui::view::file_task::column::curspeed);
         }
         else if (property == "curremain")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::curest);
+            j = magic_enum::enum_integer(gui::view::file_task::column::curest);
         }
         else if (property == "avgspeed")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::avgspeed);
+            j = magic_enum::enum_integer(gui::view::file_task::column::avgspeed);
         }
         else if (property == "avgremain")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::avgest);
+            j = magic_enum::enum_integer(gui::view::file_task::column::avgest);
         }
         else if (property == "elapsed")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::elapsed);
+            j = magic_enum::enum_integer(gui::view::file_task::column::elapsed);
         }
         else if (property == "started")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::started);
+            j = magic_enum::enum_integer(gui::view::file_task::column::started);
         }
         else if (property == "status")
         {
-            j = magic_enum::enum_integer(ptk::view::file_task::column::status);
+            j = magic_enum::enum_integer(gui::view::file_task::column::status);
         }
         else if (property == "queue_state")
         {
@@ -1602,7 +1602,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const auto task_data = glz::read_json<socket::socket_task_data>(data[0]);
             if (!task_data)
             {
-                logger::error<logger::domain::ptk>(
+                logger::error<logger::domain::gui>(
                     "Failed to decode json: {}",
                     glz::format_error(task_data.error(), socket_commands_json));
 
@@ -1621,8 +1621,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 cmd.append(std::format(" {}", c));
             }
 
-            ptk::file_task* ptask =
-                ptk_file_exec_new(!task_data->title.empty() ? task_data->title : cmd,
+            gui::file_task* ptask =
+                gui_file_exec_new(!task_data->title.empty() ? task_data->title : cmd,
                                   !task_data->cwd.empty() ? task_data->cwd.data() : browser->cwd(),
                                   GTK_WIDGET(browser),
                                   browser->task_view());
@@ -1727,7 +1727,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_INVALID, std::format("invalid mount TARGET '{}'", value)};
             }
             // Task
-            ptk::file_task* ptask = ptk_file_exec_new(property,
+            gui::file_task* ptask = gui_file_exec_new(property,
                                                       browser->cwd(),
                                                       GTK_WIDGET(browser),
                                                       browser->task_view());
@@ -1753,7 +1753,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const auto raw_file_task_data = glz::read_json<socket::socket_file_task_data>(data[0]);
             if (!raw_file_task_data)
             {
-                logger::error<logger::domain::ptk>(
+                logger::error<logger::domain::gui>(
                     "Failed to decode json: {}",
                     glz::format_error(raw_file_task_data.error(), socket_commands_json));
 
@@ -1847,7 +1847,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
-            ptk::file_task* ptask = ptk_file_task_new(task_type,
+            gui::file_task* ptask = gui_file_task_new(task_type,
                                                       file_list,
                                                       target_dir,
                                                       GTK_WINDOW(parent),

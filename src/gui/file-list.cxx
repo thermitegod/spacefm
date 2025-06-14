@@ -50,74 +50,74 @@ struct PtkFileListClass
     // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
 };
 
-static GType ptk_file_list_get_type() noexcept;
+static GType gui_file_list_get_type() noexcept;
 
-static void ptk_file_list_init(ptk::file_list* list) noexcept;
-static void ptk_file_list_class_init(PtkFileListClass* klass) noexcept;
-static void ptk_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept;
-static void ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept;
-static void ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
-static void ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
-static void ptk_file_list_finalize(GObject* object) noexcept;
+static void gui_file_list_init(gui::file_list* list) noexcept;
+static void gui_file_list_class_init(PtkFileListClass* klass) noexcept;
+static void gui_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept;
+static void gui_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept;
+static void gui_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
+static void gui_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
+static void gui_file_list_finalize(GObject* object) noexcept;
 
-static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept;
-static std::int32_t ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept;
-static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept;
-static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static GtkTreeModelFlags gui_file_list_get_flags(GtkTreeModel* tree_model) noexcept;
+static std::int32_t gui_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept;
+static GType gui_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept;
+static gboolean gui_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                        GtkTreePath* path) noexcept;
-static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static GtkTreePath* gui_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static void gui_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                     std::int32_t column, GValue* value) noexcept;
-static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static gboolean gui_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                             GtkTreeIter* parent) noexcept;
-static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static std::int32_t ptk_file_list_iter_n_children(GtkTreeModel* tree_model,
+static gboolean gui_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static std::int32_t gui_file_list_iter_n_children(GtkTreeModel* tree_model,
                                                   GtkTreeIter* iter) noexcept;
-static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                              GtkTreeIter* parent, std::int32_t n) noexcept;
-static gboolean ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
+static gboolean gui_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                           GtkTreeIter* child) noexcept;
-static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable,
+static gboolean gui_file_list_get_sort_column_id(GtkTreeSortable* sortable,
                                                  std::int32_t* sort_column_id,
                                                  GtkSortType* order) noexcept;
-static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
+static void gui_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                              GtkSortType order) noexcept;
-static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
+static void gui_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                         GtkTreeIterCompareFunc sort_func, void* user_data,
                                         GDestroyNotify destroy) noexcept;
-static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
+static void gui_file_list_set_default_sort_func(GtkTreeSortable* sortable,
                                                 GtkTreeIterCompareFunc sort_func, void* user_data,
                                                 GDestroyNotify destroy) noexcept;
 
-#define PTK_TYPE_FILE_LIST (ptk_file_list_get_type())
+#define PTK_TYPE_FILE_LIST (gui_file_list_get_type())
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
 
 static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-const ztd::map<ptk::file_list::column, GType, 15> column_types{{
-    {ptk::file_list::column::big_icon, GDK_TYPE_PIXBUF},
-    {ptk::file_list::column::small_icon, GDK_TYPE_PIXBUF},
-    {ptk::file_list::column::name, G_TYPE_STRING},
-    {ptk::file_list::column::size, G_TYPE_STRING},
-    {ptk::file_list::column::bytes, G_TYPE_STRING},
-    {ptk::file_list::column::type, G_TYPE_STRING},
-    {ptk::file_list::column::mime, G_TYPE_STRING},
-    {ptk::file_list::column::perm, G_TYPE_STRING},
-    {ptk::file_list::column::owner, G_TYPE_STRING},
-    {ptk::file_list::column::group, G_TYPE_STRING},
-    {ptk::file_list::column::atime, G_TYPE_STRING},
-    {ptk::file_list::column::btime, G_TYPE_STRING},
-    {ptk::file_list::column::ctime, G_TYPE_STRING},
-    {ptk::file_list::column::mtime, G_TYPE_STRING},
-    {ptk::file_list::column::info, G_TYPE_POINTER},
+const ztd::map<gui::file_list::column, GType, 15> column_types{{
+    {gui::file_list::column::big_icon, GDK_TYPE_PIXBUF},
+    {gui::file_list::column::small_icon, GDK_TYPE_PIXBUF},
+    {gui::file_list::column::name, G_TYPE_STRING},
+    {gui::file_list::column::size, G_TYPE_STRING},
+    {gui::file_list::column::bytes, G_TYPE_STRING},
+    {gui::file_list::column::type, G_TYPE_STRING},
+    {gui::file_list::column::mime, G_TYPE_STRING},
+    {gui::file_list::column::perm, G_TYPE_STRING},
+    {gui::file_list::column::owner, G_TYPE_STRING},
+    {gui::file_list::column::group, G_TYPE_STRING},
+    {gui::file_list::column::atime, G_TYPE_STRING},
+    {gui::file_list::column::btime, G_TYPE_STRING},
+    {gui::file_list::column::ctime, G_TYPE_STRING},
+    {gui::file_list::column::mtime, G_TYPE_STRING},
+    {gui::file_list::column::info, G_TYPE_POINTER},
 }};
 }
 
 GType
-ptk_file_list_get_type() noexcept
+gui_file_list_get_type() noexcept
 {
     static GType type = 0;
     if (!type)
@@ -125,31 +125,31 @@ ptk_file_list_get_type() noexcept
         static const GTypeInfo type_info = {sizeof(PtkFileListClass),
                                             nullptr, /* base_init */
                                             nullptr, /* base_finalize */
-                                            (GClassInitFunc)ptk_file_list_class_init,
+                                            (GClassInitFunc)gui_file_list_class_init,
                                             nullptr, /* class finalize */
                                             nullptr, /* class_data */
-                                            sizeof(ptk::file_list),
+                                            sizeof(gui::file_list),
                                             0, /* n_preallocs */
-                                            (GInstanceInitFunc)ptk_file_list_init,
+                                            (GInstanceInitFunc)gui_file_list_init,
                                             nullptr /* value_table */};
 
         static const GInterfaceInfo tree_model_info = {
-            (GInterfaceInitFunc)ptk_file_list_tree_model_init,
+            (GInterfaceInitFunc)gui_file_list_tree_model_init,
             nullptr,
             nullptr};
 
         static const GInterfaceInfo tree_sortable_info = {
-            (GInterfaceInitFunc)ptk_file_list_tree_sortable_init,
+            (GInterfaceInitFunc)gui_file_list_tree_sortable_init,
             nullptr,
             nullptr};
 
         static const GInterfaceInfo drag_src_info = {
-            (GInterfaceInitFunc)ptk_file_list_drag_source_init,
+            (GInterfaceInitFunc)gui_file_list_drag_source_init,
             nullptr,
             nullptr};
 
         static const GInterfaceInfo drag_dest_info = {
-            (GInterfaceInitFunc)ptk_file_list_drag_dest_init,
+            (GInterfaceInitFunc)gui_file_list_drag_dest_init,
             nullptr,
             nullptr};
 
@@ -166,82 +166,82 @@ ptk_file_list_get_type() noexcept
 }
 
 static void
-ptk_file_list_init(ptk::file_list* list) noexcept
+gui_file_list_init(gui::file_list* list) noexcept
 {
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
-    list->sort_col = ptk::file_list::column::name;
-    list->stamp = ptk::utils::stamp().data();
+    list->sort_col = gui::file_list::column::name;
+    list->stamp = gui::utils::stamp().data();
 }
 
 static void
-ptk_file_list_class_init(PtkFileListClass* klass) noexcept
+gui_file_list_class_init(PtkFileListClass* klass) noexcept
 {
     GObjectClass* object_class = nullptr;
 
     parent_class = (GObjectClass*)g_type_class_peek_parent(klass);
     object_class = (GObjectClass*)klass;
 
-    object_class->finalize = ptk_file_list_finalize;
+    object_class->finalize = gui_file_list_finalize;
 }
 
 static void
-ptk_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept
+gui_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept
 {
-    iface->get_flags = ptk_file_list_get_flags;
-    iface->get_n_columns = ptk_file_list_get_n_columns;
-    iface->get_column_type = ptk_file_list_get_column_type;
-    iface->get_iter = ptk_file_list_get_iter;
-    iface->get_path = ptk_file_list_get_path;
-    iface->get_value = ptk_file_list_get_value;
-    iface->iter_next = ptk_file_list_iter_next;
-    iface->iter_children = ptk_file_list_iter_children;
-    iface->iter_has_child = ptk_file_list_iter_has_child;
-    iface->iter_n_children = ptk_file_list_iter_n_children;
-    iface->iter_nth_child = ptk_file_list_iter_nth_child;
-    iface->iter_parent = ptk_file_list_iter_parent;
+    iface->get_flags = gui_file_list_get_flags;
+    iface->get_n_columns = gui_file_list_get_n_columns;
+    iface->get_column_type = gui_file_list_get_column_type;
+    iface->get_iter = gui_file_list_get_iter;
+    iface->get_path = gui_file_list_get_path;
+    iface->get_value = gui_file_list_get_value;
+    iface->iter_next = gui_file_list_iter_next;
+    iface->iter_children = gui_file_list_iter_children;
+    iface->iter_has_child = gui_file_list_iter_has_child;
+    iface->iter_n_children = gui_file_list_iter_n_children;
+    iface->iter_nth_child = gui_file_list_iter_nth_child;
+    iface->iter_parent = gui_file_list_iter_parent;
 }
 
 static void
-ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept
+gui_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept
 {
-    /* iface->sort_column_changed = ptk_file_list_sort_column_changed; */
-    iface->get_sort_column_id = ptk_file_list_get_sort_column_id;
-    iface->set_sort_column_id = ptk_file_list_set_sort_column_id;
-    iface->set_sort_func = ptk_file_list_set_sort_func;
-    iface->set_default_sort_func = ptk_file_list_set_default_sort_func;
+    /* iface->sort_column_changed = gui_file_list_sort_column_changed; */
+    iface->get_sort_column_id = gui_file_list_get_sort_column_id;
+    iface->set_sort_column_id = gui_file_list_set_sort_column_id;
+    iface->set_sort_func = gui_file_list_set_sort_func;
+    iface->set_default_sort_func = gui_file_list_set_default_sort_func;
     iface->has_default_sort_func = (gboolean (*)(GtkTreeSortable*)) false;
 }
 
 static void
-ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
+gui_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
+gui_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_file_list_finalize(GObject* object) noexcept
+gui_file_list_finalize(GObject* object) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(object);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(object);
 
     list->set_dir(nullptr);
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
 }
 
-ptk::file_list*
-ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, const bool show_hidden,
+gui::file_list*
+gui::file_list::create(const std::shared_ptr<vfs::dir>& dir, const bool show_hidden,
                        const std::string_view pattern) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
+    gui::file_list* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
     list->pattern = pattern.data();
     list->set_dir(dir);
@@ -249,7 +249,7 @@ ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, const bool show_hid
 }
 
 bool
-ptk::file_list::is_pattern_match(const std::filesystem::path& filename) const noexcept
+gui::file_list::is_pattern_match(const std::filesystem::path& filename) const noexcept
 {
     if (!this->pattern || std::strlen(this->pattern) == 0)
     {
@@ -259,7 +259,7 @@ ptk::file_list::is_pattern_match(const std::filesystem::path& filename) const no
 }
 
 static GtkTreeModelFlags
-ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept
+gui_file_list_get_flags(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -267,28 +267,28 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept
 }
 
 static std::int32_t
-ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept
+gui_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
-    return magic_enum::enum_count<ptk::file_list::column>();
+    return magic_enum::enum_count<gui::file_list::column>();
 }
 
 static GType
-ptk_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept
+gui_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     // assert(index > global::column_types.size());
-    return global::column_types.at(ptk::file_list::column(index));
+    return global::column_types.at(gui::file_list::column(index));
 }
 
 static gboolean
-ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
+gui_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(path != nullptr);
 
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     const auto* indices = gtk_tree_path_get_indices(path);
@@ -317,9 +317,9 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 }
 
 static GtkTreePath*
-ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     assert(iter != nullptr);
@@ -333,25 +333,25 @@ ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 }
 
 static void
-ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
+gui_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
                         GValue* value) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(iter != nullptr);
     // assert(column > global::column_types.size());
 
-    g_value_init(value, global::column_types.at(ptk::file_list::column(column)));
+    g_value_init(value, global::column_types.at(gui::file_list::column(column)));
 
     const auto file = static_cast<vfs::file*>(iter->user_data2)->shared_from_this();
 
     GdkPixbuf* icon = nullptr;
 
-    switch (ptk::file_list::column(column))
+    switch (gui::file_list::column(column))
     {
-        case ptk::file_list::column::big_icon:
+        case gui::file_list::column::big_icon:
             /* special file can use special icons saved as thumbnails*/
             if (file && !file->is_desktop_entry() &&
                 (list->max_thumbnail > file->size() ||
@@ -370,7 +370,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_
                 g_object_unref(icon);
             }
             break;
-        case ptk::file_list::column::small_icon:
+        case gui::file_list::column::small_icon:
             /* special file can use special icons saved as thumbnails*/
             if (file && (list->max_thumbnail > file->size() ||
                          (list->max_thumbnail != 0 && file->mime_type()->is_video())))
@@ -387,50 +387,50 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_
                 g_object_unref(icon);
             }
             break;
-        case ptk::file_list::column::name:
+        case gui::file_list::column::name:
             g_value_set_string(value, file->name().data());
             break;
-        case ptk::file_list::column::size:
+        case gui::file_list::column::size:
             g_value_set_string(value, file->display_size().data());
             break;
-        case ptk::file_list::column::bytes:
+        case gui::file_list::column::bytes:
             g_value_set_string(value, file->display_size_in_bytes().data());
             break;
-        case ptk::file_list::column::type:
+        case gui::file_list::column::type:
             g_value_set_string(value, file->mime_type()->description().data());
             break;
-        case ptk::file_list::column::mime:
+        case gui::file_list::column::mime:
             g_value_set_string(value, file->mime_type()->type().data());
             break;
-        case ptk::file_list::column::perm:
+        case gui::file_list::column::perm:
             g_value_set_string(value, file->display_permissions().data());
             break;
-        case ptk::file_list::column::owner:
+        case gui::file_list::column::owner:
             g_value_set_string(value, file->display_owner().data());
             break;
-        case ptk::file_list::column::group:
+        case gui::file_list::column::group:
             g_value_set_string(value, file->display_group().data());
             break;
-        case ptk::file_list::column::atime:
+        case gui::file_list::column::atime:
             g_value_set_string(value, file->display_atime().data());
             break;
-        case ptk::file_list::column::btime:
+        case gui::file_list::column::btime:
             g_value_set_string(value, file->display_btime().data());
             break;
-        case ptk::file_list::column::ctime:
+        case gui::file_list::column::ctime:
             g_value_set_string(value, file->display_ctime().data());
             break;
-        case ptk::file_list::column::mtime:
+        case gui::file_list::column::mtime:
             g_value_set_string(value, file->display_mtime().data());
             break;
-        case ptk::file_list::column::info:
+        case gui::file_list::column::info:
             g_value_set_pointer(value, file.get());
             break;
     }
 }
 
 static gboolean
-ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     if (iter == nullptr || iter->user_data == nullptr)
     {
@@ -438,7 +438,7 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
     }
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     GList* l = (GList*)iter->user_data;
@@ -457,7 +457,7 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 }
 
 static gboolean
-ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+gui_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
                             GtkTreeIter* parent) noexcept
 {
     /* this is a list, nodes have no children */
@@ -471,7 +471,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
     assert(parent->user_data != nullptr);
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     /* No rows => no first row */
@@ -488,7 +488,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
 }
 
 static gboolean
-ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     (void)tree_model;
     (void)iter;
@@ -496,11 +496,11 @@ ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexce
 }
 
 static std::int32_t
-ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
+gui_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
@@ -511,12 +511,12 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexc
 }
 
 static gboolean
-ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
+gui_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
                              std::int32_t n) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     /* a list has only top-level rows */
@@ -542,7 +542,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
 }
 
 static gboolean
-ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
+gui_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
 {
     (void)tree_model;
     (void)iter;
@@ -551,10 +551,10 @@ ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIt
 }
 
 static gboolean
-ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, std::int32_t* sort_column_id,
+gui_file_list_get_sort_column_id(GtkTreeSortable* sortable, std::int32_t* sort_column_id,
                                  GtkSortType* order) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
     {
         *sort_column_id = magic_enum::enum_integer(list->sort_col);
@@ -567,22 +567,22 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, std::int32_t* sort_c
 }
 
 static void
-ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
+gui_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                  GtkSortType order) noexcept
 {
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
-    if (list->sort_col == ptk::file_list::column(sort_column_id) && list->sort_order == order)
+    gui::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
+    if (list->sort_col == gui::file_list::column(sort_column_id) && list->sort_order == order)
     {
         return;
     }
-    list->sort_col = ptk::file_list::column(sort_column_id);
+    list->sort_col = gui::file_list::column(sort_column_id);
     list->sort_order = order;
     gtk_tree_sortable_sort_column_changed(sortable);
     list->sort();
 }
 
 static void
-ptk_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
+gui_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
                             GDestroyNotify destroy) noexcept
 {
@@ -591,38 +591,38 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    logger::warn<logger::domain::ptk>("ptk_file_list_set_sort_func: Not supported");
+    logger::warn<logger::domain::gui>("gui_file_list_set_sort_func: Not supported");
 }
 
 static void
-ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
+gui_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
                                     void* user_data, GDestroyNotify destroy) noexcept
 {
     (void)sortable;
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    logger::warn<logger::domain::ptk>("ptk_file_list_set_default_sort_func: Not supported");
+    logger::warn<logger::domain::gui>("gui_file_list_set_default_sort_func: Not supported");
 }
 
 static std::int32_t
 compare_files(const std::shared_ptr<vfs::file>& lhs, const std::shared_ptr<vfs::file>& rhs,
-              ptk::file_list* list) noexcept
+              gui::file_list* list) noexcept
 {
     std::int32_t result{0};
 
-    if (list->sort_dir_ != ptk::file_list::sort_dir::mixed)
+    if (list->sort_dir_ != gui::file_list::sort_dir::mixed)
     {
         result = lhs->is_directory() - rhs->is_directory();
         if (result != 0)
         {
-            return list->sort_dir_ == ptk::file_list::sort_dir::first ? -result : result;
+            return list->sort_dir_ == gui::file_list::sort_dir::first ? -result : result;
         }
     }
 
     switch (list->sort_col)
     {
-        case ptk::file_list::column::name:
+        case gui::file_list::column::name:
         {
             if (list->sort_natural)
             {
@@ -634,60 +634,60 @@ compare_files(const std::shared_ptr<vfs::file>& lhs, const std::shared_ptr<vfs::
             }
             break;
         }
-        case ptk::file_list::column::size:
-        case ptk::file_list::column::bytes:
+        case gui::file_list::column::size:
+        case gui::file_list::column::bytes:
         {
             result = (lhs->size() > rhs->size()) ? 1 : (lhs->size() == rhs->size()) ? 0 : -1;
             break;
         }
-        case ptk::file_list::column::type:
+        case gui::file_list::column::type:
         {
             result = lhs->mime_type()->type().compare(rhs->mime_type()->type());
             break;
         }
-        case ptk::file_list::column::mime:
+        case gui::file_list::column::mime:
         {
             result = lhs->mime_type()->description().compare(rhs->mime_type()->description());
             break;
         }
-        case ptk::file_list::column::perm:
+        case gui::file_list::column::perm:
         {
             result = lhs->display_permissions().compare(rhs->display_permissions());
             break;
         }
-        case ptk::file_list::column::owner:
+        case gui::file_list::column::owner:
         {
             result = lhs->display_owner().compare(rhs->display_owner());
             break;
         }
-        case ptk::file_list::column::group:
+        case gui::file_list::column::group:
         {
             result = lhs->display_group().compare(rhs->display_group());
             break;
         }
-        case ptk::file_list::column::atime:
+        case gui::file_list::column::atime:
         {
             result = (lhs->atime() > rhs->atime()) ? 1 : (lhs->atime() == rhs->atime()) ? 0 : -1;
             break;
         }
-        case ptk::file_list::column::btime:
+        case gui::file_list::column::btime:
         {
             result = (lhs->btime() > rhs->btime()) ? 1 : (lhs->btime() == rhs->btime()) ? 0 : -1;
             break;
         }
-        case ptk::file_list::column::ctime:
+        case gui::file_list::column::ctime:
         {
             result = (lhs->ctime() > rhs->ctime()) ? 1 : (lhs->ctime() == rhs->ctime()) ? 0 : -1;
             break;
         }
-        case ptk::file_list::column::mtime:
+        case gui::file_list::column::mtime:
         {
             result = (lhs->mtime() > rhs->mtime()) ? 1 : (lhs->mtime() == rhs->mtime()) ? 0 : -1;
             break;
         }
-        case ptk::file_list::column::big_icon:
-        case ptk::file_list::column::small_icon:
-        case ptk::file_list::column::info:
+        case gui::file_list::column::big_icon:
+        case gui::file_list::column::small_icon:
+        case gui::file_list::column::info:
             result = 0;
     };
 
@@ -695,11 +695,11 @@ compare_files(const std::shared_ptr<vfs::file>& lhs, const std::shared_ptr<vfs::
 }
 
 static GList*
-ptk_file_info_list_sort(ptk::file_list* list) noexcept
+gui_file_info_list_sort(gui::file_list* list) noexcept
 {
-    assert(list->sort_col != ptk::file_list::column::big_icon);
-    assert(list->sort_col != ptk::file_list::column::small_icon);
-    assert(list->sort_col != ptk::file_list::column::info);
+    assert(list->sort_col != gui::file_list::column::big_icon);
+    assert(list->sort_col != gui::file_list::column::small_icon);
+    assert(list->sort_col != gui::file_list::column::info);
 
     auto file_list = [](GList* list)
     {
@@ -727,10 +727,10 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
     }(file_list);
 }
 
-// ptk::file_list
+// gui::file_list
 
 void
-ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
+gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 {
     if (this->dir == new_dir)
     {
@@ -771,7 +771,7 @@ ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 }
 
 void
-ptk::file_list::sort() noexcept
+gui::file_list::sort() noexcept
 {
     if (g_list_length(this->files) <= 1)
     {
@@ -779,7 +779,7 @@ ptk::file_list::sort() noexcept
     }
 
     /* sort the list */
-    this->files = ptk_file_info_list_sort(this);
+    this->files = gui_file_info_list_sort(this);
 
     GtkTreePath* path = gtk_tree_path_new();
     gtk_tree_model_rows_reordered(GTK_TREE_MODEL(this), path, nullptr, nullptr);
@@ -787,7 +787,7 @@ ptk::file_list::sort() noexcept
 }
 
 void
-ptk::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
     {
@@ -811,7 +811,7 @@ ptk::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 void
-ptk::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!this->dir || this->dir->is_loading())
     {
@@ -840,7 +840,7 @@ ptk::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 void
-ptk::file_list::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!file || !this->dir)
     {
@@ -865,7 +865,7 @@ ptk::file_list::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file
 }
 
 void
-ptk::file_list::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
 {
     this->file_created(file);
 
@@ -882,7 +882,7 @@ ptk::file_list::on_file_list_file_created(const std::shared_ptr<vfs::file>& file
 }
 
 void
-ptk::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
 {
     /* If there is no file info, that means the dir itself was deleted. */
     if (!file)
@@ -916,9 +916,9 @@ ptk::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file
 }
 
 void
-ptk::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    // logger::debug<logger::domain::ptk>("LOADED: {}", file->name());
+    // logger::debug<logger::domain::gui>("LOADED: {}", file->name());
     if (!file)
     {
         return;
@@ -927,7 +927,7 @@ ptk::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::fi
 }
 
 void
-ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept
+gui::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept
 {
     const u64 old_max_thumbnail = this->max_thumbnail;
     this->max_thumbnail = max_file_size;
@@ -976,7 +976,7 @@ ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
             else
             {
                 this->dir->load_thumbnail(file, this->thumbnail_size);
-                // logger::debug<logger::domain::ptk>("REQUEST: {}", file->name());
+                // logger::debug<logger::domain::gui>("REQUEST: {}", file->name());
             }
         }
     }

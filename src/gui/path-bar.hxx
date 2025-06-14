@@ -21,7 +21,7 @@
 
 #include "gui/file-browser.hxx"
 
-namespace ptk
+namespace gui
 {
-GtkEntry* path_bar_new(ptk::browser* browser) noexcept;
+GtkEntry* path_bar_new(gui::browser* browser) noexcept;
 }

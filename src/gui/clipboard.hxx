@@ -28,7 +28,7 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::clipboard
+namespace gui::clipboard
 {
 void cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                        bool copy) noexcept;
@@ -44,4 +44,4 @@ void copy_text(const std::string_view text) noexcept;
 void cut_or_copy_file_list(const std::span<const std::string> selected_files, bool copy) noexcept;
 std::vector<std::filesystem::path> get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
                                                   i32* missing_targets) noexcept;
-} // namespace ptk::clipboard
+} // namespace gui::clipboard

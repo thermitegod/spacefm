@@ -48,10 +48,10 @@ static void on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* i
                                            GtkTreePath* path, void* user_data) noexcept;
 
 static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event,
-                                          ptk::browser* browser) noexcept;
+                                          gui::browser* browser) noexcept;
 
 static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event,
-                                       ptk::browser* browser) noexcept;
+                                       gui::browser* browser) noexcept;
 
 static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
                      bool path_currently_selected, void* data) noexcept;
@@ -64,13 +64,13 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
                                                 i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
                                                 std::time_t time, void* user_data) noexcept;
 static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                         i32 y, std::time_t time, ptk::browser* browser) noexcept;
+                                         i32 y, std::time_t time, gui::browser* browser) noexcept;
 
 static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
-                                        std::time_t time, ptk::browser* browser) noexcept;
+                                        std::time_t time, gui::browser* browser) noexcept;
 
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                       i32 y, std::time_t time, ptk::browser* browser) noexcept;
+                                       i32 y, std::time_t time, gui::browser* browser) noexcept;
 
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data) noexcept
@@ -85,7 +85,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data) noexcept
     }
 
     std::shared_ptr<vfs::file> file;
-    gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
+    gtk_tree_model_get(model, iter, gui::dir_tree::column::info, &file, -1);
 
     return !(file && file->is_hidden());
 }
@@ -100,7 +100,7 @@ on_destroy(GtkWidget* w) noexcept
 
 /* Create a new dir tree view */
 GtkWidget*
-ptk::view::dir_tree::create(ptk::browser* browser, bool show_hidden) noexcept
+gui::view::dir_tree::create(gui::browser* browser, bool show_hidden) noexcept
 {
     GtkTreeViewColumn* col = nullptr;
     GtkCellRenderer* renderer = nullptr;
@@ -139,16 +139,16 @@ ptk::view::dir_tree::create(ptk::browser* browser, bool show_hidden) noexcept
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
-                                        ptk::dir_tree::column::icon,
+                                        gui::dir_tree::column::icon,
                                         "info",
-                                        ptk::dir_tree::column::info,
+                                        gui::dir_tree::column::info,
                                         nullptr);
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(col, renderer, true);
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        ptk::dir_tree::column::disp_name,
+                                        gui::dir_tree::column::disp_name,
                                         nullptr);
 
     gtk_tree_view_append_column(dir_tree_view, col);
@@ -199,7 +199,7 @@ ptk::view::dir_tree::create(ptk::browser* browser, bool show_hidden) noexcept
 }
 
 bool
-ptk::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept
+gui::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept
 {
     GtkTreeIter it;
     GtkTreeIter parent_it;
@@ -249,7 +249,7 @@ ptk::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::pa
         do
         {
             std::shared_ptr<vfs::file> file;
-            gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
+            gtk_tree_model_get(model, &it, gui::dir_tree::column::info, &file, -1);
             if (!file)
             {
                 continue;
@@ -292,26 +292,26 @@ ptk::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::pa
 
 /* FIXME: should this API be put here? Maybe it belongs to prk-dir-tree.c */
 std::optional<std::filesystem::path>
-ptk::view::dir_tree::dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept
+gui::view::dir_tree::dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept
 {
     GtkTreeIter real_it;
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &real_it, it);
     GtkTreeModel* tree_model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
 
-    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    gui::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     return tree->get_dir_path(&real_it);
 }
 
 /* Return a newly allocated string containing path of current selected dir. */
 std::optional<std::filesystem::path>
-ptk::view::dir_tree::selected_dir(GtkTreeView* dir_tree_view) noexcept
+gui::view::dir_tree::selected_dir(GtkTreeView* dir_tree_view) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
-        return ptk::view::dir_tree::dir_path(model, &it);
+        return gui::view::dir_tree::dir_path(model, &it);
     }
     return std::nullopt;
 }
@@ -319,11 +319,11 @@ ptk::view::dir_tree::selected_dir(GtkTreeView* dir_tree_view) noexcept
 static GtkTreeModel*
 get_dir_tree_model() noexcept
 {
-    static ptk::dir_tree* dir_tree_model = nullptr;
+    static gui::dir_tree* dir_tree_model = nullptr;
 
     if (!dir_tree_model)
     {
-        dir_tree_model = ptk::dir_tree::create();
+        dir_tree_model = gui::dir_tree::create();
         g_object_add_weak_pointer(G_OBJECT(dir_tree_model), (void**)GTK_WIDGET(&dir_tree_model));
     }
     else
@@ -347,13 +347,13 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
         return false;
     }
     std::shared_ptr<vfs::file> file;
-    gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
+    gtk_tree_model_get(model, &it, gui::dir_tree::column::info, &file, -1);
 
     return file != nullptr;
 }
 
 void
-ptk::view::dir_tree::show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept
+gui::view::dir_tree::show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept
 {
     g_object_set_qdata(G_OBJECT(dir_tree_view), dir_tree_view_data, GINT_TO_POINTER(show_hidden));
     GtkTreeModel* filter = gtk_tree_view_get_model(dir_tree_view);
@@ -366,7 +366,7 @@ on_dir_tree_view_row_expanded(GtkTreeView* treeview, GtkTreeIter* iter, GtkTreeP
 {
     GtkTreeIter real_it;
     GtkTreeModel* filter = gtk_tree_view_get_model(treeview);
-    ptk::dir_tree* tree = PTK_DIR_TREE(user_data);
+    gui::dir_tree* tree = PTK_DIR_TREE(user_data);
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &real_it, iter);
     GtkTreePath* real_path =
         gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(filter), path);
@@ -380,7 +380,7 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 {
     GtkTreeIter real_it;
     GtkTreeModel* filter = gtk_tree_view_get_model(treeview);
-    ptk::dir_tree* tree = PTK_DIR_TREE(user_data);
+    gui::dir_tree* tree = PTK_DIR_TREE(user_data);
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &real_it, iter);
     GtkTreePath* real_path =
         gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(filter), path);
@@ -389,7 +389,7 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 }
 
 static bool
-on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser) noexcept
+on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, gui::browser* browser) noexcept
 {
     GtkTreePath* tree_path = nullptr;
     GtkTreeViewColumn* tree_col = nullptr;
@@ -405,7 +405,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
     if (type == GdkEventType::GDK_BUTTON_PRESS &&
         (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
     {
-        // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
+        // middle click 2 handled in gui/file-browser.cxx on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                           static_cast<std::int32_t>(x),
@@ -427,7 +427,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
                 {
                     // right click
                     const auto path =
-                        ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view)).value_or("");
+                        gui::view::dir_tree::selected_dir(GTK_TREE_VIEW(view)).value_or("");
                     if (path.empty())
                     {
                         // path will be empty if the right click is on
@@ -441,7 +441,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
                          * This simulates a right-click in the file list when
                          * no files are selected (even if some are) since
                          * actions are to be taken on the dir itself. */
-                        GtkWidget* popup = ptk_file_menu_new(browser);
+                        GtkWidget* popup = gui_file_menu_new(browser);
                         if (popup)
                         {
                             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
@@ -481,7 +481,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
 }
 
 static bool
-on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser) noexcept
+on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, gui::browser* browser) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter iter;
@@ -492,7 +492,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* brows
         return false;
     }
 
-    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = gui::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
 
     GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
@@ -540,14 +540,14 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* brows
                 return false;
             }
 
-            const auto dir_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view));
+            const auto dir_path = gui::view::dir_tree::selected_dir(GTK_TREE_VIEW(view));
             if (dir_path && browser->chdir(dir_path.value()))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
                  * no files are selected (even if some are) since
                  * actions are to be taken on the dir itself. */
-                GtkWidget* popup = ptk_file_menu_new(browser);
+                GtkWidget* popup = gui_file_menu_new(browser);
                 if (popup)
                 {
                     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
@@ -593,10 +593,10 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y) noexcept
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
             std::shared_ptr<vfs::file> file;
-            gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
+            gtk_tree_model_get(model, &it, gui::dir_tree::column::info, &file, -1);
             if (file)
             {
-                dest_path = ptk::view::dir_tree::dir_path(model, &it);
+                dest_path = gui::view::dir_tree::dir_path(model, &it);
             }
         }
         gtk_tree_path_free(tree_path);
@@ -610,7 +610,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                     void* user_data) noexcept
 {
     (void)info;
-    auto* browser = static_cast<ptk::browser*>(user_data);
+    auto* browser = static_cast<gui::browser*>(user_data);
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
@@ -727,7 +727,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
-                        ptk::file_task* ptask = ptk_file_task_new(file_action,
+                        gui::file_task* ptask = gui_file_task_new(file_action,
                                                                   file_list,
                                                                   dest_dir.value(),
                                                                   GTK_WINDOW(parent),
@@ -741,7 +741,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         }
         else
         {
-            logger::warn<logger::domain::ptk>(
+            logger::warn<logger::domain::gui>(
                 "bad dest_dir in on_dir_tree_view_drag_data_received");
         }
     }
@@ -757,7 +757,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
 static bool
 on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                           std::time_t time, ptk::browser* browser) noexcept
+                           std::time_t time, gui::browser* browser) noexcept
 {
     (void)x;
     (void)y;
@@ -773,7 +773,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 
 
 static bool
 on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                             std::time_t time, ptk::browser* browser) noexcept
+                             std::time_t time, gui::browser* browser) noexcept
 {
     (void)x;
     (void)y;
@@ -880,7 +880,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
 
 static bool
 on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, std::time_t time,
-                            ptk::browser* browser) noexcept
+                            gui::browser* browser) noexcept
 {
     (void)widget;
     (void)drag_context;

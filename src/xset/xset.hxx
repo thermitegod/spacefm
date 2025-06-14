@@ -31,7 +31,7 @@
 #include "types.hxx"
 
 // need to forward declare to avoid circular header dependencies
-namespace ptk
+namespace gui
 {
 struct browser;
 }
@@ -141,7 +141,7 @@ struct set : public std::enable_shared_from_this<set>
     std::optional<std::string> y{std::nullopt}; // saved
     std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
     bool disable{false};                        // not saved
-    ptk::browser* browser{nullptr};             // not saved - set automatically
+    gui::browser* browser{nullptr};             // not saved - set automatically
     std::shared_ptr<set> shared_key{nullptr};   // not saved
 
     struct callback_data

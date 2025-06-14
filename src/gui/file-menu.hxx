@@ -35,7 +35,7 @@
  * free the list after calling this function.
  */
 
-namespace ptk
+namespace gui
 {
 struct file_menu
 {
@@ -63,7 +63,7 @@ struct file_menu
     file_menu& operator=(const file_menu& other) = delete;
     file_menu& operator=(file_menu&& other) = delete;
 
-    ptk::browser* browser{nullptr};
+    gui::browser* browser{nullptr};
     std::filesystem::path cwd;
     std::filesystem::path file_path;
     std::shared_ptr<vfs::file> file{nullptr};
@@ -74,42 +74,42 @@ struct file_menu
     GtkAccelGroup* accel_group{nullptr};
 #endif
 };
-} // namespace ptk
+} // namespace gui
 
 struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 {
     AutoOpenCreate() = delete;
-    AutoOpenCreate(ptk::browser* browser, bool open_file) noexcept;
+    AutoOpenCreate(gui::browser* browser, bool open_file) noexcept;
     ~AutoOpenCreate() = default;
     AutoOpenCreate(const AutoOpenCreate& other) = delete;
     AutoOpenCreate(AutoOpenCreate&& other) = delete;
     AutoOpenCreate& operator=(const AutoOpenCreate& other) = delete;
     AutoOpenCreate& operator=(AutoOpenCreate&& other) = delete;
 
-    ptk::browser* browser{nullptr};
+    gui::browser* browser{nullptr};
     bool open_file{false};
     std::filesystem::path path;
     GFunc callback{nullptr};
 };
 
 GtkWidget*
-ptk_file_menu_new(ptk::browser* browser,
+gui_file_menu_new(gui::browser* browser,
                   const std::span<const std::shared_ptr<vfs::file>> selected_files = {}) noexcept;
 
 #if (GTK_MAJOR_VERSION == 4)
-void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
+void gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                        GtkEventController* accel_group) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
-void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
+void gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group) noexcept;
 #endif
 
-void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 
-void ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept;
+void gui_file_menu_action(gui::browser* browser, const xset_t& set) noexcept;
 
-void on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcept;
-void on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
-void on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
-void on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
-void on_popup_list_large(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
+void on_popup_sortby(GtkMenuItem* menuitem, gui::browser* browser, i32 order) noexcept;
+void on_popup_list_detailed(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
+void on_popup_list_icons(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
+void on_popup_list_compact(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
+void on_popup_list_large(GtkMenuItem* menuitem, gui::browser* browser) noexcept;

@@ -27,7 +27,7 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::action
+namespace gui::action
 {
 enum class create_mode : std::uint8_t
 {
@@ -36,7 +36,7 @@ enum class create_mode : std::uint8_t
     link,
 };
 
-i32 create_files(ptk::browser* browser, const std::filesystem::path& cwd,
-                 const std::shared_ptr<vfs::file>& file, const ptk::action::create_mode init_mode,
+i32 create_files(gui::browser* browser, const std::filesystem::path& cwd,
+                 const std::shared_ptr<vfs::file>& file, const gui::action::create_mode init_mode,
                  AutoOpenCreate* ao) noexcept;
-} // namespace ptk::action
+} // namespace gui::action

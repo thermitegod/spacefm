@@ -84,13 +84,13 @@ struct MainWindow
     void show_panels() noexcept;
     void focus_panel(const panel_t panel) noexcept;
 
-    ptk::browser* current_browser() const noexcept;
+    gui::browser* current_browser() const noexcept;
 
-    GtkWidget* create_tab_label(ptk::browser* browser) const noexcept;
+    GtkWidget* create_tab_label(gui::browser* browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
     void open_path_in_current_tab(const std::filesystem::path& path) const noexcept;
 
-    void set_window_title(ptk::browser* browser) noexcept;
+    void set_window_title(gui::browser* browser) noexcept;
 
     bool is_main_tasks_running() const noexcept;
 
@@ -110,28 +110,28 @@ struct MainWindow
     void open_terminal() const noexcept;
 
     void rebuild_menus() noexcept;
-    void rebuild_menu_file(ptk::browser* browser) noexcept;
-    void rebuild_menu_view(ptk::browser* browser) noexcept;
-    void rebuild_menu_device(ptk::browser* browser) noexcept;
-    void rebuild_menu_bookmarks(ptk::browser* browser) const noexcept;
-    void rebuild_menu_help(ptk::browser* browser) noexcept;
+    void rebuild_menu_file(gui::browser* browser) noexcept;
+    void rebuild_menu_view(gui::browser* browser) noexcept;
+    void rebuild_menu_device(gui::browser* browser) noexcept;
+    void rebuild_menu_bookmarks(gui::browser* browser) const noexcept;
+    void rebuild_menu_help(gui::browser* browser) noexcept;
 
   public:
     // signals
-    void on_browser_before_chdir(ptk::browser* browser) noexcept;
-    void on_browser_begin_chdir(ptk::browser* browser) noexcept;
-    void on_browser_after_chdir(ptk::browser* browser) noexcept;
-    void on_browser_open_item(ptk::browser* browser, const std::filesystem::path& path,
-                              ptk::browser::open_action action) noexcept;
-    void on_browser_content_change(ptk::browser* browser) noexcept;
-    void on_browser_sel_change(ptk::browser* browser) noexcept;
-    void on_browser_panel_change(ptk::browser* browser) noexcept;
+    void on_browser_before_chdir(gui::browser* browser) noexcept;
+    void on_browser_begin_chdir(gui::browser* browser) noexcept;
+    void on_browser_after_chdir(gui::browser* browser) noexcept;
+    void on_browser_open_item(gui::browser* browser, const std::filesystem::path& path,
+                              gui::browser::open_action action) noexcept;
+    void on_browser_content_change(gui::browser* browser) noexcept;
+    void on_browser_sel_change(gui::browser* browser) noexcept;
+    void on_browser_panel_change(gui::browser* browser) noexcept;
 };
 
 GType main_window_get_type() noexcept;
 
 /* Utility functions */
-ptk::browser* main_window_get_current_browser() noexcept;
+gui::browser* main_window_get_current_browser() noexcept;
 
 // void main_window_preference(MainWindow* main_window) noexcept;
 
@@ -142,13 +142,13 @@ MainWindow* main_window_get_on_current_desktop() noexcept;
 std::span<MainWindow*> main_window_get_all() noexcept;
 
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window) noexcept;
-void update_views_all_windows(GtkWidget* item, ptk::browser* browser) noexcept;
+void update_views_all_windows(GtkWidget* item, gui::browser* browser) noexcept;
 void main_window_reload_thumbnails_all_windows() noexcept;
 void main_window_toggle_thumbnails_all_windows() noexcept;
 void main_window_refresh_all_tabs_matching(const std::filesystem::path& path) noexcept;
 void main_window_close_all_invalid_tabs() noexcept;
-void main_window_rebuild_all_toolbars(ptk::browser* browser) noexcept;
+void main_window_rebuild_all_toolbars(gui::browser* browser) noexcept;
 
 void main_window_rubberband_all() noexcept;
 void main_window_refresh_all() noexcept;
-void set_panel_focus(MainWindow* main_window, ptk::browser* browser) noexcept;
+void set_panel_focus(MainWindow* main_window, gui::browser* browser) noexcept;

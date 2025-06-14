@@ -49,7 +49,7 @@ static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& tas
                                       const vfs::file_task::state state, void* state_data,
                                       void* user_data) noexcept;
 
-ptk::file_task::file_task(const vfs::file_task::type type,
+gui::file_task::file_task(const vfs::file_task::type type,
                           const std::span<const std::filesystem::path> src_files,
                           const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                           GtkWidget* task_view) noexcept
@@ -60,15 +60,15 @@ ptk::file_task::file_task(const vfs::file_task::type type,
     this->task->set_state_callback(on_vfs_file_task_state_cb, this);
     if (xset_get_b(xset::name::task_err_any))
     {
-        this->err_mode_ = ptk::file_task::ptask_error::any;
+        this->err_mode_ = gui::file_task::ptask_error::any;
     }
     else if (xset_get_b(xset::name::task_err_first))
     {
-        this->err_mode_ = ptk::file_task::ptask_error::first;
+        this->err_mode_ = gui::file_task::ptask_error::first;
     }
     else
     {
-        this->err_mode_ = ptk::file_task::ptask_error::cont;
+        this->err_mode_ = gui::file_task::ptask_error::cont;
     }
 
     GtkTextIter iter;
@@ -87,13 +87,13 @@ ptk::file_task::file_task(const vfs::file_task::type type,
     }
 
     // GThread *self = g_thread_self();
-    // logger::info<logger::domain::ptk>("GUI_THREAD = {}", logger::utils::ptr(self));
-    // logger::info<logger::domain::ptk>("ptk::file_task::file_task({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("GUI_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::domain::gui>("gui::file_task::file_task({}) DONE", logger::utils::ptr(this));
 }
 
-ptk::file_task::~file_task() noexcept
+gui::file_task::~file_task() noexcept
 {
-    // logger::info<logger::domain::ptk>("ptk::file_task::~file_task({})", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::~file_task({})", logger::utils::ptr(this));
     if (this->timeout_ != 0)
     {
         g_source_remove(this->timeout_.data());
@@ -104,8 +104,8 @@ ptk::file_task::~file_task() noexcept
         g_source_remove(this->progress_timer_.data());
         this->progress_timer_ = 0;
     }
-    ptk::view::file_task::remove_task(this);
-    ptk::view::file_task::start_queued(this->task_view_, nullptr);
+    gui::view::file_task::remove_task(this);
+    gui::view::file_task::start_queued(this->task_view_, nullptr);
 
     if (this->progress_dlg_)
     {
@@ -126,104 +126,104 @@ ptk::file_task::~file_task() noexcept
     gtk_text_buffer_set_text(this->log_buf_, "", -1);
     g_object_unref(this->log_buf_);
 
-    // logger::info<logger::domain::ptk>("ptk::file_task::~file_task({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::~file_task({}) DONE", logger::utils::ptr(this));
 }
 
 void
-ptk::file_task::lock() noexcept
+gui::file_task::lock() noexcept
 {
     g_mutex_lock(this->task->mutex);
 }
 
 void
-ptk::file_task::unlock() noexcept
+gui::file_task::unlock() noexcept
 {
     g_mutex_unlock(this->task->mutex);
 }
 
 bool
-ptk::file_task::trylock() noexcept
+gui::file_task::trylock() noexcept
 {
     return g_mutex_trylock(this->task->mutex);
 }
 
 bool
-ptk::file_task::is_completed() const noexcept
+gui::file_task::is_completed() const noexcept
 {
     return this->complete_;
 }
 
 bool
-ptk::file_task::is_aborted() const noexcept
+gui::file_task::is_aborted() const noexcept
 {
     return this->aborted_;
 }
 
 std::string_view
-ptk::file_task::display_file_count() const noexcept
+gui::file_task::display_file_count() const noexcept
 {
     return this->display_file_count_;
 }
 
 std::string_view
-ptk::file_task::display_size_tally() const noexcept
+gui::file_task::display_size_tally() const noexcept
 {
     return this->display_size_tally_;
 }
 
 std::string_view
-ptk::file_task::display_elapsed() const noexcept
+gui::file_task::display_elapsed() const noexcept
 {
     return this->display_elapsed_;
 }
 
 std::string_view
-ptk::file_task::display_current_speed() const noexcept
+gui::file_task::display_current_speed() const noexcept
 {
     return this->display_current_speed_;
 }
 
 std::string_view
-ptk::file_task::display_current_estimate() const noexcept
+gui::file_task::display_current_estimate() const noexcept
 {
     return this->display_current_estimate_;
 }
 
 std::string_view
-ptk::file_task::display_average_speed() const noexcept
+gui::file_task::display_average_speed() const noexcept
 {
     return this->display_average_speed_;
 }
 
 std::string_view
-ptk::file_task::display_average_estimate() const noexcept
+gui::file_task::display_average_estimate() const noexcept
 {
     return this->display_average_estimate_;
 }
 
-ptk::file_task*
-ptk_file_task_new(const vfs::file_task::type type,
+gui::file_task*
+gui_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files, GtkWindow* parent_window,
                   GtkWidget* task_view) noexcept
 {
-    auto* const ptask = new ptk::file_task(type, src_files, "", parent_window, task_view);
+    auto* const ptask = new gui::file_task(type, src_files, "", parent_window, task_view);
 
     return ptask;
 }
 
-ptk::file_task*
-ptk_file_task_new(const vfs::file_task::type type,
+gui::file_task*
+gui_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files,
                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                   GtkWidget* task_view) noexcept
 {
-    auto* const ptask = new ptk::file_task(type, src_files, dest_dir, parent_window, task_view);
+    auto* const ptask = new gui::file_task(type, src_files, dest_dir, parent_window, task_view);
 
     return ptask;
 }
 
-ptk::file_task*
-ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
+gui::file_task*
+gui_file_exec_new(const std::string_view item_name, GtkWidget* parent,
                   GtkWidget* task_view) noexcept
 {
     GtkWidget* parent_win = nullptr;
@@ -237,7 +237,7 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    auto* const ptask = new ptk::file_task(vfs::file_task::type::exec,
+    auto* const ptask = new gui::file_task(vfs::file_task::type::exec,
                                            file_list,
                                            "",
                                            GTK_WINDOW(parent_win),
@@ -246,8 +246,8 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
     return ptask;
 }
 
-ptk::file_task*
-ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path& dest_dir,
+gui::file_task*
+gui_file_exec_new(const std::string_view item_name, const std::filesystem::path& dest_dir,
                   GtkWidget* parent, GtkWidget* task_view) noexcept
 {
     GtkWidget* parent_win = nullptr;
@@ -261,7 +261,7 @@ ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path&
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    auto* const ptask = new ptk::file_task(vfs::file_task::type::exec,
+    auto* const ptask = new gui::file_task(vfs::file_task::type::exec,
                                            file_list,
                                            dest_dir,
                                            GTK_WINDOW(parent_win),
@@ -271,7 +271,7 @@ ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path&
 }
 
 void
-ptk::file_task::save_progress_dialog_size() const noexcept
+gui::file_task::save_progress_dialog_size() const noexcept
 {
 #if 0
     // save dialog size  - do this here now because as of GTK 3.8,
@@ -303,22 +303,22 @@ ptk::file_task::save_progress_dialog_size() const noexcept
 }
 
 void
-ptk::file_task::set_complete_notify(GFunc callback, void* user_data) noexcept
+gui::file_task::set_complete_notify(GFunc callback, void* user_data) noexcept
 {
     this->complete_notify_ = callback;
     this->user_data_ = user_data;
 }
 
 static bool
-on_progress_timer(ptk::file_task* ptask) noexcept
+on_progress_timer(gui::file_task* ptask) noexcept
 {
     // GThread *self = g_thread_self ();
-    // logger::info<logger::domain::ptk>("PROGRESS_TIMER_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::domain::gui>("PROGRESS_TIMER_THREAD = {}", logger::utils::ptr(self));
 
     // query condition?
     if (ptask->query_cond_ && ptask->query_cond_ != ptask->query_cond_last_)
     {
-        // logger::info<logger::domain::ptk>("QUERY = {}  mutex = {}", logger::utils::ptr(ptask->query_cond), logger::utils::ptr(ptask->task->mutex));
+        // logger::info<logger::domain::gui>("QUERY = {}  mutex = {}", logger::utils::ptr(ptask->query_cond), logger::utils::ptr(ptask->task->mutex));
         ptask->restart_timeout_ = (ptask->timeout_ != 0);
         if (ptask->timeout_ != 0)
         {
@@ -347,7 +347,7 @@ on_progress_timer(ptk::file_task* ptask) noexcept
         }
         else
         {
-            ptk::view::file_task::start_queued(ptask->task_view_, ptask);
+            gui::view::file_task::start_queued(ptask->task_view_, ptask);
         }
         if (ptask->timeout_ != 0 && ptask->task->state_pause_ != vfs::file_task::state::running &&
             ptask->task->state_ == vfs::file_task::state::running)
@@ -365,7 +365,7 @@ on_progress_timer(ptk::file_task* ptask) noexcept
         return true;
     }
     ptask->progress_count_ = 0;
-    // logger::info<logger::domain::ptk>("on_progress_timer ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::domain::gui>("on_progress_timer ptask={}", logger::utils::ptr(ptask));
 
     if (ptask->is_completed())
     {
@@ -379,8 +379,8 @@ on_progress_timer(ptk::file_task* ptask) noexcept
             ptask->complete_notify_(ptask->task.get(), ptask->user_data_);
             ptask->complete_notify_ = nullptr;
         }
-        ptk::view::file_task::remove_task(ptask);
-        ptk::view::file_task::start_queued(ptask->task_view_, nullptr);
+        gui::view::file_task::remove_task(ptask);
+        gui::view::file_task::start_queued(ptask->task_view_, nullptr);
     }
     else if (ptask->task->state_pause_ != vfs::file_task::state::running && !ptask->pause_change_ &&
              ptask->task->type_ != vfs::file_task::type::exec)
@@ -395,7 +395,7 @@ on_progress_timer(ptk::file_task* ptask) noexcept
         if (!ptask->progress_dlg_ || (ptask->err_count_ == 0 && !ptask->keep_dlg_))
         {
             delete ptask;
-            // logger::info<logger::domain::ptk>("on_progress_timer DONE false-COMPLETE ptask={}", logger::utils::ptr(ptask));
+            // logger::info<logger::domain::gui>("on_progress_timer DONE false-COMPLETE ptask={}", logger::utils::ptr(ptask));
             return false;
         }
         else if (ptask->progress_dlg_ && ptask->err_count_ != 0)
@@ -403,14 +403,14 @@ on_progress_timer(ptk::file_task* ptask) noexcept
             gtk_window_present(GTK_WINDOW(ptask->progress_dlg_));
         }
     }
-    // logger::info<logger::domain::ptk>("on_progress_timer DONE true ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::domain::gui>("on_progress_timer DONE true ptask={}", logger::utils::ptr(ptask));
     return !ptask->is_completed();
 }
 
 static bool
-ptk_file_task_add_main(ptk::file_task* ptask) noexcept
+gui_file_task_add_main(gui::file_task* ptask) noexcept
 {
-    // logger::info<logger::domain::ptk>("ptk_file_task_add_main ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::domain::gui>("gui_file_task_add_main ptask={}", logger::utils::ptr(ptask));
     if (ptask->timeout_ != 0)
     {
         g_source_remove(ptask->timeout_.data());
@@ -432,16 +432,16 @@ ptk_file_task_add_main(ptk::file_task* ptask) noexcept
 
     on_progress_timer(ptask);
 
-    // logger::info<logger::domain::ptk>("ptk_file_task_add_main DONE ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::domain::gui>("gui_file_task_add_main DONE ptask={}", logger::utils::ptr(ptask));
     return false;
 }
 
 void
-ptk::file_task::run() noexcept
+gui::file_task::run() noexcept
 {
-    // logger::info<logger::domain::ptk>("ptk::file_task::run({})", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::run({})", logger::utils::ptr(this));
     // wait this long to first show task in manager, popup
-    this->timeout_ = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, this);
+    this->timeout_ = g_timeout_add(500, (GSourceFunc)gui_file_task_add_main, this);
     this->progress_timer_ = 0;
     this->task->run_task();
     if (this->task->type_ == vfs::file_task::type::exec)
@@ -453,14 +453,14 @@ ptk::file_task::run() noexcept
         }
     }
     this->progress_timer_ = g_timeout_add(50, (GSourceFunc)on_progress_timer, this);
-    // logger::info<logger::domain::ptk>("ptk::file_task::run({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::run({}) DONE", logger::utils::ptr(this));
 }
 
 bool
-ptk::file_task::cancel() noexcept
+gui::file_task::cancel() noexcept
 {
     // GThread *self = g_thread_self ();
-    // logger::info<logger::domain::ptk>("CANCEL_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::domain::gui>("CANCEL_THREAD = {}", logger::utils::ptr(self));
     if (this->timeout_ != 0)
     {
         g_source_remove(this->timeout_.data());
@@ -504,7 +504,7 @@ ptk::file_task::cancel() noexcept
 }
 
 void
-ptk::file_task::set_button_states() noexcept
+gui::file_task::set_button_states() noexcept
 {
     if (!this->progress_dlg_)
     {
@@ -544,7 +544,7 @@ ptk::file_task::set_button_states() noexcept
 }
 
 void
-ptk::file_task::pause(const vfs::file_task::state state) noexcept
+gui::file_task::pause(const vfs::file_task::state state) noexcept
 {
     if (state == vfs::file_task::state::pause)
     {
@@ -571,7 +571,7 @@ ptk::file_task::pause(const vfs::file_task::state state) noexcept
 }
 
 static bool
-on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask) noexcept
+on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, gui::file_task* ptask) noexcept
 {
     (void)widget;
     (void)event;
@@ -580,7 +580,7 @@ on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task*
 }
 
 static void
-on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask) noexcept
+on_progress_dlg_response(GtkDialog* dlg, i32 response, gui::file_task* ptask) noexcept
 {
     (void)dlg;
     ptask->save_progress_dialog_size();
@@ -618,7 +618,7 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask) no
             {
                 ptask->pause(vfs::file_task::state::pause);
             }
-            ptk::view::file_task::start_queued(ptask->task_view_, nullptr);
+            gui::view::file_task::start_queued(ptask->task_view_, nullptr);
             break;
         case GtkResponseType::GTK_RESPONSE_OK:
         case GtkResponseType::GTK_RESPONSE_NONE:
@@ -640,7 +640,7 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask) no
 }
 
 static void
-on_progress_dlg_destroy(GtkDialog* dlg, ptk::file_task* ptask) noexcept
+on_progress_dlg_destroy(GtkDialog* dlg, gui::file_task* ptask) noexcept
 {
     (void)dlg;
     ptask->progress_dlg_ = nullptr;
@@ -665,7 +665,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data) noexcept
 }
 
 void
-ptk::file_task::set_progress_icon() noexcept
+gui::file_task::set_progress_icon() noexcept
 {
     std::string icon;
 
@@ -700,7 +700,7 @@ ptk::file_task::set_progress_icon() noexcept
 }
 
 static void
-on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
+on_overwrite_combo_changed(GtkComboBox* box, gui::file_task* ptask) noexcept
 {
     auto overwrite_mode = gtk_combo_box_get_active(box);
     overwrite_mode = std::max(overwrite_mode, 0);
@@ -708,15 +708,15 @@ on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
 }
 
 static void
-on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
+on_error_combo_changed(GtkComboBox* box, gui::file_task* ptask) noexcept
 {
     auto error_mode = gtk_combo_box_get_active(box);
     error_mode = std::max(error_mode, 0);
-    ptask->err_mode_ = ptk::file_task::ptask_error(error_mode);
+    ptask->err_mode_ = gui::file_task::ptask_error(error_mode);
 }
 
 void
-ptk::file_task::progress_open() noexcept
+gui::file_task::progress_open() noexcept
 {
     static constexpr ztd::map<vfs::file_task::type, std::string_view, 7> job_actions{{
         {vfs::file_task::type::move, "Move: "},
@@ -742,7 +742,7 @@ ptk::file_task::progress_open() noexcept
         return;
     }
 
-    // logger::info<logger::domain::ptk>("ptk::file_task::progress_open");
+    // logger::info<logger::domain::gui>("gui::file_task::progress_open");
 
     // create dialog
     this->progress_dlg_ =
@@ -1095,11 +1095,11 @@ ptk::file_task::progress_open() noexcept
                                  0);
 
     this->progress_count_ = 50; // trigger fast display
-    // logger::info<logger::domain::ptk>("ptk::file_task::progress_open DONE");
+    // logger::info<logger::domain::gui>("gui::file_task::progress_open DONE");
 }
 
 void
-ptk::file_task::progress_update() noexcept
+gui::file_task::progress_update() noexcept
 {
     if (!this->progress_dlg_)
     {
@@ -1110,7 +1110,7 @@ ptk::file_task::progress_update() noexcept
         return;
     }
 
-    // logger::info<logger::domain::ptk>("ptk::file_task::progress_update({})", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::progress_update({})", logger::utils::ptr(this));
 
     std::string ufile_path;
 
@@ -1313,7 +1313,7 @@ ptk::file_task::progress_update() noexcept
     {
         // scroll to end if scrollbar is mostly down
 
-        // logger::info<logger::domain::ptk>("    scroll to end line {}", this->log_end,
+        // logger::info<logger::domain::gui>("    scroll to end line {}", this->log_end,
         // gtk_text_buffer_get_line_count(this->log_buf));
         gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(this->error_view_),
                                      this->log_end_,
@@ -1340,11 +1340,11 @@ ptk::file_task::progress_update() noexcept
         {
             if (this->task->err_count != 0 && this->task->type_ != vfs::file_task::type::exec)
             {
-                if (this->err_mode_ == ptk::file_task::ptask_error::first)
+                if (this->err_mode_ == gui::file_task::ptask_error::first)
                 {
                     errs = "Error  ( Stop If First )";
                 }
-                else if (this->err_mode_ == ptk::file_task::ptask_error::any)
+                else if (this->err_mode_ == gui::file_task::ptask_error::any)
                 {
                     errs = "Error  ( Stop On Any )";
                 }
@@ -1397,36 +1397,36 @@ ptk::file_task::progress_update() noexcept
         }
     }
     gtk_label_set_text(this->errors_, errs.data());
-    // logger::info<logger::domain::ptk>("ptk::file_task::progress_update({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::progress_update({}) DONE", logger::utils::ptr(this));
 }
 
 void
-ptk::file_task::set_chmod(const std::array<u8, 12> chmod_actions) noexcept
+gui::file_task::set_chmod(const std::array<u8, 12> chmod_actions) noexcept
 {
     this->task->set_chmod(chmod_actions);
 }
 
 void
-ptk::file_task::set_chown(const uid_t uid, const gid_t gid) noexcept
+gui::file_task::set_chown(const uid_t uid, const gid_t gid) noexcept
 {
     this->task->set_chown(uid, gid);
 }
 
 void
-ptk::file_task::set_recursive(const bool recursive) noexcept
+gui::file_task::set_recursive(const bool recursive) noexcept
 {
     this->task->set_recursive(recursive);
 }
 
 void
-ptk::file_task::update() noexcept
+gui::file_task::update() noexcept
 {
-    // logger::info<logger::domain::ptk>("ptk::file_task::update({})", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::update({})", logger::utils::ptr(this));
     // calculate updated display data
 
     if (!this->trylock())
     {
-        // logger::info<logger::domain::ptk>("UPDATE LOCKED");
+        // logger::info<logger::domain::gui>("UPDATE LOCKED");
         return;
     }
 
@@ -1443,7 +1443,7 @@ ptk::file_task::update() noexcept
             {
                 cur_speed = (this->task->progress - this->task->last_progress) /
                             u64::create(since_last.count());
-                // logger::info<logger::domain::ptk>("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
+                // logger::info<logger::domain::gui>("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
                 this->task->last_elapsed = elapsed;
                 this->task->last_speed = cur_speed;
                 this->task->last_progress = this->task->progress;
@@ -1733,8 +1733,8 @@ ptk::file_task::update() noexcept
             this->err_count_ != this->task->err_count)
         {
             this->keep_dlg_ = true;
-            if (this->complete_ || this->err_mode_ == ptk::file_task::ptask_error::any ||
-                (this->task->error_first && this->err_mode_ == ptk::file_task::ptask_error::first))
+            if (this->complete_ || this->err_mode_ == gui::file_task::ptask_error::any ||
+                (this->task->error_first && this->err_mode_ == gui::file_task::ptask_error::first))
             {
                 gtk_window_present(GTK_WINDOW(this->progress_dlg_));
             }
@@ -1754,11 +1754,11 @@ ptk::file_task::update() noexcept
 
     if (this->timeout_ == 0 && !this->complete_)
     {
-        ptk::view::file_task::update_task(this);
+        gui::view::file_task::update_task(this);
     }
 
     this->task->unlock();
-    // logger::info<logger::domain::ptk>("ptk::file_task::update({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::update({}) DONE", logger::utils::ptr(this));
 }
 
 static void
@@ -1874,13 +1874,13 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                           const vfs::file_task::state state, void* state_data,
                           void* user_data) noexcept
 {
-    ptk::file_task* ptask = PTK_FILE_TASK(user_data);
+    gui::file_task* ptask = PTK_FILE_TASK(user_data);
     bool ret = true;
 
     switch (state)
     {
         case vfs::file_task::state::finish:
-            // logger::info<logger::domain::ptk>("vfs::file_task::state::finish");
+            // logger::info<logger::domain::gui>("vfs::file_task::state::finish");
 
             ptask->complete_ = true;
 
@@ -1895,7 +1895,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             break;
         case vfs::file_task::state::query_overwrite:
             // 0; GThread *self = g_thread_self ();
-            // logger::info<logger::domain::ptk>("TASK_THREAD = {}", logger::utils::ptr(self));
+            // logger::info<logger::domain::gui>("TASK_THREAD = {}", logger::utils::ptr(self));
             task->lock();
             ptask->query_new_dest_ = (char**)state_data;
             *ptask->query_new_dest_ = nullptr;
@@ -1915,17 +1915,17 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             task->unlock();
             break;
         case vfs::file_task::state::error:
-            // logger::info<logger::domain::ptk>("vfs::file_task::state::error");
+            // logger::info<logger::domain::gui>("vfs::file_task::state::error");
             task->lock();
             task->err_count += 1;
-            // logger::info<logger::domain::ptk>("    ptask->item_count = {}", task->current_item );
+            // logger::info<logger::domain::gui>("    ptask->item_count = {}", task->current_item );
 
             if (task->type_ == vfs::file_task::type::exec)
             {
                 ret = false;
             }
-            else if (ptask->err_mode_ == ptk::file_task::ptask_error::any ||
-                     (task->error_first && ptask->err_mode_ == ptk::file_task::ptask_error::first))
+            else if (ptask->err_mode_ == gui::file_task::ptask_error::any ||
+                     (task->error_first && ptask->err_mode_ == gui::file_task::ptask_error::first))
             {
                 ret = false;
                 ptask->aborted_ = true;
@@ -1937,7 +1937,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             if (xset_get_b(xset::name::task_q_pause))
             {
                 // pause all queued
-                ptk::view::file_task::pause_all_queued(ptask);
+                gui::view::file_task::pause_all_queued(ptask);
             }
             break;
         case vfs::file_task::state::running:
@@ -1951,10 +1951,10 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
 }
 
 static bool
-on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask) noexcept
+on_query_input_keypress(GtkWidget* widget, GdkEvent* event, gui::file_task* ptask) noexcept
 {
     (void)ptask;
-    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = gui::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     if (keymod == 0)
     {
@@ -1977,13 +1977,13 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptas
                 if (new_name && old_name && new_name.value() != old_name)
                 {
                     gtk_dialog_response(GTK_DIALOG(parent),
-                                        magic_enum::enum_integer(ptk::file_task::response::rename));
+                                        magic_enum::enum_integer(gui::file_task::response::rename));
                 }
                 else
                 {
                     gtk_dialog_response(
                         GTK_DIALOG(parent),
-                        magic_enum::enum_integer(ptk::file_task::response::auto_rename));
+                        magic_enum::enum_integer(gui::file_task::response::auto_rename));
                 }
                 return true;
             }
@@ -2015,20 +2015,20 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
         gtk_widget_set_sensitive(rename_button, can_rename);
     }
     gtk_dialog_set_response_sensitive(GTK_DIALOG(parent),
-                                      magic_enum::enum_integer(ptk::file_task::response::overwrite),
+                                      magic_enum::enum_integer(gui::file_task::response::overwrite),
                                       !can_rename);
     gtk_dialog_set_response_sensitive(
         GTK_DIALOG(parent),
-        magic_enum::enum_integer(ptk::file_task::response::overwrite_all),
+        magic_enum::enum_integer(gui::file_task::response::overwrite_all),
         !can_rename);
 }
 
 static void
-query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* ptask) noexcept
+query_overwrite_response(GtkDialog* dlg, const i32 response, gui::file_task* ptask) noexcept
 {
-    switch (ptk::file_task::response(response.data()))
+    switch (gui::file_task::response(response.data()))
     {
-        case ptk::file_task::response::overwrite_all:
+        case gui::file_task::response::overwrite_all:
         {
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::overwrite_all);
             if (ptask->progress_dlg_)
@@ -2039,12 +2039,12 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             }
             break;
         }
-        case ptk::file_task::response::overwrite:
+        case gui::file_task::response::overwrite:
         {
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::overwrite);
             break;
         }
-        case ptk::file_task::response::skip_all:
+        case gui::file_task::response::skip_all:
         {
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::skip_all);
             if (ptask->progress_dlg_)
@@ -2055,12 +2055,12 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             }
             break;
         }
-        case ptk::file_task::response::skip:
+        case gui::file_task::response::skip:
         {
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::skip);
             break;
         }
-        case ptk::file_task::response::auto_rename_all:
+        case gui::file_task::response::auto_rename_all:
         {
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::auto_rename);
             if (ptask->progress_dlg_)
@@ -2071,12 +2071,12 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             }
             break;
         }
-        case ptk::file_task::response::auto_rename:
-        case ptk::file_task::response::rename:
+        case gui::file_task::response::auto_rename:
+        case gui::file_task::response::rename:
         {
             std::optional<std::string> str;
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::rename);
-            if (ptk::file_task::response(response.data()) == ptk::file_task::response::auto_rename)
+            if (gui::file_task::response(response.data()) == gui::file_task::response::auto_rename)
             {
                 GtkWidget* auto_button =
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
@@ -2099,15 +2099,15 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             }
             break;
         }
-        case ptk::file_task::response::pause:
+        case gui::file_task::response::pause:
         {
             ptask->pause(vfs::file_task::state::pause);
-            ptk::view::file_task::start_queued(ptask->task_view_, ptask);
+            gui::view::file_task::start_queued(ptask->task_view_, ptask);
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::rename);
             ptask->restart_timeout_ = false;
             break;
         }
-        case ptk::file_task::response::close:
+        case gui::file_task::response::close:
         {
             if (response.data() == GtkResponseType::GTK_RESPONSE_CANCEL ||
                 response.data() == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
@@ -2146,14 +2146,14 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
     }
     if (ptask->restart_timeout_)
     {
-        ptask->timeout_ = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, (void*)ptask);
+        ptask->timeout_ = g_timeout_add(500, (GSourceFunc)gui_file_task_add_main, (void*)ptask);
     }
     ptask->progress_count_ = 50;
     ptask->progress_timer_ = g_timeout_add(50, (GSourceFunc)on_progress_timer, ptask);
 }
 
 static void
-on_query_button_press(GtkWidget* widget, ptk::file_task* ptask) noexcept
+on_query_button_press(GtkWidget* widget, gui::file_task* ptask) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
@@ -2168,26 +2168,26 @@ on_query_button_press(GtkWidget* widget, ptk::file_task* ptask) noexcept
         return;
     }
 
-    ptk::file_task::response response = ptk::file_task::response::close;
+    gui::file_task::response response = gui::file_task::response::close;
     if (widget == rename_button)
     {
-        response = ptk::file_task::response::rename;
+        response = gui::file_task::response::rename;
     }
     else if (widget == auto_button)
     {
-        response = ptk::file_task::response::auto_rename;
+        response = gui::file_task::response::auto_rename;
     }
     else
     {
-        response = ptk::file_task::response::auto_rename_all;
+        response = gui::file_task::response::auto_rename_all;
     }
     query_overwrite_response(GTK_DIALOG(parent), magic_enum::enum_integer(response), ptask);
 }
 
 void
-ptk::file_task::query_overwrite() noexcept
+gui::file_task::query_overwrite() noexcept
 {
-    // logger::info<logger::domain::ptk>("ptk::file_task::query_overwrite({}) ", logger::utils::ptr(this));
+    // logger::info<logger::domain::gui>("gui::file_task::query_overwrite({}) ", logger::utils::ptr(this));
     GtkWidget* dlg = nullptr;
     GtkWidget* parent_win = nullptr;
     GtkTextIter iter;
@@ -2429,21 +2429,21 @@ ptk::file_task::query_overwrite() noexcept
     {
         gtk_dialog_add_buttons(GTK_DIALOG(dlg),
                                "_Overwrite",
-                               ptk::file_task::response::overwrite,
+                               gui::file_task::response::overwrite,
                                "Overwrite _All",
-                               ptk::file_task::response::overwrite_all,
+                               gui::file_task::response::overwrite_all,
                                nullptr);
     }
 
     GtkWidget* btn_pause =
         gtk_dialog_add_button(GTK_DIALOG(dlg),
                               "_Pause",
-                              magic_enum::enum_integer(ptk::file_task::response::pause));
+                              magic_enum::enum_integer(gui::file_task::response::pause));
     gtk_dialog_add_buttons(GTK_DIALOG(dlg),
                            "_Skip",
-                           ptk::file_task::response::skip,
+                           gui::file_task::response::skip,
                            "S_kip All",
-                           ptk::file_task::response::skip_all,
+                           gui::file_task::response::skip_all,
                            "Cancel",
                            GtkResponseType::GTK_RESPONSE_CANCEL,
                            nullptr);
@@ -2568,7 +2568,7 @@ ptk::file_task::query_overwrite() noexcept
     if (this->task_view_ &&
         gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(this->task_view_))))
     {
-        ptk::view::file_task::update_task(this);
+        gui::view::file_task::update_task(this);
     }
 
     // show dialog

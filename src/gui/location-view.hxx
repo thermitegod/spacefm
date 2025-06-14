@@ -27,16 +27,16 @@
 
 #include "vfs/volume.hxx"
 
-namespace ptk::view::location
+namespace gui::view::location
 {
-GtkWidget* create(ptk::browser* browser) noexcept;
+GtkWidget* create(gui::browser* browser) noexcept;
 
 bool chdir(GtkTreeView* location_view, const std::filesystem::path& current_path) noexcept;
 void on_action(GtkWidget* view, const xset_t& set) noexcept;
 std::shared_ptr<vfs::volume> selected_volume(GtkTreeView* location_view) noexcept;
 void update_volume_icons() noexcept;
-void mount_network(ptk::browser* browser, const std::string_view url, const bool new_tab,
+void mount_network(gui::browser* browser, const std::string_view url, const bool new_tab,
                    const bool force_new_mount) noexcept;
-void dev_menu(GtkWidget* parent, ptk::browser* browser, GtkWidget* menu) noexcept;
+void dev_menu(GtkWidget* parent, gui::browser* browser, GtkWidget* menu) noexcept;
 bool open_block(const std::filesystem::path& block, const bool new_tab) noexcept;
-} // namespace ptk::view::location
+} // namespace gui::view::location

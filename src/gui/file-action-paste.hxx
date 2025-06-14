@@ -19,7 +19,7 @@
 
 #include "gui/file-browser.hxx"
 
-namespace ptk::action
+namespace gui::action
 {
-void paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept;
+void paste_files(gui::browser* browser, const std::filesystem::path& cwd) noexcept;
 }

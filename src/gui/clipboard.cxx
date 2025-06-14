@@ -40,31 +40,31 @@
 // https://docs.gtk.org/gtk4/migrating-3to4.html#replace-gtkclipboard-with-gdkclipboard
 
 void
-ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
+gui::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                                   bool copy) noexcept
 {
     (void)selected_files;
     (void)copy;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::copy_as_text(
+gui::clipboard::copy_as_text(
     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)selected_files;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+gui::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)selected_files;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                             GtkTreeView* task_view, GFunc callback,
                             GtkWindow* callback_win) noexcept
 {
@@ -73,11 +73,11 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                             GtkTreeView* task_view, GFunc callback,
                             GtkWindow* callback_win) noexcept
 {
@@ -86,11 +86,11 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                               GtkTreeView* task_view, GFunc callback,
                               GtkWindow* callback_win) noexcept
 {
@@ -99,32 +99,32 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::copy_text(const std::string_view text) noexcept
+gui::clipboard::copy_text(const std::string_view text) noexcept
 {
     (void)text;
 }
 
 void
-ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
+gui::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
                                       bool copy) noexcept
 {
     (void)selected_files;
     (void)copy;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
 }
 
 const std::vector<std::filesystem::path>
-ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
+gui::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
                                i32* missing_targets) noexcept
 {
     (void)cwd;
     (void)is_cut;
     (void)missing_targets;
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
     return {};
 }
 
@@ -201,7 +201,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, st
                            8,
                            (const unsigned char*)uri_list.data(),
                            static_cast<std::int32_t>(uri_list.size()));
-    // logger::debug<logger::domain::ptk>("clipboard data: \n\n{}\n\n", uri_list);
+    // logger::debug<logger::domain::gui>("clipboard data: \n\n{}\n\n", uri_list);
 }
 
 static void
@@ -209,13 +209,13 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data) noexcept
 {
     (void)clipboard;
     (void)user_data;
-    // logger::debug<logger::domain::ptk>("clean clipboard!");
+    // logger::debug<logger::domain::gui>("clean clipboard!");
     clipboard_file_list.clear();
     clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 }
 
 void
-ptk::clipboard::copy_as_text(
+gui::clipboard::copy_as_text(
     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -232,7 +232,7 @@ ptk::clipboard::copy_as_text(
 }
 
 void
-ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+gui::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -249,7 +249,7 @@ ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> sele
 }
 
 void
-ptk::clipboard::copy_text(const std::string_view text) noexcept
+gui::clipboard::copy_text(const std::string_view text) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -258,7 +258,7 @@ ptk::clipboard::copy_text(const std::string_view text) noexcept
 }
 
 void
-ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
+gui::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                                   bool copy) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -297,7 +297,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
 }
 
 void
-ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
+gui::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
                                       bool copy) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -338,7 +338,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selecte
 }
 
 void
-ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                             GtkTreeView* task_view, GFunc callback,
                             GtkWindow* callback_win) noexcept
 {
@@ -428,7 +428,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
          * otherwise, paste the file in current directory.
          */
 
-        ptk::file_task* ptask = ptk_file_task_new(action,
+        gui::file_task* ptask = gui_file_task_new(action,
                                                   file_list,
                                                   dest_dir,
                                                   parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -443,7 +443,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
 }
 
 void
-ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                             GtkTreeView* task_view, GFunc callback,
                             GtkWindow* callback_win) noexcept
 {
@@ -511,7 +511,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
             file_list.push_back(file_path);
         }
 
-        ptk::file_task* ptask = ptk_file_task_new(action,
+        gui::file_task* ptask = gui_file_task_new(action,
                                                   file_list,
                                                   dest_dir,
                                                   parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -526,7 +526,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
 }
 
 void
-ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+gui::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                               GtkTreeView* task_view, GFunc callback,
                               GtkWindow* callback_win) noexcept
 {
@@ -610,7 +610,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
             }
         }
 
-        ptk::file_task* ptask = ptk_file_task_new(action,
+        gui::file_task* ptask = gui_file_task_new(action,
                                                   file_list,
                                                   dest_dir,
                                                   parent_win ? GTK_WINDOW(parent_win) : nullptr,
@@ -623,7 +623,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
 
         if (missing_targets > 0)
         {
-            ptk::dialog::error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
+            gui::dialog::error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                "Error",
                                std::format("{} target{} missing",
                                            missing_targets,
@@ -634,7 +634,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
 }
 
 std::vector<std::filesystem::path>
-ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
+gui::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
                                i32* missing_targets) noexcept
 {
     (void)cwd;

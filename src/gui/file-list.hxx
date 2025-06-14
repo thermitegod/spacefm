@@ -29,10 +29,10 @@
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
 
-#define PTK_FILE_LIST(obj) (static_cast<ptk::file_list*>(obj))
-#define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<ptk::file_list*>(obj))
+#define PTK_FILE_LIST(obj) (static_cast<gui::file_list*>(obj))
+#define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<gui::file_list*>(obj))
 
-namespace ptk
+namespace gui
 {
 struct file_list
 {
@@ -62,7 +62,7 @@ struct file_list
         last
     };
 
-    [[nodiscard]] static ptk::file_list* create(const std::shared_ptr<vfs::dir>& dir,
+    [[nodiscard]] static gui::file_list* create(const std::shared_ptr<vfs::dir>& dir,
                                                 const bool show_hidden,
                                                 const std::string_view pattern) noexcept;
 
@@ -79,12 +79,12 @@ struct file_list
     vfs::file::thumbnail_size thumbnail_size{vfs::file::thumbnail_size::big};
     u64 max_thumbnail{0};
 
-    ptk::file_list::column sort_col{ptk::file_list::column::name};
+    gui::file_list::column sort_col{gui::file_list::column::name};
     GtkSortType sort_order;
     bool sort_natural{false};
     bool sort_case{false};
     bool sort_hidden_first{false};
-    ptk::file_list::sort_dir sort_dir_{ptk::file_list::sort_dir::mixed};
+    gui::file_list::sort_dir sort_dir_{gui::file_list::sort_dir::mixed};
 
     // Random integer to check whether an iter belongs to our model
     std::int32_t stamp{0};
@@ -113,4 +113,4 @@ struct file_list
     sigc::connection signal_file_changed;
     sigc::connection signal_file_thumbnail_loaded;
 };
-} // namespace ptk
+} // namespace gui

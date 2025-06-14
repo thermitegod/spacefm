@@ -61,7 +61,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
     if (keyval == GDK_KEY_Return)
     {
         auto* const browser =
-            static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
+            static_cast<gui::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
 
         if (xset_get_b(xset::name::search_select))
         {
@@ -81,14 +81,14 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
         gtk_entry_set_text(GTK_ENTRY(entry), "");
 #endif
 
-        browser->focus(ptk::browser::focus_widget::filelist);
+        browser->focus(gui::browser::focus_widget::filelist);
     }
 
     return false;
 }
 
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcept
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, gui::browser* browser) noexcept
 {
     (void)entry;
 
@@ -117,7 +117,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcep
 }
 
 GtkEntry*
-ptk::search_bar_new(ptk::browser* browser) noexcept
+gui::search_bar_new(gui::browser* browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_placeholder_text(entry, "Search");

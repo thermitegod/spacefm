@@ -40,7 +40,7 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
     const auto editor = xset_get_s(xset::name::editor);
     if (!editor)
     {
-        ptk::dialog::error(nullptr,
+        gui::dialog::error(nullptr,
                            "Editor Not Set",
                            "Please set your editor in View|Preferences|Advanced");
         return;
@@ -63,7 +63,7 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
     const auto opened = desktop->open_files(path.parent_path(), open_files);
     if (!opened)
     {
-        ptk::dialog::error(
+        gui::dialog::error(
             nullptr,
             "Error",
             std::format("Unable to use '{}' to open file:\n{}", editor.value(), path.string()));

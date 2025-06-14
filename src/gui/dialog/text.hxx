@@ -25,7 +25,7 @@
 
 #include <ztd/ztd.hxx>
 
-namespace ptk::dialog
+namespace gui::dialog
 {
 std::tuple<bool, std::string> text(GtkWidget* parent, const std::string_view title,
                                    const std::string_view message, const std::string_view defstring,
@@ -42,4 +42,4 @@ GtkResponseType message(GtkWindow* parent, GtkMessageType action, const std::str
 
 void error(GtkWindow* parent, const std::string_view title,
            const std::string_view message) noexcept;
-} // namespace ptk::dialog
+} // namespace gui::dialog

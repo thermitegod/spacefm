@@ -27,9 +27,9 @@
 
 #include "vfs/file-task.hxx"
 
-#define PTK_FILE_TASK(obj) (static_cast<ptk::file_task*>(obj))
+#define PTK_FILE_TASK(obj) (static_cast<gui::file_task*>(obj))
 
-namespace ptk
+namespace gui
 {
 struct file_task
 {
@@ -87,7 +87,7 @@ struct file_task
     GtkTextMark* log_end_{nullptr};
     bool log_appended_{false};
     i32 err_count_{0};
-    ptk::file_task::ptask_error err_mode_{ptk::file_task::ptask_error::first};
+    gui::file_task::ptask_error err_mode_{gui::file_task::ptask_error::first};
 
     bool complete_{false};
     bool aborted_{false};
@@ -152,19 +152,19 @@ struct file_task
     std::string display_average_speed_;
     std::string display_average_estimate_;
 };
-} // namespace ptk
+} // namespace gui
 
-ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
+gui::file_task* gui_file_task_new(const vfs::file_task::type type,
                                   const std::span<const std::filesystem::path> src_files,
                                   GtkWindow* parent_window, GtkWidget* task_view) noexcept;
 
-ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
+gui::file_task* gui_file_task_new(const vfs::file_task::type type,
                                   const std::span<const std::filesystem::path> src_files,
                                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                                   GtkWidget* task_view) noexcept;
 
-ptk::file_task* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
+gui::file_task* gui_file_exec_new(const std::string_view item_name, GtkWidget* parent,
                                   GtkWidget* task_view) noexcept;
-ptk::file_task* ptk_file_exec_new(const std::string_view item_name,
+gui::file_task* gui_file_exec_new(const std::string_view item_name,
                                   const std::filesystem::path& dest_dir, GtkWidget* parent,
                                   GtkWidget* task_view) noexcept;

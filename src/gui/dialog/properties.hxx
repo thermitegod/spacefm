@@ -24,6 +24,6 @@
 
 #include "vfs/file.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
+void gui_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                               const std::span<const std::shared_ptr<vfs::file>> selected_files,
                               const i32 page) noexcept;

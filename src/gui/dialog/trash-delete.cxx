@@ -62,7 +62,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header,
 }
 
 void
-ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+gui::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
                           const std::span<const std::shared_ptr<vfs::file>> selected_files,
                           GtkTreeView* task_view) noexcept
 {
@@ -70,7 +70,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
 
     if (selected_files.empty())
     {
-        logger::warn<logger::domain::ptk>("Trying to delete an empty file list");
+        logger::warn<logger::domain::gui>("Trying to delete an empty file list");
         return;
     }
 
@@ -91,7 +91,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
         file_list.push_back(file->path());
     }
 
-    ptk::file_task* ptask = ptk_file_task_new(vfs::file_task::type::del,
+    gui::file_task* ptask = gui_file_task_new(vfs::file_task::type::del,
                                               file_list,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));
@@ -99,7 +99,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
 }
 
 void
-ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+gui::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
                          GtkTreeView* task_view) noexcept
 {
@@ -107,7 +107,7 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
 
     if (selected_files.empty())
     {
-        logger::warn<logger::domain::ptk>("Trying to trash an empty file list");
+        logger::warn<logger::domain::gui>("Trying to trash an empty file list");
         return;
     }
 
@@ -128,7 +128,7 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
         file_list.push_back(file->path());
     }
 
-    ptk::file_task* ptask = ptk_file_task_new(vfs::file_task::type::trash,
+    gui::file_task* ptask = gui_file_task_new(vfs::file_task::type::trash,
                                               file_list,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));

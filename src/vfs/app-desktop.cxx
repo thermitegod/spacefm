@@ -437,7 +437,7 @@ vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
                                const std::string_view command) const noexcept
 {
     // task
-    ptk::file_task* ptask = ptk_file_exec_new(this->display_name(), cwd, nullptr, nullptr);
+    gui::file_task* ptask = gui_file_exec_new(this->display_name(), cwd, nullptr, nullptr);
 
     ptask->task->exec_command = command;
 

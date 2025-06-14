@@ -165,7 +165,7 @@ save_settings(const std::shared_ptr<config::settings>& settings) noexcept
                         std::string tabs;
                         for (const auto i : std::views::iota(0, pages))
                         {
-                            ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
+                            gui::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));
                             tabs = std::format("{}{}{}",
                                                tabs,

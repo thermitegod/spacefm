@@ -188,8 +188,6 @@ IncludeCategories:
     Priority: 55
   - Regex: '^"xset/.*"'
     Priority: 56
-  - Regex: '^"ptk/.*"'
-    Priority: 57
   - Regex: '^"gui/dialog/.*"'
     Priority: 58
   - Regex: '^"gui/.*"'

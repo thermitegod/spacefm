@@ -30,7 +30,7 @@
 #include "package.hxx"
 
 std::tuple<bool, std::string>
-ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::string_view message,
+gui::dialog::text(GtkWidget* parent, const std::string_view title, const std::string_view message,
                   const std::string_view defstring, const std::string_view defreset) noexcept
 {
     (void)parent;
@@ -50,7 +50,7 @@ ptk::dialog::text(GtkWidget* parent, const std::string_view title, const std::st
 }
 
 std::optional<std::filesystem::path>
-ptk::dialog::file_chooser(GtkWidget* parent, GtkFileChooserAction action,
+gui::dialog::file_chooser(GtkWidget* parent, GtkFileChooserAction action,
                           const std::string_view title,
                           const std::optional<std::filesystem::path>& deffolder,
                           const std::optional<std::filesystem::path>& deffile) noexcept
@@ -75,7 +75,7 @@ ptk::dialog::file_chooser(GtkWidget* parent, GtkFileChooserAction action,
 }
 
 void
-ptk::dialog::error(GtkWindow* parent, const std::string_view title,
+gui::dialog::error(GtkWindow* parent, const std::string_view title,
                    const std::string_view message) noexcept
 {
     (void)parent;
@@ -86,7 +86,7 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
 }
 
 GtkResponseType
-ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
+gui::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
                      GtkButtonsType buttons, const std::string_view message,
                      const std::string_view secondary_message) noexcept
 {

@@ -25,8 +25,8 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::action
+namespace gui::action
 {
-i32 batch_rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
+i32 batch_rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                        const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
-} // namespace ptk::action
+} // namespace gui::action

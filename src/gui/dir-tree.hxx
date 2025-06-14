@@ -30,12 +30,12 @@
 #include "vfs/file.hxx"
 #include "vfs/monitor.hxx"
 
-#define PTK_DIR_TREE(obj) (static_cast<ptk::dir_tree*>(obj))
-#define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<ptk::dir_tree*>(obj))
+#define PTK_DIR_TREE(obj) (static_cast<gui::dir_tree*>(obj))
+#define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<gui::dir_tree*>(obj))
 
-namespace ptk
+namespace gui
 {
-struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::TreeModel
+struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::TreeModel
 {
     /* Columns of folder view */
     enum class column : std::uint8_t
@@ -47,7 +47,7 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
 
     GObject parent;
 
-    static ptk::dir_tree* create() noexcept;
+    static gui::dir_tree* create() noexcept;
 
     void expand_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
     void collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
@@ -58,7 +58,7 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
     {
         [[nodiscard]] static std::shared_ptr<node> create() noexcept;
         [[nodiscard]] static std::shared_ptr<node>
-        create(ptk::dir_tree* tree, const std::shared_ptr<node>& parent,
+        create(gui::dir_tree* tree, const std::shared_ptr<node>& parent,
                const std::filesystem::path& path) noexcept;
 
         std::shared_ptr<vfs::file> file{nullptr};
@@ -69,7 +69,7 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
         std::shared_ptr<node> next{nullptr};
         std::shared_ptr<node> prev{nullptr};
         std::shared_ptr<node> last{nullptr};
-        ptk::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
+        gui::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
         vfs::monitor monitor;
 
@@ -91,9 +91,9 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
   private:
     void insert_child(const std::shared_ptr<node>& parent,
                       const std::filesystem::path& file_path = "") noexcept;
-    void delete_child(const std::shared_ptr<ptk::dir_tree::node>& child) noexcept;
+    void delete_child(const std::shared_ptr<gui::dir_tree::node>& child) noexcept;
 
-    static std::int32_t node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
-                                     const std::shared_ptr<ptk::dir_tree::node>& b) noexcept;
+    static std::int32_t node_compare(const std::shared_ptr<gui::dir_tree::node>& a,
+                                     const std::shared_ptr<gui::dir_tree::node>& b) noexcept;
 };
-} // namespace ptk
+} // namespace gui

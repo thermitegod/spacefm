@@ -24,12 +24,12 @@
 
 #include "gui/file-browser.hxx"
 
-namespace ptk::view::dir_tree
+namespace gui::view::dir_tree
 {
-GtkWidget* create(ptk::browser* browser, bool show_hidden) noexcept;
+GtkWidget* create(gui::browser* browser, bool show_hidden) noexcept;
 
 bool chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept;
 void show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept;
 std::optional<std::filesystem::path> selected_dir(GtkTreeView* dir_tree_view) noexcept;
 std::optional<std::filesystem::path> dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept;
-} // namespace ptk::view::dir_tree
+} // namespace gui::view::dir_tree

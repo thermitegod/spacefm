@@ -21,18 +21,18 @@
 #include "xset/xset.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
-void xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
+void xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
                    const std::vector<xset::name>& submenu_entries) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
-void xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+void xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const std::vector<xset::name>& submenu_entries) noexcept;
 #endif
 
 #if (GTK_MAJOR_VERSION == 4)
-GtkWidget* xset_add_menuitem(ptk::browser* browser, GtkWidget* menu,
+GtkWidget* xset_add_menuitem(gui::browser* browser, GtkWidget* menu,
                              GtkEventController* accel_group, const xset_t& set) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
-GtkWidget* xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+GtkWidget* xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                              const xset_t& set) noexcept;
 #endif
 

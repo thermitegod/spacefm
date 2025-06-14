@@ -22,7 +22,7 @@
 
 #include "vfs/user-dirs.hxx"
 
-namespace ptk::utils
+namespace gui::utils
 {
 struct history
 {
@@ -54,4 +54,4 @@ struct history
     std::vector<std::filesystem::path> back_;
     std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>> selection_;
 };
-} // namespace ptk::utils
+} // namespace gui::utils

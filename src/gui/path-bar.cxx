@@ -38,7 +38,7 @@
 
 // #define ENABLE_AUTO_SEEK
 
-namespace ptk::path_entry
+namespace gui::path_entry
 {
 enum column : std::uint8_t
 {
@@ -139,7 +139,7 @@ seek_path(GtkEntry* entry) noexcept
         }
     }
 
-    auto* const browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
+    auto* const browser = static_cast<gui::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
 
     browser->seek_path(is_unique ? seek_dir : "", seek_name);
 
@@ -157,7 +157,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
-    gtk_tree_model_get(model, it, ptk::path_entry::column::name, &name, -1);
+    gtk_tree_model_get(model, it, gui::path_entry::column::name, &name, -1);
 
     if (!name)
     {
@@ -224,9 +224,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion) noexcept
             gtk_list_store_append(list, &it);
             gtk_list_store_set(list,
                                &it,
-                               ptk::path_entry::column::name,
+                               gui::path_entry::column::name,
                                disp_name.c_str(),
-                               ptk::path_entry::column::path,
+                               gui::path_entry::column::path,
                                name.c_str(),
                                -1);
         }
@@ -372,7 +372,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
 
     if (keyval == GDK_KEY_Tab)
     {
-        const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+        const auto keymod = gui::utils::get_keymod(gdk_event_get_modifier_state(event));
         if (keymod != 0)
         {
             return false;
@@ -407,7 +407,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
     (void)completion;
 
     g_autofree char* c_path = nullptr;
-    gtk_tree_model_get(model, iter, ptk::path_entry::column::path, &c_path, -1);
+    gtk_tree_model_get(model, iter, gui::path_entry::column::path, &c_path, -1);
     if (!(c_path && c_path[0]))
     {
         return true;
@@ -452,7 +452,7 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
     (void)user_data;
 
     GtkEntryCompletion* completion = gtk_entry_completion_new();
-    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<ptk::path_entry::column>(),
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<gui::path_entry::column>(),
                                             G_TYPE_STRING,
                                             G_TYPE_STRING);
 
@@ -460,17 +460,17 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
     gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(list));
     g_object_unref(list);
 
-    /* gtk_entry_completion_set_text_column( completion, ptk::path_entry::column::path ); */
+    /* gtk_entry_completion_set_text_column( completion, gui::path_entry::column::path ); */
 
     // Following line causes GTK3 to show both columns, so skip this and use
-    // custom match-selected handler to insert ptk::path_entry::column::path
-    // g_object_set(completion, "text-column", ptk::path_entry::column::path, nullptr);
+    // custom match-selected handler to insert gui::path_entry::column::path
+    // g_object_set(completion, "text-column", gui::path_entry::column::path, nullptr);
     GtkCellRenderer* render = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start((GtkCellLayout*)completion, render, true);
     gtk_cell_layout_add_attribute((GtkCellLayout*)completion,
                                   render,
                                   "text",
-                                  ptk::path_entry::column::name);
+                                  gui::path_entry::column::name);
 
     // gtk_entry_completion_set_inline_completion(completion, true);
     gtk_entry_completion_set_popup_set_width(completion, true);
@@ -499,7 +499,7 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
 
 #if defined(ENABLE_AUTO_SEEK)
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcept
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, gui::browser* browser) noexcept
 {
     (void)entry;
 
@@ -529,7 +529,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcep
 #endif
 
 GtkEntry*
-ptk::path_bar_new(ptk::browser* browser) noexcept
+gui::path_bar_new(gui::browser* browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_has_frame(entry, true);

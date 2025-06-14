@@ -37,7 +37,7 @@ is_archiver_installed() noexcept
     const auto archiver = Glib::find_program_in_path("file-roller");
     if (archiver.empty())
     {
-        ptk::dialog::error(nullptr, "Missing Archiver", "Failed to find file-roller in $PATH");
+        gui::dialog::error(nullptr, "Missing Archiver", "Failed to find file-roller in $PATH");
         return false;
     }
     return true;
@@ -57,7 +57,7 @@ archiver_create_shell_file_list(
 }
 
 void
-ptk::archiver::create(ptk::browser* browser,
+gui::archiver::create(gui::browser* browser,
                       const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)browser;
@@ -70,12 +70,12 @@ ptk::archiver::create(ptk::browser* browser,
     const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller --add {}", shell_file_list);
-    logger::info<logger::domain::ptk>("COMMAND({})", command);
+    logger::info<logger::domain::gui>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
 void
-ptk::archiver::extract(ptk::browser* browser,
+gui::archiver::extract(gui::browser* browser,
                        const std::span<const std::shared_ptr<vfs::file>> selected_files,
                        const std::filesystem::path& dest_dir) noexcept
 {
@@ -99,12 +99,12 @@ ptk::archiver::extract(ptk::browser* browser,
     }
     command.append(shell_file_list);
 
-    logger::info<logger::domain::ptk>("COMMAND({})", command);
+    logger::info<logger::domain::gui>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
 void
-ptk::archiver::open(ptk::browser* browser,
+gui::archiver::open(gui::browser* browser,
                     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)browser;
@@ -117,6 +117,6 @@ ptk::archiver::open(ptk::browser* browser,
     const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller {}", shell_file_list);
-    logger::info<logger::domain::ptk>("COMMAND({})", command);
+    logger::info<logger::domain::gui>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }

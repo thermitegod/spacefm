@@ -66,53 +66,53 @@
 #include "logger.hxx"
 #include "types.hxx"
 
-#define PTK_FILE_MENU(obj) (static_cast<ptk::file_menu*>(obj))
+#define PTK_FILE_MENU(obj) (static_cast<gui::file_menu*>(obj))
 
-static bool on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noexcept;
-static bool app_menu_keypress(GtkWidget* menu, GdkEvent* event, ptk::file_menu* data) noexcept;
-static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 button,
+static bool on_app_button_press(GtkWidget* item, GdkEvent* event, gui::file_menu* data) noexcept;
+static bool app_menu_keypress(GtkWidget* menu, GdkEvent* event, gui::file_menu* data) noexcept;
+static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, gui::file_menu* data, u32 button,
                           const std::chrono::system_clock::time_point time_point) noexcept;
 
 /* Signal handlers for popup menu */
-static void on_popup_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_open_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 static void on_popup_open_with_another_activate(GtkMenuItem* menuitem,
-                                                ptk::file_menu* data) noexcept;
-static void on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_new_bookmark(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_cut_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_copy_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_paste_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_paste_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_paste_target_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_copy_text_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_copy_name_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_copy_parent_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+                                                gui::file_menu* data) noexcept;
+static void on_popup_run_app(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_new_bookmark(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_cut_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_copy_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_paste_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_paste_link_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_paste_target_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_copy_text_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_copy_name_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_copy_parent_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 
-static void on_popup_paste_as_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_paste_as_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 
-static void on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_batch_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_extract_here_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_extract_to_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_extract_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_new_folder_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_new_text_file_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_new_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_trash_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_delete_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_rename_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_batch_rename_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_compress_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_extract_here_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_extract_to_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_extract_open_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_new_folder_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_new_text_file_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_new_link_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 
-static void on_popup_file_properties_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_file_attributes_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_file_properties_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_file_attributes_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 static void on_popup_file_permissions_activate(GtkMenuItem* menuitem,
-                                               ptk::file_menu* data) noexcept;
+                                               gui::file_menu* data) noexcept;
 
-static void on_popup_open_all(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
-static void on_popup_canon(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
+static void on_popup_open_all(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
+static void on_popup_canon(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 static void on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept;
 
-ptk::file_menu::~file_menu() noexcept
+gui::file_menu::~file_menu() noexcept
 {
     if (this->accel_group)
     {
@@ -120,7 +120,7 @@ ptk::file_menu::~file_menu() noexcept
     }
 }
 
-AutoOpenCreate::AutoOpenCreate(ptk::browser* browser, bool open_file) noexcept
+AutoOpenCreate::AutoOpenCreate(gui::browser* browser, bool open_file) noexcept
     : browser(browser), open_file(open_file)
 {
     if (this->browser)
@@ -130,7 +130,7 @@ AutoOpenCreate::AutoOpenCreate(ptk::browser* browser, bool open_file) noexcept
 }
 
 void
-on_popup_list_large(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_list_large(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     const panel_t p = browser->panel();
@@ -145,7 +145,7 @@ on_popup_list_large(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 void
-on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_list_detailed(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     const panel_t p = browser->panel();
@@ -168,7 +168,7 @@ on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 void
-on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_list_icons(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     const panel_t p = browser->panel();
@@ -191,7 +191,7 @@ on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 void
-on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_list_compact(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     const panel_t p = browser->panel();
@@ -214,7 +214,7 @@ on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 static void
-on_popup_show_hidden(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_show_hidden(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     if (browser)
@@ -224,7 +224,7 @@ on_popup_show_hidden(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 static void
-on_copycmd(GtkMenuItem* menuitem, ptk::file_menu* data, const xset_t& set2) noexcept
+on_copycmd(GtkMenuItem* menuitem, gui::file_menu* data, const xset_t& set2) noexcept
 {
     xset_t set;
     if (menuitem)
@@ -247,7 +247,7 @@ on_copycmd(GtkMenuItem* menuitem, ptk::file_menu* data, const xset_t& set2) noex
 }
 
 static void
-on_popup_select_pattern(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_select_pattern(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -257,7 +257,7 @@ on_popup_select_pattern(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_open_in_tab(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_open_in_tab(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     const tab_t tab = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "tab"));
     if (data->browser)
@@ -267,7 +267,7 @@ on_open_in_tab(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_open_in_panel(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_open_in_panel(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel"));
@@ -278,14 +278,14 @@ on_open_in_panel(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_file_edit(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_file_edit(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     vfs::utils::open_editor(data->file_path);
 }
 
 static void
-on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* browser, const xset_t& set2) noexcept
+on_popup_sort_extra(GtkMenuItem* menuitem, gui::browser* browser, const xset_t& set2) noexcept
 {
     xset_t set;
     if (menuitem)
@@ -301,7 +301,7 @@ on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* browser, const xset_t& 
 }
 
 void
-on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcept
+on_popup_sortby(GtkMenuItem* menuitem, gui::browser* browser, i32 order) noexcept
 {
     GtkSortType v = GtkSortType::GTK_SORT_ASCENDING;
     i32 sort_order = 0;
@@ -336,15 +336,15 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcep
                        xset::panel::list_detailed,
                        xset::var::x,
                        std::format("{}", sort_order));
-        browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order.data()));
+        browser->set_sort_order(static_cast<enum gui::browser::sort_order>(sort_order.data()));
     }
 }
 
 static void
-on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_detailed_column(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
-    if (browser->is_view_mode(ptk::browser::view_mode::list_view))
+    if (browser->is_view_mode(gui::browser::view_mode::list_view))
     {
         // get visiblity for correct mode
         const MainWindow* main_window = browser->main_window();
@@ -411,7 +411,7 @@ on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 }
 
 static void
-on_popup_toggle_view(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
+on_popup_toggle_view(GtkMenuItem* menuitem, gui::browser* browser) noexcept
 {
     (void)menuitem;
     // get visiblity for correct mode
@@ -462,7 +462,7 @@ on_archive_default(GtkMenuItem* menuitem, const xset_t& set) noexcept
 }
 
 static void
-on_hide_file(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_hide_file(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -472,7 +472,7 @@ on_hide_file(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_permission(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_permission(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     if (data->browser)
     {
@@ -482,11 +482,11 @@ on_permission(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 
 #if (GTK_MAJOR_VERSION == 4)
 void
-ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
+gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                   GtkEventController* accel_group) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 void
-ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
+gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                   GtkAccelGroup* accel_group) noexcept
 #endif
 {
@@ -499,7 +499,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     const MainWindow* main_window = browser->main_window();
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
-    xset_set_cb(xset::name::view_refresh, (GFunc)ptk::wrapper::browser::refresh, browser);
+    xset_set_cb(xset::name::view_refresh, (GFunc)gui::wrapper::browser::refresh, browser);
 
     {
         const auto set = xset::set::get(xset::panel::show_toolbox, p);
@@ -521,7 +521,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
 
     xset_set_cb_panel(p, xset::panel::show_hidden, (GFunc)on_popup_show_hidden, browser);
 
-    if (browser->is_view_mode(ptk::browser::view_mode::list_view))
+    if (browser->is_view_mode(gui::browser::view_mode::list_view))
     {
         { // size
             const auto set = xset::set::get(xset::panel::detcol_size, p);
@@ -589,7 +589,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             set->b = xset::set::get(xset::panel::detcol_mtime, p, mode)->b;
         }
 
-        xset_set_cb(xset::name::view_reorder_col, (GFunc)ptk::view::file_task::on_reorder, browser);
+        xset_set_cb(xset::name::view_reorder_col, (GFunc)gui::view::file_task::on_reorder, browser);
 
         {
             const auto set = xset::set::get(xset::name::view_columns);
@@ -697,7 +697,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
                                                      : xset::set::enabled::unset;
     }
 
-    if (browser->is_view_mode(ptk::browser::view_mode::icon_view))
+    if (browser->is_view_mode(gui::browser::view_mode::icon_view))
     {
         const auto set = xset::set::get(xset::panel::list_large, p);
         set->b = xset::set::enabled::yes;
@@ -735,8 +735,8 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // name
         const auto set = xset::set::get(xset::name::sortby_name);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::name));
-        set->b = browser->is_sort_order(ptk::browser::sort_order::name) ? xset::set::enabled::yes
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::name));
+        set->b = browser->is_sort_order(gui::browser::sort_order::name) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
         set->menu.radio_set = nullptr;
         set_radio = set;
@@ -745,99 +745,99 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // size
         const auto set = xset::set::get(xset::name::sortby_size);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::size));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::size));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::size) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::size) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
     }
 
     { // size in bytes
         const auto set = xset::set::get(xset::name::sortby_bytes);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::bytes));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::bytes));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::bytes) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::bytes) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // type
         const auto set = xset::set::get(xset::name::sortby_type);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::type));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::type));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::type) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::type) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
     }
 
     { // MIME type
         const auto set = xset::set::get(xset::name::sortby_mime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::mime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::mime));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::mime) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::mime) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
     }
 
     { // perm
         const auto set = xset::set::get(xset::name::sortby_perm);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::perm));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::perm));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::perm) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::perm) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
     }
 
     { // owner
         const auto set = xset::set::get(xset::name::sortby_owner);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::owner));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::owner));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::owner) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::owner) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // group
         const auto set = xset::set::get(xset::name::sortby_group);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::group));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::group));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::group) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::group) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // atime
         const auto set = xset::set::get(xset::name::sortby_atime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::atime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::atime));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::atime) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::atime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // btime
         const auto set = xset::set::get(xset::name::sortby_btime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::btime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::btime));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::btime) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::btime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // ctime
         const auto set = xset::set::get(xset::name::sortby_ctime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::ctime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::ctime));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::ctime) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::ctime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
     { // mtime
         const auto set = xset::set::get(xset::name::sortby_mtime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::mtime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(gui::browser::sort_order::mtime));
         set->menu.radio_set = set_radio;
-        set->b = browser->is_sort_order(ptk::browser::sort_order::mtime) ? xset::set::enabled::yes
+        set->b = browser->is_sort_order(gui::browser::sort_order::mtime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
     }
 
@@ -884,7 +884,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             const auto set = xset::set::get(xset::name::sortx_directories);
             xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
             set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
-                             ptk::file_list::sort_dir::first
+                             gui::file_list::sort_dir::first
                          ? xset::set::enabled::yes
                          : xset::set::enabled::no;
             set->menu.radio_set = nullptr;
@@ -896,7 +896,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
             set->menu.radio_set = set_radio;
             set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
-                             ptk::file_list::sort_dir::last
+                             gui::file_list::sort_dir::last
                          ? xset::set::enabled::yes
                          : xset::set::enabled::no;
         }
@@ -906,7 +906,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
             set->menu.radio_set = set_radio;
             set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
-                             ptk::file_list::sort_dir::mixed
+                             gui::file_list::sort_dir::mixed
                          ? xset::set::enabled::yes
                          : xset::set::enabled::no;
         }
@@ -1058,14 +1058,14 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
 }
 
 static void
-ptk_file_menu_free(ptk::file_menu* data) noexcept
+gui_file_menu_free(gui::file_menu* data) noexcept
 {
     delete data;
 }
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(ptk::browser* browser,
+gui_file_menu_new(gui::browser* browser,
                   const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     assert(browser != nullptr);
@@ -1080,7 +1080,7 @@ ptk_file_menu_new(ptk::browser* browser,
 
     const auto& cwd = browser->cwd();
 
-    auto* const data = new ptk::file_menu;
+    auto* const data = new gui::file_menu;
     data->cwd = cwd;
     data->browser = browser;
     data->file_path = file_path;
@@ -1102,7 +1102,7 @@ ptk_file_menu_new(ptk::browser* browser,
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)ptk_file_menu_free, data);
+    g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)gui_file_menu_free, data);
     // clang-format off
     g_signal_connect_after(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
     // clang-format on
@@ -1117,7 +1117,7 @@ ptk_file_menu_new(ptk::browser* browser,
     const auto no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
 #if (GTK_MAJOR_VERSION == 4)
-    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
     bool is_clip = false;
 #elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -1437,86 +1437,86 @@ ptk_file_menu_new(ptk::browser* browser,
     {
         {
             const auto set = xset::set::get(xset::name::go_back);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_back, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_back, browser);
             set->disable = !browser->history_->has_back();
         }
 
         {
             const auto set = xset::set::get(xset::name::go_forward);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_forward, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_forward, browser);
             set->disable = !browser->history_->has_forward();
         }
 
         {
             const auto set = xset::set::get(xset::name::go_up);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_up, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_up, browser);
             set->disable = std::filesystem::equivalent(cwd, "/");
-            xset_set_cb(xset::name::go_home, (GFunc)ptk::wrapper::browser::go_home, browser);
+            xset_set_cb(xset::name::go_home, (GFunc)gui::wrapper::browser::go_home, browser);
             xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
         }
 
         {
             const auto set = xset::set::get(xset::name::focus_path_bar);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::focus, browser);
             xset_set_ob(set,
                         "focus",
-                        magic_enum::enum_integer(ptk::browser::focus_widget::path_bar));
+                        magic_enum::enum_integer(gui::browser::focus_widget::path_bar));
         }
 
         {
             const auto set = xset::set::get(xset::name::focus_search_bar);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::focus, browser);
             xset_set_ob(set,
                         "focus",
-                        magic_enum::enum_integer(ptk::browser::focus_widget::search_bar));
+                        magic_enum::enum_integer(gui::browser::focus_widget::search_bar));
         }
 
         {
             const auto set = xset::set::get(xset::name::focus_filelist);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::focus, browser);
             xset_set_ob(set,
                         "focus",
-                        magic_enum::enum_integer(ptk::browser::focus_widget::filelist));
+                        magic_enum::enum_integer(gui::browser::focus_widget::filelist));
         }
 
         {
             const auto set = xset::set::get(xset::name::focus_dirtree);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::focus, browser);
             xset_set_ob(set,
                         "focus",
-                        magic_enum::enum_integer(ptk::browser::focus_widget::dirtree));
+                        magic_enum::enum_integer(gui::browser::focus_widget::dirtree));
         }
 
         {
             const auto set = xset::set::get(xset::name::focus_device);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-            xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::device));
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::focus, browser);
+            xset_set_ob(set, "focus", magic_enum::enum_integer(gui::browser::focus_widget::device));
         }
 
         // Go > Tab >
         {
             const auto set = xset::set::get(xset::name::tab_prev);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_tab, browser);
             xset_set_ob(set, "tab", tab_control_code_prev);
             set->disable = (tab_count < 2);
         }
 
         {
             const auto set = xset::set::get(xset::name::tab_next);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_tab, browser);
             xset_set_ob(set, "tab", tab_control_code_next);
             set->disable = (tab_count < 2);
         }
 
         {
             const auto set = xset::set::get(xset::name::tab_close);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_tab, browser);
             xset_set_ob(set, "tab", tab_control_code_close);
         }
 
         {
             const auto set = xset::set::get(xset::name::tab_restore);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_tab, browser);
             xset_set_ob(set, "tab", tab_control_code_restore);
         }
 
@@ -1524,7 +1524,7 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             const std::string name = std::format("tab_{}", tab);
             const auto set = xset::set::get(name);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::go_tab, browser);
             xset_set_ob(set, "tab", tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
         }
@@ -1547,7 +1547,7 @@ ptk_file_menu_new(ptk::browser* browser,
 
         {
             const auto set = xset::set::get(xset::name::tab_new);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::new_tab, browser);
             set->disable = !browser;
         }
 
@@ -1617,17 +1617,17 @@ ptk_file_menu_new(ptk::browser* browser,
         }
 
         xset_set_cb(xset::name::select_all,
-                    (GFunc)ptk::wrapper::browser::select_all,
+                    (GFunc)gui::wrapper::browser::select_all,
                     data->browser);
 
         {
             const auto set = xset::set::get(xset::name::select_un);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::unselect_all, browser);
+            xset_set_cb(set, (GFunc)gui::wrapper::browser::unselect_all, browser);
             set->disable = set_disable;
         }
 
         xset_set_cb(xset::name::select_invert,
-                    (GFunc)ptk::wrapper::browser::invert_selection,
+                    (GFunc)gui::wrapper::browser::invert_selection,
                     browser);
         xset_set_cb(xset::name::select_patt, (GFunc)on_popup_select_pattern, data);
 
@@ -1809,7 +1809,7 @@ ptk_file_menu_new(ptk::browser* browser,
     if (browser)
     {
         // View >
-        ptk_file_menu_add_panel_view_menu(browser, popup, accel_group);
+        gui_file_menu_add_panel_view_menu(browser, popup, accel_group);
 
         // Properties >
         xset_set_cb(xset::name::prop_info, (GFunc)on_popup_file_properties_activate, data);
@@ -1852,10 +1852,10 @@ ptk_file_menu_new(ptk::browser* browser,
 }
 
 static void
-on_popup_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_open_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::action::open_files_with_app(data->cwd,
+    gui::action::open_files_with_app(data->cwd,
                                      data->selected_files,
                                      "",
                                      data->browser,
@@ -1864,7 +1864,7 @@ on_popup_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_open_with_another_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
 
@@ -1889,10 +1889,10 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     }
 
     const auto app =
-        ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, false, true, true, false);
+        gui_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, false, true, true, false);
     if (app)
     {
-        ptk::action::open_files_with_app(data->cwd,
+        gui::action::open_files_with_app(data->cwd,
                                          data->selected_files,
                                          app.value(),
                                          data->browser,
@@ -1902,10 +1902,10 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 }
 
 static void
-on_popup_open_all(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_open_all(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::action::open_files_with_app(data->cwd,
+    gui::action::open_files_with_app(data->cwd,
                                      data->selected_files,
                                      "",
                                      data->browser,
@@ -1914,7 +1914,7 @@ on_popup_open_all(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_run_app(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     const char* desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
@@ -1925,7 +1925,7 @@ on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
         return;
     }
 
-    ptk::action::open_files_with_app(data->cwd,
+    gui::action::open_files_with_app(data->cwd,
                                      data->selected_files,
                                      desktop->name(),
                                      data->browser,
@@ -1965,7 +1965,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
     }
 
     const auto job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
-    ptk::file_menu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
+    gui::file_menu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->file))
     {
         return;
@@ -1973,14 +1973,14 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
 
     const auto mime_type = data->file->mime_type();
 
-    switch (ptk::file_menu::app_job(job))
+    switch (gui::file_menu::app_job(job))
     {
-        case ptk::file_menu::app_job::default_action:
+        case gui::file_menu::app_job::default_action:
         {
             mime_type->set_default_action(desktop->name());
             break;
         }
-        case ptk::file_menu::app_job::edit:
+        case gui::file_menu::app_job::edit:
         {
             const auto path = vfs::user::data() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
@@ -1991,7 +1991,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                     return;
                 }
 
-                const auto response = ptk::dialog::message(
+                const auto response = gui::dialog::message(
                     GTK_WINDOW(data->browser),
                     GtkMessageType::GTK_MESSAGE_QUESTION,
                     "Copy Desktop File",
@@ -2019,7 +2019,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             vfs::utils::open_editor(path);
             break;
         }
-        case ptk::file_menu::app_job::view:
+        case gui::file_menu::app_job::view:
         {
             const auto desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
@@ -2028,14 +2028,14 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             }
             break;
         }
-        case ptk::file_menu::app_job::edit_list:
+        case gui::file_menu::app_job::edit_list:
         {
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             const auto path = vfs::user::config() / "mimeapps.list";
             vfs::utils::open_editor(path);
             break;
         }
-        case ptk::file_menu::app_job::browse:
+        case gui::file_menu::app_job::browse:
         {
             const auto path = vfs::user::data() / "applications";
             std::filesystem::create_directories(path);
@@ -2045,11 +2045,11 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             {
                 data->browser->signal_open_file().emit(data->browser,
                                                        path,
-                                                       ptk::browser::open_action::new_tab);
+                                                       gui::browser::open_action::new_tab);
             }
             break;
         }
-        case ptk::file_menu::app_job::browse_shared:
+        case gui::file_menu::app_job::browse_shared:
         {
             std::filesystem::path path;
             const auto desktop_path = get_shared_desktop_file_location(desktop->name());
@@ -2065,11 +2065,11 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             {
                 data->browser->signal_open_file().emit(data->browser,
                                                        path,
-                                                       ptk::browser::open_action::new_tab);
+                                                       gui::browser::open_action::new_tab);
             }
         }
         break;
-        case ptk::file_menu::app_job::edit_type:
+        case gui::file_menu::app_job::edit_type:
         {
             const auto mime_path = vfs::user::data() / "mime" / "packages";
             std::filesystem::create_directories(mime_path);
@@ -2103,7 +2103,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                                     mime_type->type());
                 }
 
-                const auto response = ptk::dialog::message(GTK_WINDOW(data->browser),
+                const auto response = gui::dialog::message(GTK_WINDOW(data->browser),
                                                            GtkMessageType::GTK_MESSAGE_QUESTION,
                                                            "Create New XML",
                                                            GtkButtonsType::GTK_BUTTONS_YES_NO,
@@ -2151,7 +2151,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 const auto buffer = vfs::utils::read_file(usr_path);
                 if (buffer)
                 {
-                    logger::warn<logger::domain::ptk>("Error reading {}: {}",
+                    logger::warn<logger::domain::gui>("Error reading {}: {}",
                                                       usr_path.string(),
                                                       buffer.error().message());
                 }
@@ -2204,7 +2204,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             vfs::mime_monitor();
             break;
         }
-        case ptk::file_menu::app_job::view_type:
+        case gui::file_menu::app_job::view_type:
         {
             str2 = std::format("{}.xml", mime_type->type());
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
@@ -2214,24 +2214,24 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             }
             break;
         }
-        case ptk::file_menu::app_job::view_over:
+        case gui::file_menu::app_job::view_over:
         {
             const std::filesystem::path path = "/usr/share/mime/packages/Overrides.xml";
             vfs::utils::open_editor(path);
             break;
         }
-        case ptk::file_menu::app_job::browse_mime_usr:
+        case gui::file_menu::app_job::browse_mime_usr:
         {
             if (data->browser)
             {
                 const std::filesystem::path path = "/usr/share/mime/packages";
                 data->browser->signal_open_file().emit(data->browser,
                                                        path,
-                                                       ptk::browser::open_action::new_tab);
+                                                       gui::browser::open_action::new_tab);
             }
             break;
         }
-        case ptk::file_menu::app_job::browse_mime:
+        case gui::file_menu::app_job::browse_mime:
         {
             const auto path = vfs::user::data() / "mime" / "packages";
             std::filesystem::create_directories(path);
@@ -2240,30 +2240,30 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             {
                 data->browser->signal_open_file().emit(data->browser,
                                                        path,
-                                                       ptk::browser::open_action::new_tab);
+                                                       gui::browser::open_action::new_tab);
             }
             vfs::mime_monitor();
             break;
         }
-        case ptk::file_menu::app_job::update:
+        case gui::file_menu::app_job::update:
         {
             const auto data_dir = vfs::user::data();
             command = std::format("update-mime-database {}/mime", data_dir.string());
-            logger::info<logger::domain::ptk>("COMMAND({})", command);
+            logger::info<logger::domain::gui>("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
 
             command = std::format("update-desktop-database {}/applications", data_dir.string());
-            logger::info<logger::domain::ptk>("COMMAND({})", command);
+            logger::info<logger::domain::gui>("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
             break;
         }
-        case ptk::file_menu::app_job::usr:
+        case gui::file_menu::app_job::usr:
             break;
     }
 }
 
 static bool
-app_menu_keypress(GtkWidget* menu, GdkEvent* event, ptk::file_menu* data) noexcept
+app_menu_keypress(GtkWidget* menu, GdkEvent* event, gui::file_menu* data) noexcept
 {
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (!item)
@@ -2275,9 +2275,9 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, ptk::file_menu* data) noexce
     // const std::string desktop_file = static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
     // const auto desktop = vfs::desktop::create(desktop_file);
     // else if app menu, data will be set
-    // ptk::file_menu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
+    // gui::file_menu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = gui::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
@@ -2300,8 +2300,8 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu) noexcept
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, const std::string_view label, ptk::file_menu::app_job job,
-                 GtkWidget* app_item, ptk::file_menu* data) noexcept
+app_menu_additem(GtkWidget* menu, const std::string_view label, gui::file_menu::app_job job,
+                 GtkWidget* app_item, gui::file_menu* data) noexcept
 {
     GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());
 
@@ -2313,7 +2313,7 @@ app_menu_additem(GtkWidget* menu, const std::string_view label, ptk::file_menu::
 }
 
 static void
-show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 button,
+show_app_menu(GtkWidget* menu, GtkWidget* app_item, gui::file_menu* data, u32 button,
               const std::chrono::system_clock::time_point time_point) noexcept
 {
     (void)button;
@@ -2343,7 +2343,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     // Set Default
     newitem = app_menu_additem(app_menu,
                                "_Set As Default",
-                               ptk::file_menu::app_job::default_action,
+                               gui::file_menu::app_job::default_action,
                                app_item,
                                data);
 
@@ -2363,20 +2363,20 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
             str = ztd::replace(desktop->name(), ".desktop", "._desktop");
             str = std::format("{} (*copy)", str);
         }
-        newitem = app_menu_additem(app_menu, str, ptk::file_menu::app_job::edit, app_item, data);
+        newitem = app_menu_additem(app_menu, str, gui::file_menu::app_job::edit, app_item, data);
     }
 
     // mimeapps.list
     newitem = app_menu_additem(app_menu,
                                "_mimeapps.list",
-                               ptk::file_menu::app_job::edit_list,
+                               gui::file_menu::app_job::edit_list,
                                app_item,
                                data);
 
     // applications/
     newitem = app_menu_additem(app_menu,
                                "appli_cations/",
-                               ptk::file_menu::app_job::browse,
+                               gui::file_menu::app_job::browse,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2398,12 +2398,12 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
         str = ztd::replace(type, "/", "-");
         str = std::format("{}._xml (*new)", str);
     }
-    newitem = app_menu_additem(app_menu, str, ptk::file_menu::app_job::edit_type, app_item, data);
+    newitem = app_menu_additem(app_menu, str, gui::file_menu::app_job::edit_type, app_item, data);
 
     // mime/packages/
     newitem = app_menu_additem(app_menu,
                                "mime/pac_kages/",
-                               ptk::file_menu::app_job::browse_mime,
+                               gui::file_menu::app_job::browse_mime,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2416,7 +2416,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     submenu = gtk_menu_new();
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
     gtk_container_add(GTK_CONTAINER(app_menu), newitem);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(ptk::file_menu::app_job::usr));
+    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(gui::file_menu::app_job::usr));
     g_object_set_data(G_OBJECT(newitem), "data", data);
     g_signal_connect(G_OBJECT(submenu), "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
@@ -2425,7 +2425,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     {
         newitem = app_menu_additem(submenu,
                                    desktop->name(),
-                                   ptk::file_menu::app_job::view,
+                                   gui::file_menu::app_job::view,
                                    app_item,
                                    data);
 
@@ -2436,7 +2436,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     // /usr applications/
     newitem = app_menu_additem(submenu,
                                "appli_cations/",
-                               ptk::file_menu::app_job::browse_shared,
+                               gui::file_menu::app_job::browse_shared,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2448,13 +2448,13 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     str = std::format("{}.xml", type);
     const auto sys_mime_path = std::filesystem::path() / "/usr/share/mime" / str;
     str = std::format("{}._xml", type);
-    newitem = app_menu_additem(submenu, str, ptk::file_menu::app_job::view_type, app_item, data);
+    newitem = app_menu_additem(submenu, str, gui::file_menu::app_job::view_type, app_item, data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), std::filesystem::exists(sys_mime_path));
 
     // /usr *Overrides.xml
     newitem = app_menu_additem(submenu,
                                "_Overrides.xml",
-                               ptk::file_menu::app_job::view_over,
+                               gui::file_menu::app_job::view_over,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem),
@@ -2463,7 +2463,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
     // mime/packages/
     newitem = app_menu_additem(submenu,
                                "mime/pac_kages/",
-                               ptk::file_menu::app_job::browse_mime_usr,
+                               gui::file_menu::app_job::browse_mime_usr,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem),
@@ -2488,10 +2488,10 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
 }
 
 static bool
-on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noexcept
+on_app_button_press(GtkWidget* item, GdkEvent* event, gui::file_menu* data) noexcept
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = gui::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
@@ -2553,7 +2553,7 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noex
 }
 
 static void
-on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
 
@@ -2565,7 +2565,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
             {
                 data->browser->signal_open_file().emit(data->browser,
                                                        file->path(),
-                                                       ptk::browser::open_action::new_tab);
+                                                       gui::browser::open_action::new_tab);
             }
         }
     }
@@ -2573,53 +2573,53 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
     {
         data->browser->signal_open_file().emit(data->browser,
                                                data->cwd,
-                                               ptk::browser::open_action::new_tab);
+                                               gui::browser::open_action::new_tab);
     }
 }
 
 void
-on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser && std::filesystem::is_directory(data->cwd))
     {
         data->browser->signal_open_file().emit(data->browser,
                                                data->file_path,
-                                               ptk::browser::open_action::new_tab);
+                                               gui::browser::open_action::new_tab);
     }
 }
 
 static void
-on_new_bookmark(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_new_bookmark(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::view::bookmark::add(data->browser->cwd());
+    gui::view::bookmark::add(data->browser->cwd());
 }
 
 static void
-on_popup_cut_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
-{
-    (void)menuitem;
-    if (data->selected_files.empty())
-    {
-        return;
-    }
-    ptk::clipboard::cut_or_copy_files(data->selected_files, false);
-}
-
-static void
-on_popup_copy_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_cut_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->selected_files.empty())
     {
         return;
     }
-    ptk::clipboard::cut_or_copy_files(data->selected_files, true);
+    gui::clipboard::cut_or_copy_files(data->selected_files, false);
 }
 
 static void
-on_popup_paste_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_copy_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
+{
+    (void)menuitem;
+    if (data->selected_files.empty())
+    {
+        return;
+    }
+    gui::clipboard::cut_or_copy_files(data->selected_files, true);
+}
+
+static void
+on_popup_paste_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -2630,7 +2630,7 @@ on_popup_paste_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk::clipboard::paste_files(GTK_WINDOW(parent),
+        gui::clipboard::paste_files(GTK_WINDOW(parent),
                                     data->cwd,
                                     GTK_TREE_VIEW(data->browser->task_view()),
                                     nullptr,
@@ -2639,7 +2639,7 @@ on_popup_paste_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_paste_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_paste_link_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -2649,7 +2649,7 @@ on_popup_paste_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexce
 }
 
 static void
-on_popup_paste_target_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_paste_target_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -2659,38 +2659,38 @@ on_popup_paste_target_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noex
 }
 
 static void
-on_popup_copy_text_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_copy_text_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::clipboard::copy_as_text(data->selected_files);
+    gui::clipboard::copy_as_text(data->selected_files);
 }
 
 static void
-on_popup_copy_name_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_copy_name_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::clipboard::copy_name(data->selected_files);
+    gui::clipboard::copy_name(data->selected_files);
 }
 
 static void
-on_popup_copy_parent_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_copy_parent_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (!data->cwd.empty())
     {
-        ptk::clipboard::copy_text(data->cwd.string());
+        gui::clipboard::copy_text(data->cwd.string());
     }
 }
 
 static void
-on_popup_paste_as_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_paste_as_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::action::paste_files(data->browser, data->cwd);
+    gui::action::paste_files(data->browser, data->cwd);
 }
 
 static void
-on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_delete_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
 
@@ -2707,7 +2707,7 @@ on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk::action::delete_files(GTK_WINDOW(parent),
+        gui::action::delete_files(GTK_WINDOW(parent),
                                   data->cwd,
                                   data->selected_files,
                                   GTK_TREE_VIEW(data->browser->task_view()));
@@ -2715,7 +2715,7 @@ on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_trash_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
 
@@ -2732,7 +2732,7 @@ on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk::action::trash_files(GTK_WINDOW(parent),
+        gui::action::trash_files(GTK_WINDOW(parent),
                                  data->cwd,
                                  data->selected_files,
                                  GTK_TREE_VIEW(data->browser->task_view()));
@@ -2740,7 +2740,7 @@ on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_rename_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -2750,7 +2750,7 @@ on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_batch_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_batch_rename_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (data->browser)
@@ -2760,32 +2760,32 @@ on_popup_batch_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noex
 }
 
 static void
-on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_compress_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::create(data->browser, data->selected_files);
+    gui::archiver::create(data->browser, data->selected_files);
 }
 
 static void
-on_popup_extract_to_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_extract_to_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::extract(data->browser, data->selected_files, "");
+    gui::archiver::extract(data->browser, data->selected_files, "");
 }
 
 static void
-on_popup_extract_here_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_extract_here_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::extract(data->browser, data->selected_files, data->cwd);
+    gui::archiver::extract(data->browser, data->selected_files, data->cwd);
 }
 
 static void
-on_popup_extract_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_extract_open_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk::archiver::open(data->browser, data->selected_files);
+    gui::archiver::open(data->browser, data->selected_files);
 }
 
 static void
@@ -2820,7 +2820,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
             {
                 const auto file = vfs::file::create(ao->path);
                 const std::vector<std::shared_ptr<vfs::file>> selected_files{file};
-                ptk::action::open_files_with_app(cwd, selected_files, "", ao->browser, false, true);
+                gui::action::open_files_with_app(cwd, selected_files, "", ao->browser, false, true);
             }
         }
     }
@@ -2829,7 +2829,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
 }
 
 static void
-create_new_file(ptk::file_menu* data, ptk::action::create_mode mode) noexcept
+create_new_file(gui::file_menu* data, gui::action::create_mode mode) noexcept
 {
     if (data->cwd.empty())
     {
@@ -2844,48 +2844,32 @@ create_new_file(ptk::file_menu* data, ptk::action::create_mode mode) noexcept
         file = data->selected_files.front();
     }
 
-    ptk::action::create_files(data->browser, data->cwd, file, mode, ao);
+    gui::action::create_files(data->browser, data->cwd, file, mode, ao);
 }
 
 static void
-on_popup_new_folder_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_new_folder_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::create_mode::dir);
+    create_new_file(data, gui::action::create_mode::dir);
 }
 
 static void
-on_popup_new_text_file_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_new_text_file_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::create_mode::file);
+    create_new_file(data, gui::action::create_mode::file);
 }
 
 static void
-on_popup_new_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_new_link_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::create_mode::link);
+    create_new_file(data, gui::action::create_mode::link);
 }
 
 static void
-on_popup_file_properties_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
-{
-    (void)menuitem;
-    GtkWidget* parent = nullptr;
-    if (data->browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
-    }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 0);
-}
-
-static void
-on_popup_file_attributes_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_file_properties_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     GtkWidget* parent = nullptr;
@@ -2897,11 +2881,11 @@ on_popup_file_attributes_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
         parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
     }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 1);
+    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 0);
 }
 
 static void
-on_popup_file_permissions_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_file_attributes_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     GtkWidget* parent = nullptr;
@@ -2913,11 +2897,27 @@ on_popup_file_permissions_activate(GtkMenuItem* menuitem, ptk::file_menu* data) 
         parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
     }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 2);
+    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 1);
 }
 
 static void
-on_popup_canon(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
+on_popup_file_permissions_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
+{
+    (void)menuitem;
+    GtkWidget* parent = nullptr;
+    if (data->browser)
+    {
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
+    }
+    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 2);
+}
+
+static void
+on_popup_canon(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
     if (!data->browser)
@@ -2929,11 +2929,11 @@ on_popup_canon(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 void
-ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
+gui_file_menu_action(gui::browser* browser, const xset_t& set) noexcept
 {
     assert(set != nullptr);
     assert(browser != nullptr);
-    // logger::debug<logger::domain::ptk>("ptk_file_menu_action()={}", set->name());
+    // logger::debug<logger::domain::gui>("gui_file_menu_action()={}", set->name());
 
     // setup data
     const auto& cwd = browser->cwd();
@@ -2947,7 +2947,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         file_path = file->path();
     }
 
-    auto* const data = new ptk::file_menu;
+    auto* const data = new gui::file_menu;
     data->cwd = cwd;
     data->browser = browser;
     data->selected_files = selected_files;
@@ -3008,7 +3008,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         }
         else if (set->xset_name == xset::name::new_bookmark)
         {
-            ptk::view::bookmark::add(browser->cwd());
+            gui::view::bookmark::add(browser->cwd());
         }
         else if (set->xset_name == xset::name::new_archive)
         {
@@ -3142,5 +3142,5 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         browser->new_tab_here();
     }
 
-    ptk_file_menu_free(data);
+    gui_file_menu_free(data);
 }

@@ -1170,7 +1170,7 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
 
         if (terminal.empty())
         {
-            ptk::dialog::message(
+            gui::dialog::message(
                 nullptr,
                 GtkMessageType::GTK_MESSAGE_ERROR,
                 "Terminal Not Available",

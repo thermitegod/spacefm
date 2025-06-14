@@ -46,7 +46,7 @@
 
 struct ParentInfo
 {
-    ptk::browser* browser{nullptr};
+    gui::browser* browser{nullptr};
     std::filesystem::path cwd;
 };
 
@@ -72,18 +72,18 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
         (::utils::has_read_permission(parent->cwd) && ::utils::has_write_permission(parent->cwd)))
     {
         // Extract Here
-        ptk::archiver::extract(parent->browser, selected_files, parent->cwd);
+        gui::archiver::extract(parent->browser, selected_files, parent->cwd);
         return true;
     }
     else if (extract_here || xset_get_b(xset::name::archive_default_extract_to))
     {
         // Extract Here but no write access or Extract To option
-        ptk::archiver::extract(parent->browser, selected_files, "");
+        gui::archiver::extract(parent->browser, selected_files, "");
         return true;
     }
     else if (xset_get_b(xset::name::archive_default_open_with_archiver))
     {
-        ptk::archiver::open(parent->browser, selected_files);
+        gui::archiver::open(parent->browser, selected_files);
         return true;
     }
 
@@ -107,7 +107,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
         return false;
     }
 
-    logger::info<logger::domain::ptk>("EXEC({})={}", desktop->path().string(), desktop->exec());
+    logger::info<logger::domain::gui>("EXEC({})={}", desktop->path().string(), desktop->exec());
 
     const auto opened = desktop->open_files(parent->cwd, open_files);
     if (!opened)
@@ -118,7 +118,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
             file_list.append(file.string());
             file_list.append("\n");
         }
-        ptk::dialog::error(
+        gui::dialog::error(
             nullptr,
             "Error",
             std::format("Unable to use '{}' to open files:\n{}", app_desktop, file_list));
@@ -128,9 +128,9 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 }
 
 void
-ptk::action::open_files_with_app(const std::filesystem::path& cwd,
+gui::action::open_files_with_app(const std::filesystem::path& cwd,
                                  const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                                 const std::string_view app_desktop, ptk::browser* browser,
+                                 const std::string_view app_desktop, gui::browser* browser,
                                  const bool xforce, const bool xnever) noexcept
 {
     if (selected_files.empty())
@@ -175,7 +175,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             {
                 browser->signal_open_file().emit(browser,
                                                  file->path(),
-                                                 ptk::browser::open_action::file);
+                                                 gui::browser::open_action::file);
             }
             continue;
         }
@@ -226,7 +226,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
                     GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
-                    ptk::dialog::error(
+                    gui::dialog::error(
                         GTK_WINDOW(toplevel),
                         "Broken Link",
                         std::format("This symlink's target is missing or you do not "
@@ -238,7 +238,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             }
             catch (const std::filesystem::filesystem_error& e)
             {
-                logger::warn<logger::domain::ptk>("{}", e.what());
+                logger::warn<logger::domain::gui>("{}", e.what());
                 continue;
             }
         }
@@ -251,16 +251,16 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
-            const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
+            const auto gui_app = gui_choose_app_for_mime_type(GTK_WINDOW(toplevel),
                                                               mime_type,
                                                               true,
                                                               true,
                                                               true,
                                                               !browser);
 
-            if (ptk_app)
+            if (gui_app)
             {
-                alloc_desktop = ptk_app;
+                alloc_desktop = gui_app;
             }
         }
         if (!alloc_desktop)
@@ -290,13 +290,13 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
         {
             browser->signal_open_file().emit(browser,
                                              dirs_to_open.front(),
-                                             ptk::browser::open_action::dir);
+                                             gui::browser::open_action::dir);
         }
         else
         {
             for (const auto& dir : dirs_to_open)
             {
-                browser->signal_open_file().emit(browser, dir, ptk::browser::open_action::new_tab);
+                browser->signal_open_file().emit(browser, dir, gui::browser::open_action::new_tab);
             }
         }
     }

@@ -2533,7 +2533,7 @@ xset_defaults() noexcept
             set->b = xset::set::enabled::yes; // sort_natural
             set->x =
                 std::format("{}", magic_enum::enum_integer(xset::set::enabled::no)); // sort_case
-            set->y = "1"; // ptk::file_list::sort_dir::PTK_LIST_SORT_DIR_FIRST
+            set->y = "1"; // gui::file_list::sort_dir::PTK_LIST_SORT_DIR_FIRST
             set->z =
                 std::format("{}",
                             magic_enum::enum_integer(xset::set::enabled::yes)); // sort_hidden_first

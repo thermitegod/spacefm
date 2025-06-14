@@ -22,7 +22,7 @@
 #include "gui/file-task.hxx"
 #include "gui/main-window.hxx"
 
-namespace ptk::view::file_task
+namespace gui::view::file_task
 {
 enum class column : std::uint8_t
 {
@@ -44,20 +44,20 @@ enum class column : std::uint8_t
     data
 };
 
-void stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2) noexcept;
+void stop(GtkWidget* view, const xset_t& set2, gui::file_task* ptask2) noexcept;
 bool is_task_running(GtkWidget* task_view) noexcept;
 void prepare_menu(MainWindow* main_window, GtkWidget* menu) noexcept;
 void column_selected(GtkWidget* view) noexcept;
 void popup_show(MainWindow* main_window, const std::string_view name) noexcept;
 void popup_errset(MainWindow* main_window, const std::string_view name = "") noexcept;
-ptk::file_task* selected_task(GtkWidget* view) noexcept;
+gui::file_task* selected_task(GtkWidget* view) noexcept;
 void show_task_dialog(GtkWidget* view) noexcept;
 
 GtkWidget* create(MainWindow* main_window) noexcept;
-void start_queued(GtkWidget* view, ptk::file_task* new_ptask) noexcept;
-void update_task(ptk::file_task* ptask) noexcept;
-void remove_task(ptk::file_task* ptask) noexcept;
-void pause_all_queued(ptk::file_task* ptask) noexcept;
+void start_queued(GtkWidget* view, gui::file_task* new_ptask) noexcept;
+void update_task(gui::file_task* ptask) noexcept;
+void remove_task(gui::file_task* ptask) noexcept;
+void pause_all_queued(gui::file_task* ptask) noexcept;
 
 void on_reorder(GtkWidget* item, GtkWidget* parent) noexcept;
-} // namespace ptk::view::file_task
+} // namespace gui::view::file_task

@@ -21,8 +21,8 @@
 
 #include "gui/file-browser.hxx"
 
-namespace ptk::view::bookmark
+namespace gui::view::bookmark
 {
 void add(const std::filesystem::path& book_path) noexcept;
-void add_callback(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
-} // namespace ptk::view::bookmark
+void add_callback(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
+} // namespace gui::view::bookmark

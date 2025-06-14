@@ -31,7 +31,7 @@ enum class domain : std::uint8_t
     autosave,
     signals,
     socket,
-    ptk,
+    gui,
     vfs,
 };
 

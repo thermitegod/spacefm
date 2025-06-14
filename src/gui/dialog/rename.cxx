@@ -44,7 +44,7 @@
 #include "package.hxx"
 
 i32
-ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
+gui::action::rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                           const bool clip_copy) noexcept
 {
@@ -102,7 +102,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cw
 
     if (mode == datatype::rename::mode::copy)
     { // copy task
-        ptk::file_task* ptask = ptk_file_exec_new("Copy", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Copy", parent, task_view);
 
         std::string over_opt;
         if (overwrite)
@@ -131,7 +131,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cw
     }
     else if (mode == datatype::rename::mode::link)
     { // link task
-        ptk::file_task* ptask = ptk_file_exec_new("Create Link", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Create Link", parent, task_view);
 
         if (overwrite)
         {
@@ -153,7 +153,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cw
     }
     else if (mode == datatype::rename::mode::move)
     { // need move?  (do move as task in case it takes a long time)
-        ptk::file_task* ptask = ptk_file_exec_new("Move", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Move", parent, task_view);
 
         if (overwrite)
         {
@@ -179,7 +179,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& cw
         if (ec)
         {
             // Unknown error occurred
-            ptk::dialog::error(GTK_WINDOW(parent),
+            gui::dialog::error(GTK_WINDOW(parent),
                                "Rename Error",
                                std::format("Error renaming file\n\n{}", std::strerror(errno)));
         }

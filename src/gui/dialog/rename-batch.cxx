@@ -43,14 +43,14 @@
 #include "logger.hxx"
 
 i32
-ptk::action::batch_rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
+gui::action::batch_rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                                 const std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     (void)browser;
     (void)cwd;
     (void)files;
 
-    logger::debug<logger::domain::vfs>("ptk::action::batch_rename_files");
+    logger::debug<logger::domain::vfs>("gui::action::batch_rename_files");
 
     return 0;
 }

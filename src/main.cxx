@@ -74,7 +74,7 @@ open_file(const std::filesystem::path& path) noexcept
     if (!app_name)
     {
         const auto app_name_alt =
-            ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
+            gui_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (!app_name_alt)
         {
             logger::error("no application to open file: {}", path.string());
@@ -91,7 +91,7 @@ open_file(const std::filesystem::path& path) noexcept
     const auto opened = desktop->open_file(Glib::get_current_dir(), path);
     if (!opened)
     {
-        ptk::dialog::error(
+        gui::dialog::error(
             nullptr,
             "Error",
             std::format("Unable to use '{}' to open file:\n{}", app_name.value(), path.string()));
@@ -198,7 +198,7 @@ activate(GtkApplication* app, void* user_data) noexcept
             if (stat && stat->is_block_file())
             {
                 // open block device eg /dev/sda1
-                ptk::view::location::open_block(real_path, true);
+                gui::view::location::open_block(real_path, true);
             }
             else
             {

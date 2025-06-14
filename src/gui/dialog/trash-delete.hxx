@@ -23,7 +23,7 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::action
+namespace gui::action
 {
 void trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
                  const std::span<const std::shared_ptr<vfs::file>> selected_files,
@@ -32,4 +32,4 @@ void trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 void delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
                   const std::span<const std::shared_ptr<vfs::file>> selected_files,
                   GtkTreeView* task_view) noexcept;
-} // namespace ptk::action
+} // namespace gui::action

@@ -36,20 +36,20 @@
 #include "vfs/file.hxx"
 
 void
-ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept
+gui::action::paste_files(gui::browser* browser, const std::filesystem::path& cwd) noexcept
 {
     bool is_cut = false;
     i32 missing_targets = 0;
 
     const std::vector<std::filesystem::path> files =
-        ptk::clipboard::get_file_paths(cwd, &is_cut, &missing_targets);
+        gui::clipboard::get_file_paths(cwd, &is_cut, &missing_targets);
 
     for (const auto& file_path : files)
     {
         const auto file = vfs::file::create(file_path);
 
         const auto result =
-            ptk::action::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
+            gui::action::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
         if (result == 0)
         {
             missing_targets = 0;
@@ -69,7 +69,7 @@ ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd
 #endif
         }
 
-        ptk::dialog::error(GTK_WINDOW(parent),
+        gui::dialog::error(GTK_WINDOW(parent),
                            "Error",
                            std::format("{} target{} missing",
                                        missing_targets,

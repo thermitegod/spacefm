@@ -42,11 +42,11 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 void
-xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
               const std::vector<xset::name>& submenu_entries) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 void
-xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
               const std::vector<xset::name>& submenu_entries) noexcept
 #endif
 {
@@ -84,11 +84,11 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon) noe
 
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget*
-xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
                   const xset_t& set) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
-xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   const xset_t& set) noexcept
 #endif
 {
@@ -299,7 +299,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             const auto default_str = set->z.value();
 
             const auto [response, answer] =
-                ptk::dialog::text(parent, title, msg, set->s.value(), default_str);
+                gui::dialog::text(parent, title, msg, set->s.value(), default_str);
             set->s = answer;
             if (response)
             {

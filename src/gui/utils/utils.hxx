@@ -24,7 +24,7 @@
 #define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
 #endif
 
-namespace ptk::utils
+namespace gui::utils
 {
 void set_window_icon(GtkWindow* win) noexcept;
 
@@ -38,4 +38,4 @@ u32 get_keymod(GdkModifierType event) noexcept;
  * @return a random i32
  */
 [[nodiscard]] i32 stamp() noexcept;
-} // namespace ptk::utils
+} // namespace gui::utils

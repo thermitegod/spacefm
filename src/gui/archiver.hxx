@@ -25,15 +25,15 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::archiver
+namespace gui::archiver
 {
-void create(ptk::browser* browser,
+void create(gui::browser* browser,
             const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 
-void extract(ptk::browser* browser,
+void extract(gui::browser* browser,
              const std::span<const std::shared_ptr<vfs::file>> selected_files,
              const std::filesystem::path& dest_dir) noexcept;
 
-void open(ptk::browser* browser,
+void open(gui::browser* browser,
           const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
-} // namespace ptk::archiver
+} // namespace gui::archiver

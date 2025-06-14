@@ -54,7 +54,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 }
 
 void
-ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
+gui_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
                          const i32 page) noexcept
 {

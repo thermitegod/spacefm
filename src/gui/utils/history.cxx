@@ -22,7 +22,7 @@
 #include "gui/utils/history.hxx"
 
 void
-ptk::utils::history::go_back() noexcept
+gui::utils::history::go_back() noexcept
 {
     if (!this->has_back())
     {
@@ -34,7 +34,7 @@ ptk::utils::history::go_back() noexcept
 }
 
 bool
-ptk::utils::history::has_back() const noexcept
+gui::utils::history::has_back() const noexcept
 {
     if (this->back_.size() == 1)
     {
@@ -48,7 +48,7 @@ ptk::utils::history::has_back() const noexcept
 }
 
 void
-ptk::utils::history::go_forward() noexcept
+gui::utils::history::go_forward() noexcept
 {
     if (!this->has_forward())
     {
@@ -60,13 +60,13 @@ ptk::utils::history::go_forward() noexcept
 }
 
 bool
-ptk::utils::history::has_forward() const noexcept
+gui::utils::history::has_forward() const noexcept
 {
     return !this->forward_.empty();
 }
 
 void
-ptk::utils::history::new_forward(const std::filesystem::path& path) noexcept
+gui::utils::history::new_forward(const std::filesystem::path& path) noexcept
 {
     if (this->current_ == path)
     {
@@ -78,7 +78,7 @@ ptk::utils::history::new_forward(const std::filesystem::path& path) noexcept
 }
 
 const std::filesystem::path&
-ptk::utils::history::path(const mode mode) const noexcept
+gui::utils::history::path(const mode mode) const noexcept
 {
     switch (mode)
     {
@@ -107,7 +107,7 @@ ptk::utils::history::path(const mode mode) const noexcept
 }
 
 std::optional<std::vector<std::filesystem::path>>
-ptk::utils::history::get_selection(const std::filesystem::path& path) noexcept
+gui::utils::history::get_selection(const std::filesystem::path& path) noexcept
 {
     if (!this->selection_.contains(path))
     {
@@ -117,7 +117,7 @@ ptk::utils::history::get_selection(const std::filesystem::path& path) noexcept
 }
 
 void
-ptk::utils::history::set_selection(const std::filesystem::path& path,
+gui::utils::history::set_selection(const std::filesystem::path& path,
                                    const std::vector<std::filesystem::path>& files) noexcept
 {
     if (this->selection_.contains(path))

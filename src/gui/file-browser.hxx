@@ -38,12 +38,12 @@
 #include "logger.hxx"
 #include "types.hxx"
 
-#define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))
+#define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<gui::browser*>(obj))
 
 // forward declare
 struct MainWindow;
 
-namespace ptk
+namespace gui
 {
 struct browser
 {
@@ -109,8 +109,8 @@ struct browser
 
     // sorting
     GtkSortType sort_type_;
-    ptk::browser::sort_order sort_order_{ptk::browser::sort_order::perm};
-    ptk::browser::view_mode view_mode_{ptk::browser::view_mode::compact_view};
+    gui::browser::sort_order sort_order_{gui::browser::sort_order::perm};
+    gui::browser::view_mode view_mode_{gui::browser::view_mode::compact_view};
 
     bool show_hidden_files_{true};
     bool large_icons_{true};
@@ -157,11 +157,11 @@ struct browser
     GtkEntry* search_bar_{nullptr};
 
     // private:
-    std::unique_ptr<ptk::utils::history> history_;
+    std::unique_ptr<gui::utils::history> history_;
 
   public:
     bool chdir(const std::filesystem::path& new_path,
-               const ptk::utils::history::mode mode = ptk::utils::history::mode::normal) noexcept;
+               const gui::utils::history::mode mode = gui::utils::history::mode::normal) noexcept;
 
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;
@@ -213,7 +213,7 @@ struct browser
     void copycmd(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                  const std::filesystem::path& cwd, xset::name setname) noexcept;
 
-    void set_sort_order(ptk::browser::sort_order order) noexcept;
+    void set_sort_order(gui::browser::sort_order order) noexcept;
     void set_sort_type(GtkSortType order) noexcept;
     void set_sort_extra(xset::name setname) const noexcept;
 
@@ -242,7 +242,7 @@ struct browser
     void show_thumbnails(const u32 max_file_size, const bool large_icons) noexcept;
 
     void update_views() noexcept;
-    void focus(const ptk::browser::focus_widget item) noexcept;
+    void focus(const gui::browser::focus_widget item) noexcept;
     void focus_me() noexcept;
     void save_column_widths() const noexcept;
     bool slider_release(GtkPaned* pane) const noexcept;
@@ -278,8 +278,8 @@ struct browser
 
     // sorting
     bool is_sort_type(GtkSortType type) const noexcept;
-    bool is_sort_order(const ptk::browser::sort_order type) const noexcept;
-    bool is_view_mode(const ptk::browser::view_mode type) const noexcept;
+    bool is_sort_order(const gui::browser::sort_order type) const noexcept;
+    bool is_view_mode(const gui::browser::view_mode type) const noexcept;
 
     // directory view
 
@@ -347,14 +347,14 @@ struct browser
 
   private:
     // Signals
-    sigc::signal<void(ptk::browser*)> signal_chdir_before_;
-    sigc::signal<void(ptk::browser*)> signal_chdir_begin_;
-    sigc::signal<void(ptk::browser*)> signal_chdir_after_;
-    sigc::signal<void(ptk::browser*, const std::filesystem::path&, ptk::browser::open_action)>
+    sigc::signal<void(gui::browser*)> signal_chdir_before_;
+    sigc::signal<void(gui::browser*)> signal_chdir_begin_;
+    sigc::signal<void(gui::browser*)> signal_chdir_after_;
+    sigc::signal<void(gui::browser*, const std::filesystem::path&, gui::browser::open_action)>
         signal_open_file_;
-    sigc::signal<void(ptk::browser*)> signal_change_content_;
-    sigc::signal<void(ptk::browser*)> signal_change_selection_;
-    sigc::signal<void(ptk::browser*)> signal_change_pane_;
+    sigc::signal<void(gui::browser*)> signal_change_content_;
+    sigc::signal<void(gui::browser*)> signal_change_selection_;
+    sigc::signal<void(gui::browser*)> signal_change_pane_;
 
   public:
     // Signals we connect to
@@ -363,34 +363,34 @@ struct browser
     sigc::connection signal_file_changed_;
     sigc::connection signal_file_listed_;
 };
-} // namespace ptk
+} // namespace gui
 
-GtkWidget* ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
+GtkWidget* gui_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                            MainWindow* main_window,
                            const std::shared_ptr<config::settings>& settings) noexcept;
 
-bool ptk_browser_delay_focus(ptk::browser* browser) noexcept;
+bool gui_browser_delay_focus(gui::browser* browser) noexcept;
 
 // xset callback wrapper functions
-namespace ptk::wrapper::browser
+namespace gui::wrapper::browser
 {
-void go_home(GtkWidget* item, ptk::browser* browser) noexcept;
-void go_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
-void go_back(GtkWidget* item, ptk::browser* browser) noexcept;
-void go_forward(GtkWidget* item, ptk::browser* browser) noexcept;
-void go_up(GtkWidget* item, ptk::browser* browser) noexcept;
+void go_home(GtkWidget* item, gui::browser* browser) noexcept;
+void go_tab(GtkMenuItem* item, gui::browser* browser) noexcept;
+void go_back(GtkWidget* item, gui::browser* browser) noexcept;
+void go_forward(GtkWidget* item, gui::browser* browser) noexcept;
+void go_up(GtkWidget* item, gui::browser* browser) noexcept;
 
-void refresh(GtkWidget* item, ptk::browser* browser) noexcept;
+void refresh(GtkWidget* item, gui::browser* browser) noexcept;
 
-void new_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
-void new_tab_here(GtkMenuItem* item, ptk::browser* browser) noexcept;
-void close_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
-void restore_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
+void new_tab(GtkMenuItem* item, gui::browser* browser) noexcept;
+void new_tab_here(GtkMenuItem* item, gui::browser* browser) noexcept;
+void close_tab(GtkMenuItem* item, gui::browser* browser) noexcept;
+void restore_tab(GtkMenuItem* item, gui::browser* browser) noexcept;
 
-void select_all(GtkWidget* item, ptk::browser* browser) noexcept;
-void unselect_all(GtkWidget* item, ptk::browser* browser) noexcept;
-void invert_selection(GtkWidget* item, ptk::browser* browser) noexcept;
+void select_all(GtkWidget* item, gui::browser* browser) noexcept;
+void unselect_all(GtkWidget* item, gui::browser* browser) noexcept;
+void invert_selection(GtkWidget* item, gui::browser* browser) noexcept;
 
-void focus(GtkMenuItem* item, ptk::browser* browser) noexcept;
-bool slider_release(GtkWidget* widget, GdkEvent* event, ptk::browser* browser) noexcept;
-} // namespace ptk::wrapper::browser
+void focus(GtkMenuItem* item, gui::browser* browser) noexcept;
+bool slider_release(GtkWidget* widget, GdkEvent* event, gui::browser* browser) noexcept;
+} // namespace gui::wrapper::browser

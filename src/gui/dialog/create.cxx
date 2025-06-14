@@ -44,15 +44,15 @@
 #include "package.hxx"
 
 i32
-ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cwd,
+gui::action::create_files(gui::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file,
-                          const ptk::action::create_mode init_mode, AutoOpenCreate* ao) noexcept
+                          const gui::action::create_mode init_mode, AutoOpenCreate* ao) noexcept
 {
-    static_assert(magic_enum::enum_integer(ptk::action::create_mode::file) ==
+    static_assert(magic_enum::enum_integer(gui::action::create_mode::file) ==
                   magic_enum::enum_integer(datatype::create::mode::file));
-    static_assert(magic_enum::enum_integer(ptk::action::create_mode::dir) ==
+    static_assert(magic_enum::enum_integer(gui::action::create_mode::dir) ==
                   magic_enum::enum_integer(datatype::create::mode::dir));
-    static_assert(magic_enum::enum_integer(ptk::action::create_mode::link) ==
+    static_assert(magic_enum::enum_integer(gui::action::create_mode::link) ==
                   magic_enum::enum_integer(datatype::create::mode::link));
 
     const auto response = datatype::run_dialog_sync<datatype::create::response>(
@@ -99,7 +99,7 @@ ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cw
 
     if (mode == datatype::create::mode::link)
     { // new link task
-        ptk::file_task* ptask = ptk_file_exec_new("Create Link", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Create Link", parent, task_view);
 
         if (overwrite)
         {
@@ -134,7 +134,7 @@ ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cw
             over_cmd = std::format("rm -f {} && ", ::utils::shell_quote(dest));
         }
 
-        ptk::file_task* ptask = ptk_file_exec_new("Create New File", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Create New File", parent, task_view);
         ptask->task->exec_command = std::format("{}touch {}", over_cmd, ::utils::shell_quote(dest));
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
@@ -151,7 +151,7 @@ ptk::action::create_files(ptk::browser* browser, const std::filesystem::path& cw
     }
     else if (mode == datatype::create::mode::dir)
     { // new directory task
-        ptk::file_task* ptask = ptk_file_exec_new("Create New Directory", parent, task_view);
+        gui::file_task* ptask = gui_file_exec_new("Create New Directory", parent, task_view);
         ptask->task->exec_command = std::format("mkdir {}", ::utils::shell_quote(dest));
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;

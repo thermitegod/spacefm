@@ -26,9 +26,9 @@
 
 #include "vfs/file.hxx"
 
-namespace ptk::action
+namespace gui::action
 {
-i32 rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
+i32 rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                  const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                  const bool clip_copy) noexcept;
-} // namespace ptk::action
+} // namespace gui::action
