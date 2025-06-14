@@ -21,8 +21,9 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 #include "single-instance.hxx"

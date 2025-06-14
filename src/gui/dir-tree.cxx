@@ -35,9 +35,10 @@
 #include "gui/natsort/strnatcmp.hxx"
 #include "gui/utils/utils.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-monitor.hxx"
+#include "vfs/file.hxx"
+#include "vfs/monitor.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

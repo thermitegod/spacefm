@@ -28,7 +28,7 @@
 
 #include "gui/file-browser.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 /* selected_files is a list containing vfs::file structures
  * The list will be freed in this function, so the caller must not

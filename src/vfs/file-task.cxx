@@ -42,11 +42,12 @@
 
 #include "gui/dialog/text.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-terminals.hxx"
-#include "vfs/vfs-trash-can.hxx"
-#include "vfs/vfs-volume.hxx"
+#include "vfs/file-task.hxx"
+#include "vfs/terminals.hxx"
+#include "vfs/trash-can.hxx"
+#include "vfs/volume.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

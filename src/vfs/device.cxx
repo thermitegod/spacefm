@@ -22,10 +22,11 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/device.hxx"
+
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
-#include "vfs/vfs-device.hxx"
 
 std::shared_ptr<vfs::device>
 vfs::device::create(const libudev::device& udevice) noexcept

@@ -25,7 +25,7 @@
 
 #include "gui/file-browser.hxx"
 
-#include "vfs/vfs-volume.hxx"
+#include "vfs/volume.hxx"
 
 namespace ptk::view::location
 {

@@ -29,7 +29,7 @@
 #include "commandline/socket.hxx"
 #endif
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"

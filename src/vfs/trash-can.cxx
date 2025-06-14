@@ -22,10 +22,11 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/trash-can.hxx"
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-trash-can.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

@@ -22,7 +22,7 @@
 
 #include <glaze/glaze.hpp>
 
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/mime-type.hxx"
 
 #include "app-chooser.hxx"
 #include "datatypes.hxx"

@@ -48,9 +48,10 @@
 
 #include "gui/dialog/text.hxx"
 
+#include "vfs/volume.hxx"
+
 #include "vfs/linux/self.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-volume.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"

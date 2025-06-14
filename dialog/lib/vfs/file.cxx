@@ -26,9 +26,10 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/file.hxx"
+#include "vfs/mime-type.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

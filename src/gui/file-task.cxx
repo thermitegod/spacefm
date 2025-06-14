@@ -43,7 +43,7 @@
 #include "gui/file-task.hxx"
 #include "gui/utils/utils.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/utils/utils.hxx"
 
 static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                                       const vfs::file_task::state state, void* state_data,

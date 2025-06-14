@@ -39,7 +39,7 @@
 
 #include "gui/dialog/create.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "package.hxx"
 

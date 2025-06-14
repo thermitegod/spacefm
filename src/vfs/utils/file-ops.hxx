@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "vfs/vfs-error.hxx"
+#include "vfs/error.hxx"
 
 #include "logger.hxx"
 

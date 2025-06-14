@@ -38,7 +38,7 @@
 #include "gui/dialog/rename-batch.hxx"
 #include "gui/dialog/text.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "logger.hxx"
 

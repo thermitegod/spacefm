@@ -24,7 +24,7 @@
 
 #include "settings/settings.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/utils/utils.hxx"
 
 GdkPixbuf*
 vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept

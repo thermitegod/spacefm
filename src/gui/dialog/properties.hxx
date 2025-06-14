@@ -22,7 +22,7 @@
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 void ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                               const std::span<const std::shared_ptr<vfs::file>> selected_files,

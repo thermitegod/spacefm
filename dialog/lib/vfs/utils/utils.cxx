@@ -19,7 +19,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/utils/utils.hxx"
 
 std::string
 vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept

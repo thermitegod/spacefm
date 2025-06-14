@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
 
 namespace ptk::utils
 {

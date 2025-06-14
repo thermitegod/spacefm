@@ -24,7 +24,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "concurrency.hxx"
 

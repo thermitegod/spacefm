@@ -34,7 +34,7 @@
 #include "gui/path-bar.hxx"
 #include "gui/utils/utils.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
 
 // #define ENABLE_AUTO_SEEK
 

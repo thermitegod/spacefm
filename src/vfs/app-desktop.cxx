@@ -36,9 +36,10 @@
 
 #include "gui/file-task.hxx" // break vfs independence for exec_in_terminal
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-error.hxx"
+#include "vfs/app-desktop.hxx"
+#include "vfs/error.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

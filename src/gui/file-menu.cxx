@@ -55,12 +55,13 @@
 #include "gui/dialog/text.hxx"
 #include "gui/dialog/trash-delete.hxx"
 
+#include "vfs/app-desktop.hxx"
+#include "vfs/mime-monitor.hxx"
+#include "vfs/mime-type.hxx"
+#include "vfs/user-dirs.hxx"
+
+#include "vfs/utils/editor.hxx"
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/utils/vfs-editor.hxx"
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-mime-monitor.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"

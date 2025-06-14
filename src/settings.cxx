@@ -36,10 +36,10 @@
 
 #include "gui/main-window.hxx"
 
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-terminals.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/app-desktop.hxx"
+#include "vfs/mime-type.hxx"
+#include "vfs/terminals.hxx"
+#include "vfs/user-dirs.hxx"
 
 #include "logger.hxx"
 #include "settings.hxx"

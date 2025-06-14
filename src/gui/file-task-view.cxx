@@ -43,8 +43,9 @@
 
 #include "gui/dialog/text.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file-task.hxx"
+#include "vfs/file-task.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 static constexpr ztd::map<ptk::view::file_task::column, std::string_view, 14> task_titles{{
     // If you change "Status", also change it in on_task_button_press_event

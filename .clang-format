@@ -194,8 +194,18 @@ IncludeCategories:
     Priority: 58
   - Regex: '^"gui/.*"'
     Priority: 57
+  - Regex: '^"vfs/libudevpp/.*"'
+    Priority: 71
+  - Regex: '^"vfs/linux/.*"'
+    Priority: 71
+  - Regex: '^"vfs/mime-type/.*"'
+    Priority: 71
+  - Regex: '^"vfs/thumbnails/.*"'
+    Priority: 71
+  - Regex: '^"vfs/utils/.*"'
+    Priority: 71
   - Regex: '^"vfs/.*"'
-    Priority: 60
+    Priority: 70
   - Regex: '.*' # everything else
     Priority: 100
 IncludeIsMainRegex: 'x' # using a 'bad' regex will disable this feature

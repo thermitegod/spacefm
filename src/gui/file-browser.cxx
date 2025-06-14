@@ -83,10 +83,11 @@
 #include "gui/dialog/rename.hxx"
 #include "gui/dialog/text.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/dir.hxx"
+#include "vfs/file.hxx"
+#include "vfs/user-dirs.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "autosave.hxx"
 #include "logger.hxx"

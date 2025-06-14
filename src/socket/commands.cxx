@@ -48,12 +48,13 @@
 #include "gui/file-task-view.hxx"
 #include "gui/main-window.hxx"
 
+#include "vfs/file-task.hxx"
+#include "vfs/terminals.hxx"
+#include "vfs/volume.hxx"
+
+#include "vfs/utils/editor.hxx"
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/utils/vfs-editor.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-terminals.hxx"
-#include "vfs/vfs-volume.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"

@@ -39,8 +39,8 @@
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/text.hxx"
 
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-file.hxx"
+#include "vfs/app-desktop.hxx"
+#include "vfs/file.hxx"
 
 #include "logger.hxx"
 

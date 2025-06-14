@@ -28,12 +28,13 @@
 
 #include "settings/settings.hxx"
 
+#include "vfs/app-desktop.hxx"
+#include "vfs/file.hxx"
+#include "vfs/mime-type.hxx"
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/thumbnails/thumbnails.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

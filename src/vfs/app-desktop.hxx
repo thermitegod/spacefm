@@ -29,7 +29,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-error.hxx"
+#include "vfs/error.hxx"
 
 namespace vfs
 {

@@ -28,8 +28,9 @@
 
 #include "gui/dialog/text.hxx"
 
-#include "vfs/utils/vfs-editor.hxx"
-#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/app-desktop.hxx"
+
+#include "vfs/utils/editor.hxx"
 
 #include "logger.hxx"
 

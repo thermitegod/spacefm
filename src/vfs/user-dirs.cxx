@@ -18,7 +18,7 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
 
 std::filesystem::path
 vfs::user::desktop() noexcept

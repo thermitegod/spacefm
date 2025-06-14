@@ -23,9 +23,9 @@ test_sources += files(
 
     # VFS
     'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
-    'spacefm/vfs/utils/vfs-utils.cxx',
-    'spacefm/vfs/vfs-error.cxx',
-    'spacefm/vfs/vfs-user-dirs.cxx',
+    'spacefm/vfs/utils/utils.cxx',
+    'spacefm/vfs/error.cxx',
+    'spacefm/vfs/user-dirs.cxx',
 )
 
 # Test Source Files
@@ -43,9 +43,9 @@ test_sources += files(
 
     # VFS
     'src/vfs/mime-type/chrome/mime-utils.cxx',
-    'src/vfs/utils/test-vfs-utils.cxx',
+    'src/vfs/utils/test-utils.cxx',
     'src/vfs/utils/test-file-ops.cxx',
-    'src/vfs/test-vfs-error.cxx',
+    'src/vfs/test-error.cxx',
 )
 
 ## Build

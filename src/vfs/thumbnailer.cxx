@@ -22,7 +22,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-thumbnailer.hxx"
+#include "vfs/thumbnailer.hxx"
 
 #include "concurrency.hxx"
 

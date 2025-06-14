@@ -30,9 +30,10 @@
 
 #include "utils/shell-quote.hxx"
 
+#include "vfs/file.hxx"
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/thumbnails/thumbnails.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 

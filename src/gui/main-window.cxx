@@ -55,7 +55,7 @@
 #include "gui/dialog/preference.hxx"
 #include "gui/dialog/text.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
 
 #include "autosave.hxx"
 #include "bookmarks.hxx"

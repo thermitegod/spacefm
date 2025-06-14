@@ -25,8 +25,9 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
+#include "vfs/mime-type.hxx"
+
 #include "vfs/mime-type/mime-type.hxx"
-#include "vfs/vfs-mime-type.hxx"
 
 #include "logger.hxx"
 

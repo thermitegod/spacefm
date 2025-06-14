@@ -20,7 +20,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-error.hxx"
+#include "vfs/error.hxx"
 
 const std::error_category&
 vfs::error_category() noexcept

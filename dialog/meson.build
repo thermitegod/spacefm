@@ -4,11 +4,11 @@ sources_vfs = files(
 
     'lib/utils/permissions.cxx',
 
-    'lib/vfs/vfs-file.cxx',
-    'lib/vfs/vfs-mime-type.cxx',
-    'lib/vfs/vfs-user-dirs.cxx',
+    'lib/vfs/file.cxx',
+    'lib/vfs/mime-type.cxx',
+    'lib/vfs/user-dirs.cxx',
 
-    'lib/vfs/utils/vfs-utils.cxx',
+    'lib/vfs/utils/utils.cxx',
 
 	'lib/vfs/mime-type/chrome/mime-utils.cxx',
 	'lib/vfs/mime-type/mime-type.cxx',

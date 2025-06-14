@@ -25,7 +25,7 @@
 #include "gui/file-browser.hxx"
 #include "gui/file-menu.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 namespace ptk::action
 {

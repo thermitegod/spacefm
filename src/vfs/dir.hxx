@@ -32,9 +32,9 @@
 
 #include "settings/settings.hxx"
 
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-monitor.hxx"
-#include "vfs/vfs-thumbnailer.hxx"
+#include "vfs/file.hxx"
+#include "vfs/monitor.hxx"
+#include "vfs/thumbnailer.hxx"
 
 #include "concurrency.hxx"
 

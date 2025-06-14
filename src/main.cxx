@@ -44,10 +44,11 @@
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/text.hxx"
 
+#include "vfs/app-desktop.hxx"
+#include "vfs/file.hxx"
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/linux/self.hxx"
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "autosave.hxx"
 #include "bookmarks.hxx"

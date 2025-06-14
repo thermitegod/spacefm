@@ -26,7 +26,7 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 namespace ptk::clipboard
 {

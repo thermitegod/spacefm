@@ -27,7 +27,7 @@
 
 #include "gui/dialog/app-chooser.hxx"
 
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/mime-type.hxx"
 
 #include "package.hxx"
 

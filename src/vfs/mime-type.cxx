@@ -31,10 +31,11 @@
 
 #include "settings/settings.hxx"
 
+#include "vfs/mime-type.hxx"
+
 #include "vfs/mime-type/mime-action.hxx"
 #include "vfs/mime-type/mime-type.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

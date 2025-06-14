@@ -42,9 +42,10 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/mime-type/mime-action.hxx"
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 

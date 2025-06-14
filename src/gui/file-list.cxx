@@ -36,7 +36,7 @@
 #include "gui/natsort/strnatcmp.hxx"
 #include "gui/utils/utils.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "logger.hxx"
 

@@ -33,10 +33,11 @@
 
 #include "utils/permissions.hxx"
 
+#include "vfs/mime-type.hxx"
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/mime-type/chrome/mime-utils.hxx"
 #include "vfs/mime-type/mime-type.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 

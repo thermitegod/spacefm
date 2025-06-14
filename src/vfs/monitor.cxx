@@ -35,7 +35,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-monitor.hxx"
+#include "vfs/monitor.hxx"
 
 #include "logger.hxx"
 

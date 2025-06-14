@@ -27,7 +27,7 @@
 
 #include "gui/dialog/properties.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "package.hxx"
 

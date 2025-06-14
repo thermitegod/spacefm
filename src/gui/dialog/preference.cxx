@@ -34,7 +34,7 @@
 
 #include "gui/dialog/preference.hxx"
 
-#include "vfs/vfs-terminals.hxx"
+#include "vfs/terminals.hxx"
 
 #include "autosave.hxx"
 #include "logger.hxx"

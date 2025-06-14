@@ -35,12 +35,13 @@
 
 #include "gui/main-window.hxx"
 
+#include "vfs/device.hxx"
+#include "vfs/volume.hxx"
+
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-device.hxx"
-#include "vfs/vfs-volume.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

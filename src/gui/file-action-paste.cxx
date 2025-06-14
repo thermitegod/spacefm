@@ -33,7 +33,7 @@
 #include "gui/dialog/rename.hxx"
 #include "gui/dialog/text.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 void
 ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept

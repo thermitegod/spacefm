@@ -22,7 +22,7 @@
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/mime-type.hxx"
 
 // Let the user choose a application
 std::optional<std::string>

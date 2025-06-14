@@ -18,10 +18,11 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/user-dirs.hxx"
+
 #include "vfs/mime-type/chrome/mime-utils.hxx"
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 

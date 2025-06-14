@@ -17,7 +17,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/vfs/vfs-error.hxx"
+#include "spacefm/vfs/error.hxx"
 
 TEST_SUITE("vfs::error_code" * doctest::description(""))
 {

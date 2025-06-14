@@ -19,7 +19,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/vfs/utils/vfs-utils.hxx"
+#include "spacefm/vfs/utils/utils.hxx"
 
 const std::filesystem::path test_data_path = TEST_DATA_PATH;
 

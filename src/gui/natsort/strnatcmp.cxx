@@ -28,7 +28,7 @@
 #include <cctype>
 #include <cstdint>
 
-#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "strnatcmp.hxx"
 

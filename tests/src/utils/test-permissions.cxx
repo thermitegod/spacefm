@@ -18,7 +18,7 @@
 #include <doctest/doctest.h>
 
 #include "spacefm/utils/permissions.hxx"
-#include "spacefm/vfs/vfs-user-dirs.hxx"
+#include "spacefm/vfs/user-dirs.hxx"
 
 TEST_SUITE("utils::permissions" * doctest::description(""))
 {

@@ -25,8 +25,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/utils/vfs-utils.hxx"
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
+
+#include "vfs/utils/utils.hxx"
 
 #include "create.hxx"
 #include "datatypes.hxx"

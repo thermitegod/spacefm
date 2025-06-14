@@ -23,9 +23,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-mime-monitor.hxx"
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/dir.hxx"
+#include "vfs/mime-monitor.hxx"
+#include "vfs/user-dirs.hxx"
 
 #include "logger.hxx"
 

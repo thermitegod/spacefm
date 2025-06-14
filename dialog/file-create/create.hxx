@@ -22,7 +22,7 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "datatypes.hxx"
 

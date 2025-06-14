@@ -33,7 +33,7 @@
 
 #include "gui/utils/history.hxx"
 
-#include "vfs/vfs-dir.hxx"
+#include "vfs/dir.hxx"
 
 #include "logger.hxx"
 #include "types.hxx"

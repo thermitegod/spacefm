@@ -27,12 +27,13 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/dir.hxx"
+#include "vfs/file.hxx"
+#include "vfs/monitor.hxx"
+#include "vfs/thumbnailer.hxx"
+#include "vfs/volume.hxx"
+
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-monitor.hxx"
-#include "vfs/vfs-thumbnailer.hxx"
-#include "vfs/vfs-volume.hxx"
 
 #include "concurrency.hxx"
 #include "logger.hxx"

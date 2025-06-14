@@ -31,7 +31,7 @@
 
 #include "gui/dialog/trash-delete.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "vfs/file.hxx"
 
 #include "logger.hxx"
 #include "package.hxx"

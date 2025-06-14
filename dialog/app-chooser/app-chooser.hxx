@@ -19,7 +19,7 @@
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-mime-type.hxx"
+#include "vfs/mime-type.hxx"
 
 // https://github.com/GNOME/gtkmm/blob/master/demos/gtk-demo/example_listview_applauncher.cc
 

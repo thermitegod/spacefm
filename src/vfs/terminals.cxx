@@ -24,8 +24,8 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-error.hxx"
-#include "vfs/vfs-terminals.hxx"
+#include "vfs/error.hxx"
+#include "vfs/terminals.hxx"
 
 namespace
 {
