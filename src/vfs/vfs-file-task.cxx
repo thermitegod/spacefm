@@ -40,7 +40,7 @@
 
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-dialog.hxx"
+#include "gui/dialog/text.hxx"
 
 #include "vfs/utils/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"

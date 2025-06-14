@@ -17,9 +17,9 @@ test_sources += files(
     # Settings
     'spacefm/settings/settings.cxx',
 
-    # PTK
-    'spacefm/ptk/natsort/strnatcmp.cxx',
-    'spacefm/ptk/utils/history.cxx',
+    # GUI
+    'spacefm/gui/natsort/strnatcmp.cxx',
+    'spacefm/gui/utils/history.cxx',
 
     # VFS
     'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
@@ -37,9 +37,9 @@ test_sources += files(
     # SFM
     'src/base/test-types.cxx',
 
-    # PTK
-    'src/ptk/natsort/test-natsort.cxx',
-    'src/ptk/utils/test-history.cxx',
+    # GUI
+    'src/gui/natsort/test-natsort.cxx',
+    'src/gui/utils/test-history.cxx',
 
     # VFS
     'src/vfs/mime-type/chrome/mime-utils.cxx',

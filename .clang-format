@@ -190,8 +190,12 @@ IncludeCategories:
     Priority: 56
   - Regex: '^"ptk/.*"'
     Priority: 57
-  - Regex: '^"vfs/.*"'
+  - Regex: '^"gui/dialog/.*"'
     Priority: 58
+  - Regex: '^"gui/.*"'
+    Priority: 57
+  - Regex: '^"vfs/.*"'
+    Priority: 60
   - Regex: '.*' # everything else
     Priority: 100
 IncludeIsMainRegex: 'x' # using a 'bad' regex will disable this feature

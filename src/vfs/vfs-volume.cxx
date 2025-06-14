@@ -33,6 +33,8 @@
 
 #include "xset/xset.hxx"
 
+#include "gui/main-window.hxx"
+
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
@@ -41,7 +43,6 @@
 #include "vfs/vfs-volume.hxx"
 
 #include "logger.hxx"
-#include "main-window.hxx"
 
 [[nodiscard]] static std::shared_ptr<vfs::volume>
 read_by_device(const libudev::device& udevice) noexcept;

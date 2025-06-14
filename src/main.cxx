@@ -38,9 +38,11 @@
 #include "settings/config.hxx"
 #include "settings/settings.hxx"
 
-#include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-location-view.hxx"
+#include "gui/location-view.hxx"
+#include "gui/main-window.hxx"
+
+#include "gui/dialog/app-chooser.hxx"
+#include "gui/dialog/text.hxx"
 
 #include "vfs/linux/self.hxx"
 #include "vfs/vfs-app-desktop.hxx"
@@ -50,7 +52,6 @@
 #include "autosave.hxx"
 #include "bookmarks.hxx"
 #include "logger.hxx"
-#include "main-window.hxx"
 #include "settings.hxx"
 #include "single-instance.hxx"
 #include "types.hxx"

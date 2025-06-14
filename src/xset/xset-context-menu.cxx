@@ -32,8 +32,9 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-file-browser.hxx"
+#include "gui/file-browser.hxx"
+
+#include "gui/dialog/text.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 

@@ -34,13 +34,14 @@
 #include "xset/xset-defaults.hxx"
 #include "xset/xset.hxx"
 
+#include "gui/main-window.hxx"
+
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-terminals.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
-#include "main-window.hxx"
 #include "settings.hxx"
 #include "types.hxx"
 

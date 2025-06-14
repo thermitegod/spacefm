@@ -43,9 +43,10 @@
 
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-file-task-view.hxx"
+#include "gui/clipboard.hxx"
+#include "gui/file-browser.hxx"
+#include "gui/file-task-view.hxx"
+#include "gui/main-window.hxx"
 
 #include "vfs/utils/file-ops.hxx"
 #include "vfs/utils/vfs-editor.hxx"
@@ -55,7 +56,6 @@
 #include "vfs/vfs-volume.hxx"
 
 #include "logger.hxx"
-#include "main-window.hxx"
 #include "types.hxx"
 
 static std::string

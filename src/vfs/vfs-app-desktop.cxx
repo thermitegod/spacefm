@@ -34,7 +34,7 @@
 
 #include "utils/shell-quote.hxx"
 
-#include "ptk/ptk-file-task.hxx" // break vfs independence for exec_in_terminal
+#include "gui/file-task.hxx" // break vfs independence for exec_in_terminal
 
 #include "vfs/utils/vfs-utils.hxx"
 #include "vfs/vfs-app-desktop.hxx"
