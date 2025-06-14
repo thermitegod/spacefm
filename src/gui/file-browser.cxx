@@ -3707,9 +3707,7 @@ gui::browser::paste_link() const noexcept
 
     gui::clipboard::paste_links(GTK_WINDOW(parent_win),
                                 this->cwd(),
-                                GTK_TREE_VIEW(this->task_view_),
-                                nullptr,
-                                nullptr);
+                                GTK_TREE_VIEW(this->task_view_));
 }
 
 void
@@ -3723,9 +3721,7 @@ gui::browser::paste_target() const noexcept
 
     gui::clipboard::paste_targets(GTK_WINDOW(parent_win),
                                   this->cwd(),
-                                  GTK_TREE_VIEW(this->task_view_),
-                                  nullptr,
-                                  nullptr);
+                                  GTK_TREE_VIEW(this->task_view_));
 }
 
 void

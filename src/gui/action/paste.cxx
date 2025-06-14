@@ -39,11 +39,13 @@
 void
 gui::action::paste_files(gui::browser* browser, const std::filesystem::path& cwd) noexcept
 {
+    (void)cwd;
+
     bool is_cut = false;
     i32 missing_targets = 0;
 
     const std::vector<std::filesystem::path> files =
-        gui::clipboard::get_file_paths(cwd, &is_cut, &missing_targets);
+        gui::clipboard::get_file_paths(&is_cut, &missing_targets);
 
     for (const auto& file_path : files)
     {

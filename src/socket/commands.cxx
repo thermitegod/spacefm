@@ -60,18 +60,6 @@
 #include "logger.hxx"
 #include "types.hxx"
 
-static std::string
-unescape(const std::string_view t) noexcept
-{
-    std::string unescaped = t.data();
-    unescaped = ztd::replace(unescaped, "\\\n", "\\n");
-    unescaped = ztd::replace(unescaped, "\\\t", "\\t");
-    unescaped = ztd::replace(unescaped, "\\\r", "\\r");
-    unescaped = ztd::replace(unescaped, "\\\"", "\"");
-
-    return unescaped;
-}
-
 #if 0
 static bool
 delayed_show_menu(GtkWidget* menu) noexcept
@@ -733,26 +721,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "clipboard-text" || property == "clipboard-primary-text")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
             const std::string_view value = data[0];
 
-            if (!g_utf8_validate(value.data(), -1, nullptr))
-            {
-                return {SOCKET_INVALID, "text is not valid UTF-8"};
-            }
-            GtkClipboard* clip = gtk_clipboard_get(
-                property == "clipboard-text" ? GDK_SELECTION_CLIPBOARD : GDK_SELECTION_PRIMARY);
-            const std::string str = unescape(value);
-            gtk_clipboard_set_text(clip, str.data(), -1);
-#endif
+            gui::clipboard::copy_text(value);
         }
         else if (property == "clipboard-from-file" || property == "clipboard-primary-from-file")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
             const std::string_view value = data[0];
 
             const auto buffer = vfs::utils::read_file(value);
@@ -760,20 +734,15 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("error reading file '{}'", value)};
             }
-            if (!g_utf8_validate(buffer->data(), -1, nullptr))
-            {
-                return {SOCKET_INVALID,
-                        std::format("file '{}' does not contain valid UTF-8 text", value)};
-            }
-            GtkClipboard* clip =
-                gtk_clipboard_get(property == "clipboard-from-file" ? GDK_SELECTION_CLIPBOARD
-                                                                    : GDK_SELECTION_PRIMARY);
-            gtk_clipboard_set_text(clip, buffer->data(), -1);
-#endif
+
+            gui::clipboard::copy_text(*buffer);
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
         {
-            gui::clipboard::cut_or_copy_file_list(data, property == "clipboard_copy_files");
+            gui::clipboard::cut_or_copy_files(data,
+                                              property == "clipboard_copy_files"
+                                                  ? gui::clipboard::mode::copy
+                                                  : gui::clipboard::mode::move);
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {
@@ -1221,71 +1190,23 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "clipboard-text" || property == "clipboard-primary-text")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
-            GtkClipboard* clip = gtk_clipboard_get(
-                property == "clipboard-text" ? GDK_SELECTION_CLIPBOARD : GDK_SELECTION_PRIMARY);
-            return {SOCKET_SUCCESS, gtk_clipboard_wait_for_text(clip)};
-#endif
+            return {SOCKET_SUCCESS, gui::clipboard::get_text()};
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
-            GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-            GdkAtom gnome_target = nullptr;
-            GdkAtom uri_list_target = nullptr;
-            GtkSelectionData* sel_data = nullptr;
+            bool is_cut = false;
+            i32 missing_targets = 0;
+            auto files = gui::clipboard::get_file_paths(&is_cut, &missing_targets);
 
-            gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
-            sel_data = gtk_clipboard_wait_for_contents(clip, gnome_target);
-            if (!sel_data)
+            std::string text;
+            for (const auto& file : files)
             {
-                uri_list_target = gdk_atom_intern("text/uri-list", false);
-                sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
-                if (!sel_data)
-                {
-                    return {SOCKET_SUCCESS, ""};
-                }
+                text.append(::utils::shell_quote(file.string()));
+                text.append(" ");
             }
-            if (gtk_selection_data_get_length(sel_data) <= 0 ||
-                gtk_selection_data_get_format(sel_data) != 8)
-            {
-                gtk_selection_data_free(sel_data);
-                return {SOCKET_SUCCESS, ""};
-            }
+            text = ztd::strip(text);
 
-            const char* uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
-            if (std::string(uri_list_str).starts_with("cut"))
-            {
-                if (property == "clipboard-copy-files")
-                {
-                    gtk_selection_data_free(sel_data);
-                    return {SOCKET_SUCCESS, ""};
-                }
-            }
-            else if (property == "clipboard-cut-files")
-            {
-                gtk_selection_data_free(sel_data);
-                return {SOCKET_SUCCESS, ""};
-            }
-            const char* clip_txt = gtk_clipboard_wait_for_text(clip);
-            gtk_selection_data_free(sel_data);
-            if (!clip_txt)
-            {
-                return {SOCKET_SUCCESS, ""};
-            }
-            // build fish array
-            const std::vector<std::string> pathv = ztd::split(clip_txt, "");
-            std::string str;
-            for (const std::string_view path : pathv)
-            {
-                str.append(std::format("{} ", ::utils::shell_quote(path)));
-            }
-            return {SOCKET_SUCCESS, std::format("({})", str)};
-#endif
+            return {SOCKET_SUCCESS, std::format("({})", text)};
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {

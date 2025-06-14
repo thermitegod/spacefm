@@ -24,24 +24,33 @@
 #include <vector>
 
 #include <glibmm.h>
-#include <gtkmm.h>
 
 #include "vfs/file.hxx"
 
 namespace gui::clipboard
 {
-void cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                       bool copy) noexcept;
+enum class mode : std::uint8_t
+{
+    copy,
+    move,
+};
+
+[[nodiscard]] bool is_content_valid() noexcept;
+[[nodiscard]] std::string get_text() noexcept;
+
 void copy_as_text(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 void copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
-void paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                 GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win) noexcept;
-void paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                 GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win) noexcept;
-void paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                   GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win) noexcept;
 void copy_text(const std::string_view text) noexcept;
-void cut_or_copy_file_list(const std::span<const std::string> selected_files, bool copy) noexcept;
-std::vector<std::filesystem::path> get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
-                                                  i32* missing_targets) noexcept;
+void cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                       const mode mode) noexcept;
+void cut_or_copy_files(const std::span<const std::string> selected_files, const mode mode) noexcept;
+void paste_files(GtkWindow* parent, const std::filesystem::path& dest_dir,
+                 GtkTreeView* task_view) noexcept;
+void paste_links(GtkWindow* parent, const std::filesystem::path& dest_dir,
+                 GtkTreeView* task_view) noexcept;
+void paste_targets(GtkWindow* parent, const std::filesystem::path& dest_dir,
+                   GtkTreeView* task_view) noexcept;
+
+[[nodiscard]] std::vector<std::filesystem::path> get_file_paths(bool* is_cut,
+                                                                i32* missing_targets) noexcept;
 } // namespace gui::clipboard

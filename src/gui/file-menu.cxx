@@ -1118,17 +1118,7 @@ gui_file_menu_new(gui::browser* browser,
     // const auto no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
     const auto no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
-#if (GTK_MAJOR_VERSION == 4)
-    logger::debug<logger::domain::gui>("TODO - PORT - GdkClipboard");
-    bool is_clip = false;
-#elif (GTK_MAJOR_VERSION == 3)
-    GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-    const bool is_clip =
-        gtk_clipboard_wait_is_target_available(
-            clip,
-            gdk_atom_intern("x-special/gnome-copied-files", false)) ||
-        gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false));
-#endif
+    const bool is_clip = gui::clipboard::is_content_valid();
 
     const panel_t p = browser->panel();
 
@@ -2590,7 +2580,7 @@ on_popup_cut_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     {
         return;
     }
-    gui::clipboard::cut_or_copy_files(data->selected_files, false);
+    gui::clipboard::cut_or_copy_files(data->selected_files, gui::clipboard::mode::move);
 }
 
 static void
@@ -2601,7 +2591,7 @@ on_popup_copy_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     {
         return;
     }
-    gui::clipboard::cut_or_copy_files(data->selected_files, true);
+    gui::clipboard::cut_or_copy_files(data->selected_files, gui::clipboard::mode::copy);
 }
 
 static void
@@ -2618,9 +2608,7 @@ on_popup_paste_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 
         gui::clipboard::paste_files(GTK_WINDOW(parent),
                                     data->cwd,
-                                    GTK_TREE_VIEW(data->browser->task_view()),
-                                    nullptr,
-                                    nullptr);
+                                    GTK_TREE_VIEW(data->browser->task_view()));
     }
 }
 
