@@ -25,8 +25,6 @@
 #include "vfs/vfs-file.hxx"
 
 #include "datatypes.hxx"
-#include "giomm/simpleaction.h"
-#include "glibmm/refptr.h"
 
 class CreateDialog : public Gtk::ApplicationWindow
 {

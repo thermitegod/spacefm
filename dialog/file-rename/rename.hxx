@@ -25,7 +25,6 @@
 #include "vfs/vfs-file.hxx"
 
 #include "datatypes.hxx"
-#include "giomm/simpleaction.h"
 
 class RenameDialog : public Gtk::ApplicationWindow
 {
