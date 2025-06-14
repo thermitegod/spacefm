@@ -46,7 +46,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header,
     std::vector<datatype::file_action::data> file_data;
     for (const auto& file : selected_files)
     {
-        file_data.push_back({file->name().data(), file->size(), file->is_directory()});
+        file_data.push_back({file->name().data(), file->size().data(), file->is_directory()});
     }
 
     const auto response = datatype::run_dialog_sync<datatype::file_action::response>(

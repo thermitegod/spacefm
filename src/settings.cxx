@@ -158,7 +158,7 @@ save_settings(const std::shared_ptr<config::settings>& settings) noexcept
                 const auto set = xset::set::get(xset::panel::show, p);
                 if (GTK_IS_NOTEBOOK(main_window->get_panel_notebook(p)))
                 {
-                    const i32 pages = gtk_notebook_get_n_pages(main_window->get_panel_notebook(p));
+                    const auto pages = gtk_notebook_get_n_pages(main_window->get_panel_notebook(p));
                     if (pages) // panel was shown
                     {
                         std::string tabs;

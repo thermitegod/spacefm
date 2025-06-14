@@ -45,7 +45,7 @@ vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
     const auto buffer = get_string(dir, attribute);
     if (buffer)
     {
-        const auto result = ztd::from_string<i64>(*buffer);
+        const auto result = i64::create(*buffer);
         if (result)
         {
             return result.value();
@@ -61,7 +61,7 @@ vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
     const auto buffer = get_string(dir, attribute);
     if (buffer)
     {
-        const auto result = ztd::from_string<u64>(*buffer);
+        const auto result = u64::create(*buffer);
         if (result)
         {
             return result.value();

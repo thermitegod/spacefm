@@ -250,11 +250,11 @@ PropertiesDialog::calc_total_size_of_files(const std::filesystem::path& path) no
         this->size_on_disk_ += stat.size_on_disk();
         if (stat.is_directory())
         {
-            ++this->total_count_dir_;
+            this->total_count_dir_ += 1;
         }
         else
         {
-            ++this->total_count_file_;
+            this->total_count_file_ += 1;
         }
     }
 }
@@ -273,11 +273,11 @@ PropertiesDialog::calc_size() noexcept
 
         if (file->is_directory())
         {
-            ++this->total_count_dir_;
+            this->total_count_dir_ += 1;
         }
         else
         {
-            ++this->total_count_file_;
+            this->total_count_file_ += 1;
         }
 
         calc_total_size_of_files(file->path());

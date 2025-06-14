@@ -85,7 +85,7 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
         datatype::error::request{.title = title.data(), .message = message.data()});
 }
 
-i32
+GtkResponseType
 ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
                      GtkButtonsType buttons, const std::string_view message,
                      const std::string_view secondary_message) noexcept

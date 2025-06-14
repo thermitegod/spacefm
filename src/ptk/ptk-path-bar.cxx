@@ -300,21 +300,22 @@ insert_complete(GtkEntry* entry) noexcept
         if (prefix_name.empty())
         { // full match
             last_path = path;
-            if (++count > 1)
+            count += 1;
+            if (count > 1)
             {
                 break;
             }
         }
         else if (filename.string().starts_with(prefix_name))
         { // prefix matches
-            count++;
+            count += 1;
             if (long_prefix.empty())
             {
                 long_prefix = filename;
             }
             else
             {
-                usize i = 0;
+                std::size_t i = 0;
                 while (filename.string()[i] && filename.string()[i] == long_prefix[i])
                 {
                     i++;
@@ -372,7 +373,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
     if (keyval == GDK_KEY_Tab)
     {
         const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
-        if (keymod)
+        if (keymod != 0)
         {
             return false;
         }

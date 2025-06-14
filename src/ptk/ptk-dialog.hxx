@@ -36,9 +36,9 @@ file_chooser(GtkWidget* parent, GtkFileChooserAction action, const std::string_v
              const std::optional<std::filesystem::path>& deffolder,
              const std::optional<std::filesystem::path>& deffile) noexcept;
 
-i32 message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
-            GtkButtonsType buttons, const std::string_view message,
-            const std::string_view secondary_message = "") noexcept;
+GtkResponseType message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
+                        GtkButtonsType buttons, const std::string_view message,
+                        const std::string_view secondary_message = "") noexcept;
 
 void error(GtkWindow* parent, const std::string_view title,
            const std::string_view message) noexcept;

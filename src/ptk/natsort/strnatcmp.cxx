@@ -26,14 +26,13 @@
 #include <string_view>
 
 #include <cctype>
-#include <cstdlib>
-#include <cstring>
+#include <cstdint>
 
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "strnatcmp.hxx"
 
-[[nodiscard]] static i32
+[[nodiscard]] static std::int32_t
 strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
 {
     const auto* it_lhs = lhs.cbegin();
@@ -51,8 +50,8 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
             std::string_view num_lhs(it_lhs, std::string_view::size_type(end_lhs - it_lhs));
             std::string_view num_rhs(it_rhs, std::string_view::size_type(end_rhs - it_rhs));
 
-            f32 val_lhs{};
-            f32 val_rhs{};
+            float val_lhs{};
+            float val_rhs{};
             // TODO use placeholder variable when switching to c++26
             const auto [ptr_lhs, ec_lhs] =
                 std::from_chars(num_lhs.data(), num_lhs.data() + num_lhs.size(), val_lhs);
@@ -104,14 +103,14 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
     return 0;
 }
 
-[[nodiscard]] i32
+[[nodiscard]] std::int32_t
 strnatcmp(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
 {
     // TODO use placeholder variable when switching to c++26
     const auto [basename_lhs, ext_lhs, multi_lhs] = vfs::utils::split_basename_extension(lhs);
     const auto [basename_rhs, ext_rhs, multi_rhs] = vfs::utils::split_basename_extension(rhs);
 
-    i32 result{0};
+    std::int32_t result{0};
     if (!basename_lhs.empty() && !basename_rhs.empty())
     {
         result = strnatcmp0(basename_lhs, basename_rhs, fold_case);

@@ -110,14 +110,14 @@ vfs::file::update() noexcept
     this->display_disk_size_ = vfs::utils::format_file_size(this->size_on_disk());
 
     // owner
-    const auto pw = ztd::passwd::create(this->stat_.uid());
+    const auto pw = ztd::passwd::create(this->stat_.uid().data());
     if (pw)
     {
         this->display_owner_ = pw->name();
     }
 
     // group
-    const auto gr = ztd::group::create(this->stat_.gid());
+    const auto gr = ztd::group::create(this->stat_.gid().data());
     if (gr)
     {
         this->display_group_ = gr->name();
@@ -386,19 +386,19 @@ vfs::file::mtime() const noexcept
 std::string
 vfs::file::create_file_perm_string() const noexcept
 {
-    static constexpr u8 file_type{0};
+    static constexpr std::uint8_t file_type{0};
 
-    static constexpr u8 owner_read{1};
-    static constexpr u8 owner_write{2};
-    static constexpr u8 owner_exec{3};
+    static constexpr std::uint8_t owner_read{1};
+    static constexpr std::uint8_t owner_write{2};
+    static constexpr std::uint8_t owner_exec{3};
 
-    static constexpr u8 group_read{4};
-    static constexpr u8 group_write{5};
-    static constexpr u8 group_exec{6};
+    static constexpr std::uint8_t group_read{4};
+    static constexpr std::uint8_t group_write{5};
+    static constexpr std::uint8_t group_exec{6};
 
-    static constexpr u8 other_read{7};
-    static constexpr u8 other_write{8};
-    static constexpr u8 other_exec{9};
+    static constexpr std::uint8_t other_read{7};
+    static constexpr std::uint8_t other_write{8};
+    static constexpr std::uint8_t other_exec{9};
 
     // blank permissions
     std::string perm = "----------";

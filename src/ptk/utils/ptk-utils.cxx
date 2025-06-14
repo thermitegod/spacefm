@@ -45,5 +45,5 @@ ptk::utils::get_keymod(GdkModifierType event) noexcept
 i32
 ptk::utils::stamp() noexcept
 {
-    return ztd::random<i32>(0, std::numeric_limits<i32>::max());
+    return i32::random(0, std::numeric_limits<i32>::max());
 }

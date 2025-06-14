@@ -213,7 +213,7 @@ vfs::dir::load_thread() noexcept
 
             if (this->is_file_user_hidden(dfile.path()))
             {
-                this->xhidden_count_++;
+                this->xhidden_count_ += 1;
                 continue;
             }
 
@@ -262,7 +262,7 @@ vfs::dir::refresh_thread() noexcept
         // Check if new files are hidden
         if (this->is_file_user_hidden(dfile.path()))
         {
-            this->xhidden_count_++;
+            this->xhidden_count_ += 1;
             continue;
         }
 
@@ -286,7 +286,7 @@ vfs::dir::refresh_thread() noexcept
             // Use the delete signal to properly remove this file from the file list.
             this->emit_file_deleted(file->name());
 
-            this->xhidden_count_++;
+            this->xhidden_count_ += 1;
             continue;
         }
 
@@ -478,7 +478,7 @@ vfs::dir::update_created_files() noexcept
             {
                 if (this->is_file_user_hidden(created_file))
                 {
-                    this->xhidden_count_++;
+                    this->xhidden_count_ += 1;
                     continue;
                 }
 

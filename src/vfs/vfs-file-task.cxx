@@ -375,7 +375,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     this->lock();
     this->current_file = src_file;
     this->current_dest = dest_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
 
     const auto file_stat = ztd::lstat::create(src_file);
@@ -439,7 +439,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 }
             }
 
-            chmod(actual_dest_file.c_str(), file_stat->mode());
+            chmod(actual_dest_file.c_str(), file_stat->mode().data());
 
             times.actime = std::chrono::system_clock::to_time_t(file_stat->atime());
             times.modtime = std::chrono::system_clock::to_time_t(file_stat->mtime());
@@ -535,7 +535,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     }
     else
     {
-        const i32 rfd = open(src_file.c_str(), O_RDONLY);
+        const auto rfd = open(src_file.c_str(), O_RDONLY);
         if (rfd >= 0)
         {
             if (!this->check_overwrite(actual_dest_file, dest_exists, new_dest_file))
@@ -564,7 +564,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 }
             }
 
-            const i32 wfd = creat(actual_dest_file.c_str(), file_stat->mode() | S_IWUSR);
+            const auto wfd = creat(actual_dest_file.c_str(), file_stat->mode().data() | S_IWUSR);
             if (wfd >= 0)
             {
                 // sshfs becomes unresponsive with this, nfs is okay with it
@@ -580,11 +580,11 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                         break;
                     }
 
-                    const auto length = write(wfd, buffer, static_cast<std::size_t>(rsize));
+                    const auto length = write(wfd, buffer, rsize.cast_unsigned().data());
                     if (length > 0)
                     {
                         this->lock();
-                        this->progress += static_cast<std::size_t>(rsize);
+                        this->progress += rsize.cast_unsigned().data();
                         this->unlock();
                     }
                     else
@@ -609,7 +609,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     // do not chmod link
                     if (!std::filesystem::is_symlink(actual_dest_file))
                     {
-                        chmod(actual_dest_file.c_str(), file_stat->mode());
+                        chmod(actual_dest_file.c_str(), file_stat->mode().data());
                         struct utimbuf times;
                         times.actime = std::chrono::system_clock::to_time_t(file_stat->atime());
                         times.modtime = std::chrono::system_clock::to_time_t(file_stat->mtime());
@@ -719,7 +719,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     this->lock();
     this->current_file = src_file;
     this->current_dest = dest_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
 
     // logger::debug<logger::domain::vfs>("move '{}' to '{}'", src_file, dest_file);
@@ -768,7 +768,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
             const auto sub_src_file = src_file / filename;
             const auto sub_dest_file = dest_file / filename;
             const auto result = this->do_file_move(sub_src_file, sub_dest_file);
-            if (!result)
+            if (result == 0)
             {
                 logger::error<logger::domain::vfs>("File Move failed {} -> {}",
                                                    sub_src_file.string(),
@@ -802,7 +802,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     }
     else if (!std::filesystem::is_symlink(dest_file))
     { // do not chmod link
-        chmod(dest_file.c_str(), file_stat->mode());
+        chmod(dest_file.c_str(), file_stat->mode().data());
     }
 
     this->lock();
@@ -826,7 +826,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file) noexcept
 
     this->lock();
     this->current_file = src_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
 
     const auto file_stat = ztd::lstat::create(src_file);
@@ -871,7 +871,7 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file) noexcept
 
     this->lock();
     this->current_file = src_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
 
     const auto file_stat = ztd::lstat::create(src_file);
@@ -944,7 +944,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
     this->lock();
     this->current_file = src_file;
     this->current_dest = old_dest_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
 
     const auto src_stat = ztd::stat::create(src_file);
@@ -1040,7 +1040,7 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
 
     this->lock();
     this->current_file = src_file;
-    this->current_item++;
+    this->current_item += 1;
     this->unlock();
     // logger::debug<logger::domain::vfs>("chmod_chown: {}", src_file);
 
@@ -1219,7 +1219,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     if (task->type_ < vfs::file_task::type::move || task->type_ >= vfs::file_task::type::last)
     {
         task->state_ = vfs::file_task::state::running;
-        if (size_timeout)
+        if (size_timeout != 0)
         {
             g_source_remove_by_user_data(task.get());
         }
@@ -1239,7 +1239,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     if (task->abort)
     {
         task->state_ = vfs::file_task::state::running;
-        if (size_timeout)
+        if (size_timeout != 0)
         {
             g_source_remove_by_user_data(task.get());
         }
@@ -1269,7 +1269,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
             if (task->abort)
             {
                 task->state_ = vfs::file_task::state::running;
-                if (size_timeout)
+                if (size_timeout != 0)
                 {
                     g_source_remove_by_user_data(task.get());
                 }
@@ -1303,7 +1303,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
                 task->task_error(errno, "Accessing", task->dest_dir.value());
                 task->abort = true;
                 task->state_ = vfs::file_task::state::running;
-                if (size_timeout)
+                if (size_timeout != 0)
                 {
                     g_source_remove_by_user_data(task.get());
                 }
@@ -1313,7 +1313,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
                 }
                 return nullptr;
             }
-            dest_dev = file_stat->dev();
+            dest_dev = file_stat->dev().data();
         }
 
         for (const auto& src_path : task->src_paths)
@@ -1344,7 +1344,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
             if (task->abort)
             {
                 task->state_ = vfs::file_task::state::running;
-                if (size_timeout)
+                if (size_timeout != 0)
                 {
                     g_source_remove_by_user_data(task.get());
                 }
@@ -1365,7 +1365,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     if (task->abort)
     {
         task->state_ = vfs::file_task::state::running;
-        if (size_timeout)
+        if (size_timeout != 0)
         {
             g_source_remove_by_user_data(task.get());
         }
@@ -1377,7 +1377,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     }
 
     // cancel the timer
-    if (size_timeout)
+    if (size_timeout != 0)
     {
         g_source_remove_by_user_data(task.get());
     }
@@ -1407,7 +1407,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
                     break;
             }
 
-            if (!exlimit || task->total_size < exlimit)
+            if (exlimit == 0 || task->total_size < exlimit)
             {
                 task->state_pause_ = vfs::file_task::state::running;
             }
@@ -1425,7 +1425,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     if (task->should_abort())
     {
         task->state_ = vfs::file_task::state::running;
-        if (size_timeout)
+        if (size_timeout != 0)
         {
             g_source_remove_by_user_data(task.get());
         }
@@ -1467,7 +1467,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
     }
 
     task->state_ = vfs::file_task::state::running;
-    if (size_timeout)
+    if (size_timeout != 0)
     {
         g_source_remove_by_user_data(task.get());
     }
@@ -1608,9 +1608,9 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path) noexcep
 void
 vfs::file_task::task_error(i32 errnox, const std::string_view action) noexcept
 {
-    if (errnox)
+    if (errnox != 0)
     {
-        const std::string errno_msg = std::strerror(errnox);
+        const std::string errno_msg = std::strerror(errnox.data());
         this->append_add_log(std::format("{}\n{}\n", action, errno_msg));
     }
     else
@@ -1626,7 +1626,7 @@ vfs::file_task::task_error(i32 errnox, const std::string_view action,
                            const std::filesystem::path& target) noexcept
 {
     this->error = errnox;
-    const std::string errno_msg = std::strerror(errnox);
+    const std::string errno_msg = std::strerror(errnox.data());
     this->append_add_log(std::format("\n{} {}\nError: {}\n", action, target.string(), errno_msg));
     call_state_callback(this->shared_from_this(), vfs::file_task::state::error);
 }

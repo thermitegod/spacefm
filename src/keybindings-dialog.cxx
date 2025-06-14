@@ -48,8 +48,8 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
                         .label = xset::utils::clean_label(set->menu.label.value_or("")),
                         .category = magic_enum::enum_name(set->keybinding.type).data(),
                         .shared_key = set->shared_key ? set->shared_key->name().data() : "",
-                        .key = set->keybinding.key,
-                        .modifier = set->keybinding.modifier});
+                        .key = set->keybinding.key.data(),
+                        .modifier = set->keybinding.modifier.data()});
     }
 
     const auto response = datatype::run_dialog_sync<datatype::keybinding::response>(

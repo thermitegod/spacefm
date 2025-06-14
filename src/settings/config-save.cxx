@@ -19,6 +19,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
 #include "settings/config.hxx"
@@ -85,13 +86,13 @@ pack_xset(const xset_t& set) noexcept
         const auto value = std::format("{}", set->z.value());
         setvars.insert({name, value});
     }
-    if (set->keybinding.key)
+    if (set->keybinding.key != 0_u32)
     {
         const auto name = magic_enum::enum_name(xset::var::key);
         const auto value = std::format("{}", set->keybinding.key);
         setvars.insert({name, value});
     }
-    if (set->keybinding.modifier)
+    if (set->keybinding.modifier != 0_u32)
     {
         const auto name = magic_enum::enum_name(xset::var::keymod);
         const auto value = std::format("{}", set->keybinding.modifier);

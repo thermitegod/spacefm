@@ -524,7 +524,7 @@ vfs::volume_init() noexcept
         return false;
     }
 
-    const i32 ufd = global::umonitor.get_fd();
+    const auto ufd = global::umonitor.get_fd();
     if (ufd == 0)
     {
         logger::warn<logger::domain::vfs>("cannot get udev monitor socket file descriptor");
@@ -651,7 +651,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
     }
     // logger::debug<logger::domain::vfs>("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
-    const auto fstype = devmount_fstype(stat->dev());
+    const auto fstype = devmount_fstype(stat->dev().data());
     if (!fstype)
     {
         return false;
@@ -804,7 +804,7 @@ vfs::volume::devnum() const noexcept
     return this->devnum_;
 }
 
-dev_t
+u64
 vfs::volume::size() const noexcept
 {
     return this->size_;

@@ -27,8 +27,8 @@ struct socket_request_data
 {
     // flags
     std::string window;
-    panel_t panel{0};
-    tab_t tab{0};
+    panel_t::integer_type panel{0};
+    tab_t::integer_type tab{0};
 
     // socket data
     std::string command;           // get, set, etc...
@@ -39,7 +39,7 @@ struct socket_request_data
 
 struct socket_response_data
 {
-    i32 exit_status;
+    std::int32_t exit_status;
     std::string message;
 };
 

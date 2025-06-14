@@ -79,7 +79,7 @@ audio_video_metadata(const std::filesystem::path& path) noexcept
     data.push_back({"Duration", duration_dsp});
 
     // TODO - label multiple video/audio streams
-    for (u32 i = 0; i < format_context->nb_streams; ++i)
+    for (std::uint32_t i = 0; i < format_context->nb_streams; ++i)
     {
         const AVCodecParameters* codec_parameters = format_context->streams[i]->codecpar;
 
@@ -98,7 +98,7 @@ audio_video_metadata(const std::filesystem::path& path) noexcept
                  std::format("{} x {}", codec_parameters->width, codec_parameters->height)});
 
             const auto framerate =
-                (f64)codec_parameters->framerate.num / (f64)codec_parameters->framerate.den;
+                (float)codec_parameters->framerate.num / (float)codec_parameters->framerate.den;
             data.push_back({"Video Frame Rate", std::format("{:.02f}", framerate)});
 
             // data.push_back({"Video Bit Rate", std::format("{} kbps", format_context->bit_rate / 1000)});

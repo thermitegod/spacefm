@@ -117,7 +117,8 @@ on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
 
     for (const auto i : std::views::iota(0uz, task_names.size()))
     {
-        GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), static_cast<i32>(i));
+        GtkTreeViewColumn* col =
+            gtk_tree_view_get_column(GTK_TREE_VIEW(view), static_cast<std::int32_t>(i));
         if (!col)
         {
             return;
@@ -136,7 +137,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
                     !main_window->fullscreen)
                 {
                     const i32 width = gtk_tree_view_column_get_width(col);
-                    if (width) // manager unshown, all widths are zero
+                    if (width != 0) // manager unshown, all widths are zero
                     {
                         // save column width
                         set->y = std::format("{}", width);
@@ -155,16 +156,16 @@ static void
 on_task_destroy(GtkWidget* view, void* user_data) noexcept
 {
     (void)user_data;
-    const u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
+    const auto id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        const u64 hand = g_signal_handler_find((void*)view,
-                                               GSignalMatchType::G_SIGNAL_MATCH_ID,
-                                               id,
-                                               0,
-                                               nullptr,
-                                               nullptr,
-                                               nullptr);
+        const auto hand = g_signal_handler_find((void*)view,
+                                                GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                                id,
+                                                0,
+                                                nullptr,
+                                                nullptr,
+                                                nullptr);
         if (hand)
         {
             g_signal_handler_disconnect((void*)view, hand);
@@ -432,17 +433,17 @@ idle_set_task_height(MainWindow* main_window) noexcept
         }
         else
         {
-            taskh = allocation.height - pos;
+            taskh = allocation.height - pos.data();
         }
     }
-    taskh = std::min(taskh, allocation.height / 2);
+    taskh = taskh.min(allocation.height / 2);
     if (taskh < 1)
     {
         taskh = 90;
     }
     // logger::info<logger::domain::ptk>("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
     // allocation.height, taskh, allocation.height - taskh);
-    gtk_paned_set_position(main_window->task_vpane, allocation.height - taskh);
+    gtk_paned_set_position(main_window->task_vpane, allocation.height - taskh.data());
     return false;
 }
 
@@ -467,7 +468,7 @@ show_task_manager(MainWindow* main_window, bool show) noexcept
         // save height
         if (gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
         {
-            const i32 pos = gtk_paned_get_position(main_window->task_vpane);
+            const auto pos = gtk_paned_get_position(main_window->task_vpane);
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
@@ -772,8 +773,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
         return false;
     }
 
-    f64 x = NAN;
-    f64 y = NAN;
+    double x = NAN;
+    double y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     switch (button)
@@ -792,8 +793,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 return false;
             }
             if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                               static_cast<i32>(x),
-                                               static_cast<i32>(y),
+                                               static_cast<std::int32_t>(x),
+                                               static_cast<std::int32_t>(y),
                                                &tree_path,
                                                &col,
                                                nullptr,
@@ -845,8 +846,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             if (is_tasks)
             {
                 if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                                  static_cast<i32>(x),
-                                                  static_cast<i32>(y),
+                                                  static_cast<std::int32_t>(x),
+                                                  static_cast<std::int32_t>(y),
                                                   &tree_path,
                                                   &col,
                                                   nullptr,
@@ -1148,7 +1149,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
         std::string status_final;
         if (ptask->task->type_ != vfs::file_task::type::exec)
         {
-            if (!ptask->err_count_)
+            if (ptask->err_count_ == 0)
             {
                 status = job_titles.at(ptask->task->type_);
             }
@@ -1200,7 +1201,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
                 const auto set = xset::set::get(xset::name::task_que);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("list-add"), 22);
             }
-            else if (ptask->err_count_ && ptask->task->type_ != vfs::file_task::type::exec)
+            else if (ptask->err_count_ != 0 && ptask->task->type_ != vfs::file_task::type::exec)
             {
                 pixbuf = vfs::utils::load_icon("error", 22);
             }
@@ -1415,10 +1416,10 @@ ptk::view::file_task::create(MainWindow* main_window) noexcept
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
-        u64 j = 0;
+        std::uint64_t j = 0;
         for (const auto [index, value] : std::views::enumerate(task_names))
         {
-            if (xset_get_int(value, xset::var::x) == static_cast<i32>(i))
+            if (xset_get_int(value, xset::var::x) == i)
             {
                 // column width
                 i32 width = xset_get_int(value, xset::var::y);
@@ -1426,7 +1427,7 @@ ptk::view::file_task::create(MainWindow* main_window) noexcept
                 {
                     width = 80;
                 }
-                gtk_tree_view_column_set_fixed_width(col, width);
+                gtk_tree_view_column_set_fixed_width(col, width.data());
 
                 j = static_cast<std::uint64_t>(index);
 

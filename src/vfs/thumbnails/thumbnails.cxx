@@ -112,7 +112,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
             if (thumb_mtime != nullptr)
             {
-                const auto result = ztd::from_string<time_t>(thumb_mtime);
+                const auto result = ztd::from_string<std::time_t>(thumb_mtime);
                 embeded_mtime = std::chrono::system_clock::from_time_t(result.value_or(0));
             }
         }
@@ -211,8 +211,8 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     }
 
     GdkPixbuf* thumbnail_scaled = gdk_pixbuf_scale_simple(thumbnail,
-                                                          new_width,
-                                                          new_height,
+                                                          new_width.data(),
+                                                          new_height.data(),
                                                           GdkInterpType::GDK_INTERP_BILINEAR);
     g_object_unref(thumbnail);
 

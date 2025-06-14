@@ -75,7 +75,8 @@ vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem
     auto unique_path = path / std::format("{}{}", parts.basename, parts.extension);
     while (std::filesystem::exists(unique_path))
     { // need to see broken symlinks
-        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, ++n, parts.extension);
+        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, n, parts.extension);
+        n += 1;
     }
 
     return unique_path;

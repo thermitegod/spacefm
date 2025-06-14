@@ -74,7 +74,7 @@
 // https://source.chromium.org/chromium/chromium/src/+/main:base/strings/utf_string_conversion_utils.cc
 
 static size_t
-WriteUnicodeCharacter(i32 code_point, std::string* output) noexcept
+WriteUnicodeCharacter(const std::int32_t code_point, std::string* output) noexcept
 {
     if (code_point >= 0 && code_point <= 0x7f)
     {

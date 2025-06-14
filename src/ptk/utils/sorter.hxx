@@ -48,7 +48,7 @@ struct random
     {
         (void)lhs;
         (void)rhs;
-        return ztd::random<i32>(-1, 1);
+        return ztd::random<bool>();
     }
 };
 } // namespace sorter

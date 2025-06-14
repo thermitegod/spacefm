@@ -60,27 +60,29 @@ static void ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
 static void ptk_file_list_finalize(GObject* object) noexcept;
 
 static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept;
-static i32 ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept;
-static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept;
+static std::int32_t ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept;
+static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept;
 static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                        GtkTreePath* path) noexcept;
 static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
-                                    GValue* value) noexcept;
+static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter,
+                                    std::int32_t column, GValue* value) noexcept;
 static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                             GtkTreeIter* parent) noexcept;
 static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
-static i32 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static std::int32_t ptk_file_list_iter_n_children(GtkTreeModel* tree_model,
+                                                  GtkTreeIter* iter) noexcept;
 static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                             GtkTreeIter* parent, i32 n) noexcept;
+                                             GtkTreeIter* parent, std::int32_t n) noexcept;
 static gboolean ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                           GtkTreeIter* child) noexcept;
-static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
+static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable,
+                                                 std::int32_t* sort_column_id,
                                                  GtkSortType* order) noexcept;
-static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
+static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                              GtkSortType order) noexcept;
-static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
+static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                         GtkTreeIterCompareFunc sort_func, void* user_data,
                                         GDestroyNotify destroy) noexcept;
 static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
@@ -168,7 +170,7 @@ ptk_file_list_init(ptk::file_list* list) noexcept
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
     list->sort_col = ptk::file_list::column::name;
-    list->stamp = ptk::utils::stamp();
+    list->stamp = ptk::utils::stamp().data();
 }
 
 static void
@@ -263,7 +265,7 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
 }
 
-static i32
+static std::int32_t
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
@@ -271,7 +273,7 @@ ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept
 }
 
 static GType
-ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept
+ptk_file_list_get_column_type(GtkTreeModel* tree_model, std::int32_t index) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -288,20 +290,20 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
-    const i32* indices = gtk_tree_path_get_indices(path);
-    const i32 depth = gtk_tree_path_get_depth(path);
+    const auto* indices = gtk_tree_path_get_indices(path);
+    const auto depth = gtk_tree_path_get_depth(path);
 
     /* we do not allow children */
     assert(depth == 1); /* depth 1 = top level; a list only has top level nodes and no children */
 
-    const u32 n = static_cast<std::uint32_t>(indices[0]); /* the n-th top level row */
+    const auto n = indices[0]; /* the n-th top level row */
 
-    if (n >= g_list_length(list->files) /* || n < 0 */)
+    if (static_cast<std::uint32_t>(n) >= g_list_length(list->files) /* || n < 0 */)
     {
         return false;
     }
 
-    GList* l = g_list_nth(list->files, n);
+    GList* l = g_list_nth(list->files, static_cast<std::uint32_t>(n));
     assert(l != nullptr);
 
     /* We simply store a pointer in the iter */
@@ -330,7 +332,7 @@ ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 }
 
 static void
-ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
+ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, std::int32_t column,
                         GValue* value) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
@@ -492,7 +494,7 @@ ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexce
     return false;
 }
 
-static i32
+static std::int32_t
 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -509,7 +511,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexc
 
 static gboolean
 ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
-                             i32 n) noexcept
+                             std::int32_t n) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
@@ -548,7 +550,7 @@ ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIt
 }
 
 static gboolean
-ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
+ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, std::int32_t* sort_column_id,
                                  GtkSortType* order) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
@@ -564,7 +566,7 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
 }
 
 static void
-ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
+ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                                  GtkSortType order) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
@@ -579,7 +581,7 @@ ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
 }
 
 static void
-ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
+ptk_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
                             GDestroyNotify destroy) noexcept
 {
@@ -602,11 +604,11 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
     logger::warn<logger::domain::ptk>("ptk_file_list_set_default_sort_func: Not supported");
 }
 
-static i32
+static std::int32_t
 compare_files(const std::shared_ptr<vfs::file>& lhs, const std::shared_ptr<vfs::file>& rhs,
               ptk::file_list* list) noexcept
 {
-    i32 result{0};
+    std::int32_t result{0};
 
     if (list->sort_dir_ != ptk::file_list::sort_dir::mixed)
     {

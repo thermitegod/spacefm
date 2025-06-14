@@ -97,9 +97,9 @@ struct MainWindowClass
 static void main_window_class_init(MainWindowClass* klass) noexcept;
 static void main_window_init(MainWindow* main_window) noexcept;
 static void main_window_finalize(GObject* obj) noexcept;
-static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value,
+static void main_window_get_property(GObject* obj, std::uint32_t prop_id, GValue* value,
                                      GParamSpec* pspec) noexcept;
-static void main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
+static void main_window_set_property(GObject* obj, std::uint32_t prop_id, const GValue* value,
                                      GParamSpec* pspec) noexcept;
 static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept;
 static gboolean main_window_window_state_event(GtkWidget* widget,
@@ -394,7 +394,7 @@ update_views_all_windows(GtkWidget* item, ptk::browser* browser) noexcept
         if (gtk_widget_get_visible(GTK_WIDGET(window->get_panel_notebook(p))))
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
-            const i32 cur_tabx = gtk_notebook_get_current_page(notebook);
+            const auto cur_tabx = gtk_notebook_get_current_page(notebook);
             if (cur_tabx != -1)
             {
                 ptk::browser* a_browser =
@@ -444,11 +444,11 @@ MainWindow::focus_panel(const panel_t panel) noexcept
     panel_t panel_focus = 0;
     panel_t panel_hide = 0;
 
-    switch (panel)
+    switch (panel.data())
     {
-        case panel_control_code_prev:
+        case panel_control_code_prev.data():
             // prev
-            panel_focus = this->curpanel - 1;
+            panel_focus = this->curpanel - 1_i32;
             do
             {
                 if (panel_focus < panel_1)
@@ -459,12 +459,12 @@ MainWindow::focus_panel(const panel_t panel) noexcept
                 {
                     break;
                 }
-                panel_focus--;
-            } while (panel_focus != this->curpanel - 1);
+                panel_focus -= 1;
+            } while (panel_focus != this->curpanel - 1_i32);
             break;
-        case panel_control_code_next:
+        case panel_control_code_next.data():
             // next
-            panel_focus = this->curpanel + 1;
+            panel_focus = this->curpanel + 1_i32;
             do
             {
                 if (!is_valid_panel(panel_focus))
@@ -475,13 +475,13 @@ MainWindow::focus_panel(const panel_t panel) noexcept
                 {
                     break;
                 }
-                panel_focus++;
-            } while (panel_focus != this->curpanel + 1);
+                panel_focus += 1;
+            } while (panel_focus != this->curpanel + 1_i32);
             break;
-        case panel_control_code_hide:
+        case panel_control_code_hide.data():
             // hide
             panel_hide = this->curpanel;
-            panel_focus = this->curpanel + 1;
+            panel_focus = this->curpanel + 1_i32;
             do
             {
                 if (!is_valid_panel(panel_focus))
@@ -492,7 +492,7 @@ MainWindow::focus_panel(const panel_t panel) noexcept
                 {
                     break;
                 }
-                panel_focus++;
+                panel_focus += 1;
             } while (panel_focus != panel_hide);
             if (panel_focus == panel_hide)
             {
@@ -579,7 +579,7 @@ MainWindow::show_panels() noexcept
         {
             if (gtk_widget_get_visible(GTK_WIDGET(this->get_panel_notebook(p))))
             {
-                const tab_t cur_tabx = gtk_notebook_get_current_page(this->get_panel_notebook(p));
+                const auto cur_tabx = gtk_notebook_get_current_page(this->get_panel_notebook(p));
                 if (cur_tabx != -1)
                 {
                     ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -610,21 +610,21 @@ MainWindow::show_panels() noexcept
     for (const panel_t p : PANELS)
     {
         // panel context - how panels share horiz and vert space with other panels
-        switch (p)
+        switch (p.data())
         {
-            case panel_1:
+            case panel_1.data():
                 horiz = show.at(panel_2);
                 vert = show.at(panel_3) || show.at(panel_4);
                 break;
-            case panel_2:
+            case panel_2.data():
                 horiz = show.at(panel_1);
                 vert = show.at(panel_3) || show.at(panel_4);
                 break;
-            case panel_3:
+            case panel_3.data():
                 horiz = show.at(panel_4);
                 vert = show.at(panel_1) || show.at(panel_2);
                 break;
-            case panel_4:
+            case panel_4.data():
                 horiz = show.at(panel_3);
                 vert = show.at(panel_1) || show.at(panel_2);
                 break;
@@ -730,11 +730,11 @@ MainWindow::show_panels() noexcept
             }
             // load dynamic slider positions for this panel context
             this->panel_slide_x[p] =
-                set->x ? ztd::from_string<panel_t>(set->x.value()).value_or(0) : 0;
+                set->x ? panel_t::create(set->x.value()).value_or(0_i32) : 0_i32;
             this->panel_slide_y[p] =
-                set->y ? ztd::from_string<panel_t>(set->y.value()).value_or(0) : 0;
+                set->y ? panel_t::create(set->y.value()).value_or(0_i32) : 0_i32;
             this->panel_slide_s[p] =
-                set->s ? ztd::from_string<panel_t>(set->s.value()).value_or(0) : 0;
+                set->s ? panel_t::create(set->s.value()).value_or(0_i32) : 0_i32;
             // logger::info("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
             {
@@ -771,13 +771,15 @@ MainWindow::show_panels() noexcept
                     if (set->x)
                     {
                         // set current tab
-                        const auto cur_tabx = ztd::from_string<tab_t>(set->x.value()).value_or(0);
+                        const auto cur_tabx = tab_t::create(set->x.value()).value_or(0);
                         if (cur_tabx >= 0 &&
                             cur_tabx < gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
                         {
-                            gtk_notebook_set_current_page(this->get_panel_notebook(p), cur_tabx);
+                            gtk_notebook_set_current_page(this->get_panel_notebook(p),
+                                                          cur_tabx.data());
                             ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
-                                gtk_notebook_get_nth_page(this->get_panel_notebook(p), cur_tabx));
+                                gtk_notebook_get_nth_page(this->get_panel_notebook(p),
+                                                          cur_tabx.data()));
                             // if (browser->folder_view)
                             //      gtk_widget_grab_focus(browser->folder_view);
                             // logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, logger::utils::ptr(browser->folder_view_), logger::utils::ptr(this));
@@ -825,7 +827,7 @@ MainWindow::show_panels() noexcept
             {
                 this->curpanel = p;
                 this->notebook = this->get_panel_notebook(p);
-                const tab_t cur_tabx = gtk_notebook_get_current_page(this->notebook);
+                const auto cur_tabx = gtk_notebook_get_current_page(this->notebook);
                 ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(this->notebook, cur_tabx));
                 if (!browser)
@@ -845,7 +847,7 @@ MainWindow::show_panels() noexcept
     {
         if (show.at(p))
         {
-            const tab_t cur_tabx = gtk_notebook_get_current_page(this->get_panel_notebook(p));
+            const auto cur_tabx = gtk_notebook_get_current_page(this->get_panel_notebook(p));
             if (cur_tabx != -1)
             {
                 ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -943,13 +945,13 @@ MainWindow::rebuild_menu_view(ptk::browser* browser) noexcept
     {
         if (xset_get_b_panel(p, xset::panel::show))
         {
-            vis_count++;
+            vis_count += 1;
         }
     }
-    if (!vis_count)
+    if (vis_count == 0)
     {
         xset_set_b_panel(1, xset::panel::show, true);
-        vis_count++;
+        vis_count += 1;
     }
 
     {
@@ -1372,17 +1374,17 @@ main_window_init(MainWindow* main_window) noexcept
     // do this after maximizing/showing window so slider positions are valid
     // in actual window size
     i32 pos = xset_get_int(xset::name::panel_sliders, xset::var::x);
-    pos = std::max(pos, 200);
-    gtk_paned_set_position(main_window->hpane_top, pos);
+    pos = pos.max(200);
+    gtk_paned_set_position(main_window->hpane_top, pos.data());
     pos = xset_get_int(xset::name::panel_sliders, xset::var::y);
-    pos = std::max(pos, 200);
-    gtk_paned_set_position(main_window->hpane_bottom, pos);
+    pos = pos.max(200);
+    gtk_paned_set_position(main_window->hpane_bottom, pos.data());
     pos = xset_get_int(xset::name::panel_sliders, xset::var::s);
     if (pos < 200)
     {
         pos = -1;
     }
-    gtk_paned_set_position(main_window->vpane, pos);
+    gtk_paned_set_position(main_window->vpane, pos.data());
 
     // build the main menu initially, eg for F10 - Note: file_list is nullptr
     // NOT doing this because it slows down the initial opening of the window
@@ -1403,7 +1405,8 @@ main_window_finalize(GObject* obj) noexcept
 }
 
 static void
-main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec) noexcept
+main_window_get_property(GObject* obj, std::uint32_t prop_id, GValue* value,
+                         GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -1412,7 +1415,8 @@ main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* p
 }
 
 static void
-main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec) noexcept
+main_window_set_property(GObject* obj, std::uint32_t prop_id, const GValue* value,
+                         GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -1441,20 +1445,20 @@ MainWindow::store_positions() noexcept
         {
             const auto set = xset::set::get(xset::name::panel_sliders);
 
-            i32 pos = gtk_paned_get_position(this->hpane_top);
-            if (pos)
+            std::int32_t pos = gtk_paned_get_position(this->hpane_top);
+            if (pos != 0)
             {
                 set->x = std::format("{}", pos);
             }
 
             pos = gtk_paned_get_position(this->hpane_bottom);
-            if (pos)
+            if (pos != 0)
             {
                 set->x = std::format("{}", pos);
             }
 
             pos = gtk_paned_get_position(this->vpane);
-            if (pos)
+            if (pos != 0)
             {
                 set->x = std::format("{}", pos);
             }
@@ -1462,7 +1466,7 @@ MainWindow::store_positions() noexcept
             if (gtk_widget_get_visible(GTK_WIDGET(this->task_scroll)))
             {
                 pos = gtk_paned_get_position(this->task_vpane);
-                if (pos)
+                if (pos != 0)
                 {
                     // save absolute height
                     set->x = std::format("{}", allocation.height - pos);
@@ -1479,7 +1483,7 @@ MainWindow::store_positions() noexcept
         }
         for (const panel_t p : PANELS)
         {
-            const i32 page_x = gtk_notebook_get_current_page(this->get_panel_notebook(p));
+            const auto page_x = gtk_notebook_get_current_page(this->get_panel_notebook(p));
             if (page_x != -1)
             {
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -1781,11 +1785,11 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 
     const auto sort_order =
         xset_get_int_panel(browser->panel(), xset::panel::list_detailed, xset::var::x);
-    browser->set_sort_order((ptk::browser::sort_order)sort_order);
+    browser->set_sort_order(ptk::browser::sort_order(sort_order.data()));
 
     const auto sort_type =
         xset_get_int_panel(browser->panel(), xset::panel::list_detailed, xset::var::y);
-    browser->set_sort_type((GtkSortType)sort_type);
+    browser->set_sort_type((GtkSortType)sort_type.data());
 
     gtk_widget_show(GTK_WIDGET(browser));
 
@@ -1800,7 +1804,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     browser->signal_change_pane().connect([this](auto a) { this->on_browser_panel_change(a); });
 
     GtkWidget* tab_label = this->create_tab_label(browser);
-    const i32 idx =
+    const auto idx =
         gtk_notebook_append_page(this->notebook, GTK_WIDGET(browser), GTK_WIDGET(tab_label));
     gtk_notebook_set_tab_reorderable(this->notebook, GTK_WIDGET(browser), true);
     gtk_notebook_set_current_page(this->notebook, idx);
@@ -1835,7 +1839,7 @@ MainWindow::current_browser() const noexcept
     ptk::browser* browser = nullptr;
     if (this->notebook)
     {
-        const tab_t tab = gtk_notebook_get_current_page(this->notebook);
+        const auto tab = gtk_notebook_get_current_page(this->notebook);
         if (tab >= 0)
         {
             GtkWidget* widget = gtk_notebook_get_nth_page(this->notebook, tab);
@@ -1856,7 +1860,7 @@ main_window_get_current_browser() noexcept
     ptk::browser* browser = nullptr;
     if (main_window->notebook)
     {
-        const tab_t tab = gtk_notebook_get_current_page(main_window->notebook);
+        const auto tab = gtk_notebook_get_current_page(main_window->notebook);
         if (tab >= 0)
         {
             GtkWidget* widget = gtk_notebook_get_nth_page(main_window->notebook, tab);
@@ -2186,7 +2190,7 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y
     (void)time;
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_widget_get_parent(GTK_WIDGET(browser)));
     // TODO: Add a timeout here and do not set current page immediately
-    const i32 idx = gtk_notebook_page_num(notebook, GTK_WIDGET(browser));
+    const auto idx = gtk_notebook_page_num(notebook, GTK_WIDGET(browser));
     gtk_notebook_set_current_page(notebook, idx);
     return false;
 }
@@ -2242,12 +2246,16 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         return false;
     }
 
-    if ((keyval == GDK_KEY_Home && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (keyval == GDK_KEY_End && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+    if ((keyval == GDK_KEY_Home &&
+         (keymod == 0 || keymod.data() == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_End &&
+         (keymod == 0 || keymod.data() == GdkModifierType::GDK_SHIFT_MASK)) ||
         (keyval == GDK_KEY_Delete && keymod == 0) || (keyval == GDK_KEY_Tab && keymod == 0) ||
         (keymod == 0 && (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)) ||
-        (keyval == GDK_KEY_Left && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (keyval == GDK_KEY_Right && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_Left &&
+         (keymod == 0 || keymod.data() == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_Right &&
+         (keymod == 0 || keymod.data() == GdkModifierType::GDK_SHIFT_MASK)) ||
         (keyval == GDK_KEY_BackSpace && keymod == 0) ||
         (keymod == 0 && keyval != GDK_KEY_Escape && gdk_keyval_to_unicode(keyval))) // visible char
     {
@@ -2304,9 +2312,9 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
     }
 
 #if (GTK_MAJOR_VERSION == 4)
-    if ((keymod & GdkModifierType::GDK_ALT_MASK))
+    if ((keymod.data() & GdkModifierType::GDK_ALT_MASK))
 #elif (GTK_MAJOR_VERSION == 3)
-    if ((keymod & GdkModifierType::GDK_MOD1_MASK))
+    if ((keymod.data() & GdkModifierType::GDK_MOD1_MASK))
 #endif
     {
         this->rebuild_menus();
@@ -2423,7 +2431,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         else
         {
             const auto panel = ztd::removeprefix(set->name(), "panel_");
-            i = ztd::from_string<panel_t>(panel).value_or(INVALID_PANEL);
+            i = panel_t::create(panel).value_or(INVALID_PANEL);
         }
         this->focus_panel(i);
     }

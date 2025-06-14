@@ -53,7 +53,7 @@ spacefm::server::server_thread() noexcept
             logger::info<logger::domain::socket>("request: {}", command);
             const auto [ret, result] = socket::command(command);
 
-            const auto response = socket::socket_response_data{ret, result};
+            const auto response = socket::socket_response_data{ret.data(), result};
             const auto buffer = glz::write_json(response);
             if (!buffer)
             {

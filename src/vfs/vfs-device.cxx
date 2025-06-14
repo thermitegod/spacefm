@@ -235,7 +235,7 @@ vfs::device::device_get_info() noexcept
         const auto prop_id_cdrom = this->udevice.get_property("ID_CDROM");
         if (prop_id_cdrom)
         {
-            is_cd = ztd::from_string<i32>(prop_id_cdrom.value()).value_or(0) != 0;
+            is_cd = i32::create(prop_id_cdrom.value()).value_or(0) != 0;
         }
         else
         {
@@ -246,7 +246,7 @@ vfs::device::device_get_info() noexcept
         {
             // this test is limited for non-root - user may not have read
             // access to device file even if media is present
-            const i32 fd = open(this->devnode_.data(), O_RDONLY);
+            const auto fd = open(this->devnode_.data(), O_RDONLY);
             if (fd >= 0)
             {
                 media_available = true;
@@ -258,8 +258,7 @@ vfs::device::device_get_info() noexcept
             const auto prop_id_cdrom_media = this->udevice.get_property("ID_CDROM_MEDIA");
             if (prop_id_cdrom_media)
             {
-                media_available =
-                    ztd::from_string<i32>(prop_id_cdrom_media.value()).value_or(0) == 1;
+                media_available = i32::create(prop_id_cdrom_media.value()).value_or(0) == 1;
             }
         }
     }
@@ -268,7 +267,7 @@ vfs::device::device_get_info() noexcept
         const auto prop_id_cdrom_media = this->udevice.get_property("ID_CDROM_MEDIA");
         if (prop_id_cdrom_media)
         {
-            media_available = ztd::from_string<i32>(prop_id_cdrom_media.value()).value_or(0) == 1;
+            media_available = i32::create(prop_id_cdrom_media.value()).value_or(0) == 1;
         }
         else
         {
@@ -332,8 +331,7 @@ vfs::device::device_get_info() noexcept
     const auto prop_id_drive_ejectable = this->udevice.get_property("ID_DRIVE_EJECTABLE");
     if (prop_id_drive_ejectable)
     {
-        drive_is_ejectable =
-            ztd::from_string<i32>(prop_id_drive_ejectable.value()).value_or(0) != 0;
+        drive_is_ejectable = i32::create(prop_id_drive_ejectable.value()).value_or(0) != 0;
     }
     else
     {
@@ -350,7 +348,7 @@ vfs::device::device_get_info() noexcept
     const auto prop_id_cdrom = this->udevice.get_property("ID_CDROM");
     if (prop_id_cdrom)
     {
-        this->is_optical_disc_ = ztd::from_string<i32>(prop_id_cdrom.value()).value_or(0) != 0;
+        this->is_optical_disc_ = i32::create(prop_id_cdrom.value()).value_or(0) != 0;
     }
 
     return true;

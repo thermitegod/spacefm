@@ -49,7 +49,7 @@ ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd
 
         const auto result =
             ptk::action::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
-        if (!result)
+        if (result == 0)
         {
             missing_targets = 0;
             break;

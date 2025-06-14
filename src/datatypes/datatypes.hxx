@@ -20,6 +20,8 @@
 
 #include <cstdint>
 
+#include <ztd/ztd.hxx>
+
 namespace datatype
 {
 struct settings
@@ -29,9 +31,9 @@ struct settings
     bool thumbnail_size_limit{true};
     std::uint32_t thumbnail_max_size{8 << 20}; // 8 MiB
 
-    std::int32_t icon_size_big{48};
-    std::int32_t icon_size_small{22};
-    std::int32_t icon_size_tool{22};
+    i32 icon_size_big{48};
+    i32 icon_size_small{22};
+    i32 icon_size_tool{22};
 
     bool click_executes{false};
 

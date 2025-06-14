@@ -22,6 +22,8 @@
 
 #include <glaze/glaze.hpp>
 
+#include <ztd/ztd.hxx>
+
 #include "datatypes.hxx"
 #include "keybinding.hxx"
 #include "utils.hxx"
@@ -204,9 +206,9 @@ KeybindingDialog::KeybindingPage::init(
                                              name.get_value(),
                                              buffer.value());
 
-            std::int32_t exit_status = 0;
+            i32 exit_status = 0;
             std::string standard_output;
-            Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
+            Glib::spawn_command_line_sync(command, &standard_output, nullptr, exit_status.unwrap());
 
             if (exit_status != 0 || standard_output.empty())
             {

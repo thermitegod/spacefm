@@ -151,7 +151,7 @@ uri_list_extract_uris(const char* uri_list_str) noexcept
 }
 
 static void
-clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u32 info,
+clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, std::uint32_t info,
                    void* user_data) noexcept
 {
     (void)clipboard;
@@ -199,7 +199,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
                            gtk_selection_data_get_target(selection_data),
                            8,
                            (const unsigned char*)uri_list.data(),
-                           static_cast<i32>(uri_list.size()));
+                           static_cast<std::int32_t>(uri_list.size()));
     // logger::debug<logger::domain::ptk>("clipboard data: \n\n{}\n\n", uri_list);
 }
 
@@ -605,7 +605,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
             }
             else
             {
-                missing_targets++;
+                missing_targets += 1;
             }
         }
 
@@ -713,7 +713,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
         }
         else
         { // no *missing_targets++ here to avoid -Wunused-value compiler warning
-            *missing_targets = *missing_targets + 1;
+            *missing_targets += 1;
         }
     }
 

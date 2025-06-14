@@ -43,7 +43,7 @@ struct opts_data final
     bool no_tabs{false};
     bool new_window{false};
 
-    panel_t panel{0};
+    panel_t panel{0_i32};
 
     std::filesystem::path config_dir;
 
@@ -95,7 +95,10 @@ setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
     app.add_flag("-n,--no-saved-tab", opt->no_tabs, "Do not load saved tabs");
     app.add_flag("-w,--new-window", opt->new_window, "Open directories in new window");
 
-    static constexpr std::array<panel_t, 4> panels = {panel_1, panel_2, panel_3, panel_4};
+    static constexpr std::array<panel_t::integer_type, MAX_PANELS.data()> panels = {panel_1.data(),
+                                                                                    panel_2.data(),
+                                                                                    panel_3.data(),
+                                                                                    panel_4.data()};
     app.add_option("-p,--panel", opt->panel, "Open directories in panel")
         ->expected(1)
         ->check(CLI::IsMember(panels));

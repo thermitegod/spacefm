@@ -58,10 +58,10 @@ class PropertiesDialog : public Gtk::ApplicationWindow
     std::vector<std::shared_ptr<vfs::file>> file_list_;
     std::filesystem::path cwd_;
 
-    std::uint64_t total_size_{0};
-    std::uint64_t size_on_disk_{0};
-    std::uint64_t total_count_file_{0};
-    std::uint64_t total_count_dir_{0};
+    u64 total_size_{0};
+    u64 size_on_disk_{0};
+    u64 total_count_file_{0};
+    u64 total_count_dir_{0};
 
     // Concurrency
     std::shared_ptr<concurrencpp::thread_executor> executor_;

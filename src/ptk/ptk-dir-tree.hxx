@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -62,8 +63,8 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
 
         std::shared_ptr<vfs::file> file{nullptr};
         std::shared_ptr<node> children{nullptr};
-        i32 n_children{0};
-        i32 n_expand{0};
+        std::int32_t n_children{0};
+        std::int32_t n_expand{0};
         std::shared_ptr<node> parent{nullptr};
         std::shared_ptr<node> next{nullptr};
         std::shared_ptr<node> prev{nullptr};
@@ -72,9 +73,9 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
 
         vfs::monitor monitor;
 
-        std::shared_ptr<node> get_nth_node(i32 n) const noexcept;
+        std::shared_ptr<node> get_nth_node(std::int32_t n) const noexcept;
         std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
-        isize get_node_index(const std::shared_ptr<node>& child) const noexcept;
+        std::ptrdiff_t get_node_index(const std::shared_ptr<node>& child) const noexcept;
 
         /* file monitor callback */
         void on_monitor_event(const vfs::monitor::event event,
@@ -85,14 +86,14 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
 
     /* Random integer to check whether an iter belongs to our model */
-    i32 stamp{0};
+    std::int32_t stamp{0};
 
   private:
     void insert_child(const std::shared_ptr<node>& parent,
                       const std::filesystem::path& file_path = "") noexcept;
     void delete_child(const std::shared_ptr<ptk::dir_tree::node>& child) noexcept;
 
-    static i32 node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
-                            const std::shared_ptr<ptk::dir_tree::node>& b) noexcept;
+    static std::int32_t node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
+                                     const std::shared_ptr<ptk::dir_tree::node>& b) noexcept;
 };
 } // namespace ptk

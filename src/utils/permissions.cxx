@@ -38,15 +38,15 @@ utils::has_read_permission(const std::filesystem::path& path) noexcept
 
     if (stat->uid() == uid)
     {
-        return stat->mode() & S_IRUSR;
+        return stat->mode().data() & S_IRUSR;
     }
 
     if (stat->gid() == gid)
     {
-        return stat->mode() & S_IRGRP;
+        return stat->mode().data() & S_IRGRP;
     }
 
-    return stat->mode() & S_IROTH;
+    return stat->mode().data() & S_IROTH;
 }
 
 bool
@@ -68,15 +68,15 @@ utils::has_write_permission(const std::filesystem::path& path) noexcept
 
     if (stat->uid() == uid)
     {
-        return stat->mode() & S_IWUSR;
+        return stat->mode().data() & S_IWUSR;
     }
 
     if (stat->gid() == gid)
     {
-        return stat->mode() & S_IWGRP;
+        return stat->mode().data() & S_IWGRP;
     }
 
-    return stat->mode() & S_IWOTH;
+    return stat->mode().data() & S_IWOTH;
 }
 
 bool
@@ -98,15 +98,15 @@ utils::has_execute_permission(const std::filesystem::path& path) noexcept
 
     if (stat->uid() == uid)
     {
-        return stat->mode() & S_IXUSR;
+        return stat->mode().data() & S_IXUSR;
     }
 
     if (stat->gid() == gid)
     {
-        return stat->mode() & S_IXGRP;
+        return stat->mode().data() & S_IXGRP;
     }
 
-    return stat->mode() & S_IXOTH;
+    return stat->mode().data() & S_IXOTH;
 }
 
 bool

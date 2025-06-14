@@ -176,9 +176,9 @@ image_metadata(const std::filesystem::path& path) noexcept
         }
     }
 
-    f64 longitude = NAN;
-    f64 latitude = NAN;
-    f64 altitude = NAN;
+    double longitude = NAN;
+    double latitude = NAN;
+    double altitude = NAN;
     if (gexiv2_metadata_try_get_gps_info(metadata, &longitude, &latitude, &altitude, nullptr))
     {
         const std::string gps_coords = std::format("{}° {} {}° {} ({:.0f} m)",

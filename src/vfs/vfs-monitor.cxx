@@ -21,6 +21,7 @@
 #include <array>
 #include <cerrno>
 #include <filesystem>
+#include <format>
 #include <system_error>
 
 #include <cstring>
@@ -46,7 +47,7 @@ vfs::monitor::monitor(const std::filesystem::path& path) : path_(path)
         throw std::system_error(errno, std::generic_category(), "Failed to initialize inotify");
     }
 
-    this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_);
+    this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_.data());
     this->inotify_io_channel_->set_encoding();
     this->inotify_io_channel_->set_buffered(true);
     this->inotify_io_channel_->set_flags(Glib::IO_FLAG_NONBLOCK);
@@ -60,7 +61,7 @@ vfs::monitor::monitor(const std::filesystem::path& path) : path_(path)
     // inotify does not follow symlinks, need to get real path
     const auto real_path = std::filesystem::absolute(this->path_);
 
-    this->inotify_wd_ = inotify_add_watch(this->inotify_fd_,
+    this->inotify_wd_ = inotify_add_watch(this->inotify_fd_.data(),
                                           real_path.c_str(),
                                           IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
                                               IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
@@ -84,8 +85,8 @@ vfs::monitor::~monitor() noexcept
 
     if (this->inotify_fd_ != -1)
     {
-        inotify_rm_watch(this->inotify_fd_, this->inotify_wd_);
-        close(this->inotify_fd_);
+        inotify_rm_watch(this->inotify_fd_.data(), this->inotify_wd_.data());
+        close(this->inotify_fd_.data());
     }
 }
 
@@ -101,8 +102,8 @@ bool
 vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
 {
     // logger::debug<logger::domain::vfs>("vfs::monitor::on_inotify_event({})  {}", logger::utils::ptr(this), this->path_);
-    static constexpr auto EVENT_SIZE = (sizeof(inotify_event));
-    static constexpr auto EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
+    static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));
+    static constexpr std::size_t EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
     if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {
@@ -111,14 +112,14 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
     }
 
     std::array<char, EVENT_BUF_LEN> buffer{};
-    const auto length = read(this->inotify_fd_, buffer.data(), EVENT_BUF_LEN);
+    const auto length = read(this->inotify_fd_.data(), buffer.data(), EVENT_BUF_LEN);
     if (length < 0)
     {
         logger::error<logger::domain::vfs>("Error reading inotify event: {}", std::strerror(errno));
         return false;
     }
 
-    u32 i = 0;
+    std::size_t i = 0;
     while (i < length)
     {
         auto* const event = (inotify_event*)&buffer[i];

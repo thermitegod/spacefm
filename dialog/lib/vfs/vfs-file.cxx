@@ -92,11 +92,11 @@ vfs::file::update() noexcept
     this->display_disk_size_ = vfs::utils::format_file_size(this->size_on_disk());
 
     // owner
-    const auto pw = ztd::passwd(this->stat_.uid());
+    const auto pw = ztd::passwd(this->stat_.uid().data());
     this->display_owner_ = pw.name();
 
     // group
-    const auto gr = ztd::group(this->stat_.gid());
+    const auto gr = ztd::group(this->stat_.gid().data());
     this->display_group_ = gr.name();
 
     // time

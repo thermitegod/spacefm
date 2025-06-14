@@ -166,7 +166,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
         }
 
         // mimeinfo.cache has only MIME Cache; others do not have it
-        for (i32 k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
+        for (std::int32_t k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
         {
             // logger::info<logger::domain::vfs>("        {} [{}]", groups[k], k);
             bool is_removed = false;
@@ -469,7 +469,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string cust;
 
-    for (i32 i = 0;; ++i)
+    for (std::int32_t i = 0;; ++i)
     {
         /* generate the basename */
         cust = ztd::replace(cust_template, replace_txt, std::format("{}", i));

@@ -38,13 +38,13 @@ utils::has_execute_permission(const std::filesystem::path& path) noexcept
 
     if (stat->uid() == uid)
     {
-        return stat->mode() & S_IXUSR;
+        return stat->mode().data() & S_IXUSR;
     }
 
     if (stat->gid() == gid)
     {
-        return stat->mode() & S_IXGRP;
+        return stat->mode().data() & S_IXGRP;
     }
 
-    return stat->mode() & S_IXOTH;
+    return stat->mode().data() & S_IXOTH;
 }

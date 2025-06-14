@@ -28,8 +28,8 @@
 
 struct panel_lookup_data
 {
-    std::array<xset::name, MAX_PANELS> panel{};
-    std::array<std::array<xset::name, 4>, MAX_PANELS> panel_mode{};
+    std::array<xset::name, MAX_PANELS.data()> panel{};
+    std::array<std::array<xset::name, 4>, MAX_PANELS.data()> panel_mode{};
 };
 
 static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{{
@@ -905,7 +905,7 @@ xset::get_name_from_panel(const panel_t panel, const xset::panel name) noexcept
 {
     assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
 
-    return xset_panel_lookup.at(name).panel[static_cast<std::size_t>(panel - 1)];
+    return xset_panel_lookup.at(name).panel[static_cast<std::size_t>(panel.data() - 1)];
 }
 
 // panel mode
@@ -918,7 +918,7 @@ xset::get_name_from_panel_mode(const panel_t panel, const xset::panel name,
     assert(name != xset::panel::show);
 
     return xset_panel_lookup.at(name)
-        .panel_mode[static_cast<std::size_t>(panel - 1)][magic_enum::enum_integer(mode)];
+        .panel_mode[static_cast<std::size_t>(panel.data() - 1)][magic_enum::enum_integer(mode)];
 }
 
 // main window panel mode

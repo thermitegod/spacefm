@@ -172,7 +172,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
         // get menu icon size
         i32 icon_w = 0;
         i32 icon_h = 0;
-        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
+        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, icon_w.unwrap(), icon_h.unwrap());
         item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
     }
 
@@ -224,8 +224,8 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
             gtk_widget_add_accelerator(item,
                                        "activate",
                                        accel_group,
-                                       keyset->keybinding.key,
-                                       (GdkModifierType)keyset->keybinding.modifier,
+                                       keyset->keybinding.key.data(),
+                                       (GdkModifierType)keyset->keybinding.modifier.data(),
                                        GTK_ACCEL_VISIBLE);
 #endif
         }

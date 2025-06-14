@@ -93,7 +93,7 @@ mime_monitor::on_mime_change_timer(void* user_data) noexcept
     logger::info<logger::domain::vfs>("COMMAND({})", command2);
     Glib::spawn_command_line_async(command2);
 
-    g_source_remove(global::mime_change_timer);
+    g_source_remove(global::mime_change_timer.data());
     global::mime_change_timer = 0;
     return false;
 }

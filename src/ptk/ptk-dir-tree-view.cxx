@@ -398,8 +398,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
 
-    f64 x = NAN;
-    f64 y = NAN;
+    double x = NAN;
+    double y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     if (type == GdkEventType::GDK_BUTTON_PRESS &&
@@ -408,8 +408,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
         // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          static_cast<i32>(x),
-                                          static_cast<i32>(y),
+                                          static_cast<std::int32_t>(x),
+                                          static_cast<std::int32_t>(y),
                                           &tree_path,
                                           &tree_col,
                                           nullptr,
@@ -458,8 +458,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
     {
         // double click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          static_cast<i32>(x),
-                                          static_cast<i32>(y),
+                                          static_cast<std::int32_t>(x),
+                                          static_cast<std::int32_t>(y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,
@@ -534,7 +534,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* brows
         case GDK_KEY_F10:
         case GDK_KEY_Menu:
         {
-            if (keyval == GDK_KEY_F10 && keymod != GdkModifierType::GDK_SHIFT_MASK)
+            if (keyval == GDK_KEY_F10 && keymod.data() != GdkModifierType::GDK_SHIFT_MASK)
             {
                 gtk_tree_path_free(path);
                 return false;
@@ -576,8 +576,8 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y) noexcept
     {
         // no drag in progress, get drop path
         if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                           x,
-                                           y,
+                                           x.data(),
+                                           y.data(),
                                            &tree_path,
                                            nullptr,
                                            nullptr,
@@ -632,7 +632,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 {
                     if (browser->drag_source_dev_tree_ == 0)
                     {
-                        browser->drag_source_dev_tree_ = dest_stat->dev();
+                        browser->drag_source_dev_tree_ = dest_stat->dev().data();
                         for (; *puri; ++puri)
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
@@ -640,7 +640,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                             const auto file_stat = ztd::stat::create(file_path);
                             if (file_stat && file_stat->dev() != dest_stat->dev())
                             {
-                                browser->drag_source_dev_tree_ = file_stat->dev();
+                                browser->drag_source_dev_tree_ = file_stat->dev().data();
                                 break;
                             }
                         }
@@ -856,7 +856,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
             GdkDragAction suggested_action;
             GdkDragAction action;
 
-            u32 start_time;
+            std::uint32_t start_time;
 
             GdkDevice* device;
 
@@ -864,7 +864,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
              * different versions of GTK3 which causes the crash. It appears they
              * added/removed some variables from that struct.
              * https://github.com/IgnorantGuru/spacefm/issues/670 */
-            u32 drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
+            std::uint32_t drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
         };
         ((struct _GdkDragContext*)drag_context)->suggested_action = suggested_action;
 #if (GTK_MAJOR_VERSION == 4)

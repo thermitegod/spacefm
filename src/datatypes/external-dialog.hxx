@@ -26,6 +26,9 @@
 
 #include <glaze/glaze.hpp>
 
+#include <ztd/extra/glaze.hxx>
+#include <ztd/ztd.hxx>
+
 #include "utils/shell-quote.hxx"
 
 #include "logger.hxx"
@@ -59,9 +62,9 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
     // std::println(R"({} --json '{}')", binary, buffer.value())
     const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
-    std::int32_t exit_status = 0;
+    i32 exit_status = 0;
     std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
+    Glib::spawn_command_line_sync(command, &standard_output, nullptr, exit_status.unwrap());
 
 #if defined(DEV_MODE) && __has_feature(address_sanitizer)
     if (standard_output.empty())

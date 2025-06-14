@@ -40,7 +40,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     datatype::run_dialog_async(spacefm::package.dialog.properties,
                                datatype::properties::request{.cwd = cwd,
-                                                             .page = (std::uint32_t)page,
+                                                             .page = (std::uint32_t)page.data(),
                                                              .files = [selected_files]()
                                                              {
                                                                  std::vector<std::string> result;

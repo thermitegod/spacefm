@@ -107,8 +107,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
     }
 
     // socket flags
-    auto panel = request_data->panel;
-    auto tab = request_data->tab;
+    panel_t panel = request_data->panel;
+    tab_t tab = request_data->tab;
     auto window = request_data->window;
     // socket commands
     // subproperty and data are only retrived in the properties that need them
@@ -183,11 +183,11 @@ socket::command(const std::string_view socket_commands_json) noexcept
         return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
     ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
-        gtk_notebook_get_nth_page(main_window->get_panel_notebook(panel), tab - 1));
+        gtk_notebook_get_nth_page(main_window->get_panel_notebook(panel), tab.data() - 1));
 
     // command
 
-    const i8 i = 0; // socket commands index
+    const i32 i = 0; // socket commands index
 
     if (command == "set")
     {
@@ -206,8 +206,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_INVALID, std::format("invalid size format {}", value)};
             }
             const auto size = ztd::split(value, "x");
-            width = ztd::from_string<i32>(size[0]).value_or(0);
-            height = ztd::from_string<i32>(size[1]).value_or(0);
+            width = i32::create(size[0]).value_or(0);
+            height = i32::create(size[1]).value_or(0);
 
             if (height < 1 || width < 1)
             {
@@ -215,14 +215,14 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             if (property == "window-size")
             {
-                gtk_window_set_default_size(GTK_WINDOW(main_window), width, height);
+                gtk_window_set_default_size(GTK_WINDOW(main_window), width.data(), height.data());
             }
             else
             {
 #if (GTK_MAJOR_VERSION == 4)
                 return {SOCKET_INVALID, "Not Implemented"};
 #elif (GTK_MAJOR_VERSION == 3)
-                gtk_window_move(GTK_WINDOW(main_window), width, height);
+                gtk_window_move(GTK_WINDOW(main_window), width.data(), height.data());
 #endif
             }
         }
@@ -251,7 +251,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string_view value = data[0];
 
-            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
+            const auto width = i32::create(value.data()).value_or(0);
             if (width <= 0)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
@@ -275,7 +275,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 pane = main_window->task_vpane;
             }
 
-            gtk_paned_set_position(pane, width);
+            gtk_paned_set_position(pane, width.data());
         }
         else if (property == "focused-panel")
         {
@@ -498,7 +498,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string_view value = data[0];
 
-            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
+            const auto width = i32::create(value.data()).value_or(0);
 
             if (width <= 0)
             {
@@ -517,7 +517,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 pane = browser->hpane;
             }
-            gtk_paned_set_position(pane, width);
+            gtk_paned_set_position(pane, width.data());
             browser->slider_release(nullptr);
             update_views_all_windows(nullptr, browser);
         }
@@ -526,7 +526,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const std::string_view value = data[0];
             const auto subproperty = request_data->subproperty;
 
-            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
+            const auto width = i32::create(value.data()).value_or(0);
 
             if (width < 1)
             {
@@ -539,7 +539,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(browser->folder_view()),
-                                                   static_cast<i32>(index));
+                                                   static_cast<std::int32_t>(index));
                     if (!col)
                     {
                         continue;
@@ -565,7 +565,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 }
                 if (found)
                 {
-                    gtk_tree_view_column_set_fixed_width(col, width);
+                    gtk_tree_view_column_set_fixed_width(col, width.data());
                 }
                 else
                 {
@@ -698,7 +698,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string_view value = data[0];
             browser->settings_->thumbnail_max_size =
-                ztd::from_string<u32>(value.data()).value_or(8 << 20);
+                u32::create(value.data()).value_or(8 << 20).data();
         }
         else if (property == "large-icons")
         {
@@ -891,7 +891,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             i32 width = 0;
             i32 height = 0;
-            gtk_window_get_default_size(GTK_WINDOW(main_window), &width, &height);
+            gtk_window_get_default_size(GTK_WINDOW(main_window), width.unwrap(), height.unwrap());
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
         }
         else if (property == "window-position")
@@ -901,7 +901,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
             i32 width = 0;
             i32 height = 0;
-            gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
+            gtk_window_get_position(GTK_WINDOW(main_window), width.unwrap(), height.unwrap());
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
 #endif
         }
@@ -1032,7 +1032,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (property.starts_with("panel"))
             {
-                const auto j = ztd::from_string<panel_t>(property.substr(5, 1)).value_or(1);
+                const auto j = panel_t::create(property.substr(5, 1)).value_or(1);
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, xset::panel::show))};
             }
             if (!valid)
@@ -1085,7 +1085,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(browser->folder_view()),
-                                                   static_cast<i32>(index));
+                                                   static_cast<std::int32_t>(index));
                     if (!col)
                     {
                         continue;
@@ -1142,25 +1142,26 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (property == "sort-case")
             {
-                return {
-                    SOCKET_SUCCESS,
-                    std::format("{}",
-                                xset_get_b_panel(browser->panel(), xset::panel::sort_extra) &&
-                                        xset_get_int_panel(browser->panel(),
-                                                           xset::panel::sort_extra,
-                                                           xset::var::x) == xset::set::enabled::yes
-                                    ? 1
-                                    : 0)};
+                return {SOCKET_SUCCESS,
+                        std::format("{}",
+                                    xset_get_b_panel(browser->panel(), xset::panel::sort_extra) &&
+                                            xset_get_int_panel(browser->panel(),
+                                                               xset::panel::sort_extra,
+                                                               xset::var::x)
+                                                    .data() == xset::set::enabled::yes
+                                        ? 1
+                                        : 0)};
             }
             else if (property == "sort-hidden-first")
             {
-                return {SOCKET_SUCCESS,
-                        std::format("{}",
-                                    xset_get_int_panel(browser->panel(),
-                                                       xset::panel::sort_extra,
-                                                       xset::var::z) == xset::set::enabled::yes
-                                        ? 1
-                                        : 0)};
+                return {
+                    SOCKET_SUCCESS,
+                    std::format(
+                        "{}",
+                        xset_get_int_panel(browser->panel(), xset::panel::sort_extra, xset::var::z)
+                                    .data() == xset::set::enabled::yes
+                            ? 1
+                            : 0)};
             }
             else if (property == "sort-first")
             {
@@ -1356,7 +1357,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
                 const std::string str = std::format("{}", logger::utils::ptr(ptask));
-                if (str == data[i])
+                if (str == data[i.cast_unsigned().data()])
                 {
                     break;
                 }
@@ -1365,11 +1366,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         if (!ptask)
         {
-            return {SOCKET_INVALID, std::format("invalid task '{}'", data[i])};
+            return {SOCKET_INVALID,
+                    std::format("invalid task '{}'", data[i.cast_unsigned().data()])};
         }
         if (ptask->task->type_ != vfs::file_task::type::exec)
         {
-            return {SOCKET_INVALID, std::format("internal task {} is read-only", data[i])};
+            return {SOCKET_INVALID,
+                    std::format("internal task {} is read-only", data[i.cast_unsigned().data()])};
         }
 
         // set model value
@@ -1406,8 +1409,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else
             {
-                const auto v = ztd::from_string<i32>(value).value_or(0);
-                ptask->task->percent = std::min(std::max(0, v), 100);
+                const auto v = i32::create(value).value_or(0);
+                ptask->task->percent = v.max(0).min(100);
             }
             ptask->task->custom_percent = value != "0";
             ptask->pause_change_view_ = ptask->pause_change_ = true;
@@ -1808,7 +1811,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
             if (file_list.empty() || (property != "delete" && property != "trash"))
             {
                 return {SOCKET_INVALID,
-                        std::format("task type {} requires FILE argument(s)", data[i])};
+                        std::format("task type {} requires FILE argument(s)",
+                                    data[i.cast_unsigned().data()])};
             }
             vfs::file_task::type task_type;
             if (property == "copy")

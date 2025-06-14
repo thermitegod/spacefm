@@ -20,6 +20,7 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
 #include "settings/config.hxx"
@@ -102,7 +103,7 @@ parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
             }
             else if (var == xset::var::key)
             {
-                const auto result = ztd::from_string<u32>(value);
+                const auto result = u32::create(value);
                 if (!result)
                 {
                     logger::error("Config: Failed trying to set xset.{} to {}",
@@ -114,7 +115,7 @@ parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
             }
             else if (var == xset::var::keymod)
             {
-                const auto result = ztd::from_string<u32>(value);
+                const auto result = u32::create(value);
                 if (!result)
                 {
                     logger::error("Config: Failed trying to set xset.{} to {}",

@@ -486,7 +486,7 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
         {
             return 0;
         }
-        return ztd::from_string<i32>(set->s.value()).value();
+        return i32::create(set->s.value()).value();
     }
     else if (var == xset::var::x)
     {
@@ -494,7 +494,7 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
         {
             return 0;
         }
-        return ztd::from_string<i32>(set->x.value()).value();
+        return i32::create(set->x.value()).value();
     }
     else if (var == xset::var::y)
     {
@@ -502,7 +502,7 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
         {
             return 0;
         }
-        return ztd::from_string<i32>(set->y.value()).value();
+        return i32::create(set->y.value()).value();
     }
     else if (var == xset::var::z)
     {
@@ -510,7 +510,7 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
         {
             return 0;
         }
-        return ztd::from_string<i32>(set->z.value()).value();
+        return i32::create(set->z.value()).value();
     }
     else
     {
@@ -619,7 +619,7 @@ xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) 
 {
     assert(set != nullptr);
     set->menu.obj.key = key.data();
-    set->menu.obj.data = GINT_TO_POINTER(user_data);
+    set->menu.obj.data = GINT_TO_POINTER(user_data.data());
 }
 
 void

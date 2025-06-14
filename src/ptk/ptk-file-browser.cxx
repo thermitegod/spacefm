@@ -108,9 +108,9 @@ static GType ptk_browser_get_type() noexcept;
 static void ptk_browser_class_init(PtkFileBrowserClass* klass) noexcept;
 static void ptk_browser_init(ptk::browser* browser) noexcept;
 static void ptk_browser_finalize(GObject* obj) noexcept;
-static void ptk_browser_get_property(GObject* obj, u32 prop_id, GValue* value,
+static void ptk_browser_get_property(GObject* obj, std::uint32_t prop_id, GValue* value,
                                      GParamSpec* pspec) noexcept;
-static void ptk_browser_set_property(GObject* obj, u32 prop_id, const GValue* value,
+static void ptk_browser_set_property(GObject* obj, std::uint32_t prop_id, const GValue* value,
                                      GParamSpec* pspec) noexcept;
 
 /* Utility functions */
@@ -120,7 +120,8 @@ static void init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexce
 static GtkWidget* ptk_browser_create_dir_tree(ptk::browser* browser) noexcept;
 
 /* Get GtkTreePath of the item at coordinate x, y */
-static GtkTreePath* folder_view_get_tree_path_at_pos(ptk::browser* browser, i32 x, i32 y) noexcept;
+static GtkTreePath* folder_view_get_tree_path_at_pos(ptk::browser* browser, std::int32_t x,
+                                                     std::int32_t y) noexcept;
 
 /* signal handlers */
 
@@ -148,19 +149,22 @@ static void on_dir_tree_row_activated(GtkTreeView* view, GtkTreePath* path,
 
 /* Drag & Drop */
 static void on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
-                                              i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
+                                              std::int32_t x, std::int32_t y,
+                                              GtkSelectionData* sel_data, std::uint32_t info,
                                               std::time_t time, void* user_data) noexcept;
 static void on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
-                                         GtkSelectionData* sel_data, u32 info, std::time_t time,
-                                         ptk::browser* browser) noexcept;
+                                         GtkSelectionData* sel_data, std::uint32_t info,
+                                         std::time_t time, ptk::browser* browser) noexcept;
 static void on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
                                       ptk::browser* browser) noexcept;
-static bool on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                       i32 y, std::time_t time, ptk::browser* browser) noexcept;
+static bool on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context,
+                                       std::int32_t x, std::int32_t y, std::time_t time,
+                                       ptk::browser* browser) noexcept;
 static bool on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
                                       std::time_t time, ptk::browser* browser) noexcept;
-static bool on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                     std::time_t time, ptk::browser* browser) noexcept;
+static bool on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context,
+                                     std::int32_t x, std::int32_t y, std::time_t time,
+                                     ptk::browser* browser) noexcept;
 static void on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
                                     ptk::browser* browser) noexcept;
 
@@ -515,21 +519,20 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
     // get real icon size from gtk icon size
     i32 icon_w = 0;
     i32 icon_h = 0;
-    gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
+    gtk_icon_size_lookup((GtkIconSize)icon_size.data(), icon_w.unwrap(), icon_h.unwrap());
 
     GtkWidget* image = nullptr;
 
     // builtin tool item
     if (set->icon)
     {
-        // image = xset_get_image(set->icon.value(), (GtkIconSize)icon_size);
-        image = gtk_image_new_from_icon_name(set->icon->data(), (GtkIconSize)icon_size);
+        image = gtk_image_new_from_icon_name(set->icon->data(), (GtkIconSize)icon_size.data());
     }
     else
     {
         logger::warn<logger::domain::ptk>("set missing icon {}", set->name());
-        // image = xset_get_image("application-x-executable", (GtkIconSize)icon_size);
-        image = gtk_image_new_from_icon_name("application-x-executable", (GtkIconSize)icon_size);
+        image =
+            gtk_image_new_from_icon_name("application-x-executable", (GtkIconSize)icon_size.data());
     }
 
     GtkButton* button = GTK_BUTTON(gtk_button_new());
@@ -822,7 +825,8 @@ ptk_browser_finalize(GObject* obj) noexcept
 }
 
 static void
-ptk_browser_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec) noexcept
+ptk_browser_get_property(GObject* obj, std::uint32_t prop_id, GValue* value,
+                         GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -831,7 +835,8 @@ ptk_browser_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* p
 }
 
 static void
-ptk_browser_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec) noexcept
+ptk_browser_set_property(GObject* obj, std::uint32_t prop_id, const GValue* value,
+                         GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -959,7 +964,7 @@ ptk::browser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file) 
 static void
 on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* browser) noexcept
 {
-    i32 col = 0;
+    std::int32_t col = 0;
     gtk_tree_sortable_get_sort_column_id(sortable, &col, &browser->sort_type_);
 
     const auto column = ptk::file_list::column(col);
@@ -1019,12 +1024,13 @@ ptk::browser::update_model(const std::string_view pattern) noexcept
 
     // set file sorting settings
     list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
-    list->sort_case = xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) ==
-                      xset::set::enabled::yes;
+    list->sort_case =
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x).data() ==
+        xset::set::enabled::yes;
     list->sort_dir_ = ptk::file_list::sort_dir(
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y));
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y).data());
     list->sort_hidden_first =
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) ==
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z).data() ==
         xset::set::enabled::yes;
 
     gtk_tree_sortable_set_sort_column_id(
@@ -1167,7 +1173,7 @@ on_folder_view_item_sel_change(
      * when a file is clicked - causes hang if thousands of files are selected
      * So add only one g_idle_add at a time
      */
-    if (browser->sel_change_idle_)
+    if (browser->sel_change_idle_ != 0)
     {
         return;
     }
@@ -1239,9 +1245,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
         // Alt - Left/Right Click
         if (
 #if (GTK_MAJOR_VERSION == 4)
-            (keymod == GdkModifierType::GDK_ALT_MASK)
+            (keymod.data() == GdkModifierType::GDK_ALT_MASK)
 #elif (GTK_MAJOR_VERSION == 3)
-            (keymod == GdkModifierType::GDK_MOD1_MASK)
+            (keymod.data() == GdkModifierType::GDK_MOD1_MASK)
 #endif
             && (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
         {
@@ -1256,8 +1262,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             return true;
         }
 
-        f64 x = NAN;
-        f64 y = NAN;
+        double x = NAN;
+        double y = NAN;
         gdk_event_get_position(event, &x, &y);
 
         switch (browser->view_mode_)
@@ -1266,8 +1272,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             case ptk::browser::view_mode::compact_view:
 #if defined(USE_EXO)
                 tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget),
-                                                          static_cast<i32>(x),
-                                                          static_cast<i32>(y));
+                                                          static_cast<std::int32_t>(x),
+                                                          static_cast<std::int32_t>(y));
                 model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
 #else
                 tree_path = gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(widget), x, y);
@@ -1286,8 +1292,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             case ptk::browser::view_mode::list_view:
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-                                              static_cast<i32>(x),
-                                              static_cast<i32>(y),
+                                              static_cast<std::int32_t>(x),
+                                              static_cast<std::int32_t>(y),
                                               &tree_path,
                                               &col,
                                               nullptr,
@@ -1409,13 +1415,13 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event,
     const auto button = gdk_button_event_get_button(event);
 
     if (browser->is_drag_ || button != 1 || browser->skip_release_ ||
-        (keymod & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
+        (keymod.data() & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
 #if (GTK_MAJOR_VERSION == 4)
-                   GdkModifierType::GDK_ALT_MASK
+                          GdkModifierType::GDK_ALT_MASK
 #elif (GTK_MAJOR_VERSION == 3)
-                   GdkModifierType::GDK_MOD1_MASK
+                          GdkModifierType::GDK_MOD1_MASK
 #endif
-                   )))
+                          )))
     {
         if (browser->skip_release_)
         {
@@ -1486,7 +1492,7 @@ on_folder_view_columns_changed(GtkTreeView* view, ptk::browser* browser) noexcep
 
     for (const auto i : std::views::iota(0uz, global::columns.size()))
     {
-        GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
+        GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<std::int32_t>(i));
         if (!col)
         {
             return;
@@ -1510,16 +1516,16 @@ static void
 on_folder_view_destroy(GtkTreeView* view, ptk::browser* browser) noexcept
 {
     (void)browser;
-    const u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
+    const auto id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
     if (id)
     {
-        const u64 hand = g_signal_handler_find((void*)view,
-                                               GSignalMatchType::G_SIGNAL_MATCH_ID,
-                                               id,
-                                               0,
-                                               nullptr,
-                                               nullptr,
-                                               nullptr);
+        const auto hand = g_signal_handler_find((void*)view,
+                                                GSignalMatchType::G_SIGNAL_MATCH_ID,
+                                                id,
+                                                0,
+                                                nullptr,
+                                                nullptr,
+                                                nullptr);
         if (hand)
         {
             g_signal_handler_disconnect((void*)view, hand);
@@ -1534,9 +1540,9 @@ create_folder_view(ptk::browser* browser, ptk::browser::view_mode view_mode) noe
     GtkTreeSelection* selection = nullptr;
     GtkCellRenderer* renderer = nullptr;
 
-    i32 icon_size = 0;
-    const i32 big_icon_size = browser->settings_->icon_size_big;
-    const i32 small_icon_size = browser->settings_->icon_size_small;
+    std::int32_t icon_size = 0;
+    const std::int32_t big_icon_size = browser->settings_->icon_size_big.data();
+    const std::int32_t small_icon_size = browser->settings_->icon_size_small.data();
 
     PangoAttrList* attr_list = pango_attr_list_new();
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
@@ -1765,7 +1771,7 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 
         // column order
-        usize idx = 0;
+        std::size_t idx = 0;
         for (const auto [order_index, order_value] : std::views::enumerate(global::columns))
         {
             idx = static_cast<std::size_t>(order_index);
@@ -1780,8 +1786,8 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
         const auto set = xset::set::get(global::columns.at(idx).xset_name, p, mode);
-        const auto width = set->y ? ztd::from_string<i32>(set->y.value()).value_or(100) : 100;
-        if (width)
+        const auto width = set->y ? i32::create(set->y.value()).value_or(100_i32) : 100_i32;
+        if (width != 0)
         {
             if (column.column == ptk::file_list::column::name &&
                 !browser->settings_->always_show_tabs &&
@@ -1793,7 +1799,7 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
                 // all columns - this causes a horizontal scrollbar to
                 // appear on new and sometimes first tab
                 // so shave some pixels off first columns
-                gtk_tree_view_column_set_fixed_width(col, width - 6);
+                gtk_tree_view_column_set_fixed_width(col, width.data() - 6);
 
                 // below causes increasing reduction of column every time new tab is
                 // added and closed - undesirable
@@ -1810,14 +1816,14 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
                         const i32 first_width = gtk_tree_view_column_get_width(first_col);
                         if (first_width > 10)
                         {
-                            gtk_tree_view_column_set_fixed_width(first_col, first_width - 6);
+                            gtk_tree_view_column_set_fixed_width(first_col, first_width.data() - 6);
                         }
                     }
                 }
             }
             else
             {
-                gtk_tree_view_column_set_fixed_width(col, width);
+                gtk_tree_view_column_set_fixed_width(col, width.data());
                 // logger::info<logger::domain::ptk>("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
             }
         }
@@ -1886,11 +1892,11 @@ folder_view_get_drop_dir(ptk::browser* browser, i32 x, i32 y) noexcept
         case ptk::browser::view_mode::icon_view:
         case ptk::browser::view_mode::compact_view:
             gtk_icon_view_convert_widget_to_bin_window_coords(GTK_ICON_VIEW(browser->folder_view_),
-                                                              x,
-                                                              y,
-                                                              &x,
-                                                              &y);
-            tree_path = folder_view_get_tree_path_at_pos(browser, x, y);
+                                                              x.data(),
+                                                              y.data(),
+                                                              x.unwrap(),
+                                                              y.unwrap());
+            tree_path = folder_view_get_tree_path_at_pos(browser, x.data(), y.data());
 #if defined(USE_EXO)
             model = exo_icon_view_get_model(EXO_ICON_VIEW(browser->folder_view_));
 #else
@@ -1906,8 +1912,8 @@ folder_view_get_drop_dir(ptk::browser* browser, i32 x, i32 y) noexcept
             {
                 // no drag in progress, get drop path
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(browser->folder_view_),
-                                              x,
-                                              y,
+                                              x.data(),
+                                              y.data(),
                                               nullptr,
                                               &col,
                                               nullptr,
@@ -1915,8 +1921,8 @@ folder_view_get_drop_dir(ptk::browser* browser, i32 x, i32 y) noexcept
                 if (col == gtk_tree_view_get_column(GTK_TREE_VIEW(browser->folder_view_), 0))
                 {
                     gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(browser->folder_view_),
-                                                      x,
-                                                      y,
+                                                      x.data(),
+                                                      y.data(),
                                                       &tree_path,
                                                       nullptr);
                     model = gtk_tree_view_get_model(GTK_TREE_VIEW(browser->folder_view_));
@@ -1961,9 +1967,9 @@ folder_view_get_drop_dir(ptk::browser* browser, i32 x, i32 y) noexcept
 }
 
 static void
-on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                  GtkSelectionData* sel_data, u32 info, std::time_t time,
-                                  void* user_data) noexcept
+on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, std::int32_t x,
+                                  std::int32_t y, GtkSelectionData* sel_data, std::uint32_t info,
+                                  std::time_t time, void* user_data) noexcept
 {
     (void)widget;
     (void)x;
@@ -2011,7 +2017,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     const auto dest_inode = dest_dir_stat->ino();
                     if (browser->drag_source_dev_ == 0)
                     {
-                        browser->drag_source_dev_ = dest_dev;
+                        browser->drag_source_dev_ = dest_dev.data();
                         for (; *puri; ++puri)
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
@@ -2022,7 +2028,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                 if (file_path_stat->dev() != dest_dev)
                                 {
                                     // different devices - store source device
-                                    browser->drag_source_dev_ = file_path_stat->dev();
+                                    browser->drag_source_dev_ = file_path_stat->dev().data();
                                     break;
                                 }
                                 else if (browser->drag_source_inode_ == 0)
@@ -2033,7 +2039,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                     const auto src_dir_stat = ztd::stat::create(src_dir);
                                     if (src_dir_stat)
                                     {
-                                        browser->drag_source_inode_ = src_dir_stat->ino();
+                                        browser->drag_source_inode_ = src_dir_stat->ino().data();
                                     }
                                 }
                             }
@@ -2114,7 +2120,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
 static void
 on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
-                             GtkSelectionData* sel_data, u32 info, std::time_t time,
+                             GtkSelectionData* sel_data, std::uint32_t info, std::time_t time,
                              ptk::browser* browser) noexcept
 {
     (void)widget;
@@ -2135,7 +2141,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
                            type,
                            8,
                            (const unsigned char*)uri_list.data(),
-                           static_cast<i32>(uri_list.size()));
+                           static_cast<std::int32_t>(uri_list.size()));
 }
 
 static void
@@ -2148,7 +2154,7 @@ on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
 }
 
 static GtkTreePath*
-folder_view_get_tree_path_at_pos(ptk::browser* browser, i32 x, i32 y) noexcept
+folder_view_get_tree_path_at_pos(ptk::browser* browser, std::int32_t x, std::int32_t y) noexcept
 {
     GtkTreePath* tree_path = nullptr;
 
@@ -2180,7 +2186,7 @@ static bool
 on_folder_view_auto_scroll(GtkScrolledWindow* scroll) noexcept
 {
     GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(scroll);
-    f64 vpos = gtk_adjustment_get_value(vadj);
+    double vpos = gtk_adjustment_get_value(vadj);
 
     if (folder_view_auto_scroll_direction == GtkDirectionType::GTK_DIR_UP)
     {
@@ -2212,8 +2218,8 @@ on_folder_view_auto_scroll(GtkScrolledWindow* scroll) noexcept
 }
 
 static bool
-on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                           std::time_t time, ptk::browser* browser) noexcept
+on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, std::int32_t x,
+                           std::int32_t y, std::time_t time, ptk::browser* browser) noexcept
 {
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
 
@@ -2224,7 +2230,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     if (y < 32)
     {
         /* Auto scroll up */
-        if (!folder_view_auto_scroll_timer)
+        if (folder_view_auto_scroll_timer == 0)
         {
             folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_UP;
             folder_view_auto_scroll_timer =
@@ -2233,16 +2239,16 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     }
     else if (y > (allocation.height - 32))
     {
-        if (!folder_view_auto_scroll_timer)
+        if (folder_view_auto_scroll_timer == 0)
         {
             folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_DOWN;
             folder_view_auto_scroll_timer =
                 g_timeout_add(150, (GSourceFunc)on_folder_view_auto_scroll, scroll);
         }
     }
-    else if (folder_view_auto_scroll_timer)
+    else if (folder_view_auto_scroll_timer != 0)
     {
-        g_source_remove(folder_view_auto_scroll_timer);
+        g_source_remove(folder_view_auto_scroll_timer.data());
         folder_view_auto_scroll_timer = 0;
     }
 
@@ -2373,7 +2379,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         {
             const i32 drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
 
-            switch (drag_action)
+            switch (drag_action.data())
             {
                 case 1:
                     suggested_action = GdkDragAction::GDK_ACTION_COPY;
@@ -2408,17 +2414,17 @@ on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, std::
     browser->drag_source_dev_ = 0;
     browser->drag_source_inode_ = 0;
 
-    if (folder_view_auto_scroll_timer)
+    if (folder_view_auto_scroll_timer != 0)
     {
-        g_source_remove(folder_view_auto_scroll_timer);
+        g_source_remove(folder_view_auto_scroll_timer.data());
         folder_view_auto_scroll_timer = 0;
     }
     return true;
 }
 
 static bool
-on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                         std::time_t time, ptk::browser* browser) noexcept
+on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, std::int32_t x,
+                         std::int32_t y, std::time_t time, ptk::browser* browser) noexcept
 {
     (void)x;
     (void)y;
@@ -2434,9 +2440,9 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
                         ptk::browser* browser) noexcept
 {
     (void)drag_context;
-    if (folder_view_auto_scroll_timer)
+    if (folder_view_auto_scroll_timer != 0)
     {
-        g_source_remove(folder_view_auto_scroll_timer);
+        g_source_remove(folder_view_auto_scroll_timer.data());
         folder_view_auto_scroll_timer = 0;
     }
 
@@ -2476,15 +2482,15 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser
         /* left and right click handled in ptk-dir-tree-view.c
          * on_dir_tree_view_button_press() */
 
-        f64 x = NAN;
-        f64 y = NAN;
+        double x = NAN;
+        double y = NAN;
         gdk_event_get_position(event, &x, &y);
 
         GtkTreePath* tree_path = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          static_cast<i32>(x),
-                                          static_cast<i32>(y),
+                                          static_cast<std::int32_t>(x),
+                                          static_cast<std::int32_t>(y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,
@@ -2735,16 +2741,16 @@ ptk::browser::tab_cwd(const tab_t tab_num) const noexcept
 {
     tab_t tab_x = 0;
     GtkNotebook* notebook = this->main_window_->get_panel_notebook(this->panel());
-    const i32 pages = gtk_notebook_get_n_pages(notebook);
-    const i32 page_num = gtk_notebook_page_num(notebook, GTK_WIDGET(this));
+    const auto pages = gtk_notebook_get_n_pages(notebook);
+    const auto page_num = gtk_notebook_page_num(notebook, GTK_WIDGET(this));
 
-    switch (tab_num)
+    switch (tab_num.data())
     {
-        case tab_control_code_prev:
+        case tab_control_code_prev.data():
             // prev
             tab_x = page_num - 1;
             break;
-        case tab_control_code_next:
+        case tab_control_code_next.data():
             // next
             tab_x = page_num + 1;
             break;
@@ -2757,7 +2763,7 @@ ptk::browser::tab_cwd(const tab_t tab_num) const noexcept
     if (tab_x > -1 && tab_x < pages)
     {
         const ptk::browser* tab_browser =
-            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, tab_x));
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, tab_x.data()));
         return tab_browser->cwd();
     }
 
@@ -2769,13 +2775,14 @@ ptk::browser::panel_cwd(const panel_t panel_num) const noexcept
 {
     panel_t panel_x = this->panel();
 
-    switch (panel_num)
+    switch (panel_num.data())
     {
-        case panel_control_code_prev:
+        case panel_control_code_prev.data():
             // prev
             do
             {
-                if (--panel_x < 1)
+                panel_x -= 1;
+                if (panel_x < 1)
                 {
                     panel_x = 4;
                 }
@@ -2786,11 +2793,12 @@ ptk::browser::panel_cwd(const panel_t panel_num) const noexcept
             } while (!gtk_widget_get_visible(
                 GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
             break;
-        case panel_control_code_next:
+        case panel_control_code_next.data():
             // next
             do
             {
-                if (!is_valid_panel(++panel_x))
+                panel_x += 1;
+                if (!is_valid_panel(panel_x))
                 {
                     panel_x = 1;
                 }
@@ -2812,7 +2820,7 @@ ptk::browser::panel_cwd(const panel_t panel_num) const noexcept
     }
 
     GtkNotebook* notebook = this->main_window_->get_panel_notebook(panel_x);
-    const i32 page_x = gtk_notebook_get_current_page(notebook);
+    const auto page_x = gtk_notebook_get_current_page(notebook);
 
     const ptk::browser* panel_browser =
         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_x));
@@ -2825,13 +2833,14 @@ ptk::browser::open_in_panel(const panel_t panel_num,
 {
     panel_t panel_x = this->panel();
 
-    switch (panel_num)
+    switch (panel_num.data())
     {
-        case panel_control_code_prev:
+        case panel_control_code_prev.data():
             // prev
             do
             {
-                if (!is_valid_panel(--panel_x))
+                panel_x -= 1;
+                if (!is_valid_panel(panel_x))
                 { // loop to end
                     panel_x = 4;
                 }
@@ -2842,11 +2851,12 @@ ptk::browser::open_in_panel(const panel_t panel_num,
             } while (!gtk_widget_get_visible(
                 GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
             break;
-        case panel_control_code_next:
+        case panel_control_code_next.data():
             // next
             do
             {
-                if (!is_valid_panel(++panel_x))
+                panel_x += 1;
+                if (!is_valid_panel(panel_x))
                 { // loop to start
                     panel_x = 1;
                 }
@@ -2917,7 +2927,7 @@ ptk::browser::get_tab_panel_counts() const noexcept
     {
         if (gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(p))))
         {
-            panel_count++;
+            panel_count += 1;
         }
     }
 
@@ -2936,9 +2946,9 @@ ptk::browser::go_tab(tab_t tab) noexcept
 {
     // logger::info<logger::domain::ptk>("ptk::wrapper::browser::go_tab fb={}", logger::utils::ptr(this));
 
-    switch (tab)
+    switch (tab.data())
     {
-        case tab_control_code_prev:
+        case tab_control_code_prev.data():
             // prev
             if (gtk_notebook_get_current_page(this->notebook_) == 0)
             {
@@ -2950,7 +2960,7 @@ ptk::browser::go_tab(tab_t tab) noexcept
                 gtk_notebook_prev_page(this->notebook_);
             }
             break;
-        case tab_control_code_next:
+        case tab_control_code_next.data():
             // next
             if (gtk_notebook_get_current_page(this->notebook_) + 1 ==
                 gtk_notebook_get_n_pages(this->notebook_))
@@ -2962,11 +2972,11 @@ ptk::browser::go_tab(tab_t tab) noexcept
                 gtk_notebook_next_page(this->notebook_);
             }
             break;
-        case tab_control_code_close:
+        case tab_control_code_close.data():
             // close
             this->close_tab();
             break;
-        case tab_control_code_restore:
+        case tab_control_code_restore.data():
             // restore
             this->restore_tab();
             break;
@@ -2974,7 +2984,7 @@ ptk::browser::go_tab(tab_t tab) noexcept
             // set tab
             if (tab <= gtk_notebook_get_n_pages(this->notebook_) && tab > 0)
             {
-                gtk_notebook_set_current_page(this->notebook_, tab - 1);
+                gtk_notebook_set_current_page(this->notebook_, tab.data() - 1);
             }
             break;
     }
@@ -3143,7 +3153,7 @@ ptk::browser::close_tab() noexcept
     }
 
     // update view of new current tab
-    const tab_t cur_tabx = gtk_notebook_get_current_page(main_window->notebook);
+    const auto cur_tabx = gtk_notebook_get_current_page(main_window->notebook);
     if (cur_tabx != -1)
     {
         ptk::browser* a_browser =
@@ -3191,13 +3201,13 @@ ptk::browser::open_in_tab(const std::filesystem::path& file_path, const tab_t ta
     const tab_t pages = gtk_notebook_get_n_pages(this->notebook_);
 
     tab_t page_x = 0;
-    switch (tab)
+    switch (tab.data())
     {
-        case tab_control_code_prev:
+        case tab_control_code_prev.data():
             // prev
             page_x = cur_page - 1;
             break;
-        case tab_control_code_next:
+        case tab_control_code_next.data():
             // next
             page_x = cur_page + 1;
             break;
@@ -3209,7 +3219,7 @@ ptk::browser::open_in_tab(const std::filesystem::path& file_path, const tab_t ta
     if (page_x > -1 && page_x < pages && page_x != cur_page)
     {
         ptk::browser* browser =
-            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(this->notebook_, page_x));
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(this->notebook_, page_x.data()));
 
         browser->chdir(file_path);
     }
@@ -3270,7 +3280,7 @@ ptk::browser::rename_selected_files(
     for (const auto& file : selected_files)
     {
         const auto result = ptk::action::rename_files(this, cwd, file, nullptr, false);
-        if (!result)
+        if (result == 0)
         {
             break;
         }
@@ -3622,7 +3632,7 @@ ptk::browser::set_sort_type(GtkSortType order) noexcept
         this->sort_type_ = order;
         if (this->file_list_)
         {
-            i32 col = 0;
+            std::int32_t col = 0;
             GtkSortType old_order;
             gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(this->file_list_),
                                                  &col,
@@ -4159,7 +4169,7 @@ ptk::browser::show_thumbnails(const u32 max_file_size, const bool large_icons) n
         ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
         list->show_thumbnails(large_icons ? vfs::file::thumbnail_size::big
                                           : vfs::file::thumbnail_size::small,
-                              thumbs_blacklisted ? 0 : max_file_size);
+                              thumbs_blacklisted ? 0 : max_file_size.data());
     }
 }
 
@@ -4257,7 +4267,7 @@ ptk::browser::update_views() noexcept
     // logger::info<logger::domain::ptk>("    set slide_x = {}", pos);
     if (pos > 0)
     {
-        gtk_paned_set_position(this->hpane, pos);
+        gtk_paned_set_position(this->hpane, pos.data());
     }
 
     // side_vpane_top
@@ -4267,7 +4277,7 @@ ptk::browser::update_views() noexcept
         pos = -1;
     }
     // logger::info<logger::domain::ptk>("    slide_y = {}", pos);
-    gtk_paned_set_position(this->side_vpane_top, pos);
+    gtk_paned_set_position(this->side_vpane_top, pos.data());
 
     // side_vpane_bottom
     pos = this->main_window_->panel_slide_s[p];
@@ -4276,7 +4286,7 @@ ptk::browser::update_views() noexcept
         pos = -1;
     }
     // logger::info<logger::domain::ptk>( "    slide_s = {}", pos);
-    gtk_paned_set_position(this->side_vpane_bottom, pos);
+    gtk_paned_set_position(this->side_vpane_bottom, pos.data());
 
     // Large Icons - option for Detailed and Compact list views
     const bool large_icons = xset_get_b_panel(p, xset::panel::list_icons) ||
@@ -4304,7 +4314,7 @@ ptk::browser::update_views() noexcept
             for (const auto i : std::views::iota(0uz, global::columns.size()))
             {
                 GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(this->folder_view_),
-                                                                  static_cast<i32>(i));
+                                                                  static_cast<std::int32_t>(i));
                 if (!col)
                 {
                     break;
@@ -4317,11 +4327,11 @@ ptk::browser::update_views() noexcept
                         // get column width for this panel context
                         const auto set = xset::set::get(column.xset_name, p, mode);
                         const auto width =
-                            set->y ? ztd::from_string<i32>(set->y.value()).value_or(100) : 100;
+                            set->y ? i32::create(set->y.value()).value_or(100_i32) : 100_i32;
                         // logger::info<logger::domain::ptk>("        {}\t{}", width, title );
-                        if (width)
+                        if (width != 0)
                         {
-                            gtk_tree_view_column_set_fixed_width(col, width);
+                            gtk_tree_view_column_set_fixed_width(col, width.data());
                             // logger::info<logger::domain::ptk>("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
                         }
                         // set column visibility
@@ -4434,7 +4444,7 @@ ptk::browser::save_column_widths() const noexcept
         // logger::debug<logger::domain::ptk>("save_columns  fb={} (panel {})  mode = {}", logger::utils::ptr(this), p, mode);
         for (const auto i : std::views::iota(0uz, global::columns.size()))
         {
-            GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
+            GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<std::int32_t>(i));
             if (!col)
             {
                 return;
@@ -5084,59 +5094,59 @@ ptk::browser::update_statusbar() const noexcept
 
                 if (file->is_directory())
                 {
-                    ++count_dir;
+                    count_dir += 1;
                 }
                 else if (file->is_regular_file())
                 {
-                    ++count_file;
+                    count_file += 1;
                 }
                 else if (file->is_symlink())
                 {
-                    ++count_symlink;
+                    count_symlink += 1;
                 }
                 else if (file->is_socket())
                 {
-                    ++count_socket;
+                    count_socket += 1;
                 }
                 else if (file->is_fifo())
                 {
-                    ++count_pipe;
+                    count_pipe += 1;
                 }
                 else if (file->is_block_file())
                 {
-                    ++count_block;
+                    count_block += 1;
                 }
                 else if (file->is_character_file())
                 {
-                    ++count_char;
+                    count_char += 1;
                 }
             }
 
-            if (count_dir)
+            if (count_dir != 0)
             {
                 statusbar_txt.append(std::format("  Directories ({:L})", count_dir));
             }
-            if (count_file)
+            if (count_file != 0)
             {
                 statusbar_txt.append(std::format("  Files ({:L})", count_file));
             }
-            if (count_symlink)
+            if (count_symlink != 0)
             {
                 statusbar_txt.append(std::format("  Symlinks ({:L})", count_symlink));
             }
-            if (count_socket)
+            if (count_socket != 0)
             {
                 statusbar_txt.append(std::format("  Sockets ({:L})", count_socket));
             }
-            if (count_pipe)
+            if (count_pipe != 0)
             {
                 statusbar_txt.append(std::format("  Named Pipes ({:L})", count_pipe));
             }
-            if (count_block)
+            if (count_block != 0)
             {
                 statusbar_txt.append(std::format("  Block Devices ({:L})", count_block));
             }
-            if (count_char)
+            if (count_char != 0)
             {
                 statusbar_txt.append(std::format("  Character Devices ({:L})", count_char));
             }
@@ -5403,7 +5413,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             else
             {
                 const auto tab = ztd::removeprefix(set->name(), "tab_");
-                i = ztd::from_string<tab_t>(tab).value_or(INVALID_TAB);
+                i = tab_t::create(tab).value_or(INVALID_TAB);
             }
             this->go_tab(i);
         }
@@ -5447,7 +5457,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     }
     else if (set->name().starts_with("sortby_"))
     {
-        i32 i = -3;
+        std::int32_t i = -3;
         if (set->xset_name == xset::name::sortby_name)
         {
             i = magic_enum::enum_integer(ptk::browser::sort_order::name);
@@ -5524,7 +5534,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
         const auto mode = this->main_window_->panel_context.at(this->panel_);
 
         const auto panel_num = ztd::removeprefix(set->name(), "panel_");
-        const auto panel = ztd::from_string<panel_t>(panel_num).value_or(INVALID_PANEL);
+        const auto panel = panel_t::create(panel_num).value_or(INVALID_PANEL);
         // logger::debug<logger::domain::ptk>("ACTION panel={}", panel);
 
         if (is_valid_panel(panel))
@@ -5751,9 +5761,9 @@ ptk::wrapper::browser::invert_selection(GtkWidget* item, ptk::browser* browser) 
 void
 ptk::wrapper::browser::focus(GtkMenuItem* item, ptk::browser* browser) noexcept
 {
-    const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "focus"));
+    const auto job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "focus"));
 
-    const auto enum_value = magic_enum::enum_cast<ptk::browser::focus_widget>((u8)job);
+    const auto enum_value = magic_enum::enum_cast<ptk::browser::focus_widget>((std::uint8_t)job);
     if (enum_value.has_value())
     {
         browser->focus(enum_value.value());

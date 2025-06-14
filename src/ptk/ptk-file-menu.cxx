@@ -301,8 +301,7 @@ on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* browser, const xset_t& 
 void
 on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcept
 {
-    i32 v = 0;
-
+    GtkSortType v = GtkSortType::GTK_SORT_ASCENDING;
     i32 sort_order = 0;
     if (menuitem)
     {
@@ -326,8 +325,8 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcep
         xset_set_panel(browser->panel(),
                        xset::panel::list_detailed,
                        xset::var::y,
-                       std::format("{}", v));
-        browser->set_sort_type((GtkSortType)v);
+                       std::format("{}", static_cast<std::int32_t>(v)));
+        browser->set_sort_type(v);
     }
     else
     {
@@ -335,7 +334,7 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcep
                        xset::panel::list_detailed,
                        xset::var::x,
                        std::format("{}", sort_order));
-        browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order));
+        browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order.data()));
     }
 }
 
@@ -1112,8 +1111,8 @@ ptk_file_menu_new(ptk::browser* browser,
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
-    // const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
-    const i32 no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
+    // const auto no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
+    const auto no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
 #if (GTK_MAJOR_VERSION == 4)
     logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
@@ -1268,11 +1267,10 @@ ptk_file_menu_new(ptk::browser* browser,
 
         GtkWidget* app_menu_item = nullptr;
 
+        // add apps
         i32 icon_w = 0;
         i32 icon_h = 0;
-
-        // add apps
-        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
+        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, icon_w.unwrap(), icon_h.unwrap());
         if (is_text)
         {
             const auto txt_type =
@@ -1964,7 +1962,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
         return;
     }
 
-    const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    const auto job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     ptk::file_menu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->file))
     {
@@ -3104,7 +3102,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         else
         {
             const auto panel = ztd::removeprefix(set->name(), "open_in_panel_");
-            i = ztd::from_string<panel_t>(panel).value_or(INVALID_PANEL);
+            i = panel_t::create(panel).value_or(INVALID_PANEL);
         }
         data->browser->open_in_panel(i, data->file_path);
     }
@@ -3128,7 +3126,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
             else
             {
                 const auto tab = ztd::removeprefix(set->name(), "opentab_");
-                i = ztd::from_string<tab_t>(tab).value_or(INVALID_TAB);
+                i = tab_t::create(tab).value_or(INVALID_TAB);
             }
             data->browser->open_in_tab(data->file_path, i);
         }

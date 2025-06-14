@@ -55,7 +55,7 @@
 #include "types.hxx"
 
 // This limits the small icon size for side panes and task list
-static constexpr i32 PANE_MAX_ICON_SIZE = 48;
+static constexpr std::int32_t PANE_MAX_ICON_SIZE = 48;
 
 static GtkTreeModel* model = nullptr;
 
@@ -148,7 +148,7 @@ ptk::view::location::update_volume_icons() noexcept
     GtkTreeIter it;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    const auto icon_size = std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
+    const auto icon_size = config::global::settings->icon_size_small.min(PANE_MAX_ICON_SIZE);
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -573,8 +573,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept
                                       -1);
     if (set_icon)
     {
-        const auto icon_size =
-            std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
+        const auto icon_size = config::global::settings->icon_size_small.min(PANE_MAX_ICON_SIZE);
 
         GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, ptk::location_view::column::icon, icon, -1);
@@ -632,7 +631,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
         return;
     }
 
-    const auto icon_size = std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
+    const auto icon_size = config::global::settings->icon_size_small.min(PANE_MAX_ICON_SIZE);
 
     GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),
@@ -1434,14 +1433,14 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
 
     // get selected vol
 
-    f64 x = NAN;
-    f64 y = NAN;
+    double x = NAN;
+    double y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     GtkTreePath* tree_path = nullptr;
     if (gtk_tree_view_get_path_at_pos(view,
-                                      static_cast<i32>(x),
-                                      static_cast<i32>(y),
+                                      static_cast<std::int32_t>(x),
+                                      static_cast<std::int32_t>(y),
                                       &tree_path,
                                       nullptr,
                                       nullptr,
@@ -1504,7 +1503,7 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* browser) noexcep
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (keyval == GDK_KEY_Menu ||
-        (keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
+        (keyval == GDK_KEY_F10 && keymod.data() == GdkModifierType::GDK_SHIFT_MASK))
     {
         // simulate right-click (menu)
         show_devices_menu(GTK_TREE_VIEW(browser->side_dev),
@@ -1557,7 +1556,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     }
 
     // NOTE: browser may be nullptr
-    switch (button)
+    switch (button.data())
     {
         case 1:
             // left-click - mount & open

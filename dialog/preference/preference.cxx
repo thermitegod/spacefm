@@ -24,6 +24,9 @@
 
 #include <glaze/glaze.hpp>
 
+#include <ztd/extra/glaze.hxx>
+#include <ztd/ztd.hxx>
+
 #include "datatypes.hxx"
 #include "preference.hxx"
 
@@ -203,9 +206,9 @@ PreferenceDialog::on_button_apply_clicked()
                     auto object = this->icon_size_big_.get_selected_item();
                     if (auto selected = std::dynamic_pointer_cast<ListColumns>(object))
                     {
-                        return (std::int32_t)selected->value_;
+                        return static_cast<std::int32_t>(selected->value_);
                     }
-                    return (std::int32_t)0; // failed to get value
+                    return static_cast<std::int32_t>(0); // failed to get value
                 }(),
                 .icon_size_small =
                     [this]()
@@ -213,9 +216,9 @@ PreferenceDialog::on_button_apply_clicked()
                     auto object = this->icon_size_small_.get_selected_item();
                     if (auto selected = std::dynamic_pointer_cast<ListColumns>(object))
                     {
-                        return (std::int32_t)selected->value_;
+                        return static_cast<std::int32_t>(selected->value_);
                     }
-                    return (std::int32_t)0; // failed to get value
+                    return static_cast<std::int32_t>(0); // failed to get value
                 }(),
                 .icon_size_tool =
                     [this]()
@@ -223,9 +226,9 @@ PreferenceDialog::on_button_apply_clicked()
                     auto object = this->icon_size_tool_.get_selected_item();
                     if (auto selected = std::dynamic_pointer_cast<ListColumns>(object))
                     {
-                        return (std::int32_t)selected->value_;
+                        return static_cast<std::int32_t>(selected->value_);
                     }
-                    return (std::int32_t)0; // failed to get value
+                    return static_cast<std::int32_t>(0); // failed to get value
                 }(),
 
                 .click_executes = this->btn_click_executes_.get_active(),
@@ -370,7 +373,8 @@ PreferenceDialog::init_general_tab() noexcept
 
         this->icon_size_big_.set_model(store);
         this->icon_size_big_.set_factory(factory);
-        this->icon_size_big_.set_selected(size_position(this->settings_.settings.icon_size_big));
+        this->icon_size_big_.set_selected(
+            size_position(this->settings_.settings.icon_size_big.data()));
 
         page.add_row("Large Icons:", this->icon_size_big_);
     }
@@ -418,7 +422,7 @@ PreferenceDialog::init_general_tab() noexcept
         this->icon_size_small_.set_model(store);
         this->icon_size_small_.set_factory(factory);
         this->icon_size_small_.set_selected(
-            size_position(this->settings_.settings.icon_size_small));
+            size_position(this->settings_.settings.icon_size_small.data()));
 
         page.add_row("Small Icons:", this->icon_size_small_);
     }
@@ -440,7 +444,7 @@ PreferenceDialog::init_general_tab() noexcept
         this->icon_size_tool_.set_model(store);
         this->icon_size_tool_.set_factory(factory);
         this->icon_size_tool_.set_selected(
-            static_cast<std::uint32_t>(this->settings_.settings.icon_size_tool));
+            this->settings_.settings.icon_size_tool.cast_unsigned().data());
 
         page.add_row("Tool Icons:", this->icon_size_tool_);
     }

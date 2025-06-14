@@ -34,13 +34,16 @@ vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
     GtkIconInfo* icon_info = gtk_icon_theme_lookup_icon(
         icon_theme,
         icon_name.data(),
-        icon_size,
+        icon_size.data(),
         GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
                            GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
     if (!icon_info && !icon_name.starts_with('/'))
     {
-        return gdk_pixbuf_new_from_file_at_size(icon_name.data(), icon_size, icon_size, nullptr);
+        return gdk_pixbuf_new_from_file_at_size(icon_name.data(),
+                                                icon_size.data(),
+                                                icon_size.data(),
+                                                nullptr);
     }
 
     if (!icon_info)
@@ -52,7 +55,7 @@ vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
     GdkPixbuf* icon = nullptr;
     if (file)
     {
-        icon = gdk_pixbuf_new_from_file_at_size(file, icon_size, icon_size, nullptr);
+        icon = gdk_pixbuf_new_from_file_at_size(file, icon_size.data(), icon_size.data(), nullptr);
     }
 
     return icon;
@@ -119,7 +122,8 @@ vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem
     auto unique_path = path / std::format("{}{}", parts.basename, parts.extension);
     while (std::filesystem::exists(unique_path))
     { // need to see broken symlinks
-        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, ++n, parts.extension);
+        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, n, parts.extension);
+        n += 1;
     }
 
     return unique_path;
