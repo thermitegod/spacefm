@@ -16,7 +16,6 @@
 #include <filesystem>
 #include <format>
 #include <memory>
-#include <print>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -44,7 +43,7 @@
 #include "package.hxx"
 
 i32
-gui::action::rename_files(gui::browser* browser, const std::filesystem::path& cwd,
+gui::dialog::rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                           const bool clip_copy) noexcept
 {
@@ -179,8 +178,7 @@ gui::action::rename_files(gui::browser* browser, const std::filesystem::path& cw
         if (ec)
         {
             // Unknown error occurred
-            gui::dialog::error(GTK_WINDOW(parent),
-                               "Rename Error",
+            gui::dialog::error("Rename Error",
                                std::format("Error renaming file\n\n{}", std::strerror(errno)));
         }
     }

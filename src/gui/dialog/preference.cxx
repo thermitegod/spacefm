@@ -463,11 +463,8 @@ update_terminal(const std::shared_ptr<config::settings>& settings,
 }
 
 void
-show_preference_dialog(GtkWindow* parent,
-                       const std::shared_ptr<config::settings>& settings) noexcept
+gui::dialog::preference(const std::shared_ptr<config::settings>& settings) noexcept
 {
-    (void)parent;
-
     const auto response = datatype::run_dialog_sync<datatype::settings_extended>(
         spacefm::package.dialog.preference,
         datatype::settings_extended{

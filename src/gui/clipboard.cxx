@@ -623,8 +623,7 @@ gui::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
 
         if (missing_targets > 0)
         {
-            gui::dialog::error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                               "Error",
+            gui::dialog::error("Error",
                                std::format("{} target{} missing",
                                            missing_targets,
                                            missing_targets > 1 ? "s are" : " is"));

@@ -256,8 +256,6 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
         cb_data = set->callback.data;
     }
 
-    GtkWidget* parent = GTK_WIDGET(set->browser);
-
     switch (set->menu.type)
     {
         case xset::set::menu_type::normal:
@@ -299,7 +297,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             const auto default_str = set->z.value();
 
             const auto [response, answer] =
-                gui::dialog::text(parent, title, msg, set->s.value(), default_str);
+                gui::dialog::text(title, msg, set->s.value(), default_str);
             set->s = answer;
             if (response)
             {

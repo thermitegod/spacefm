@@ -15,6 +15,7 @@
 
 #pragma once
 
-#include <gtkmm.h>
-
-void show_about_dialog(GtkWindow* parent) noexcept;
+namespace gui::dialog
+{
+void about() noexcept;
+}

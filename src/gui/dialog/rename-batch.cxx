@@ -14,43 +14,30 @@
  */
 
 #include <filesystem>
-#include <format>
 #include <memory>
-#include <print>
 #include <span>
-#include <string>
-#include <string_view>
-#include <system_error>
-
-#include <cstring>
-
-#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-
-#include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 
 #include "gui/file-browser.hxx"
-#include "gui/file-task.hxx"
 
 #include "gui/dialog/rename-batch.hxx"
-#include "gui/dialog/text.hxx"
 
 #include "vfs/file.hxx"
 
 #include "logger.hxx"
 
 i32
-gui::action::batch_rename_files(gui::browser* browser, const std::filesystem::path& cwd,
+gui::dialog::batch_rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                                 const std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     (void)browser;
     (void)cwd;
     (void)files;
 
-    logger::debug<logger::domain::vfs>("gui::action::batch_rename_files");
+    logger::debug<logger::domain::vfs>("gui::dialog::batch_rename_files");
 
     return 0;
 }

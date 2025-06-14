@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtkmm.h>
-
 #include "datatypes/external-dialog.hxx"
 
 #include "gui/dialog/about.hxx"
@@ -22,9 +20,7 @@
 #include "package.hxx"
 
 void
-show_about_dialog(GtkWindow* parent) noexcept
+gui::dialog::about() noexcept
 {
-    (void)parent;
-
     datatype::run_dialog_async(spacefm::package.dialog.about);
 }

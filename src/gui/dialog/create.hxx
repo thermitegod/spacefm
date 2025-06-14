@@ -20,14 +20,12 @@
 #include <filesystem>
 #include <memory>
 
-#include <gtkmm.h>
-
 #include "gui/file-browser.hxx"
 #include "gui/file-menu.hxx"
 
 #include "vfs/file.hxx"
 
-namespace gui::action
+namespace gui::dialog
 {
 enum class create_mode : std::uint8_t
 {
@@ -37,6 +35,6 @@ enum class create_mode : std::uint8_t
 };
 
 i32 create_files(gui::browser* browser, const std::filesystem::path& cwd,
-                 const std::shared_ptr<vfs::file>& file, const gui::action::create_mode init_mode,
+                 const std::shared_ptr<vfs::file>& file, const gui::dialog::create_mode init_mode,
                  AutoOpenCreate* ao) noexcept;
-} // namespace gui::action
+} // namespace gui::dialog

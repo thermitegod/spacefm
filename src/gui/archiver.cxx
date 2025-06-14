@@ -37,7 +37,7 @@ is_archiver_installed() noexcept
     const auto archiver = Glib::find_program_in_path("file-roller");
     if (archiver.empty())
     {
-        gui::dialog::error(nullptr, "Missing Archiver", "Failed to find file-roller in $PATH");
+        gui::dialog::error("Missing Archiver", "Failed to find file-roller in $PATH");
         return false;
     }
     return true;

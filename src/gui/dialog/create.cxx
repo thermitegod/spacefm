@@ -16,11 +16,8 @@
 #include <filesystem>
 #include <format>
 #include <memory>
-#include <print>
 #include <string>
 #include <string_view>
-
-#include <cstring>
 
 #include <glibmm.h>
 
@@ -44,15 +41,15 @@
 #include "package.hxx"
 
 i32
-gui::action::create_files(gui::browser* browser, const std::filesystem::path& cwd,
+gui::dialog::create_files(gui::browser* browser, const std::filesystem::path& cwd,
                           const std::shared_ptr<vfs::file>& file,
-                          const gui::action::create_mode init_mode, AutoOpenCreate* ao) noexcept
+                          const gui::dialog::create_mode init_mode, AutoOpenCreate* ao) noexcept
 {
-    static_assert(magic_enum::enum_integer(gui::action::create_mode::file) ==
+    static_assert(magic_enum::enum_integer(gui::dialog::create_mode::file) ==
                   magic_enum::enum_integer(datatype::create::mode::file));
-    static_assert(magic_enum::enum_integer(gui::action::create_mode::dir) ==
+    static_assert(magic_enum::enum_integer(gui::dialog::create_mode::dir) ==
                   magic_enum::enum_integer(datatype::create::mode::dir));
-    static_assert(magic_enum::enum_integer(gui::action::create_mode::link) ==
+    static_assert(magic_enum::enum_integer(gui::dialog::create_mode::link) ==
                   magic_enum::enum_integer(datatype::create::mode::link));
 
     const auto response = datatype::run_dialog_sync<datatype::create::response>(

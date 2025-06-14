@@ -20,10 +20,11 @@
 #include <filesystem>
 #include <span>
 
-#include <gtkmm.h>
-
 #include "vfs/file.hxx"
 
-void gui_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
-                              const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                              const i32 page) noexcept;
+namespace gui::dialog
+{
+void properties(const std::filesystem::path& cwd,
+                const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                const i32 page) noexcept;
+}

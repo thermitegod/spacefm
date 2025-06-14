@@ -15,8 +15,6 @@
 
 #include <vector>
 
-#include <gtkmm.h>
-
 #include <magic_enum/magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
@@ -33,10 +31,8 @@
 #include "package.hxx"
 
 void
-show_keybindings_dialog(GtkWindow* parent) noexcept
+gui::dialog::keybindings() noexcept
 {
-    (void)parent;
-
     std::vector<datatype::keybinding::request_data> data;
     for (const xset_t& set : xset::sets())
     {

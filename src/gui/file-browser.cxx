@@ -632,7 +632,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEvent* event, gui::browser* bro
                 }
                 else if (i == 2)
                 { // Scroll Wheel click
-                    gui_show_file_properties(nullptr, browser->cwd(), browser->selected_files(), 0);
+                    gui::dialog::properties(browser->cwd(), browser->selected_files(), 0);
                 }
                 else if (i == 3)
                 {
@@ -2599,14 +2599,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
     {
         if (!this->inhibit_focus_)
         {
-#if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
-            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
-
-            gui::dialog::error(GTK_WINDOW(parent_win),
-                               "Error",
+            gui::dialog::error("Error",
                                std::format("Directory does not exist\n\n{}", path.string()));
         }
         return false;
@@ -2616,14 +2609,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
     {
         if (!this->inhibit_focus_)
         {
-#if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
-            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
-
             gui::dialog::error(
-                GTK_WINDOW(parent_win),
                 "Error",
                 std::format("Unable to access {}\n\n{}", path.string(), std::strerror(errno)));
         }
@@ -3282,7 +3268,7 @@ gui::browser::rename_selected_files(
 
     for (const auto& file : selected_files)
     {
-        const auto result = gui::action::rename_files(this, cwd, file, nullptr, false);
+        const auto result = gui::dialog::rename_files(this, cwd, file, nullptr, false);
         if (result == 0)
         {
             break;
@@ -3302,7 +3288,7 @@ gui::browser::batch_rename_selected_files(
 
     gtk_widget_grab_focus(this->folder_view_);
 
-    gui::action::batch_rename_files(this, cwd, selected_files);
+    gui::dialog::batch_rename_files(this, cwd, selected_files);
 }
 
 void
@@ -3312,8 +3298,6 @@ gui::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
     (void)cwd;
 
     const auto response = gui::dialog::message(
-        GTK_WINDOW(this),
-        GtkMessageType::GTK_MESSAGE_INFO,
         "Hide File",
         GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
         "The names of the selected files will be added to the '.hidden' file located in this "
@@ -3326,15 +3310,9 @@ gui::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
         return;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
-    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
-
     if (selected_files.empty())
     {
-        gui::dialog::error(GTK_WINDOW(parent_win), "Error", "No files are selected");
+        gui::dialog::error("Error", "No files are selected");
         return;
     }
 
@@ -3342,7 +3320,7 @@ gui::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
     {
         if (!this->dir_->add_hidden(file))
         {
-            gui::dialog::error(GTK_WINDOW(parent_win), "Error", "Error hiding files");
+            gui::dialog::error("Error", "Error hiding files");
         }
     }
 
@@ -3527,8 +3505,7 @@ gui::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
             folder = cwd;
         }
         const auto path =
-            gui::dialog::file_chooser(GTK_WIDGET(this),
-                                      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+            gui::dialog::file_chooser(GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                       "Choose Location",
                                       folder,
                                       std::nullopt);
@@ -3569,9 +3546,7 @@ gui::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
 
         if (std::filesystem::equivalent(dest_dir.value(), cwd))
         {
-            gui::dialog::message(GTK_WINDOW(this),
-                                 GtkMessageType::GTK_MESSAGE_ERROR,
-                                 "Invalid Destination",
+            gui::dialog::message("Invalid Destination",
                                  GtkButtonsType::GTK_BUTTONS_OK,
                                  "Destination same as source");
             return;
@@ -3601,9 +3576,7 @@ gui::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
     }
     else
     {
-        gui::dialog::message(GTK_WINDOW(this),
-                             GtkMessageType::GTK_MESSAGE_ERROR,
-                             "Invalid Destination",
+        gui::dialog::message("Invalid Destination",
                              GtkButtonsType::GTK_BUTTONS_OK,
                              "Invalid destination");
     }

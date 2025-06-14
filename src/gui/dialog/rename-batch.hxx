@@ -25,8 +25,8 @@
 
 #include "vfs/file.hxx"
 
-namespace gui::action
+namespace gui::dialog
 {
 i32 batch_rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                        const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
-} // namespace gui::action
+} // namespace gui::dialog

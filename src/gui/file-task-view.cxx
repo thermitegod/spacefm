@@ -85,9 +85,8 @@ void
 gui::view::file_task::on_reorder(GtkWidget* item, GtkWidget* parent) noexcept
 {
     (void)item;
+    (void)parent;
     gui::dialog::message(
-        GTK_WINDOW(parent),
-        GtkMessageType::GTK_MESSAGE_INFO,
         "Reorder Columns Help",
         GtkButtonsType::GTK_BUTTONS_OK,
         "To change the order of the columns, drag the column header to the desired location.");

@@ -662,12 +662,13 @@ gui::view::location::mount_network(gui::browser* browser, const std::string_view
 
     // TODO - rewrite netmount parser and mount code, kept entry point shims.
 
-    gui::dialog::error(nullptr, "Netmounting is Disabled", "Recommended to mount through a shell");
+    gui::dialog::error("Netmounting is Disabled", "Recommended to mount through a shell");
 }
 
 static void
 popup_missing_mount(GtkWidget* view, i32 job) noexcept
 {
+    (void)view;
     std::string cmd;
     if (job == 0)
     {
@@ -679,8 +680,6 @@ popup_missing_mount(GtkWidget* view, i32 job) noexcept
     }
 
     gui::dialog::message(
-        GTK_WINDOW(view),
-        GtkMessageType::GTK_MESSAGE_ERROR,
         "Handler Not Found",
         GtkButtonsType::GTK_BUTTONS_OK,
         std::format("No handler is configured for this device type, or no {} command is set. Add a "
@@ -1099,17 +1098,9 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
 static void
 on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
+    (void)item;
+    (void)view2;
     std::string msg;
-    GtkWidget* view = nullptr;
-    if (!item)
-    {
-        view = view2;
-    }
-    else
-    {
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-    }
-
     const auto set = xset::set::get(xset::name::dev_show_hide_volumes);
     if (vol)
     {
@@ -1125,8 +1116,7 @@ on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     {
         msg = set->desc.value();
     }
-    const auto [response, answer] =
-        gui::dialog::text(view, set->title.value(), msg, set->s.value(), "");
+    const auto [response, answer] = gui::dialog::text(set->title.value(), msg, set->s.value(), "");
     set->s = answer;
     if (response)
     {
@@ -1138,17 +1128,9 @@ static void
 on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
                  GtkWidget* view2) noexcept
 {
+    (void)item;
+    (void)view2;
     std::string msg;
-    GtkWidget* view = nullptr;
-    if (!item)
-    {
-        view = view2;
-    }
-    else
-    {
-        view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
-    }
-
     const auto set = xset::set::get(xset::name::dev_automount_volumes);
     if (vol)
     {
@@ -1165,8 +1147,7 @@ on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
         msg = set->desc.value();
     }
 
-    const auto [response, answer] =
-        gui::dialog::text(view, set->title.value(), msg, set->s.value(), "");
+    const auto [response, answer] = gui::dialog::text(set->title.value(), msg, set->s.value(), "");
     set->s = answer;
     if (response)
     {

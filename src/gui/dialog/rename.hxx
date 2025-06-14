@@ -26,9 +26,9 @@
 
 #include "vfs/file.hxx"
 
-namespace gui::action
+namespace gui::dialog
 {
 i32 rename_files(gui::browser* browser, const std::filesystem::path& cwd,
                  const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                  const bool clip_copy) noexcept;
-} // namespace gui::action
+} // namespace gui::dialog

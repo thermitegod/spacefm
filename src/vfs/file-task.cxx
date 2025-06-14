@@ -1171,8 +1171,6 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
         if (terminal.empty())
         {
             gui::dialog::message(
-                nullptr,
-                GtkMessageType::GTK_MESSAGE_ERROR,
                 "Terminal Not Available",
                 GtkButtonsType::GTK_BUTTONS_OK,
                 "Please set a valid terminal program in View|Preferences|Advanced");

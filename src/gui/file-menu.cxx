@@ -1879,18 +1879,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, gui::file_menu* data)
         mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::directory);
     }
 
-    GtkWidget* parent = nullptr;
-    if (data->browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
-    }
-
-    const auto app =
-        gui_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, false, true, true, false);
+    const auto app = gui::dialog::app_chooser(mime_type, false, true, true, false);
     if (app)
     {
         gui::action::open_files_with_app(data->cwd,
@@ -1993,8 +1982,6 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 }
 
                 const auto response = gui::dialog::message(
-                    GTK_WINDOW(data->browser),
-                    GtkMessageType::GTK_MESSAGE_QUESTION,
                     "Copy Desktop File",
                     GtkButtonsType::GTK_BUTTONS_YES_NO,
                     std::format("The file '{0}' does not exist.\n\nBy copying '{1}' to '{0}' and "
@@ -2104,11 +2091,8 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                                     mime_type->type());
                 }
 
-                const auto response = gui::dialog::message(GTK_WINDOW(data->browser),
-                                                           GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                           "Create New XML",
-                                                           GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                           msg);
+                const auto response =
+                    gui::dialog::message("Create New XML", GtkButtonsType::GTK_BUTTONS_YES_NO, msg);
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
@@ -2830,7 +2814,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
 }
 
 static void
-create_new_file(gui::file_menu* data, gui::action::create_mode mode) noexcept
+create_new_file(gui::file_menu* data, gui::dialog::create_mode mode) noexcept
 {
     if (data->cwd.empty())
     {
@@ -2845,76 +2829,49 @@ create_new_file(gui::file_menu* data, gui::action::create_mode mode) noexcept
         file = data->selected_files.front();
     }
 
-    gui::action::create_files(data->browser, data->cwd, file, mode, ao);
+    gui::dialog::create_files(data->browser, data->cwd, file, mode, ao);
 }
 
 static void
 on_popup_new_folder_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, gui::action::create_mode::dir);
+    create_new_file(data, gui::dialog::create_mode::dir);
 }
 
 static void
 on_popup_new_text_file_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, gui::action::create_mode::file);
+    create_new_file(data, gui::dialog::create_mode::file);
 }
 
 static void
 on_popup_new_link_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, gui::action::create_mode::link);
+    create_new_file(data, gui::dialog::create_mode::link);
 }
 
 static void
 on_popup_file_properties_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    GtkWidget* parent = nullptr;
-    if (data->browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
-    }
-    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 0);
+    gui::dialog::properties(data->cwd, data->selected_files, 0);
 }
 
 static void
 on_popup_file_attributes_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    GtkWidget* parent = nullptr;
-    if (data->browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
-    }
-    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 1);
+    gui::dialog::properties(data->cwd, data->selected_files, 1);
 }
 
 static void
 on_popup_file_permissions_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 {
     (void)menuitem;
-    GtkWidget* parent = nullptr;
-    if (data->browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
-    }
-    gui_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 2);
+    gui::dialog::properties(data->cwd, data->selected_files, 2);
 }
 
 static void

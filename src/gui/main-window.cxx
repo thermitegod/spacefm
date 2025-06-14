@@ -201,7 +201,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 
     const std::vector<std::filesystem::path> search_dirs{cwd};
 
-    find_files(search_dirs);
+    gui::dialog::find_files(search_dirs);
 }
 
 void
@@ -216,14 +216,7 @@ MainWindow::open_terminal() const noexcept
     const auto main_term = xset_get_s(xset::name::main_terminal);
     if (!main_term)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
-
-        gui::dialog::error(GTK_WINDOW(parent_win),
-                           "Terminal Not Available",
+        gui::dialog::error("Terminal Not Available",
                            "Please set your terminal program in View|Preferences|Advanced");
         return;
     }
@@ -1515,17 +1508,13 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
     // tasks running?
     if (main_window->is_main_tasks_running())
     {
-        const auto response = gui::dialog::message(GTK_WINDOW(widget),
-                                                   GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                   "MainWindow Delete Event",
+        const auto response = gui::dialog::message("MainWindow Delete Event",
                                                    GtkButtonsType::GTK_BUTTONS_YES_NO,
                                                    "Stop all tasks running in this window?");
 
         if (response == GtkResponseType::GTK_RESPONSE_YES)
         {
-            gui::dialog::message(GTK_WINDOW(widget),
-                                 GtkMessageType::GTK_MESSAGE_INFO,
-                                 "MainWindow Delete Event",
+            gui::dialog::message("MainWindow Delete Event",
                                  GtkButtonsType::GTK_BUTTONS_CLOSE,
                                  "Aborting tasks...");
             main_window->close_window();
@@ -1875,8 +1864,8 @@ static void
 on_keybindings_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
-    MainWindow* main_window = MAIN_WINDOW(user_data);
-    show_keybindings_dialog(GTK_WINDOW(main_window));
+    (void)user_data;
+    gui::dialog::keybindings();
 }
 
 static void
@@ -1884,15 +1873,15 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    show_preference_dialog(GTK_WINDOW(main_window), main_window->settings_);
+    gui::dialog::preference(main_window->settings_);
 }
 
 static void
 on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
-    MainWindow* main_window = MAIN_WINDOW(user_data);
-    show_about_dialog(GTK_WINDOW(main_window));
+    (void)user_data;
+    gui::dialog::about();
 }
 
 void

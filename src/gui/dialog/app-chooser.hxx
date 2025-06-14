@@ -20,12 +20,11 @@
 #include <optional>
 #include <string>
 
-#include <gtkmm.h>
-
 #include "vfs/mime-type.hxx"
 
-// Let the user choose a application
-std::optional<std::string>
-gui_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
-                             bool focus_all_apps, bool show_command, bool show_default,
-                             bool dir_default) noexcept;
+namespace gui::dialog
+{
+std::optional<std::string> app_chooser(const std::shared_ptr<vfs::mime_type>& mime_type,
+                                       bool focus_all_apps, bool show_command, bool show_default,
+                                       bool dir_default) noexcept;
+}

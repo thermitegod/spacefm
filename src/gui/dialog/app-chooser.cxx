@@ -18,8 +18,6 @@
 #include <string>
 #include <string_view>
 
-#include <glibmm.h>
-
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
@@ -32,12 +30,9 @@
 #include "package.hxx"
 
 std::optional<std::string>
-gui_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
-                             bool focus_all_apps, bool show_command, bool show_default,
-                             bool dir_default) noexcept
+gui::dialog::app_chooser(const std::shared_ptr<vfs::mime_type>& mime_type, bool focus_all_apps,
+                         bool show_command, bool show_default, bool dir_default) noexcept
 {
-    (void)parent;
-
     /*
     focus_all_apps      Focus All Apps tab by default
     show_command        Show custom Command entry

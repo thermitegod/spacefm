@@ -15,6 +15,7 @@
 
 #pragma once
 
-#include <gtkmm.h>
-
-void show_keybindings_dialog(GtkWindow* parent) noexcept;
+namespace gui::dialog
+{
+void keybindings() noexcept;
+}

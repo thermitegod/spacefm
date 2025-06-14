@@ -120,7 +120,6 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
             file_list.append("\n");
         }
         gui::dialog::error(
-            nullptr,
             "Error",
             std::format("Unable to use '{}' to open files:\n{}", app_desktop, file_list));
     }
@@ -221,14 +220,7 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
 
                 if (!std::filesystem::exists(target_path))
                 {
-#if (GTK_MAJOR_VERSION == 4)
-                    GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-                    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
-
                     gui::dialog::error(
-                        GTK_WINDOW(toplevel),
                         "Broken Link",
                         std::format("This symlink's target is missing or you do not "
                                     "have permission to access it:\n{}\n\nTarget: {}",
@@ -245,19 +237,7 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
         }
         if (!alloc_desktop)
         {
-            // Let the user choose an application
-#if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-            GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
-
-            const auto gui_app = gui_choose_app_for_mime_type(GTK_WINDOW(toplevel),
-                                                              mime_type,
-                                                              true,
-                                                              true,
-                                                              true,
-                                                              !browser);
+            const auto gui_app = gui::dialog::app_chooser(mime_type, true, true, true, !browser);
 
             if (gui_app)
             {

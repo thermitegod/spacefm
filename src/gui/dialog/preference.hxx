@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include <gtkmm.h>
-
 #include "settings/settings.hxx"
 
-void show_preference_dialog(GtkWindow* parent,
-                            const std::shared_ptr<config::settings>& settings_) noexcept;
+namespace gui::dialog
+{
+void preference(const std::shared_ptr<config::settings>& settings_) noexcept;
+}

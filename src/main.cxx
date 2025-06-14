@@ -73,8 +73,7 @@ open_file(const std::filesystem::path& path) noexcept
     const auto app_name = mime_type->default_action();
     if (!app_name)
     {
-        const auto app_name_alt =
-            gui_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
+        const auto app_name_alt = gui::dialog::app_chooser(mime_type, true, true, true, false);
         if (!app_name_alt)
         {
             logger::error("no application to open file: {}", path.string());
@@ -92,7 +91,6 @@ open_file(const std::filesystem::path& path) noexcept
     if (!opened)
     {
         gui::dialog::error(
-            nullptr,
             "Error",
             std::format("Unable to use '{}' to open file:\n{}", app_name.value(), path.string()));
     }

@@ -18,4 +18,7 @@
 #include <filesystem>
 #include <span>
 
+namespace gui::dialog
+{
 void find_files(const std::span<const std::filesystem::path> search_dirs) noexcept;
+}

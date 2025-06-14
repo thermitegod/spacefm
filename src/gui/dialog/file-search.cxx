@@ -20,9 +20,9 @@
 #include "gui/dialog/text.hxx"
 
 void
-find_files(const std::span<const std::filesystem::path> search_dirs) noexcept
+gui::dialog::find_files(const std::span<const std::filesystem::path> search_dirs) noexcept
 {
     (void)search_dirs;
 
-    gui::dialog::error(nullptr, "Disabled", "File search requires a rewrite");
+    gui::dialog::error("Disabled", "File search requires a rewrite");
 }

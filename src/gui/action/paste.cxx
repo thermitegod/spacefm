@@ -50,7 +50,7 @@ gui::action::paste_files(gui::browser* browser, const std::filesystem::path& cwd
         const auto file = vfs::file::create(file_path);
 
         const auto result =
-            gui::action::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
+            gui::dialog::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
         if (result == 0)
         {
             missing_targets = 0;
@@ -60,18 +60,7 @@ gui::action::paste_files(gui::browser* browser, const std::filesystem::path& cwd
 
     if (missing_targets > 0)
     {
-        GtkWidget* parent = nullptr;
-        if (browser)
-        {
-#if (GTK_MAJOR_VERSION == 4)
-            parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-            parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
-        }
-
-        gui::dialog::error(GTK_WINDOW(parent),
-                           "Error",
+        gui::dialog::error("Error",
                            std::format("{} target{} missing",
                                        missing_targets,
                                        missing_targets > 1 ? "s are" : " is"));

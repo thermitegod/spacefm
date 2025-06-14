@@ -27,19 +27,18 @@
 
 namespace gui::dialog
 {
-std::tuple<bool, std::string> text(GtkWidget* parent, const std::string_view title,
-                                   const std::string_view message, const std::string_view defstring,
+std::tuple<bool, std::string> text(const std::string_view title, const std::string_view message,
+                                   const std::string_view defstring,
                                    const std::string_view defreset) noexcept;
 
 std::optional<std::filesystem::path>
-file_chooser(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
+file_chooser(GtkFileChooserAction action, const std::string_view title,
              const std::optional<std::filesystem::path>& deffolder,
              const std::optional<std::filesystem::path>& deffile) noexcept;
 
-GtkResponseType message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
-                        GtkButtonsType buttons, const std::string_view message,
+GtkResponseType message(const std::string_view title, GtkButtonsType buttons,
+                        const std::string_view message,
                         const std::string_view secondary_message = "") noexcept;
 
-void error(GtkWindow* parent, const std::string_view title,
-           const std::string_view message) noexcept;
+void error(const std::string_view title, const std::string_view message) noexcept;
 } // namespace gui::dialog
