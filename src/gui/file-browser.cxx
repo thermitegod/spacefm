@@ -66,8 +66,6 @@
 #include "gui/clipboard.hxx"
 #include "gui/dir-tree-view.hxx"
 #include "gui/dir-tree.hxx"
-#include "gui/file-action-open.hxx"
-#include "gui/file-action-paste.hxx"
 #include "gui/file-browser.hxx"
 #include "gui/file-list.hxx"
 #include "gui/file-menu.hxx"
@@ -77,6 +75,9 @@
 #include "gui/path-bar.hxx"
 #include "gui/search-bar.hxx"
 #include "gui/utils/utils.hxx"
+
+#include "gui/action/open.hxx"
+#include "gui/action/paste.hxx"
 
 #include "gui/dialog/properties.hxx"
 #include "gui/dialog/rename-batch.hxx"

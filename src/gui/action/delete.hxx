@@ -25,10 +25,6 @@
 
 namespace gui::action
 {
-void trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                 const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                 GtkTreeView* task_view) noexcept;
-
 void delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
                   const std::span<const std::shared_ptr<vfs::file>> selected_files,
                   GtkTreeView* task_view) noexcept;

@@ -453,8 +453,6 @@ sources += files(
     'src/gui/clipboard.cxx',
     'src/gui/dir-tree.cxx',
     'src/gui/dir-tree-view.cxx',
-    'src/gui/file-action-open.cxx',
-    'src/gui/file-action-paste.cxx',
     'src/gui/file-browser.cxx',
     'src/gui/file-list.cxx',
     'src/gui/file-menu.cxx',
@@ -465,7 +463,13 @@ sources += files(
     'src/gui/path-bar.cxx',
     'src/gui/search-bar.cxx',
 
+    'src/gui/action/delete.cxx',
+    'src/gui/action/open.cxx',
+    'src/gui/action/paste.cxx',
+    'src/gui/action/trash.cxx',
+
     'src/gui/dialog/about.cxx',
+    'src/gui/dialog/action-list.cxx',
     'src/gui/dialog/app-chooser.cxx',
     'src/gui/dialog/create.cxx',
     'src/gui/dialog/file-search.cxx',
@@ -475,7 +479,6 @@ sources += files(
     'src/gui/dialog/rename.cxx',
     'src/gui/dialog/rename-batch.cxx',
     'src/gui/dialog/text.cxx',
-    'src/gui/dialog/trash-delete.cxx',
 
     'src/gui/utils/utils.cxx',
     'src/gui/utils/history.cxx',

@@ -27,8 +27,9 @@
 #include "xset/xset.hxx"
 
 #include "gui/clipboard.hxx"
-#include "gui/file-action-paste.hxx"
 #include "gui/file-browser.hxx"
+
+#include "gui/action/paste.hxx"
 
 #include "gui/dialog/rename.hxx"
 #include "gui/dialog/text.hxx"

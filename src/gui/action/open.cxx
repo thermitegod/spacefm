@@ -33,8 +33,9 @@
 #include "xset/xset.hxx"
 
 #include "gui/archiver.hxx"
-#include "gui/file-action-open.hxx"
 #include "gui/file-browser.hxx"
+
+#include "gui/action/open.hxx"
 
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/text.hxx"
