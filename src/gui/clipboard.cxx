@@ -45,28 +45,6 @@ struct clipboard_data final
 };
 
 static void
-set_clipboard(clipboard_data data) noexcept
-{
-    const auto binary = Glib::find_program_in_path("wl-copy");
-    if (binary.empty())
-    {
-        logger::error("Failed to find wl-copy");
-        return;
-    }
-
-    const auto buffer = glz::write_json(data);
-    if (!buffer)
-    {
-        logger::error("Failed to create JSON: {}", glz::format_error(buffer));
-        return;
-    }
-
-    const auto command = std::format(R"({} -- {})", binary, utils::shell_quote(buffer.value()));
-
-    Glib::spawn_command_line_async(command);
-}
-
-static void
 set_clipboard(const std::string_view data) noexcept
 {
     const auto binary = Glib::find_program_in_path("wl-copy");
@@ -79,6 +57,19 @@ set_clipboard(const std::string_view data) noexcept
     const auto command = std::format(R"({} -- {})", binary, utils::shell_quote(data));
 
     Glib::spawn_command_line_async(command);
+}
+
+static void
+set_clipboard(clipboard_data data) noexcept
+{
+    const auto buffer = glz::write_json(data);
+    if (!buffer)
+    {
+        logger::error("Failed to create JSON: {}", glz::format_error(buffer));
+        return;
+    }
+
+    set_clipboard(buffer.value());
 }
 
 static std::optional<clipboard_data>
