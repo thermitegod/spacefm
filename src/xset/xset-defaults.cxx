@@ -1239,6 +1239,13 @@ xset_defaults() noexcept
     }
 
     {
+        const auto set = xset::set::get(xset::name::main_bookmarks);
+        set->menu.label = "_Bookmark Manager";
+        set->icon = "go-jump-symbolic";
+        set->keybinding.type = xset::set::keybinding_type::editing;
+    }
+
+    {
         const auto set = xset::set::get(xset::name::new_archive);
         set->menu.label = "_Archive";
         set->icon = "document-save-as-symbolic";
@@ -2702,6 +2709,7 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::main_exit, GDK_KEY_q, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::main_prefs, GDK_KEY_F12, GdkModifierType(0));
     def_key(keysets, xset::name::book_add, GDK_KEY_d, GdkModifierType::GDK_CONTROL_MASK);
+    // def_key(keysets, xset::name::main_bookmarks, GDK_KEY_O, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
 
     // clang-format on
 }

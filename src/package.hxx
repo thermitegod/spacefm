@@ -30,6 +30,7 @@ struct package_t final
         // Standalone dialog program names
         std::string_view about = "spacefm_about";
         std::string_view app_chooser = "spacefm_app_chooser";
+        std::string_view bookmarks = "spacefm_bookmarks";
         std::string_view error = "spacefm_error";
         std::string_view file_action = "spacefm_action";
         std::string_view file_batch_rename = "spacefm_batch_rename";

@@ -15,16 +15,7 @@
 
 #pragma once
 
-#include <array>
-#include <filesystem>
-#include <span>
-
-using bookmark_t = std::array<std::filesystem::path, 2>;
-
-[[nodiscard]] std::span<bookmark_t> get_all_bookmarks() noexcept;
-
-void load_bookmarks() noexcept;
-void save_bookmarks() noexcept;
-
-void add_bookmarks(const std::filesystem::path& book_path) noexcept;
-void remove_bookmarks() noexcept;
+namespace gui::dialog
+{
+void bookmarks() noexcept;
+}

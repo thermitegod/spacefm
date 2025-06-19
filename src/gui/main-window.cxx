@@ -14,10 +14,8 @@
  */
 
 #include <algorithm>
-#include <array>
 #include <filesystem>
 #include <format>
-#include <functional>
 #include <map>
 #include <optional>
 #include <ranges>
@@ -51,15 +49,16 @@
 #include "gui/view/location.hxx"
 
 #include "gui/dialog/about.hxx"
+#include "gui/dialog/bookmarks.hxx"
 #include "gui/dialog/file-search.hxx"
 #include "gui/dialog/keybindings.hxx"
 #include "gui/dialog/preference.hxx"
 #include "gui/dialog/text.hxx"
 
+#include "vfs/bookmarks.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "autosave.hxx"
-#include "bookmarks.hxx"
 #include "logger.hxx"
 #include "settings.hxx"
 #include "types.hxx"
@@ -78,6 +77,7 @@ static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data) noexc
 static void on_keybindings_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
+static void on_bookmark_manager_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window) noexcept;
 static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window) noexcept;
 
@@ -1115,14 +1115,20 @@ MainWindow::rebuild_menu_bookmarks(gui::browser* browser) const noexcept
 #endif
 
     GtkWidget* newmenu = gtk_menu_new();
-    const auto set = xset::set::get(xset::name::book_add);
-    xset_set_cb(set, (GFunc)gui::view::bookmark::add_callback, browser);
-    set->disable = false;
-    xset_add_menuitem(browser, newmenu, accel_group, set);
-    gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
+    xset_set_cb(xset::name::book_add, (GFunc)gui::view::bookmark::add_callback, browser);
+    xset_set_cb(xset::name::main_bookmarks, (GFunc)on_bookmark_manager_activate, nullptr);
+
+    xset_add_menu(browser,
+                  newmenu,
+                  accel_group,
+                  {
+                      xset::name::book_add,
+                      xset::name::main_bookmarks,
+                      xset::name::separator,
+                  });
 
     // Add All Bookmarks
-    for (const auto& [book_path, book_name] : get_all_bookmarks())
+    for (const auto& [book_path, book_name] : vfs::bookmarks::bookmarks())
     {
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 
@@ -1885,6 +1891,14 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept
     gui::dialog::about();
 }
 
+static void
+on_bookmark_manager_activate(GtkMenuItem* menuitem, void* user_data) noexcept
+{
+    (void)menuitem;
+    (void)user_data;
+    gui::dialog::bookmarks();
+}
+
 void
 MainWindow::add_new_window() noexcept
 {
@@ -2394,6 +2408,10 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         else if (set->xset_name == xset::name::main_prefs)
         {
             on_preference_activate(nullptr, this);
+        }
+        else if (set->xset_name == xset::name::main_bookmarks)
+        {
+            on_bookmark_manager_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_title)
         {

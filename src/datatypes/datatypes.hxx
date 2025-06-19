@@ -102,6 +102,20 @@ struct request
 };
 } // namespace error
 
+namespace bookmarks
+{
+struct bookmark
+{
+    std::string name;
+    std::filesystem::path path;
+};
+
+struct bookmarks
+{
+    std::vector<bookmark> bookmarks;
+};
+} // namespace bookmarks
+
 namespace file_action
 {
 struct data

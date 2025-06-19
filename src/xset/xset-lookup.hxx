@@ -239,6 +239,7 @@ enum class name : std::uint16_t
     tab_new,
     tab_new_here,
     new_bookmark,
+    main_bookmarks,
     arc_dlg,
 
     new_app,

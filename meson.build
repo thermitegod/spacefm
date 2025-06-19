@@ -419,7 +419,6 @@ endforeach
 
 sources += files(
     'src/autosave.cxx',
-    'src/bookmarks.cxx',
     'src/concurrency.cxx',
     'src/logger.cxx',
     'src/main.cxx',
@@ -468,6 +467,7 @@ sources += files(
     'src/gui/dialog/about.cxx',
     'src/gui/dialog/action-list.cxx',
     'src/gui/dialog/app-chooser.cxx',
+    'src/gui/dialog/bookmarks.cxx',
     'src/gui/dialog/create.cxx',
     'src/gui/dialog/file-search.cxx',
     'src/gui/dialog/keybindings.cxx',
@@ -488,6 +488,7 @@ sources += files(
     'src/gui/natsort/strnatcmp.cxx',
 
     'src/vfs/app-desktop.cxx',
+    'src/vfs/bookmarks.cxx',
     'src/vfs/device.cxx',
     'src/vfs/dir.cxx',
     'src/vfs/error.cxx',

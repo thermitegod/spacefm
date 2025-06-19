@@ -13,29 +13,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
+#include "datatypes/datatypes.hxx"
+#include "datatypes/external-dialog.hxx"
 
-#include "gui/file-browser.hxx"
-
-#include "gui/view/bookmark.hxx"
+#include "gui/dialog/bookmarks.hxx"
 
 #include "vfs/bookmarks.hxx"
 
+#include "package.hxx"
+
 void
-gui::view::bookmark::add(const std::filesystem::path& path) noexcept
+gui::dialog::bookmarks() noexcept
 {
-    if (path.empty())
+    // datatype::run_dialog_sync(spacefm::package.dialog.bookmarks);
+
+    const auto response = datatype::run_dialog_sync<datatype::bookmarks::bookmarks>(
+        spacefm::package.dialog.bookmarks,
+        datatype::bookmarks::bookmarks{.bookmarks = {vfs::bookmarks::bookmarks().cbegin(),
+                                                     vfs::bookmarks::bookmarks().cend()}});
+
+    if (response)
     {
-        return;
+        vfs::bookmarks::bookmarks(response.value());
     }
-
-    vfs::bookmarks::add(path);
-}
-
-void
-gui::view::bookmark::add_callback(GtkMenuItem* menuitem, gui::browser* browser) noexcept
-{
-    (void)menuitem;
-
-    gui::view::bookmark::add(browser->cwd());
 }

@@ -16,13 +16,19 @@
 #pragma once
 
 #include <filesystem>
+#include <span>
 
-#include <gtkmm.h>
+#include "datatypes/datatypes.hxx"
 
-#include "gui/file-browser.hxx"
-
-namespace gui::view::bookmark
+namespace vfs::bookmarks
 {
+[[nodiscard]] std::span<datatype::bookmarks::bookmark> bookmarks() noexcept;
+
+void bookmarks(const datatype::bookmarks::bookmarks& bookmarks) noexcept;
+
+void load() noexcept;
+void save() noexcept;
+
 void add(const std::filesystem::path& path) noexcept;
-void add_callback(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
-} // namespace gui::view::bookmark
+void remove(const std::filesystem::path& path) noexcept;
+} // namespace vfs::bookmarks

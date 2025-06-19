@@ -13,16 +13,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <filesystem>
-
+#include <glibmm.h>
 #include <gtkmm.h>
 
-#include "gui/file-browser.hxx"
+#include <CLI/CLI.hpp>
 
-namespace gui::view::bookmark
+#include "bookmarks.hxx"
+
+int
+main(int argc, char* argv[])
 {
-void add(const std::filesystem::path& path) noexcept;
-void add_callback(GtkMenuItem* menuitem, gui::browser* browser) noexcept;
-} // namespace gui::view::bookmark
+    CLI::App capp{"Spacefm Dialog"};
+
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.bookmarks",
+                                        Gio::Application::Flags::NON_UNIQUE);
+
+    return app->make_window_and_run<BookmarksDialog>(0, nullptr, json_data);
+}

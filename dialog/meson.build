@@ -63,6 +63,29 @@ spacefm = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
+# Bookmarks
+incdir_action = include_directories(['bookmarks', '../src/datatypes'])
+sources_action = files(
+    'bookmarks/main.cxx',
+    'bookmarks/bookmarks.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_bookmarks',
+    sources_action,
+    target_type: 'executable',
+    include_directories: incdir_action,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    cpp_pch: '../pch/pch.hxx',
+)
+
 # Error
 incdir_error = include_directories(['error', '../src/datatypes'])
 sources_error = files(

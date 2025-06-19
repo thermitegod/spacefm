@@ -46,13 +46,13 @@
 #include "gui/dialog/text.hxx"
 
 #include "vfs/app-desktop.hxx"
+#include "vfs/bookmarks.hxx"
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/linux/self.hxx"
 
 #include "autosave.hxx"
-#include "bookmarks.hxx"
 #include "logger.hxx"
 #include "settings.hxx"
 #include "single-instance.hxx"
@@ -308,7 +308,7 @@ main(int argc, char* argv[]) noexcept
     vfs::volume_init();
 
     // load user bookmarks
-    load_bookmarks();
+    vfs::bookmarks::load();
 
     // start autosave thread
     // autosave::create([&settings]() { save_settings(settings); }); // BUG
@@ -317,7 +317,6 @@ main(int argc, char* argv[]) noexcept
     std::atexit(tmp_clean);
     std::atexit(autosave::close);
     std::atexit(vfs::volume_finalize);
-    std::atexit(save_bookmarks);
 
     const auto data = std::make_shared<app_data>();
     data->opts = opts.value();
