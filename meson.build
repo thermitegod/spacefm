@@ -489,6 +489,7 @@ sources += files(
 
     'src/vfs/app-desktop.cxx',
     'src/vfs/bookmarks.cxx',
+    'src/vfs/clipboard.cxx',
     'src/vfs/device.cxx',
     'src/vfs/dir.cxx',
     'src/vfs/error.cxx',

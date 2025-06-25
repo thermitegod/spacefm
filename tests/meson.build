@@ -14,6 +14,7 @@ test_sources += files(
     'spacefm/logger.cxx',
 
     'spacefm/utils/permissions.cxx',
+    'spacefm/utils/shell-quote.cxx',
 
     # Settings
     'spacefm/settings/settings.cxx',
@@ -25,6 +26,7 @@ test_sources += files(
     # VFS
     'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
     'spacefm/vfs/utils/utils.cxx',
+    'spacefm/vfs/clipboard.cxx',
     'spacefm/vfs/error.cxx',
     'spacefm/vfs/user-dirs.cxx',
 )
@@ -46,6 +48,7 @@ test_sources += files(
     'src/vfs/mime-type/chrome/mime-utils.cxx',
     'src/vfs/utils/test-utils.cxx',
     'src/vfs/utils/test-file-ops.cxx',
+    'src/vfs/test-clipboard.cxx',
     'src/vfs/test-error.cxx',
 )
 

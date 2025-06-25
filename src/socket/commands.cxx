@@ -45,6 +45,7 @@
 
 #include "gui/view/file-task.hxx"
 
+#include "vfs/clipboard.hxx"
 #include "vfs/file-task.hxx"
 #include "vfs/terminals.hxx"
 #include "vfs/volume.hxx"
@@ -708,12 +709,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             gui::clipboard::copy_text(*buffer);
         }
-        else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
+        else if (property == "clipboard-cut-files")
         {
-            gui::clipboard::cut_or_copy_files(data,
-                                              property == "clipboard_copy_files"
-                                                  ? gui::clipboard::mode::copy
-                                                  : gui::clipboard::mode::move);
+            gui::clipboard::cut_files(data);
+        }
+        else if (property == "clipboard-copy-files")
+        {
+            gui::clipboard::copy_files(data);
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {
@@ -1148,7 +1150,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "clipboard-text" || property == "clipboard-primary-text")
         {
-            return {SOCKET_SUCCESS, gui::clipboard::get_text()};
+            return {SOCKET_SUCCESS, vfs::clipboard::get_text().value_or("")};
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
         {

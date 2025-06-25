@@ -58,6 +58,7 @@
 #include "gui/dialog/text.hxx"
 
 #include "vfs/app-desktop.hxx"
+#include "vfs/clipboard.hxx"
 #include "vfs/mime-monitor.hxx"
 #include "vfs/mime-type.hxx"
 #include "vfs/user-dirs.hxx"
@@ -1102,7 +1103,7 @@ gui_file_menu_new(gui::browser* browser,
     // const auto no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
     const auto no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
-    const bool is_clip = gui::clipboard::is_content_valid();
+    const bool is_clip = vfs::clipboard::is_valid();
 
     const panel_t p = browser->panel();
 
@@ -2564,7 +2565,7 @@ on_popup_cut_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     {
         return;
     }
-    gui::clipboard::cut_or_copy_files(data->selected_files, gui::clipboard::mode::move);
+    gui::clipboard::cut_files(data->selected_files);
 }
 
 static void
@@ -2575,7 +2576,7 @@ on_popup_copy_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     {
         return;
     }
-    gui::clipboard::cut_or_copy_files(data->selected_files, gui::clipboard::mode::copy);
+    gui::clipboard::copy_files(data->selected_files);
 }
 
 static void
