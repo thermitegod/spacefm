@@ -262,7 +262,7 @@ preprocessor = [
     # data paths
     '-DPACKAGE_IMAGES="/usr/share/spacefm/images"',
     '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(join_paths(meson.current_source_dir(), 'data/images')),
-    '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'data/scripts')),
+    '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tools/scripts')),
 ]
 
 if get_option('dev')
