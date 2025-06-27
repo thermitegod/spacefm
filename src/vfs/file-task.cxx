@@ -42,6 +42,7 @@
 
 #include "gui/dialog/text.hxx"
 
+#include "vfs/execute.hxx"
 #include "vfs/file-task.hxx"
 #include "vfs/terminals.hxx"
 #include "vfs/trash-can.hxx"
@@ -1189,13 +1190,11 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
             return;
         }
 
-        logger::info<logger::domain::vfs>("COMMAND({})", command.value());
-        Glib::spawn_command_line_async(command.value());
+        vfs::execute::command_line_async(command.value());
     }
     else
     {
-        logger::info<logger::domain::vfs>("COMMAND({})", this->exec_command);
-        Glib::spawn_command_line_async(this->exec_command);
+        vfs::execute::command_line_async(this->exec_command);
     }
 
     call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);

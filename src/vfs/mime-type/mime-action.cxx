@@ -42,20 +42,17 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/execute.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/mime-type/mime-action.hxx"
 #include "vfs/utils/file-ops.hxx"
 
-#include "logger.hxx"
-
 static void
 update_desktop_database() noexcept
 {
-    const auto path = vfs::user::data() / "applications";
-    const std::string command = std::format("update-desktop-database {}", path.string());
-    logger::info<logger::domain::vfs>("COMMAND({})", command);
-    Glib::spawn_command_line_sync(command);
+    vfs::execute::command_line_async("update-desktop-database {}",
+                                     (vfs::user::data() / "applications").string());
 }
 
 /* Determine removed associations for this type */
@@ -571,16 +568,13 @@ vfs::detail::mime_type::get_default_action(const std::string_view mime_type) noe
 {
     assert(mime_type.empty() != true);
 
-    const auto command = std::format("xdg-mime query default {}", mime_type);
-    // logger::debug<logger::domain::vfs>("COMMAND({})", command);
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, nullptr);
-    if (standard_output.empty())
+    const auto result = vfs::execute::command_line_sync("xdg-mime query default {}", mime_type);
+    if (result.standard_output.empty())
     {
         return std::nullopt;
     }
     // Need to remove '\n'
-    return ztd::strip(standard_output);
+    return ztd::strip(result.standard_output);
 }
 
 void
@@ -590,7 +584,5 @@ vfs::detail::mime_type::set_default_action(const std::string_view mime_type,
     assert(mime_type.empty() != true);
     assert(desktop_id.empty() != true);
 
-    const auto command = std::format("xdg-mime default {} {}", desktop_id, mime_type);
-    logger::debug<logger::domain::vfs>("COMMAND({})", command);
-    Glib::spawn_command_line_sync(command);
+    vfs::execute::command_line_async("xdg-mime default {} {}", desktop_id, mime_type);
 }

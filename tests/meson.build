@@ -28,6 +28,7 @@ test_sources += files(
     'spacefm/vfs/utils/utils.cxx',
     'spacefm/vfs/clipboard.cxx',
     'spacefm/vfs/error.cxx',
+    'spacefm/vfs/execute.cxx',
     'spacefm/vfs/user-dirs.cxx',
 )
 

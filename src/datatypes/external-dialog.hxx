@@ -18,7 +18,6 @@
 #include <expected>
 #include <format>
 #include <optional>
-#include <print>
 #include <string>
 #include <string_view>
 
@@ -30,6 +29,8 @@
 #include <ztd/ztd.hxx>
 
 #include "utils/shell-quote.hxx"
+
+#include "vfs/execute.hxx"
 
 #include "logger.hxx"
 #include "package.hxx"
@@ -59,17 +60,14 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
         return std::unexpected("");
     }
 
-    // std::println(R"({} --json '{}')", binary, buffer.value())
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    i32 exit_status = 0;
-    std::string standard_output;
-    Glib::spawn_command_line_sync(command, &standard_output, nullptr, exit_status.unwrap());
+    const auto result = vfs::execute::command_line_sync(R"({} --json {})",
+                                                        binary,
+                                                        utils::shell_quote(buffer.value()));
 
 #if defined(DEV_MODE) && __has_feature(address_sanitizer)
-    if (standard_output.empty())
+    if (result.standard_output.empty())
 #else
-    if (exit_status != 0 || standard_output.empty())
+    if (result.exit_status != 0 || result.standard_output.empty())
 #endif
     {
         return std::unexpected("");
@@ -80,11 +78,11 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
         return {};
     }
 
-    const auto response = glz::read_json<Response>(standard_output);
+    const auto response = glz::read_json<Response>(result.standard_output);
     if (!response)
     {
         logger::error("Failed to decode JSON: {}",
-                      glz::format_error(response.error(), standard_output));
+                      glz::format_error(response.error(), result.standard_output));
         return std::unexpected("");
     }
 
@@ -113,10 +111,7 @@ run_dialog_async(const std::string_view program, const auto& request) noexcept
         return;
     }
 
-    // std::println(R"({} --json '{}')", binary, buffer.value())
-    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
-
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 }
 
 inline void
@@ -134,7 +129,6 @@ run_dialog_async(const std::string_view program) noexcept
         return;
     }
 
-    // std::println(R"({})", binary)
-    Glib::spawn_command_line_async(binary);
+    vfs::execute::command_line_async(binary);
 }
 } // namespace datatype

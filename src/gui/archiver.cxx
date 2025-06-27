@@ -29,7 +29,7 @@
 
 #include "gui/dialog/text.hxx"
 
-#include "logger.hxx"
+#include "vfs/execute.hxx"
 
 static bool
 is_archiver_installed() noexcept
@@ -67,11 +67,8 @@ gui::archiver::create(gui::browser* browser,
         return;
     }
 
-    const auto shell_file_list = archiver_create_shell_file_list(selected_files);
-
-    const auto command = std::format("file-roller --add {}", shell_file_list);
-    logger::info<logger::domain::gui>("COMMAND({})", command);
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async("file-roller --add {}",
+                                     archiver_create_shell_file_list(selected_files));
 }
 
 void
@@ -99,8 +96,7 @@ gui::archiver::extract(gui::browser* browser,
     }
     command.append(shell_file_list);
 
-    logger::info<logger::domain::gui>("COMMAND({})", command);
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async(command);
 }
 
 void
@@ -114,9 +110,6 @@ gui::archiver::open(gui::browser* browser,
         return;
     }
 
-    const auto shell_file_list = archiver_create_shell_file_list(selected_files);
-
-    const auto command = std::format("file-roller {}", shell_file_list);
-    logger::info<logger::domain::gui>("COMMAND({})", command);
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async("file-roller {}",
+                                     archiver_create_shell_file_list(selected_files));
 }

@@ -493,6 +493,7 @@ sources += files(
     'src/vfs/device.cxx',
     'src/vfs/dir.cxx',
     'src/vfs/error.cxx',
+    'src/vfs/execute.cxx',
     'src/vfs/file.cxx',
     'src/vfs/file-task.cxx',
     'src/vfs/mime-type.cxx',

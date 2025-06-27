@@ -38,6 +38,7 @@
 
 #include "vfs/app-desktop.hxx"
 #include "vfs/error.hxx"
+#include "vfs/execute.hxx"
 
 #include "vfs/utils/utils.hxx"
 

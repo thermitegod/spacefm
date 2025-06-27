@@ -30,6 +30,7 @@
 
 #include "utils/shell-quote.hxx"
 
+#include "vfs/execute.hxx"
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
 
@@ -173,11 +174,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
                 break;
             }
         }
+        const auto result = vfs::execute::command_line_sync(command);
 
-        // logger::info<logger::domain::vfs>("COMMAND({})", command);
-        Glib::spawn_command_line_sync(command);
-
-        if (!std::filesystem::exists(thumbnail_file))
+        if (result.exit_status != 0 || !std::filesystem::exists(thumbnail_file))
         {
             logger::error<logger::domain::vfs>("Failed to create thumbnail for '{}'", file->name());
             return nullptr;

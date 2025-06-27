@@ -28,6 +28,7 @@
 #include "utils/shell-quote.hxx"
 
 #include "vfs/clipboard.hxx"
+#include "vfs/execute.hxx"
 
 #include "logger.hxx"
 
@@ -49,9 +50,7 @@ vfs::clipboard::clear() noexcept
         return;
     }
 
-    const auto command = std::format(R"({} -c)", binary);
-
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async(R"({} -c)", binary);
 }
 
 void
@@ -77,9 +76,7 @@ vfs::clipboard::set_text(const std::string_view data) noexcept
         return;
     }
 
-    const auto command = std::format(R"({} -- {})", binary, utils::shell_quote(data));
-
-    Glib::spawn_command_line_async(command);
+    vfs::execute::command_line_async(R"({} -- {})", binary, utils::shell_quote(data));
 }
 
 std::optional<vfs::clipboard::clipboard_data>
@@ -110,21 +107,16 @@ vfs::clipboard::get_text() noexcept
         return std::nullopt;
     }
 
-    const auto command = std::format(R"({} --no-newline)", binary);
-
-    i32 exit_status = 0;
-    std::string standard_output;
-    std::string standard_error;
-    Glib::spawn_command_line_sync(command, &standard_output, &standard_error, exit_status.unwrap());
+    const auto result = vfs::execute::command_line_sync(R"({} --no-newline)", binary);
 
 #if defined(DEV_MODE) && __has_feature(address_sanitizer)
-    if (standard_output.empty())
+    if (result.standard_output.empty())
 #else
-    if (exit_status != 0 || standard_output.empty())
+    if (result.exit_status != 0 || result.standard_output.empty())
 #endif
     {
         return std::nullopt;
     }
 
-    return standard_output;
+    return result.standard_output;
 }

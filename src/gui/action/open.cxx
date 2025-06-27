@@ -41,6 +41,7 @@
 #include "gui/dialog/text.hxx"
 
 #include "vfs/app-desktop.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/file.hxx"
 
 #include "logger.hxx"
@@ -170,7 +171,7 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
         if (!xnever && file->mime_type()->is_executable() &&
             (browser->settings_->click_executes || xforce))
         {
-            Glib::spawn_command_line_async(file->path());
+            vfs::execute::command_line_async(file->path().string());
             if (browser)
             {
                 browser->signal_open_file().emit(browser,

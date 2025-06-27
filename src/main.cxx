@@ -29,6 +29,8 @@
 
 #include "commandline/commandline.hxx"
 
+#include "vfs/execute.hxx"
+
 #if defined(HAVE_SOCKET)
 #include "socket/server.hxx"
 #endif
@@ -281,10 +283,9 @@ main(int argc, char* argv[]) noexcept
                 logger::error("Not a directory: '{}'", file.string());
                 continue;
             }
-            const auto command = std::format("{} socket set new-tab {}",
+            vfs::execute::command_line_async("{} socket set new-tab {}",
                                              vfs::linux::proc::self::exe().string(),
                                              ::utils::shell_quote(file.string()));
-            Glib::spawn_command_line_sync(command);
         }
 
         std::exit(EXIT_SUCCESS);

@@ -59,6 +59,7 @@
 
 #include "vfs/app-desktop.hxx"
 #include "vfs/clipboard.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/mime-monitor.hxx"
 #include "vfs/mime-type.hxx"
 #include "vfs/user-dirs.hxx"
@@ -1972,8 +1973,10 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 }
 
                 // need to copy
-                command = std::format("cp -a  {} {}", share_desktop->string(), path.string());
-                Glib::spawn_command_line_sync(command);
+                [[maybe_unused]] const auto result =
+                    vfs::execute::command_line_sync("cp -a  {} {}",
+                                                    share_desktop->string(),
+                                                    path.string());
                 if (!std::filesystem::exists(path))
                 {
                     return;
@@ -2208,14 +2211,10 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
         }
         case gui::file_menu::app_job::update:
         {
-            const auto data_dir = vfs::user::data();
-            command = std::format("update-mime-database {}/mime", data_dir.string());
-            logger::info<logger::domain::gui>("COMMAND({})", command);
-            Glib::spawn_command_line_async(command);
-
-            command = std::format("update-desktop-database {}/applications", data_dir.string());
-            logger::info<logger::domain::gui>("COMMAND({})", command);
-            Glib::spawn_command_line_async(command);
+            vfs::execute::command_line_async("update-mime-database {}/mime",
+                                             vfs::user::data().string());
+            vfs::execute::command_line_async("update-desktop-database {}/applications",
+                                             vfs::user::data().string());
             break;
         }
         case gui::file_menu::app_job::usr:

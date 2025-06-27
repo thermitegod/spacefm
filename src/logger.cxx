@@ -54,6 +54,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
 #endif
             {logger::domain::autosave, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t%v%$"}},
             {logger::domain::signals, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+            {logger::domain::execute, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
             {logger::domain::socket, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
             {logger::domain::gui, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
             {logger::domain::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},

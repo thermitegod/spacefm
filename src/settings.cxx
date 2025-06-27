@@ -37,6 +37,7 @@
 #include "gui/main-window.hxx"
 
 #include "vfs/app-desktop.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/mime-type.hxx"
 #include "vfs/terminals.hxx"
 #include "vfs/user-dirs.hxx"
@@ -69,15 +70,12 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
     const auto command_script = std::filesystem::path() / DEV_SCRIPTS_PATH / "config-update-git";
     if (std::filesystem::exists(command_script))
     {
-        const auto command_args =
-            std::format("{} --config-dir {} --config-file {} --config-version {}",
-                        command_script.string(),
-                        vfs::program::config().string(),
-                        config::disk_format::filename,
-                        config::disk_format::version);
-
-        logger::debug<logger::domain::dev>("SCRIPT({})", command_script.string());
-        Glib::spawn_command_line_sync(command_args);
+        [[maybe_unused]] const auto result = vfs::execute::command_line_sync(
+            "{} --config-dir {} --config-file {} --config-version {}",
+            command_script.string(),
+            vfs::program::config().string(),
+            config::disk_format::filename,
+            config::disk_format::version);
     }
 #endif
 

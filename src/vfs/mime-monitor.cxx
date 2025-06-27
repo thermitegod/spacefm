@@ -15,19 +15,16 @@
 
 #include <filesystem>
 #include <format>
-#include <functional>
 #include <memory>
-#include <string>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "vfs/dir.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/mime-monitor.hxx"
 #include "vfs/user-dirs.hxx"
-
-#include "logger.hxx"
 
 namespace global
 {
@@ -83,15 +80,9 @@ mime_monitor::on_mime_change_timer(void* user_data) noexcept
     (void)user_data;
 
     // logger::debug<logger::domain::vfs>("MIME-UPDATE on_timer");
-    const auto data_dir = vfs::user::data();
-    const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
-    logger::info<logger::domain::vfs>("COMMAND({})", command1);
-    Glib::spawn_command_line_async(command1);
-
-    const std::string command2 =
-        std::format("update-desktop-database {}/applications", data_dir.string());
-    logger::info<logger::domain::vfs>("COMMAND({})", command2);
-    Glib::spawn_command_line_async(command2);
+    vfs::execute::command_line_async("update-mime-database {}/mime", vfs::user::data().string());
+    vfs::execute::command_line_async("update-desktop-database {}/applications",
+                                     vfs::user::data().string());
 
     g_source_remove(global::mime_change_timer.data());
     global::mime_change_timer = 0;

@@ -16,7 +16,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <chrono>
 #include <filesystem>
 #include <format>
@@ -49,12 +48,12 @@
 
 #include "gui/dialog/text.hxx"
 
+#include "vfs/execute.hxx"
 #include "vfs/volume.hxx"
 
 #include "vfs/linux/self.hxx"
 #include "vfs/utils/utils.hxx"
 
-#include "logger.hxx"
 #include "types.hxx"
 
 // This limits the small icon size for side panes and task list
@@ -874,11 +873,9 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
                 }
                 else
                 {
-                    const std::string exe = vfs::linux::proc::self::exe();
-                    const std::string qpath = ::utils::shell_quote(volume->mount_point());
-                    const std::string command = std::format("{} {}", exe, qpath);
-                    logger::info<logger::domain::gui>("COMMAND({})", command);
-                    Glib::spawn_command_line_async(command);
+                    vfs::execute::command_line_async("{} {}",
+                                                     vfs::linux::proc::self::exe().string(),
+                                                     ::utils::shell_quote(volume->mount_point()));
                 }
             }
             break;
@@ -1088,11 +1085,9 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     else
     {
-        const std::string exe = vfs::linux::proc::self::exe();
-        const std::string qpath = ::utils::shell_quote(vol->mount_point());
-        const std::string command = std::format("{} {}", exe, qpath);
-        logger::info<logger::domain::gui>("COMMAND({})", command);
-        Glib::spawn_command_line_async(command);
+        vfs::execute::command_line_async("{} {}",
+                                         vfs::linux::proc::self::exe().string(),
+                                         ::utils::shell_quote(vol->mount_point()));
     }
 }
 

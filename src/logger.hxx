@@ -30,6 +30,7 @@ enum class domain : std::uint8_t
     dev,
     autosave,
     signals,
+    execute,
     socket,
     gui,
     vfs,
