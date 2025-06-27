@@ -60,22 +60,6 @@
 #include "logger.hxx"
 #include "types.hxx"
 
-#if 0
-static bool
-delayed_show_menu(GtkWidget* menu) noexcept
-{
-    MainWindow* main_window = main_window_get_last_active();
-    if (main_window)
-    {
-        gtk_window_present(GTK_WINDOW(main_window));
-    }
-    gtk_widget_show_all(GTK_WIDGET(menu));
-    gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-    g_signal_connect(G_OBJECT(menu), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-    return false;
-}
-#endif
-
 std::tuple<i32, std::string>
 socket::command(const std::string_view socket_commands_json) noexcept
 {

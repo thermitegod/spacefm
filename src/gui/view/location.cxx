@@ -1689,14 +1689,6 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event,
     return true;
 }
 
-#if 0
-static i32
-cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::volume>& b) noexcept
-{
-    return a->display_name().compare(b->display_name());
-}
-#endif
-
 void
 gui::view::location::dev_menu(GtkWidget* parent, gui::browser* browser, GtkWidget* menu) noexcept
 { // add currently visible devices to menu with dev design mode callback

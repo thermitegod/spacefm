@@ -210,31 +210,3 @@ save_settings(const std::shared_ptr<config::settings>& settings) noexcept
 
     config::save(vfs::program::config() / config::disk_format::filename, settings);
 }
-
-#if 0
-void
-multi_input_select_region(GtkWidget* input, i32 start, i32 end) noexcept
-{
-    GtkTextIter iter, siter;
-
-    if (start < 0 || !GTK_IS_TEXT_VIEW(input))
-    {
-        return;
-    }
-
-    GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
-
-    gtk_text_buffer_get_iter_at_offset(buf, &siter, start);
-
-    if (end < 0)
-    {
-        gtk_text_buffer_get_end_iter(buf, &iter);
-    }
-    else
-    {
-        gtk_text_buffer_get_iter_at_offset(buf, &iter, end);
-    }
-
-    gtk_text_buffer_select_range(buf, &iter, &siter);
-}
-#endif
