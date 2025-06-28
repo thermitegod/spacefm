@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <format>
@@ -35,8 +34,6 @@
 #include "socket/commands.hxx"
 #include "socket/datatypes.hxx"
 
-#include "utils/shell-quote.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/clipboard.hxx"
@@ -46,6 +43,7 @@
 #include "gui/view/file-task.hxx"
 
 #include "vfs/clipboard.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/file-task.hxx"
 #include "vfs/terminals.hxx"
 #include "vfs/volume.hxx"
@@ -1161,7 +1159,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             std::string text;
             for (const auto& file : files)
             {
-                text.append(::utils::shell_quote(file.string()));
+                text.append(vfs::execute::quote(file.string()));
                 text.append(" ");
             }
             text = ztd::strip(text);
@@ -1184,7 +1182,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 {
                     continue;
                 }
-                str.append(std::format("{} ", ::utils::shell_quote(file->name())));
+                str.append(std::format("{} ", vfs::execute::quote(file->name())));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }

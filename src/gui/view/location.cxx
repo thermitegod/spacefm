@@ -33,8 +33,6 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "utils/shell-quote.hxx"
-
 #include "settings/settings.hxx"
 
 #include "xset/xset-context-menu.hxx"
@@ -875,7 +873,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
                 {
                     vfs::execute::command_line_async("{} {}",
                                                      vfs::linux::proc::self::exe().string(),
-                                                     ::utils::shell_quote(volume->mount_point()));
+                                                     vfs::execute::quote(volume->mount_point()));
                 }
             }
             break;
@@ -1087,7 +1085,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     {
         vfs::execute::command_line_async("{} {}",
                                          vfs::linux::proc::self::exe().string(),
-                                         ::utils::shell_quote(vol->mount_point()));
+                                         vfs::execute::quote(vol->mount_point()));
     }
 }
 

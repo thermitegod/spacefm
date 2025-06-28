@@ -444,7 +444,6 @@ sources += files(
     'src/settings/upgrade/config-upgrade.cxx',
 
     'src/utils/permissions.cxx',
-    'src/utils/shell-quote.cxx',
     'src/utils/strdup.cxx',
 
     'src/gui/archiver.cxx',

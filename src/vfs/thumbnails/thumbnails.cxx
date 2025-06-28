@@ -28,8 +28,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "vfs/execute.hxx"
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
@@ -161,16 +159,16 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             {
                 command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                       thumbnail_create_size,
-                                      ::utils::shell_quote(file->path().string()),
-                                      ::utils::shell_quote(thumbnail_file.string()));
+                                      vfs::execute::quote(file->path().string()),
+                                      vfs::execute::quote(thumbnail_file.string()));
                 break;
             }
             case thumbnail_mode::video:
             {
                 command = std::format("ffmpegthumbnailer -f -s {} -i {} -o {}",
                                       thumbnail_create_size,
-                                      ::utils::shell_quote(file->path().string()),
-                                      ::utils::shell_quote(thumbnail_file.string()));
+                                      vfs::execute::quote(file->path().string()),
+                                      vfs::execute::quote(thumbnail_file.string()));
                 break;
             }
         }

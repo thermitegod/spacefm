@@ -28,8 +28,6 @@
 #include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "vfs/execute.hxx"
 
 #include "logger.hxx"
@@ -62,7 +60,7 @@ run_dialog_sync(const std::string_view program, const auto& request) noexcept
 
     const auto result = vfs::execute::command_line_sync(R"({} --json {})",
                                                         binary,
-                                                        utils::shell_quote(buffer.value()));
+                                                        vfs::execute::quote(buffer.value()));
 
 #if defined(DEV_MODE) && __has_feature(address_sanitizer)
     if (result.standard_output.empty())
@@ -111,7 +109,9 @@ run_dialog_async(const std::string_view program, const auto& request) noexcept
         return;
     }
 
-    vfs::execute::command_line_async(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
+    vfs::execute::command_line_async(R"({} --json {})",
+                                     binary,
+                                     vfs::execute::quote(buffer.value()));
 }
 
 inline void

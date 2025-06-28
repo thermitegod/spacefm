@@ -29,13 +29,12 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/main-window.hxx"
 
 #include "vfs/device.hxx"
+#include "vfs/execute.hxx"
 #include "vfs/volume.hxx"
 
 #include "vfs/libudevpp/libudevpp.hxx"
@@ -745,7 +744,7 @@ vfs::volume::device_mount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), ::utils::shell_quote(this->device_file_));
+    return std::format("{} {}", path.string(), vfs::execute::quote(this->device_file_));
 }
 
 std::optional<std::string>
@@ -756,7 +755,7 @@ vfs::volume::device_unmount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), ::utils::shell_quote(this->mount_point_));
+    return std::format("{} {}", path.string(), vfs::execute::quote(this->mount_point_));
 }
 
 std::string_view

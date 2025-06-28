@@ -35,8 +35,6 @@
 #include "socket/server.hxx"
 #endif
 
-#include "utils/shell-quote.hxx"
-
 #include "settings/config.hxx"
 #include "settings/settings.hxx"
 
@@ -285,7 +283,7 @@ main(int argc, char* argv[]) noexcept
             }
             vfs::execute::command_line_async("{} socket set new-tab {}",
                                              vfs::linux::proc::self::exe().string(),
-                                             ::utils::shell_quote(file.string()));
+                                             vfs::execute::quote(file.string()));
         }
 
         std::exit(EXIT_SUCCESS);

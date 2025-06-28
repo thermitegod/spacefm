@@ -28,8 +28,6 @@
 
 #include "datatypes/external-dialog.hxx"
 
-#include "utils/shell-quote.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/file-browser.hxx"
@@ -112,15 +110,15 @@ gui::dialog::rename_files(gui::browser* browser, const std::filesystem::path& cw
         if (std::filesystem::is_directory(source))
         {
             ptask->task->exec_command = std::format("cp -Pfr {} {}",
-                                                    ::utils::shell_quote(source),
-                                                    ::utils::shell_quote(dest));
+                                                    vfs::execute::quote(source),
+                                                    vfs::execute::quote(dest));
         }
         else
         {
             ptask->task->exec_command = std::format("cp -Pf{} {} {}",
                                                     over_opt,
-                                                    ::utils::shell_quote(source),
-                                                    ::utils::shell_quote(dest));
+                                                    vfs::execute::quote(source),
+                                                    vfs::execute::quote(dest));
         }
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
@@ -134,15 +132,13 @@ gui::dialog::rename_files(gui::browser* browser, const std::filesystem::path& cw
 
         if (overwrite)
         {
-            ptask->task->exec_command = std::format("ln -sf {} {}",
-                                                    ::utils::shell_quote(source),
-                                                    ::utils::shell_quote(dest));
+            ptask->task->exec_command =
+                std::format("ln -sf {} {}", vfs::execute::quote(source), vfs::execute::quote(dest));
         }
         else
         {
-            ptask->task->exec_command = std::format("ln -s {} {}",
-                                                    ::utils::shell_quote(source),
-                                                    ::utils::shell_quote(dest));
+            ptask->task->exec_command =
+                std::format("ln -s {} {}", vfs::execute::quote(source), vfs::execute::quote(dest));
         }
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
@@ -156,14 +152,13 @@ gui::dialog::rename_files(gui::browser* browser, const std::filesystem::path& cw
 
         if (overwrite)
         {
-            ptask->task->exec_command = std::format("mv -f {} {}",
-                                                    ::utils::shell_quote(source),
-                                                    ::utils::shell_quote(dest));
+            ptask->task->exec_command =
+                std::format("mv -f {} {}", vfs::execute::quote(source), vfs::execute::quote(dest));
         }
         else
         {
             ptask->task->exec_command =
-                std::format("mv {} {}", ::utils::shell_quote(source), ::utils::shell_quote(dest));
+                std::format("mv {} {}", vfs::execute::quote(source), vfs::execute::quote(dest));
         }
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;

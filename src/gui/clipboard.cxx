@@ -30,14 +30,13 @@
 #include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "gui/clipboard.hxx"
 #include "gui/file-task.hxx"
 
 #include "gui/dialog/text.hxx"
 
 #include "vfs/clipboard.hxx"
+#include "vfs/execute.hxx"
 
 void
 gui::clipboard::copy_text(const std::string_view text) noexcept
@@ -52,7 +51,7 @@ gui::clipboard::copy_as_text(
     std::string text;
     for (const auto& file : selected_files)
     {
-        text.append(::utils::shell_quote(file->path().string()));
+        text.append(vfs::execute::quote(file->path().string()));
         text.append(" ");
     }
     text = ztd::strip(text);
@@ -66,7 +65,7 @@ gui::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> sele
     std::string text;
     for (const auto& file : selected_files)
     {
-        text.append(::utils::shell_quote(file->name()));
+        text.append(vfs::execute::quote(file->name()));
         text.append(" ");
     }
     text = ztd::strip(text);

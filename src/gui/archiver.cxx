@@ -21,8 +21,6 @@
 
 #include <glibmm.h>
 
-#include "utils/shell-quote.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/archiver.hxx"
@@ -50,7 +48,7 @@ archiver_create_shell_file_list(
     std::string file_list;
     for (const auto& file : selected_files)
     {
-        file_list.append(::utils::shell_quote(file->path().string()));
+        file_list.append(vfs::execute::quote(file->path().string()));
         file_list.append(" ");
     }
     return file_list;
@@ -92,7 +90,7 @@ gui::archiver::extract(gui::browser* browser,
     else
     {
         command.append(
-            std::format("--extract-to={} ", ::utils::shell_quote(browser->cwd().string())));
+            std::format("--extract-to={} ", vfs::execute::quote(browser->cwd().string())));
     }
     command.append(shell_file_list);
 

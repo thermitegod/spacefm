@@ -27,8 +27,6 @@
 
 #include "datatypes/external-dialog.hxx"
 
-#include "utils/shell-quote.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/file-browser.hxx"
@@ -100,15 +98,13 @@ gui::dialog::create_files(gui::browser* browser, const std::filesystem::path& cw
 
         if (overwrite)
         {
-            ptask->task->exec_command = std::format("ln -sf {} {}",
-                                                    ::utils::shell_quote(target),
-                                                    ::utils::shell_quote(dest));
+            ptask->task->exec_command =
+                std::format("ln -sf {} {}", vfs::execute::quote(target), vfs::execute::quote(dest));
         }
         else
         {
-            ptask->task->exec_command = std::format("ln -s {} {}",
-                                                    ::utils::shell_quote(target),
-                                                    ::utils::shell_quote(dest));
+            ptask->task->exec_command =
+                std::format("ln -s {} {}", vfs::execute::quote(target), vfs::execute::quote(dest));
         }
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
@@ -128,11 +124,11 @@ gui::dialog::create_files(gui::browser* browser, const std::filesystem::path& cw
         std::string over_cmd;
         if (overwrite)
         {
-            over_cmd = std::format("rm -f {} && ", ::utils::shell_quote(dest));
+            over_cmd = std::format("rm -f {} && ", vfs::execute::quote(dest));
         }
 
         gui::file_task* ptask = gui_file_exec_new("Create New File", parent, task_view);
-        ptask->task->exec_command = std::format("{}touch {}", over_cmd, ::utils::shell_quote(dest));
+        ptask->task->exec_command = std::format("{}touch {}", over_cmd, vfs::execute::quote(dest));
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
@@ -149,7 +145,7 @@ gui::dialog::create_files(gui::browser* browser, const std::filesystem::path& cw
     else if (mode == datatype::create::mode::dir)
     { // new directory task
         gui::file_task* ptask = gui_file_exec_new("Create New Directory", parent, task_view);
-        ptask->task->exec_command = std::format("mkdir {}", ::utils::shell_quote(dest));
+        ptask->task->exec_command = std::format("mkdir {}", vfs::execute::quote(dest));
         ptask->task->exec_sync = true;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;

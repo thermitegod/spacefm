@@ -32,8 +32,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "gui/file-task.hxx" // break vfs independence for exec_in_terminal
 
 #include "vfs/app-desktop.hxx"
@@ -332,7 +330,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(::utils::shell_quote(file.string()));
+                    argv.push_back(vfs::execute::quote(file.string()));
                 }
                 else
                 {
@@ -365,7 +363,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(::utils::shell_quote(file.string()));
+                    argv.push_back(vfs::execute::quote(file.string()));
                 }
                 else
                 {

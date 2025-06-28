@@ -25,8 +25,6 @@
 #include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
-#include "utils/shell-quote.hxx"
-
 #include "vfs/clipboard.hxx"
 #include "vfs/execute.hxx"
 
@@ -76,7 +74,7 @@ vfs::clipboard::set_text(const std::string_view data) noexcept
         return;
     }
 
-    vfs::execute::command_line_async(R"({} -- {})", binary, utils::shell_quote(data));
+    vfs::execute::command_line_async(R"({} -- {})", binary, vfs::execute::quote(data));
 }
 
 std::optional<vfs::clipboard::clipboard_data>

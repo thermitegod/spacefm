@@ -54,7 +54,6 @@
 #include "datatypes/datatypes.hxx"
 
 #include "utils/permissions.hxx"
-#include "utils/shell-quote.hxx"
 #include "utils/strdup.hxx"
 
 #include "settings/settings.hxx"
@@ -5247,8 +5246,7 @@ gui::browser::on_permission(GtkMenuItem* item,
     std::string file_paths;
     for (const auto& file : selected_files)
     {
-        const std::string file_path = ::utils::shell_quote(file->name());
-        file_paths = std::format("{} {}", file_paths, file_path);
+        file_paths = std::format("{} {}", file_paths, vfs::execute::quote(file->name()));
     }
 
     // task

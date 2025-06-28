@@ -36,7 +36,6 @@
 #include <ztd/ztd.hxx>
 
 #include "utils/permissions.hxx"
-#include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 
@@ -1182,7 +1181,7 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
 
         const auto command =
             vfs::terminals::create_command(terminal_s.value(),
-                                           ::utils::shell_quote(this->exec_command));
+                                           vfs::execute::quote(this->exec_command));
         if (!command)
         {
             logger::error<logger::domain::vfs>("Failed to create terminal command: {}",

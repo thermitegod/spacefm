@@ -18,9 +18,21 @@
 
 #include <glibmm.h>
 
+#include <ztd/ztd.hxx>
+
 #include "vfs/execute.hxx"
 
 #include "logger.hxx"
+
+std::string
+vfs::execute::quote(const std::string_view str) noexcept
+{
+    if (str.empty())
+    {
+        return R"("")";
+    }
+    return std::format(R"("{}")", ztd::replace(str, "\"", "\\\""));
+}
 
 vfs::execute::sync_data
 vfs::execute::command_line_sync(const std::string_view command) noexcept

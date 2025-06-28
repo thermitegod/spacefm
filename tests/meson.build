@@ -14,7 +14,6 @@ test_sources += files(
     'spacefm/logger.cxx',
 
     'spacefm/utils/permissions.cxx',
-    'spacefm/utils/shell-quote.cxx',
 
     # Settings
     'spacefm/settings/settings.cxx',
@@ -51,6 +50,7 @@ test_sources += files(
     'src/vfs/utils/test-file-ops.cxx',
     'src/vfs/test-clipboard.cxx',
     'src/vfs/test-error.cxx',
+    'src/vfs/test-execute.cxx',
 )
 
 ## Build
