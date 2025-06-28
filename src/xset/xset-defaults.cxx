@@ -2634,18 +2634,6 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::tab_new, GDK_KEY_t, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::tab_restore, GDK_KEY_T, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::tab_close, GDK_KEY_w, GdkModifierType::GDK_CONTROL_MASK);
-#if (GTK_MAJOR_VERSION == 4)
-    def_key(keysets, xset::name::tab_1, GDK_KEY_1, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_2, GDK_KEY_2, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_3, GDK_KEY_3, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_4, GDK_KEY_4, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_5, GDK_KEY_5, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_6, GDK_KEY_6, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_7, GDK_KEY_7, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_8, GDK_KEY_8, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_9, GDK_KEY_9, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::tab_10, GDK_KEY_0, GdkModifierType::GDK_ALT_MASK);
-#elif (GTK_MAJOR_VERSION == 3)
     def_key(keysets, xset::name::tab_1, GDK_KEY_1, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::tab_2, GDK_KEY_2, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::tab_3, GDK_KEY_3, GdkModifierType::GDK_MOD1_MASK);
@@ -2656,7 +2644,6 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::tab_8, GDK_KEY_8, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::tab_9, GDK_KEY_9, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::tab_10, GDK_KEY_0, GdkModifierType::GDK_MOD1_MASK);
-#endif
     def_key(keysets, xset::name::edit_cut, GDK_KEY_x, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::edit_copy, GDK_KEY_c, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::edit_paste, GDK_KEY_v, GdkModifierType::GDK_CONTROL_MASK);
@@ -2664,34 +2651,20 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::edit_batch_rename, GDK_KEY_F2, GdkModifierType::GDK_SHIFT_MASK);
     def_key(keysets, xset::name::edit_delete, GDK_KEY_Delete, GdkModifierType::GDK_SHIFT_MASK);
     def_key(keysets, xset::name::edit_trash, GDK_KEY_Delete, GdkModifierType(0));
-#if (GTK_MAJOR_VERSION == 4)
-    def_key(keysets, xset::name::copy_name, GDK_KEY_C, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_ALT_MASK));
-#elif (GTK_MAJOR_VERSION == 3)
     def_key(keysets, xset::name::copy_name, GDK_KEY_C, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_MOD1_MASK));
-#endif
     def_key(keysets, xset::name::copy_path, GDK_KEY_C, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::paste_link, GDK_KEY_V, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::paste_as, GDK_KEY_A, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::select_all, GDK_KEY_A, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::main_terminal, GDK_KEY_F4, GdkModifierType(0));
     def_key(keysets, xset::name::go_home, GDK_KEY_Escape, GdkModifierType(0));
-#if (GTK_MAJOR_VERSION == 4)
-    def_key(keysets, xset::name::go_back, GDK_KEY_Left, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::go_forward, GDK_KEY_Right, GdkModifierType::GDK_ALT_MASK);
-    def_key(keysets, xset::name::go_up, GDK_KEY_Up, GdkModifierType::GDK_ALT_MASK);
-#elif (GTK_MAJOR_VERSION == 3)
     def_key(keysets, xset::name::go_back, GDK_KEY_Left, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::go_forward, GDK_KEY_Right, GdkModifierType::GDK_MOD1_MASK);
     def_key(keysets, xset::name::go_up, GDK_KEY_Up, GdkModifierType::GDK_MOD1_MASK);
-#endif
     def_key(keysets, xset::name::focus_path_bar, GDK_KEY_l, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::focus_search_bar, GDK_KEY_f, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::view_refresh, GDK_KEY_F5, GdkModifierType(0));
-#if (GTK_MAJOR_VERSION == 4)
-    def_key(keysets, xset::name::prop_info, GDK_KEY_Return, GdkModifierType::GDK_ALT_MASK);
-#elif (GTK_MAJOR_VERSION == 3)
     def_key(keysets, xset::name::prop_info, GDK_KEY_Return, GdkModifierType::GDK_MOD1_MASK);
-#endif
     def_key(keysets, xset::name::prop_perm, GDK_KEY_p, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::panel1_show_hidden, GDK_KEY_h, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::new_file, GDK_KEY_F, GdkModifierType(GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));

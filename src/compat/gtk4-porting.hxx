@@ -19,28 +19,6 @@
 
 #include <ztd/ztd.hxx>
 
-#if (GTK_MAJOR_VERSION == 4)
-
-// TODO
-//  - rename accel_group to shortcut_controller or controller. reusing the old name to avoid even more #if blocks.
-
-#define gtk_widget_show_all(widget) ((void)(widget))
-
-// https://docs.gtk.org/gtk4/migrating-3to4.html#reduce-the-use-of-gtk_widget_destroy
-// TODO - Need to replace with either gtk_container_remove() or g_object_unref()
-#define gtk_widget_destroy(widget) ((void)(widget))
-
-// clang-format off
-#define gtk_box_pack_start(box, child, expand, fill, padding) (gtk_box_prepend(GTK_BOX(box), GTK_WIDGET(child)))
-#define gtk_box_pack_end(box, child, expand, fill, padding) (gtk_box_append(GTK_BOX(box), GTK_WIDGET(child)))
-// clang-format on
-
-#define gtk_scrolled_window_new(hadjustment, vadjustment) gtk_scrolled_window_new()
-
-#endif
-
-#if (GTK_MAJOR_VERSION == 3)
-
 // Fake gtk4 compat apis go here
 guint gdk_key_event_get_keyval(GdkEvent* event) noexcept;
 GdkModifierType gdk_event_get_modifier_state(GdkEvent* event) noexcept;
@@ -66,5 +44,3 @@ gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y) noexcept;
 #define gtk_box_remove(container, widget)                   (gtk_container_remove(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 
 // clang-format on
-
-#endif

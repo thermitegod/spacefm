@@ -22,8 +22,6 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#if (GTK_MAJOR_VERSION == 3)
-
 guint
 gdk_key_event_get_keyval(GdkEvent* event) noexcept
 {
@@ -58,5 +56,3 @@ gdk_event_get_position(GdkEvent* event, double* x, double* y) noexcept
     *y = yy;
     return ret;
 }
-
-#endif

@@ -68,11 +68,7 @@ struct file_menu
     std::filesystem::path file_path;
     std::shared_ptr<vfs::file> file{nullptr};
     std::vector<std::shared_ptr<vfs::file>> selected_files;
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group{nullptr};
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group{nullptr};
-#endif
 };
 } // namespace gui
 
@@ -96,13 +92,8 @@ GtkWidget*
 gui_file_menu_new(gui::browser* browser,
                   const std::span<const std::shared_ptr<vfs::file>> selected_files = {}) noexcept;
 
-#if (GTK_MAJOR_VERSION == 4)
-void gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
-                                       GtkEventController* accel_group) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
 void gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group) noexcept;
-#endif
 
 void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, gui::file_menu* data) noexcept;
 

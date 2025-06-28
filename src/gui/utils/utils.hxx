@@ -20,9 +20,7 @@
 
 #include <ztd/ztd.hxx>
 
-#if (GTK_MAJOR_VERSION == 3)
 #define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
-#endif
 
 namespace gui::utils
 {

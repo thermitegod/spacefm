@@ -230,11 +230,7 @@ gui_file_exec_new(const std::string_view item_name, GtkWidget* parent,
     GtkWidget* parent_win = nullptr;
     if (parent)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
-#elif (GTK_MAJOR_VERSION == 3)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
-#endif
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
@@ -254,11 +250,7 @@ gui_file_exec_new(const std::string_view item_name, const std::filesystem::path&
     GtkWidget* parent_win = nullptr;
     if (parent)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
-#elif (GTK_MAJOR_VERSION == 3)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
-#endif
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
@@ -653,11 +645,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data) noexcept
     (void)entry;
     (void)user_data;
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     const auto set = xset::set::get(xset::name::separator);
     set->browser = nullptr;
@@ -1037,7 +1025,6 @@ gui::file_task::progress_open() noexcept
     gtk_window_set_default_size(GTK_WINDOW(this->progress_dlg), win_width, win_height);
 #endif
 
-#if (GTK_MAJOR_VERSION == 3)
     if (xset_get_b(xset::name::task_pop_top))
     {
         gtk_window_set_type_hint(GTK_WINDOW(this->progress_dlg_),
@@ -1058,7 +1045,6 @@ gui::file_task::progress_open() noexcept
     }
     gtk_window_set_gravity(GTK_WINDOW(this->progress_dlg_), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(this->progress_dlg_), GtkWindowPosition::GTK_WIN_POS_CENTER);
-#endif
 
     // clang-format off
     // gtk_dialog_set_default_response(this->progress_dlg, GtkResponseType::GTK_RESPONSE_OK);
@@ -1969,11 +1955,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, gui::file_task* ptas
                 const char* old_name =
                     static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
 
-#if (GTK_MAJOR_VERSION == 4)
-                GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
-#elif (GTK_MAJOR_VERSION == 3)
                 GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
-#endif
 
                 if (new_name && old_name && new_name.value() != old_name)
                 {
@@ -2004,11 +1986,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
         static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
     const bool can_rename = new_name && old_name && (new_name.value() != old_name);
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(query_input)));
-#elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(query_input));
-#endif
 
     GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "rename_button"));
     if (GTK_IS_WIDGET(rename_button))
@@ -2156,11 +2134,7 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, gui::file_task* pta
 static void
 on_query_button_press(GtkWidget* widget, gui::file_task* ptask) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
-#elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
-#endif
 
     GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "rename_button"));
     GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "auto_button"));
@@ -2386,11 +2360,9 @@ gui::file_task::query_overwrite() noexcept
     g_signal_connect(G_OBJECT(dlg), "response", G_CALLBACK(query_overwrite_response), this);
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
-#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dlg), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_gravity(GTK_WINDOW(dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-#endif
 
     gtk_widget_set_halign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_START);

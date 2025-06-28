@@ -935,11 +935,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 xset::name::task_queue,
             };
 
-#if (GTK_MAJOR_VERSION == 4)
-            GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
             GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
             gui::view::file_task::prepare_menu(main_window, popup);
 

@@ -722,11 +722,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 {
                     /* Accept the drop and perform file actions */
                     {
-#if (GTK_MAJOR_VERSION == 4)
-                        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
                         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
 
                         gui::file_task* ptask = gui_file_task_new(file_action,
                                                                   file_list,
@@ -868,13 +864,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
             std::uint32_t drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
         };
         ((struct _GdkDragContext*)drag_context)->suggested_action = suggested_action;
-#if (GTK_MAJOR_VERSION == 4)
-        gdk_drag_status(drag_context,
-                        suggested_action,
-                        gtk_event_controller_get_current_event_time());
-#elif (GTK_MAJOR_VERSION == 3)
         gdk_drag_status(drag_context, suggested_action, gtk_get_current_event_time());
-#endif
     }
     return false;
 }

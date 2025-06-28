@@ -40,15 +40,9 @@
 
 #include "autosave.hxx"
 
-#if (GTK_MAJOR_VERSION == 4)
-void
-xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
-              const std::vector<xset::name>& submenu_entries) noexcept
-#elif (GTK_MAJOR_VERSION == 3)
 void
 xset_add_menu(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
               const std::vector<xset::name>& submenu_entries) noexcept
-#endif
 {
     if (submenu_entries.empty())
     {
@@ -82,15 +76,9 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon) noe
     return item;
 }
 
-#if (GTK_MAJOR_VERSION == 4)
-GtkWidget*
-xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
-                  const xset_t& set) noexcept
-#elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
 xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   const xset_t& set) noexcept
-#endif
 {
     GtkWidget* item = nullptr;
     GtkWidget* submenu = nullptr;
@@ -214,21 +202,12 @@ xset_add_menuitem(gui::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
         }
         if (keyset->keybinding.key > 0 && accel_group)
         {
-#if (GTK_MAJOR_VERSION == 4)
-            logger::debug("TODO - PORT - accel_group");
-            // gtk_widget_add_controller(item, accel_group);
-            // gtk_shortcut_controller_add_shortcut(
-            //     GTK_SHORTCUT_CONTROLLER(accel_group),
-            //     gtk_shortcut_new(gtk_keyval_trigger_new(keyset->keybinding.key, (GdkModifierType)keyset->keybinding.modifier),
-            //                     gtk_callback_action_new(callback_func /* TODO */, nullptr, nullptr)))
-#elif (GTK_MAJOR_VERSION == 3)
             gtk_widget_add_accelerator(item,
                                        "activate",
                                        accel_group,
                                        keyset->keybinding.key.data(),
                                        (GdkModifierType)keyset->keybinding.modifier.data(),
                                        GTK_ACCEL_VISIBLE);
-#endif
         }
     }
 

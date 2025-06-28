@@ -33,13 +33,8 @@ u32
 gui::utils::get_keymod(GdkModifierType event) noexcept
 {
     return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-#if (GTK_MAJOR_VERSION == 4)
-                     GdkModifierType::GDK_ALT_MASK |
-#elif (GTK_MAJOR_VERSION == 3)
-                     GdkModifierType::GDK_MOD1_MASK |
-#endif
-                     GdkModifierType::GDK_SUPER_MASK | GdkModifierType::GDK_HYPER_MASK |
-                     GdkModifierType::GDK_META_MASK));
+                     GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
+                     GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 }
 
 i32

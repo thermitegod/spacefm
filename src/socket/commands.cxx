@@ -32,10 +32,6 @@
 
 #include <ztd/ztd.hxx>
 
-#if (GTK_MAJOR_VERSION == 4)
-#include "compat/gtk4-porting.hxx"
-#endif
-
 #include "socket/commands.hxx"
 #include "socket/datatypes.hxx"
 
@@ -193,11 +189,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else
             {
-#if (GTK_MAJOR_VERSION == 4)
-                return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
                 gtk_window_move(GTK_WINDOW(main_window), width.data(), height.data());
-#endif
             }
         }
         else if (property == "window-maximized")
@@ -693,12 +685,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             GtkEntry* path_bar = browser->path_bar();
 
-#if (GTK_MAJOR_VERSION == 4)
-            gtk_editable_set_text(GTK_EDITABLE(path_bar), value.data());
-#elif (GTK_MAJOR_VERSION == 3)
             gtk_entry_set_text(GTK_ENTRY(path_bar), value.data());
-#endif
-
             gtk_editable_set_position(GTK_EDITABLE(path_bar), -1);
             // gtk_editable_select_region(GTK_EDITABLE(path_bar), width, height);
             gtk_widget_grab_focus(GTK_WIDGET(path_bar));
@@ -851,14 +838,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "window-position")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
             i32 width = 0;
             i32 height = 0;
             gtk_window_get_position(GTK_WINDOW(main_window), width.unwrap(), height.unwrap());
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
-#endif
         }
         else if (property == "window-maximized")
         {
@@ -870,14 +853,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "screen-size")
         {
-#if (GTK_MAJOR_VERSION == 4)
-            return {SOCKET_INVALID, "Not Implemented"};
-#elif (GTK_MAJOR_VERSION == 3)
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
             return {SOCKET_SUCCESS, std::format("{}x{}", workarea.width, workarea.height)};
-#endif
         }
         else if (property == "window-vslider-top" || property == "window-vslider-bottom" ||
                  property == "window-hslider" || property == "window-tslider")
@@ -1164,12 +1143,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             GtkEntry* path_bar = browser->path_bar();
 
-#if (GTK_MAJOR_VERSION == 4)
-            const std::string text = gtk_editable_get_text(GTK_EDITABLE(path_bar));
-#elif (GTK_MAJOR_VERSION == 3)
             const std::string text = gtk_entry_get_text(GTK_ENTRY(path_bar));
-#endif
-
             return {SOCKET_SUCCESS, text};
         }
         else if (property == "clipboard-text" || property == "clipboard-primary-text")
@@ -1747,11 +1721,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_FAILURE, std::format("invalid task type '{}'", property)};
             }
 
-#if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
 
             gui::file_task* ptask = gui_file_task_new(task_type,
                                                       file_list,
@@ -1812,11 +1782,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             set = xset::set::get(set->child.value());
             GtkWidget* widget = gtk_menu_new();
 
-#if (GTK_MAJOR_VERSION == 4)
-            GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
             GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
             xset_add_menuitem(browser, GTK_WIDGET(widget), accel_group, set);
             g_idle_add((GSourceFunc)delayed_show_menu, widget);

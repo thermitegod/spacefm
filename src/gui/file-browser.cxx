@@ -401,12 +401,7 @@ on_search_bar_activate(GtkWidget* entry, gui::browser* browser)
 {
     (void)browser;
 
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
     if (text.empty())
     {
         return;
@@ -425,12 +420,7 @@ on_address_bar_focus_in(GtkWidget* entry, GdkEventFocus* evt, gui::browser* brow
 static void
 on_address_bar_activate(GtkWidget* entry, gui::browser* browser) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
     if (text.empty())
     {
         return;
@@ -683,12 +673,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, gui::browser* browser) n
 {
     (void)widget;
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
-
     xset_t set_radio = nullptr;
 
     {
@@ -919,13 +904,9 @@ gui_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view, MainW
 void
 gui::browser::update_tab_label() noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkBox* box = GTK_BOX(gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
     GtkEventBox* ebox =
         GTK_EVENT_BOX(gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this)));
     GtkBox* box = GTK_BOX(g_object_get_data(G_OBJECT(ebox), "box"));
-#endif
 
     GtkLabel* label = GTK_LABEL(g_object_get_data(G_OBJECT(box), "label"));
 
@@ -1247,13 +1228,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
         }
 
         // Alt - Left/Right Click
-        if (
-#if (GTK_MAJOR_VERSION == 4)
-            (keymod.data() == GdkModifierType::GDK_ALT_MASK)
-#elif (GTK_MAJOR_VERSION == 3)
-            (keymod.data() == GdkModifierType::GDK_MOD1_MASK)
-#endif
-            && (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
+        if ((keymod.data() == GdkModifierType::GDK_MOD1_MASK) &&
+            (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
         {
             if (button == GDK_BUTTON_PRIMARY)
             {
@@ -1420,12 +1396,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event,
 
     if (browser->is_drag_ || button != 1 || browser->skip_release_ ||
         (keymod.data() & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-#if (GTK_MAJOR_VERSION == 4)
-                          GdkModifierType::GDK_ALT_MASK
-#elif (GTK_MAJOR_VERSION == 3)
-                          GdkModifierType::GDK_MOD1_MASK
-#endif
-                          )))
+                          GdkModifierType::GDK_MOD1_MASK)))
     {
         if (browser->skip_release_)
         {
@@ -1459,11 +1430,7 @@ on_dir_tree_update_sel(gui::browser* browser) noexcept
         {
             if (browser->chdir(dir_path.value()))
             {
-#if (GTK_MAJOR_VERSION == 4)
-                gtk_editable_set_text(GTK_EDITABLE(browser->path_bar_), dir_path->c_str());
-#elif (GTK_MAJOR_VERSION == 3)
                 gtk_entry_set_text(GTK_ENTRY(browser->path_bar_), dir_path->c_str());
-#endif
             }
         }
     }
@@ -2093,11 +2060,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     {
                         // logger::info<logger::domain::gui>("DnD dest_dir = {}", dest_dir);
 
-#if (GTK_MAJOR_VERSION == 4)
-                        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
-#elif (GTK_MAJOR_VERSION == 3)
                         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
-#endif
 
                         gui::file_task* ptask = gui_file_task_new(file_action,
                                                                   file_list,
@@ -2674,11 +2637,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
     const auto& cwd = this->cwd();
     if (!this->inhibit_focus_)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
-#elif (GTK_MAJOR_VERSION == 3)
         gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
-#endif
     }
 
     gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_back), this->history_->has_back());
@@ -3561,11 +3520,7 @@ gui::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
             file_list.push_back(file->path());
         }
 
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
 
         // task
         gui::file_task* ptask = gui_file_task_new(file_action,
@@ -3699,11 +3654,7 @@ gui::browser::set_sort_extra(xset::name setname) const noexcept
 void
 gui::browser::paste_link() const noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
 
     gui::clipboard::paste_links(GTK_WINDOW(parent_win),
                                 this->cwd(),
@@ -3713,11 +3664,7 @@ gui::browser::paste_link() const noexcept
 void
 gui::browser::paste_target() const noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
-#elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
-#endif
 
     gui::clipboard::paste_targets(GTK_WINDOW(parent_win),
                                   this->cwd(),
@@ -4488,11 +4435,7 @@ void
 gui::browser::rebuild_toolbars() const noexcept
 {
     const auto& cwd = this->cwd();
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
-#elif (GTK_MAJOR_VERSION == 3)
     gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
-#endif
 }
 
 void

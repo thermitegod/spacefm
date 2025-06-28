@@ -51,11 +51,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
     (void)event;
     (void)user_data;
 
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
 
     const auto keyval = gdk_key_event_get_keyval(event);
     if (keyval == GDK_KEY_Return)
@@ -75,11 +71,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
             browser->update_model(text);
         }
 
-#if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(entry), "");
-#elif (GTK_MAJOR_VERSION == 3)
         gtk_entry_set_text(GTK_ENTRY(entry), "");
-#endif
 
         browser->focus(gui::browser::focus_widget::filelist);
     }
@@ -97,11 +89,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, gui::browser* browser) noexcep
         return;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     {
         const auto set = xset::set::get(xset::name::separator);

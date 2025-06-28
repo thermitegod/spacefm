@@ -896,12 +896,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noex
 void
 MainWindow::rebuild_menu_file(gui::browser* browser) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
-
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_new_window, (GFunc)on_new_window_activate, this);
     xset_set_cb(xset::name::main_search, (GFunc)on_find_file_activate, this);
@@ -1024,11 +1019,7 @@ MainWindow::rebuild_menu_view(gui::browser* browser) noexcept
         set->disable = (this->curpanel == panel_4);
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     gui::view::file_task::prepare_menu(this, newmenu);
 
@@ -1067,12 +1058,7 @@ void
 MainWindow::rebuild_menu_device(gui::browser* browser) noexcept
 {
     GtkWidget* newmenu = gtk_menu_new();
-
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     {
         const auto set = xset::set::get(xset::name::main_dev);
@@ -1108,12 +1094,7 @@ MainWindow::rebuild_menu_device(gui::browser* browser) noexcept
 void
 MainWindow::rebuild_menu_bookmarks(gui::browser* browser) const noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
-
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::book_add, (GFunc)gui::view::bookmark::add_callback, browser);
     xset_set_cb(xset::name::main_bookmarks, (GFunc)on_bookmark_manager_activate, nullptr);
@@ -1158,12 +1139,7 @@ MainWindow::rebuild_menu_bookmarks(gui::browser* browser) const noexcept
 void
 MainWindow::rebuild_menu_help(gui::browser* browser) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
-
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_about, (GFunc)on_about_activate, this);
     xset_add_menu(browser, newmenu, accel_group, {xset::name::main_about});
@@ -1228,18 +1204,10 @@ main_window_init(MainWindow* main_window) noexcept
 
     main_window->main_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
 
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_box_prepend(GTK_BOX(main_window), GTK_WIDGET(main_window->main_vbox));
-#elif (GTK_MAJOR_VERSION == 3)
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(main_window->main_vbox));
-#endif
 
     // Create menu bar
-#if (GTK_MAJOR_VERSION == 4)
-    main_window->accel_group_ = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     main_window->accel_group_ = gtk_accel_group_new();
-#endif
     main_window->menu_bar = gtk_menu_bar_new();
     GtkBox* menu_hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_box_pack_start(menu_hbox, main_window->menu_bar, true, true, 0);
@@ -1590,12 +1558,7 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, gui::browser* browser) noex
         else if (button == GDK_BUTTON_SECONDARY)
         {
             GtkWidget* popup = gtk_menu_new();
-
-#if (GTK_MAJOR_VERSION == 4)
-            GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
             GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
             {
                 const auto set = xset::set::get(xset::name::tab_close);
@@ -1679,10 +1642,8 @@ GtkWidget*
 MainWindow::create_tab_label(gui::browser* browser) const noexcept
 {
     /* Create tab label */
-#if (GTK_MAJOR_VERSION == 3)
     GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-#endif
 
     GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkWidget* icon = gtk_image_new_from_icon_name("folder", GtkIconSize::GTK_ICON_SIZE_MENU);
@@ -1719,10 +1680,8 @@ MainWindow::create_tab_label(gui::browser* browser) const noexcept
         // clang-format on
     }
 
-#if (GTK_MAJOR_VERSION == 3)
     gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(box));
     g_object_set_data(G_OBJECT(ebox), "box", box);
-#endif
 
     gtk_widget_set_events(GTK_WIDGET(box), GdkEventMask::GDK_ALL_EVENTS_MASK);
     gtk_drag_dest_set(
@@ -1737,24 +1696,13 @@ MainWindow::create_tab_label(gui::browser* browser) const noexcept
     g_object_set_data(G_OBJECT(box), "icon", icon);
 
     // clang-format off
-#if (GTK_MAJOR_VERSION == 4)
-    g_signal_connect(G_OBJECT(box), "drag-motion", G_CALLBACK(on_tab_drag_motion), browser);
-    g_signal_connect(G_OBJECT(box), "button-press-event", G_CALLBACK(notebook_clicked), browser);
-
-    gtk_widget_show_all(GTK_WIDGET(box));
-#elif (GTK_MAJOR_VERSION == 3)
     g_signal_connect(G_OBJECT(ebox), "drag-motion", G_CALLBACK(on_tab_drag_motion), browser);
     g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(notebook_clicked), browser);
 
     gtk_widget_show_all(GTK_WIDGET(ebox));
-#endif
     // clang-format on
 
-#if (GTK_MAJOR_VERSION == 4)
-    return GTK_WIDGET(box);
-#elif (GTK_MAJOR_VERSION == 3)
     return GTK_WIDGET(ebox);
-#endif
 }
 
 void
@@ -2316,11 +2264,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         }
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    if ((keymod.data() & GdkModifierType::GDK_ALT_MASK))
-#elif (GTK_MAJOR_VERSION == 3)
     if ((keymod.data() & GdkModifierType::GDK_MOD1_MASK))
-#endif
     {
         this->rebuild_menus();
     }

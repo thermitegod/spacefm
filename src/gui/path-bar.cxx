@@ -50,11 +50,7 @@ enum column : std::uint8_t
 static std::filesystem::path
 get_cwd(GtkEntry* entry) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
 
     if (text.empty())
     {
@@ -89,11 +85,7 @@ seek_path(GtkEntry* entry) noexcept
         return false;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
 
     if (text.empty())
     {
@@ -174,11 +166,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
 static void
 update_completion(GtkEntry* entry, GtkEntryCompletion* completion) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
 
     if (text.empty())
     {
@@ -259,11 +247,7 @@ static void
 insert_complete(GtkEntry* entry) noexcept
 {
     // find a real completion
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string prefix = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
     const std::string prefix = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
 
     if (prefix.empty())
     {
@@ -348,11 +332,7 @@ insert_complete(GtkEntry* entry) noexcept
                                     (void*)on_changed,
                                     nullptr);
 
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(entry), new_prefix.c_str());
-#elif (GTK_MAJOR_VERSION == 3)
     gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.c_str());
-#endif
     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
 
     g_signal_handlers_unblock_matched(G_OBJECT(entry),
@@ -422,11 +402,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
                                     (void*)on_changed,
                                     nullptr);
 
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(entry), path.c_str());
-#elif (GTK_MAJOR_VERSION == 3)
     gtk_entry_set_text(GTK_ENTRY(entry), path.c_str());
-#endif
     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
 
     g_signal_handlers_unblock_matched(G_OBJECT(entry),
@@ -508,11 +484,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, gui::browser* browser) noexcep
         return;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     {
         const auto set = xset::set::get(xset::name::separator);

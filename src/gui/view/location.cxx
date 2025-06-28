@@ -1287,12 +1287,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, gu
     (void)button;
     (void)time_point;
     GtkWidget* popup = gtk_menu_new();
-
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_remove);

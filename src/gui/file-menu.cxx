@@ -482,15 +482,9 @@ on_permission(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     }
 }
 
-#if (GTK_MAJOR_VERSION == 4)
-void
-gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
-                                  GtkEventController* accel_group) noexcept
-#elif (GTK_MAJOR_VERSION == 3)
 void
 gui_file_menu_add_panel_view_menu(gui::browser* browser, GtkWidget* menu,
                                   GtkAccelGroup* accel_group) noexcept
-#endif
 {
     if (!browser || !menu || !browser->file_list_)
     {
@@ -1089,20 +1083,10 @@ gui_file_menu_new(gui::browser* browser,
     data->file = file;
     data->selected_files =
         std::vector<std::shared_ptr<vfs::file>>(selected_files.cbegin(), selected_files.cend());
-
-#if (GTK_MAJOR_VERSION == 4)
-    data->accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     data->accel_group = gtk_accel_group_new();
-#endif
 
     GtkWidget* popup = gtk_menu_new();
-
-#if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group = gtk_shortcut_controller_new();
-#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-#endif
 
     g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)gui_file_menu_free, data);
     // clang-format off
@@ -2600,11 +2584,7 @@ on_popup_paste_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
     (void)menuitem;
     if (data->browser)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
 
         gui::clipboard::paste_files(GTK_WINDOW(parent),
                                     data->cwd,
@@ -2675,11 +2655,7 @@ on_popup_delete_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 
     if (data->browser)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
 
         gui::action::delete_files(GTK_WINDOW(parent),
                                   data->cwd,
@@ -2700,11 +2676,7 @@ on_popup_trash_activate(GtkMenuItem* menuitem, gui::file_menu* data) noexcept
 
     if (data->browser)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
-#elif (GTK_MAJOR_VERSION == 3)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-#endif
 
         gui::action::trash_files(GTK_WINDOW(parent),
                                  data->cwd,
