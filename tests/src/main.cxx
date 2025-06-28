@@ -15,5 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#define DOCTEST_CONFIG_IMPLEMENT
+// #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
+
+#include "spacefm/logger.hxx"
+
+int
+main(int argc, char** argv)
+{
+    logger::initialize();
+
+    return doctest::Context(argc, argv).run();
+}

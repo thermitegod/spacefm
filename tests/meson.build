@@ -11,6 +11,7 @@ test_sources += files(
     # SFM
     'spacefm/concurrency.cxx',
     'spacefm/types.cxx',
+    'spacefm/logger.cxx',
 
     'spacefm/utils/permissions.cxx',
 
