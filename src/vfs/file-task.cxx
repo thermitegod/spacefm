@@ -355,12 +355,11 @@ vfs::file_task::file_copy(const std::filesystem::path& src_file) noexcept
     const auto dest_file = this->dest_dir.value() / filename;
 
     const auto result = this->do_file_copy(src_file, dest_file);
-    if (!result)
-    {
-        logger::error<logger::domain::vfs>("File Copy failed {} -> {}",
-                                           src_file.string(),
-                                           dest_file.string());
-    }
+
+    logger::error_if<logger::domain::vfs>(!result,
+                                          "File Copy failed {} -> {}",
+                                          src_file.string(),
+                                          dest_file.string());
 }
 
 bool
@@ -676,12 +675,11 @@ vfs::file_task::file_move(const std::filesystem::path& src_file) noexcept
         {
             // logger::info<logger::domain::vfs>("not on the same dev: {}", src_file);
             const auto result = this->do_file_copy(src_file, dest_file);
-            if (!result)
-            {
-                logger::error<logger::domain::vfs>("File Copy failed {} -> {}",
-                                                   src_file.string(),
-                                                   dest_file.string());
-            }
+
+            logger::error_if<logger::domain::vfs>(!result,
+                                                  "File Copy failed {} -> {}",
+                                                  src_file.string(),
+                                                  dest_file.string());
         }
         else
         {
@@ -691,12 +689,11 @@ vfs::file_task::file_move(const std::filesystem::path& src_file) noexcept
                 // Invalid cross-device link (st_dev not always accurate test)
                 // so now redo move as copy
                 const auto result = this->do_file_copy(src_file, dest_file);
-                if (!result)
-                {
-                    logger::error<logger::domain::vfs>("File Copy failed {} -> {}",
-                                                       src_file.string(),
-                                                       dest_file.string());
-                }
+
+                logger::error_if<logger::domain::vfs>(!result,
+                                                      "File Copy failed {} -> {}",
+                                                      src_file.string(),
+                                                      dest_file.string());
             }
         }
     }
@@ -769,12 +766,11 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
             const auto sub_src_file = src_file / filename;
             const auto sub_dest_file = dest_file / filename;
             const auto result = this->do_file_move(sub_src_file, sub_dest_file);
-            if (result == 0)
-            {
-                logger::error<logger::domain::vfs>("File Move failed {} -> {}",
-                                                   sub_src_file.string(),
-                                                   sub_dest_file.string());
-            }
+
+            logger::error_if<logger::domain::vfs>(result == 0,
+                                                  "File Move failed {} -> {}",
+                                                  sub_src_file.string(),
+                                                  sub_dest_file.string());
         }
         // remove moved src dir if empty
         if (!this->should_abort())

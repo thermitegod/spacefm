@@ -374,13 +374,11 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         add_files = true;
     }
 
-    if (!add_files && !file_list.empty())
-    {
-        logger::error<logger::domain::vfs>(
-            "Malformed desktop file, trying to open a desktop file without file/url "
-            "keys with a file list: {}",
-            this->path_.string());
-    }
+    logger::warn_if<logger::domain::vfs>(
+        !add_files && !file_list.empty(),
+        "Malformed desktop file, trying to open a desktop file without file/url "
+        "keys with a file list: {}",
+        this->path_.string());
 
     if (this->desktop_entry_.exec.contains("%c"))
     {
@@ -452,8 +450,8 @@ vfs::desktop::open_file(const std::filesystem::path& working_dir,
 {
     if (this->desktop_entry_.exec.empty())
     {
-        logger::error<logger::domain::vfs>(
-            std::format("Desktop Exec is empty, command not found: {}", this->filename_));
+        logger::error<logger::domain::vfs>("Desktop Exec is empty, command not found: {}",
+                                           this->filename_);
         return false;
     }
 
@@ -469,8 +467,8 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
 {
     if (this->desktop_entry_.exec.empty())
     {
-        logger::error<logger::domain::vfs>(
-            std::format("Desktop Exec is empty, command not found: {}", this->filename_));
+        logger::error<logger::domain::vfs>("Desktop Exec is empty, command not found: {}",
+                                           this->filename_);
         return false;
     }
 

@@ -2113,12 +2113,10 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 // build from /usr/share/mime type ?
 
                 const auto buffer = vfs::utils::read_file(usr_path);
-                if (buffer)
-                {
-                    logger::warn<logger::domain::gui>("Error reading {}: {}",
-                                                      usr_path.string(),
-                                                      buffer.error().message());
-                }
+                logger::warn_if<logger::domain::gui>(!buffer,
+                                                     "Error reading {}: {}",
+                                                     usr_path.string(),
+                                                     buffer.error().message());
 
                 auto contents = buffer.value();
 

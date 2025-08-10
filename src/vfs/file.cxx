@@ -68,10 +68,10 @@ vfs::file::file(const std::filesystem::path& path,
     this->is_hidden_ = this->name_.starts_with('.');
 
     const auto result = this->update();
-    if (!result)
-    {
-        logger::error<logger::domain::vfs>("Failed to create vfs::file for {}", path.string());
-    }
+
+    logger::error_if<logger::domain::vfs>(!result,
+                                          "Failed to create vfs::file for {}",
+                                          path.string());
 }
 
 vfs::file::~file() noexcept

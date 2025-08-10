@@ -135,8 +135,6 @@ config::save(const std::filesystem::path& session,
     std::string buffer;
     const auto ec =
         glz::write_file_json<glz::opts{.prettify = true}>(config_data, session.c_str(), buffer);
-    if (ec)
-    {
-        logger::error("Failed to write config file: {}", glz::format_error(ec, buffer));
-    }
+
+    logger::error_if(ec, "Failed to write config file: {}", glz::format_error(ec, buffer));
 }

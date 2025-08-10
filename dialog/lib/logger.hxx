@@ -16,6 +16,7 @@
 #pragma once
 
 #include <filesystem>
+#include <format>
 #include <unordered_map>
 
 #include <magic_enum/magic_enum.hpp>
@@ -29,7 +30,6 @@ enum class domain : std::uint8_t
     basic,
     dev,
     autosave,
-    signals,
     socket,
     ptk,
     vfs,
@@ -42,88 +42,111 @@ void initialize(const std::unordered_map<std::string, std::string>& options,
 
 template<domain d = domain::basic, typename... Args>
 void
-trace(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+trace(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->trace(fmt, std::forward<Args>(args)...);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->trace(std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = domain::basic, typename... Args>
 void
-debug(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+trace_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->debug(fmt, std::forward<Args>(args)...);
+    if (cond)
+    {
+        trace<d>(fmt, std::forward<Args>(args)...);
+    }
 }
 
 template<domain d = domain::basic, typename... Args>
 void
-info(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+debug(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->info(fmt, std::forward<Args>(args)...);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->debug(std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = domain::basic, typename... Args>
 void
-warn(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+debug_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->warn(fmt, std::forward<Args>(args)...);
+    if (cond)
+    {
+        debug<d>(fmt, std::forward<Args>(args)...);
+    }
 }
 
 template<domain d = domain::basic, typename... Args>
 void
-error(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+info(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->error(fmt, std::forward<Args>(args)...);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->info(std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = domain::basic, typename... Args>
 void
-critical(spdlog::format_string_t<Args...> fmt, Args&&... args) noexcept
+info_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->critical(fmt, std::forward<Args>(args)...);
+    if (cond)
+    {
+        info<d>(fmt, std::forward<Args>(args)...);
+    }
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-trace(const T& msg) noexcept
+warn(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->trace(msg);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->warn(std::format(fmt, std::forward<Args>(args)...));
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-debug(const T& msg) noexcept
+warn_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->debug(msg);
+    if (cond)
+    {
+        warn<d>(fmt, std::forward<Args>(args)...);
+    }
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-info(const T& msg) noexcept
+error(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->info(msg);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->error(std::format(fmt, std::forward<Args>(args)...));
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-warn(const T& msg) noexcept
+error_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->warn(msg);
+    if (cond)
+    {
+        error<d>(fmt, std::forward<Args>(args)...);
+    }
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-error(const T& msg) noexcept
+critical(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->error(msg);
+    spdlog::get(magic_enum::enum_name(d).data())
+        ->critical(std::format(fmt, std::forward<Args>(args)...));
 }
 
-template<domain d = domain::basic, typename T>
+template<domain d = domain::basic, typename... Args>
 void
-critical(const T& msg) noexcept
+critical_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    spdlog::get(magic_enum::enum_name(d).data())->critical(msg);
+    if (cond)
+    {
+        critical<d>(fmt, std::forward<Args>(args)...);
+    }
 }
-
 namespace utils
 {
 template<typename T>

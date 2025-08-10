@@ -79,10 +79,7 @@ single_instance_check() noexcept
     std::atexit(single_instance_finalize);
 
     const auto ec = vfs::utils::write_file(path, std::format("{}", ::getpid()));
-    if (ec)
-    {
-        logger::critical("Failed to write pid file: {} {}", path.string(), ec.message());
-    }
+    logger::critical_if(bool(ec), "Failed to write pid file: {} {}", path.string(), ec.message());
 
     return true;
 }

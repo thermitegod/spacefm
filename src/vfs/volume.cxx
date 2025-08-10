@@ -353,22 +353,10 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         }
 
         // print action
-        if (action == "add")
-        {
-            logger::info<logger::domain::vfs>("udev added:   {}", devnode);
-        }
-        else if (action == "remove")
-        {
-            logger::info<logger::domain::vfs>("udev removed: {}", devnode);
-        }
-        else if (action == "change")
-        {
-            logger::info<logger::domain::vfs>("udev changed: {}", devnode);
-        }
-        else if (action == "move")
-        {
-            logger::info<logger::domain::vfs>("udev moved:   {}", devnode);
-        }
+        logger::info_if<logger::domain::vfs>(action == "add", "udev added:   {}", devnode);
+        logger::info_if<logger::domain::vfs>(action == "remove", "udev removed: {}", devnode);
+        logger::info_if<logger::domain::vfs>(action == "change", "udev changed: {}", devnode);
+        logger::info_if<logger::domain::vfs>(action == "move", "udev moved:   {}", devnode);
 
         // add/remove volume
         if (action == "add" || action == "change")
@@ -667,10 +655,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
 
     const auto is_blacklisted = std::ranges::any_of(blacklisted, has_blacklisted);
 
-    // if (is_blacklisted)
-    // {
-    //     logger::debug<logger::domain::vfs>("    fstype '{}' matches blacklisted filesystem", fstype);
-    // }
+    // logger::debug_if<logger::domain::vfs>(is_blacklisted, "    fstype '{}' matches blacklisted filesystem", fstype.value());
 
     return is_blacklisted;
 }

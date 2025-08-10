@@ -83,10 +83,8 @@ vfs::bookmarks::save() noexcept
     std::string buffer;
     const auto ec =
         glz::write_file_json<glz::opts{.prettify = true}>(bookmarks_, file.c_str(), buffer);
-    if (ec)
-    {
-        logger::error("Failed to bookmark file: {}", glz::format_error(ec, buffer));
-    }
+
+    logger::error_if(ec, "Failed to bookmark file: {}", glz::format_error(ec, buffer));
 }
 
 void

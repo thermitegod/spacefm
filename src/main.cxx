@@ -260,10 +260,7 @@ main(int argc, char* argv[]) noexcept
     //
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
     auto* const stream = std::freopen("/dev/null", "w", stderr);
-    if (stream == nullptr)
-    {
-        logger::error("Failed to freopen() stderr");
-    }
+    logger::error_if(stream == nullptr, "Failed to freopen() stderr");
 
     // ensure that there is only one instance of spacefm.
     // if there is an existing instance, only the FILES
