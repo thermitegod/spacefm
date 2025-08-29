@@ -41,7 +41,7 @@ enum class column : std::uint8_t
     avgest,
     starttime,
     icon,
-    data
+    data,
 };
 
 void stop(GtkWidget* view, const xset_t& set2, gui::file_task* ptask2) noexcept;

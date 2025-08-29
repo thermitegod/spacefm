@@ -1018,7 +1018,7 @@ enum class main_window_panel : std::uint8_t
     panel_neither,
     panel_horiz,
     panel_vert,
-    panel_both
+    panel_both,
 };
 
 xset::name get_name_from_panel(const panel_t panel, const xset::panel name) noexcept;

@@ -53,7 +53,7 @@ struct file_menu
         update,
         browse_mime,
         browse_mime_usr,
-        usr
+        usr,
     };
 
     file_menu() = default;

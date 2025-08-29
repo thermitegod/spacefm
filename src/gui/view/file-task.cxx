@@ -304,7 +304,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
         stop,
         pause,
         queue,
-        resume
+        resume,
     };
     main_window_job job;
 

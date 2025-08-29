@@ -267,8 +267,8 @@ struct browser
     ////////////////
 
     /**
-    * @param[in] pattern Only show files matching the pattern, an empty pattern shows all files.
-    */
+     * @param[in] pattern Only show files matching the pattern, an empty pattern shows all files.
+     */
     void update_model(const std::string_view pattern = "") noexcept;
 
     bool using_large_icons() const noexcept;

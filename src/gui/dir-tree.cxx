@@ -42,7 +42,7 @@
 
 #include "logger.hxx"
 
-#define PTK_TYPE_DIR_TREE (gui_dir_tree_get_type())
+#define PTK_TYPE_DIR_TREE    (gui_dir_tree_get_type())
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
 
 struct PtkDirTreeClass

@@ -30,7 +30,7 @@
 #include "vfs/file.hxx"
 #include "vfs/monitor.hxx"
 
-#define PTK_DIR_TREE(obj) (static_cast<gui::dir_tree*>(obj))
+#define PTK_DIR_TREE(obj)             (static_cast<gui::dir_tree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<gui::dir_tree*>(obj))
 
 namespace gui

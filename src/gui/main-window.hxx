@@ -27,7 +27,7 @@
 
 #include "types.hxx"
 
-#define MAIN_WINDOW(obj) (static_cast<MainWindow*>(obj))
+#define MAIN_WINDOW(obj)             (static_cast<MainWindow*>(obj))
 #define MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<MainWindow*>(obj))
 
 struct MainWindow

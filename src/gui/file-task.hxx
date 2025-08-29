@@ -37,7 +37,7 @@ struct file_task
     {
         first,
         any,
-        cont
+        cont,
     };
 
     enum class response : std::uint8_t

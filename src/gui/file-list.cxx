@@ -90,7 +90,7 @@ static void gui_file_list_set_default_sort_func(GtkTreeSortable* sortable,
                                                 GtkTreeIterCompareFunc sort_func, void* user_data,
                                                 GDestroyNotify destroy) noexcept;
 
-#define PTK_TYPE_FILE_LIST (gui_file_list_get_type())
+#define PTK_TYPE_FILE_LIST    (gui_file_list_get_type())
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
 
 static GObjectClass* parent_class = nullptr;

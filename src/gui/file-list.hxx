@@ -29,7 +29,7 @@
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
 
-#define PTK_FILE_LIST(obj) (static_cast<gui::file_list*>(obj))
+#define PTK_FILE_LIST(obj)             (static_cast<gui::file_list*>(obj))
 #define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<gui::file_list*>(obj))
 
 namespace gui
@@ -59,7 +59,7 @@ struct file_list
     { // sort_dir of directory view - do not change order, saved in config
         mixed,
         first,
-        last
+        last,
     };
 
     [[nodiscard]] static gui::file_list* create(const std::shared_ptr<vfs::dir>& dir,
