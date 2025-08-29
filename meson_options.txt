@@ -13,6 +13,13 @@ option(
 )
 
 option(
+    'tools',
+    type : 'boolean',
+    value: false,
+    description : 'Build additional tools'
+)
+
+option(
     'exo',
     type : 'boolean',
     value: true,

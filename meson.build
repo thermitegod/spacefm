@@ -652,6 +652,12 @@ if get_option('tests')
     subdir('tests')
 endif
 
+## Tools
+
+if get_option('tools')
+    subdir('tools')
+endif
+
 ## Install
 
 install_subdir('data/applications', install_dir: datadir)
