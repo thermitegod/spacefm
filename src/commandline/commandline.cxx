@@ -52,6 +52,7 @@ struct opts_data final
     // std::filesystem::path logfile{"/tmp/test.log"};
     std::filesystem::path logfile;
 
+    bool build_debug{false};
     bool version{false};
 };
 
@@ -77,6 +78,25 @@ run_commandline(const std::shared_ptr<opts_data>& opt) noexcept
 #if defined(HAVE_SOCKET)
         std::println("Socket Port: {}", SOCKET_PORT);
 #endif
+        std::exit(EXIT_SUCCESS);
+    }
+
+    if (opt->build_debug)
+    {
+        std::println("PACKAGE_NAME          = {}", PACKAGE_NAME);
+        std::println("PACKAGE_NAME_FANCY    = {}", PACKAGE_NAME_FANCY);
+        std::println("PACKAGE_VERSION       = {}", PACKAGE_VERSION);
+        std::println("PACKAGE_GITHUB        = {}", PACKAGE_GITHUB);
+        std::println("PACKAGE_BUGREPORT     = {}", PACKAGE_BUGREPORT);
+        std::println("PACKAGE_ONLINE_DOCS   = {}", PACKAGE_ONLINE_DOCS);
+        std::println("PACKAGE_BUILD_ROOT    = {}", PACKAGE_BUILD_ROOT);
+        std::println("DIALOG_BUILD_ROOT     = {}", DIALOG_BUILD_ROOT);
+        std::println("PACKAGE_IMAGES        = {}", PACKAGE_IMAGES);
+        std::println("PACKAGE_IMAGES_LOCAL  = {}", PACKAGE_IMAGES_LOCAL);
+#if defined(DEV_MODE)
+        std::println("DEV_SCRIPTS_PATH      = {}", DEV_SCRIPTS_PATH);
+#endif
+
         std::exit(EXIT_SUCCESS);
     }
 
@@ -162,6 +182,8 @@ setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
                 }
                 return std::format("Logfile path must be absolute: {}", input.string());
             });
+
+    app.add_flag("--build-debug", opt->build_debug, "Show build information");
 
     app.add_flag("-v,--version", opt->version, "Show version information");
 
