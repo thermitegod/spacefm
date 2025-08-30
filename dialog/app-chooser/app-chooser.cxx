@@ -37,7 +37,7 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
     }
     const auto& opts = data.value();
 
-    this->type_ = vfs::mime_type::create_from_type(opts.mime_type);
+    this->type_ = vfs::mime_type::create_from_type(opts.mime_type, nullptr);
 
     this->set_size_request(600, 600);
     this->set_title("File Properties");

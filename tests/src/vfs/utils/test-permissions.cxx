@@ -17,40 +17,41 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/utils/permissions.hxx"
-#include "spacefm/vfs/user-dirs.hxx"
+#include "vfs/user-dirs.hxx"
+
+#include "vfs/utils/permissions.hxx"
 
 TEST_SUITE("utils::permissions" * doctest::description(""))
 {
     TEST_CASE("has_read_permission")
     {
-        CHECK(utils::has_read_permission(vfs::user::home()));
-        CHECK(utils::has_read_permission("/tmp"));
+        CHECK(vfs::utils::has_read_permission(vfs::user::home()));
+        CHECK(vfs::utils::has_read_permission("/tmp"));
 
-        CHECK(!utils::has_read_permission("/root"));
+        CHECK(!vfs::utils::has_read_permission("/root"));
     }
 
     TEST_CASE("has_write_permission")
     {
-        CHECK(utils::has_write_permission(vfs::user::home()));
-        CHECK(utils::has_write_permission("/tmp"));
+        CHECK(vfs::utils::has_write_permission(vfs::user::home()));
+        CHECK(vfs::utils::has_write_permission("/tmp"));
 
-        CHECK(!utils::has_write_permission("/root"));
+        CHECK(!vfs::utils::has_write_permission("/root"));
     }
 
     TEST_CASE("has_execute_permission")
     {
-        CHECK(utils::has_execute_permission(vfs::user::home()));
-        CHECK(utils::has_execute_permission("/tmp"));
+        CHECK(vfs::utils::has_execute_permission(vfs::user::home()));
+        CHECK(vfs::utils::has_execute_permission("/tmp"));
 
-        CHECK(!utils::has_execute_permission("/root"));
+        CHECK(!vfs::utils::has_execute_permission("/root"));
     }
 
     TEST_CASE("check_directory_permissions")
     {
-        CHECK(utils::check_directory_permissions(vfs::user::home()));
-        CHECK(utils::check_directory_permissions("/tmp"));
+        CHECK(vfs::utils::check_directory_permissions(vfs::user::home()));
+        CHECK(vfs::utils::check_directory_permissions("/tmp"));
 
-        CHECK(!utils::check_directory_permissions("/root"));
+        CHECK(!vfs::utils::check_directory_permissions("/root"));
     }
 }

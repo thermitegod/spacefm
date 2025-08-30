@@ -50,7 +50,7 @@
 #include "vfs/volume.hxx"
 
 #include "vfs/linux/self.hxx"
-#include "vfs/utils/utils.hxx"
+#include "vfs/utils/icon.hxx"
 
 #include "types.hxx"
 

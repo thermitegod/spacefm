@@ -16,6 +16,8 @@
 #include <print>
 #include <vector>
 
+#include <cstring>
+
 #include <glibmm.h>
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>

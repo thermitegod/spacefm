@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,20 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <format>
-#include <string>
-#include <string_view>
+#include "vfs/task.hxx"
 
-#include <ztd/ztd.hxx>
+#include "logger.hxx"
 
-#include "utils/shell-quote.hxx"
-
-std::string
-utils::shell_quote(const std::string_view str) noexcept
+vfs::task::task()
 {
-    if (str.empty())
-    {
-        return R"("")";
-    }
-    return std::format(R"("{}")", ztd::replace(str, "\"", "\\\""));
+    logger::debug<logger::domain::vfs>("TODO");
 }

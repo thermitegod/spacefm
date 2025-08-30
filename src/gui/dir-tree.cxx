@@ -38,7 +38,7 @@
 #include "vfs/file.hxx"
 #include "vfs/monitor.hxx"
 
-#include "vfs/utils/utils.hxx"
+#include "vfs/utils/icon.hxx"
 
 #include "logger.hxx"
 

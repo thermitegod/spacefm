@@ -17,10 +17,10 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/permissions.hxx"
+#include "vfs/utils/permissions.hxx"
 
 bool
-utils::has_read_permission(const std::filesystem::path& path) noexcept
+vfs::utils::has_read_permission(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::exists(path))
     {
@@ -50,7 +50,7 @@ utils::has_read_permission(const std::filesystem::path& path) noexcept
 }
 
 bool
-utils::has_write_permission(const std::filesystem::path& path) noexcept
+vfs::utils::has_write_permission(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::exists(path))
     {
@@ -80,7 +80,7 @@ utils::has_write_permission(const std::filesystem::path& path) noexcept
 }
 
 bool
-utils::has_execute_permission(const std::filesystem::path& path) noexcept
+vfs::utils::has_execute_permission(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::exists(path))
     {
@@ -110,7 +110,7 @@ utils::has_execute_permission(const std::filesystem::path& path) noexcept
 }
 
 bool
-utils::check_directory_permissions(const std::filesystem::path& path) noexcept
+vfs::utils::check_directory_permissions(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
     {

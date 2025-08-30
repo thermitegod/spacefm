@@ -22,48 +22,16 @@
 
 #include <ztd/ztd.hxx>
 
+#if 0 // TODO
 #include "settings/settings.hxx"
+#endif
 
 #include "vfs/utils/utils.hxx"
-
-GdkPixbuf*
-vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
-{
-    static GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-
-    GtkIconInfo* icon_info = gtk_icon_theme_lookup_icon(
-        icon_theme,
-        icon_name.data(),
-        icon_size.data(),
-        GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
-                           GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
-
-    if (!icon_info && !icon_name.starts_with('/'))
-    {
-        return gdk_pixbuf_new_from_file_at_size(icon_name.data(),
-                                                icon_size.data(),
-                                                icon_size.data(),
-                                                nullptr);
-    }
-
-    if (!icon_info)
-    {
-        return nullptr;
-    }
-
-    const char* file = gtk_icon_info_get_filename(icon_info);
-    GdkPixbuf* icon = nullptr;
-    if (file)
-    {
-        icon = gdk_pixbuf_new_from_file_at_size(file, icon_size.data(), icon_size.data(), nullptr);
-    }
-
-    return icon;
-}
 
 std::string
 vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
 {
+#if 0 // TODO
     if (config::global::settings->use_si_prefix)
     {
         return ztd::format_filesize(size_in_bytes, ztd::base::si, decimal ? 1 : 0);
@@ -72,6 +40,9 @@ vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
     {
         return ztd::format_filesize(size_in_bytes, ztd::base::iec, decimal ? 1 : 0);
     }
+#else
+    return ztd::format_filesize(size_in_bytes, ztd::base::iec, decimal ? 1 : 0);
+#endif
 }
 
 vfs::utils::split_basename_extension_data

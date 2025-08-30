@@ -17,7 +17,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/types.hxx"
+#include "types.hxx"
 
 TEST_SUITE("spacefm types" * doctest::description(""))
 {

@@ -23,7 +23,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "spacefm/gui/utils/sorter.hxx"
+#include "gui/utils/sorter.hxx"
 
 TEST_SUITE("natsort" * doctest::description(""))
 {

@@ -41,6 +41,8 @@
 
 #include "gui/utils/history.hxx"
 
+#include "vfs/settings.hxx"
+
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 3)
 #include <exo/exo.h>
 #endif
@@ -53,7 +55,6 @@
 
 #include "datatypes/datatypes.hxx"
 
-#include "utils/permissions.hxx"
 #include "utils/strdup.hxx"
 
 #include "settings/settings.hxx"
@@ -88,6 +89,7 @@
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
 
+#include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "autosave.hxx"
@@ -2568,7 +2570,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    if (!::utils::check_directory_permissions(path))
+    if (!vfs::utils::check_directory_permissions(path))
     {
         if (!this->inhibit_focus_)
         {
@@ -2617,7 +2619,13 @@ gui::browser::chdir(const std::filesystem::path& new_path,
     // load new dir
 
     this->signal_file_listed_.disconnect();
-    this->dir_ = vfs::dir::create(path, this->settings_);
+    // this->dir_ = vfs::dir::create(path, this->settings_);
+    this->dir_ = vfs::dir::create(path,
+                                  std::make_shared<vfs::settings>(vfs::settings{
+                                      .icon_size_big = this->settings_->icon_size_big,
+                                      .icon_size_small = this->settings_->icon_size_small,
+                                      .icon_size_tool = this->settings_->icon_size_tool,
+                                  }));
 
     this->signal_chdir_begin_.emit(this);
 

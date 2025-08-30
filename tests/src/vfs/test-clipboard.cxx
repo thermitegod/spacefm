@@ -22,7 +22,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/vfs/clipboard.hxx"
+#include "vfs/clipboard.hxx"
 
 TEST_SUITE("vfs::clipboard" * doctest::description(""))
 {

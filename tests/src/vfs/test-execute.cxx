@@ -19,7 +19,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "spacefm/vfs/execute.hxx"
+#include "vfs/execute.hxx"
 
 TEST_SUITE("vfs::clipboard" * doctest::description(""))
 {

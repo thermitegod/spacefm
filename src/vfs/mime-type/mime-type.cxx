@@ -31,14 +31,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/permissions.hxx"
-
 #include "vfs/mime-type.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/mime-type/chrome/mime-utils.hxx"
 #include "vfs/mime-type/mime-type.hxx"
 #include "vfs/utils/file-ops.hxx"
+#include "vfs/utils/permissions.hxx"
 
 #include "logger.hxx"
 
@@ -79,7 +78,7 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
     }
 
     /* Check for executable file */
-    if (::utils::has_execute_permission(path))
+    if (vfs::utils::has_execute_permission(path))
     {
         return vfs::constants::mime_type::executable.data();
     }

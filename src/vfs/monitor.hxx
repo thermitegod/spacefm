@@ -60,7 +60,11 @@ class monitor final
 
     std::filesystem::path path_;
 
+#if (GTK_MAJOR_VERSION == 4)
+    Glib::RefPtr<Glib::IOChannel> inotify_io_channel_ = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
     Glib::RefPtr<Glib::IOChannel> inotify_io_channel_;
+#endif
     sigc::connection signal_io_handler_;
 
     sigc::signal<void(const vfs::monitor::event event, const std::filesystem::path& path)>

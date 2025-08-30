@@ -228,7 +228,7 @@ gtkmm4_dep = dependency('gtkmm-4.0', required: true)
 glibmm4_dep = dependency('glibmm-2.68', required: true)
 giomm4_dep = dependency('giomm-2.68', required: true)
 
-dependencies = [
+gtk3_dependencies = [
     gtkmm3_dep,
     glibmm3_dep,
     giomm3_dep,
@@ -236,7 +236,16 @@ dependencies = [
     # glibmm4_dep,
     # giomm4_dep,
     sigc_dep,
+]
 
+gtk4_dependencies = [
+    gtkmm4_dep,
+    glibmm4_dep,
+    giomm4_dep,
+    sigc_dep,
+]
+
+base_dependencies = [
     libudev_dep,
     pugixml_dep,
     botan_dep,
@@ -260,13 +269,14 @@ preprocessor = [
     '-DDIALOG_BUILD_ROOT="@0@/dialog"'.format(build_root),
 
     # data paths
-    '-DPACKAGE_IMAGES="/usr/share/spacefm/images"',
+    '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm'),
     '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(join_paths(meson.current_source_dir(), 'data/images')),
-    '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tools/scripts')),
 ]
 
 if get_option('dev')
     preprocessor += [
+        '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tools/scripts')),
+
         # GTK
         '-DGTK_DISABLE_DEPRECATED',
         '-DGDK_DISABLE_DEPRECATED',
@@ -296,49 +306,49 @@ endif
 
 if get_option('exo')
     exo_dep = dependency('exo-2', required: true)
-    dependencies += exo_dep
+    gtk3_dependencies += exo_dep
     features += '-DUSE_EXO'
 endif
 
 if get_option('with-system-cli11')
     cli11_dep = dependency('CLI11', required: true)
-    dependencies += cli11_dep
+    base_dependencies += cli11_dep
 else
     cli11_dep_proj = subproject('CLI11', required: true)
     cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
-    dependencies += cli11_dep
+    base_dependencies += cli11_dep
 endif
 
 if get_option('with-system-concurrencpp')
     concurrencpp_dep = dependency('concurrencpp', required: true)
-    dependencies += concurrencpp_dep
+    base_dependencies += concurrencpp_dep
 else
     cmake = import('cmake')
     concurrencpp_proj = cmake.subproject('concurrencpp', required: true)
     concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
-    dependencies += concurrencpp_dep
+    base_dependencies += concurrencpp_dep
 endif
 
 if get_option('with-system-glaze')
     glaze_dep = dependency('glaze', required: true)
-    dependencies += glaze_dep
+    base_dependencies += glaze_dep
 else
     incdir += include_directories('subprojects/glaze/include')
 endif
 
 if get_option('with-system-magic-enum')
     magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
-    dependencies += magic_enum_dep
+    base_dependencies += magic_enum_dep
 else
     # TODO this is still building tests
     magic_enum_proj = subproject('magic_enum', required: true, default_options: ['test=false'])
     magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
-    dependencies += magic_enum_dep
+    base_dependencies += magic_enum_dep
 endif
 
 if get_option('with-system-spdlog')
     spdlog_dep = dependency('spdlog', required: true)
-    dependencies += spdlog_dep
+    base_dependencies += spdlog_dep
 else
     cmake = import('cmake')
     # use std::format over bundled fmt::format
@@ -346,22 +356,22 @@ else
     cmake_opt_var.add_cmake_defines({'SPDLOG_USE_STD_FORMAT': '1'})
     spdlog_proj = cmake.subproject('spdlog', required: true, options: cmake_opt_var)
     spdlog_dep = spdlog_proj.dependency('spdlog')
-    dependencies += spdlog_dep
+    base_dependencies += spdlog_dep
 endif
 
 if get_option('with-system-ztd')
     ztd_dep = dependency('ztd', required: true)
-    dependencies += ztd_dep
+    base_dependencies += ztd_dep
 else
     ztd_proj = subproject('ztd', required: true)
     ztd_dep = ztd_proj.get_variable('ztd_dep')
-    dependencies += ztd_dep
+    base_dependencies += ztd_dep
 endif
 
 if get_option('socket')
     cppzmq_dep = dependency('cppzmq', required: true)
 
-    dependencies += [
+    base_dependencies += [
         cppzmq_dep,
     ]
 
@@ -407,13 +417,144 @@ if get_option('media')
         gdkpixbuf_dep,
     ]
 
-    dependencies += media_dependencies
+    # base_dependencies += media_dependencies
     features += '-DHAVE_MEDIA'
 endif
 
 foreach a: features
     add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
+
+# VFS Lib
+
+vfs_gtk3_sources = files(
+    'src/vfs/app-desktop.cxx',
+    'src/vfs/bookmarks.cxx',
+    'src/vfs/clipboard.cxx',
+    'src/vfs/device.cxx',
+    'src/vfs/dir.cxx',
+    'src/vfs/error.cxx',
+    'src/vfs/execute.cxx',
+    'src/vfs/file.cxx',
+    'src/vfs/file-task.cxx',
+    'src/vfs/mime-type.cxx',
+    'src/vfs/mime-monitor.cxx',
+    'src/vfs/monitor.cxx',
+    'src/vfs/terminals.cxx',
+    'src/vfs/thumbnailer.cxx',
+    'src/vfs/trash-can.cxx',
+    'src/vfs/user-dirs.cxx',
+    'src/vfs/volume.cxx',
+
+    'src/vfs/utils/editor.cxx',
+    'src/vfs/utils/icon.cxx',
+    'src/vfs/utils/permissions.cxx',
+    'src/vfs/utils/utils.cxx',
+
+    'src/vfs/thumbnails/thumbnails.cxx',
+
+    'src/vfs/libudevpp/udev.cxx',
+    'src/vfs/libudevpp/udev_device.cxx',
+    'src/vfs/libudevpp/udev_enumerate.cxx',
+    'src/vfs/libudevpp/udev_monitor.cxx',
+
+    'src/vfs/linux/procfs.cxx',
+    'src/vfs/linux/self.cxx',
+    'src/vfs/linux/sysfs.cxx',
+
+    'src/vfs/mime-type/mime-action.cxx',
+    'src/vfs/mime-type/mime-type.cxx',
+    'src/vfs/mime-type/chrome/mime-utils.cxx',
+)
+
+vfs_gtk4_sources = files(
+    'src/vfs/app-desktop.cxx',
+    'src/vfs/bookmarks.cxx',
+    'src/vfs/clipboard.cxx',
+    'src/vfs/device.cxx',
+    'src/vfs/dir.cxx',
+    'src/vfs/error.cxx',
+    'src/vfs/execute.cxx',
+    'src/vfs/file.cxx',
+    # 'src/vfs/file-task.cxx', # TODO rewrite in vfs/task.cxx
+    'src/vfs/mime-type.cxx',
+    'src/vfs/mime-monitor.cxx',
+    'src/vfs/monitor.cxx',
+    'src/vfs/task.cxx',
+    'src/vfs/terminals.cxx',
+    'src/vfs/thumbnailer.cxx',
+    'src/vfs/trash-can.cxx',
+    'src/vfs/user-dirs.cxx',
+    # 'src/vfs/volume.cxx', TODO
+
+    # 'src/vfs/utils/editor.cxx', # TODO move to gui/utils
+    'src/vfs/utils/icon.cxx',
+    'src/vfs/utils/permissions.cxx',
+    'src/vfs/utils/utils.cxx',
+
+    'src/vfs/thumbnails/thumbnails.cxx',
+
+    'src/vfs/libudevpp/udev.cxx',
+    'src/vfs/libudevpp/udev_device.cxx',
+    'src/vfs/libudevpp/udev_enumerate.cxx',
+    'src/vfs/libudevpp/udev_monitor.cxx',
+
+    'src/vfs/linux/procfs.cxx',
+    'src/vfs/linux/self.cxx',
+    'src/vfs/linux/sysfs.cxx',
+
+    'src/vfs/mime-type/mime-action.cxx',
+    'src/vfs/mime-type/mime-type.cxx',
+    'src/vfs/mime-type/chrome/mime-utils.cxx',
+)
+
+# VFS gtk4
+vfs_gtk4_dependencies = gtk4_dependencies
+vfs_gtk4_dependencies += [
+    spdlog_dep,
+    concurrencpp_dep,
+    libudev_dep,
+    pugixml_dep,
+    botan_dep,
+]
+
+lib_vfs_gtk4 = static_library(
+    'vfs_gtk4',
+    vfs_gtk4_sources,
+    include_directories : include_directories('src'),
+    dependencies : vfs_gtk4_dependencies,
+    cpp_pch: 'pch/pch.hxx',
+)
+
+dep_vfs_gtk4 = declare_dependency(
+    link_with : lib_vfs_gtk4,
+    include_directories : include_directories('src'),
+    dependencies : vfs_gtk4_dependencies,
+)
+
+# VFS gtk3
+vfs_gtk3_dependencies = gtk3_dependencies
+vfs_gtk3_dependencies += [
+    spdlog_dep,
+    concurrencpp_dep,
+    libudev_dep,
+    pugixml_dep,
+    botan_dep,
+]
+
+lib_vfs_gtk3 = static_library(
+    'vfs_gtk3',
+    vfs_gtk3_sources,
+    include_directories : include_directories('src'),
+    dependencies : vfs_gtk3_dependencies,
+    cpp_pch: 'pch/pch.hxx',
+)
+
+dep_vfs_gtk3 = declare_dependency(
+    link_with : lib_vfs_gtk3,
+    include_directories : include_directories('src'),
+    dependencies : vfs_gtk3_dependencies,
+)
 
 ## Required Base Source files
 
@@ -443,7 +584,6 @@ sources += files(
 
     'src/settings/upgrade/config-upgrade.cxx',
 
-    'src/utils/permissions.cxx',
     'src/utils/strdup.cxx',
 
     'src/gui/archiver.cxx',
@@ -485,42 +625,6 @@ sources += files(
     'src/gui/utils/history.cxx',
 
     'src/gui/natsort/strnatcmp.cxx',
-
-    'src/vfs/app-desktop.cxx',
-    'src/vfs/bookmarks.cxx',
-    'src/vfs/clipboard.cxx',
-    'src/vfs/device.cxx',
-    'src/vfs/dir.cxx',
-    'src/vfs/error.cxx',
-    'src/vfs/execute.cxx',
-    'src/vfs/file.cxx',
-    'src/vfs/file-task.cxx',
-    'src/vfs/mime-type.cxx',
-    'src/vfs/mime-monitor.cxx',
-    'src/vfs/monitor.cxx',
-    'src/vfs/terminals.cxx',
-    'src/vfs/thumbnailer.cxx',
-    'src/vfs/trash-can.cxx',
-    'src/vfs/user-dirs.cxx',
-    'src/vfs/volume.cxx',
-
-    'src/vfs/utils/editor.cxx',
-    'src/vfs/utils/utils.cxx',
-
-    'src/vfs/thumbnails/thumbnails.cxx',
-
-    'src/vfs/libudevpp/udev.cxx',
-    'src/vfs/libudevpp/udev_device.cxx',
-    'src/vfs/libudevpp/udev_enumerate.cxx',
-    'src/vfs/libudevpp/udev_monitor.cxx',
-
-    'src/vfs/linux/procfs.cxx',
-    'src/vfs/linux/self.cxx',
-    'src/vfs/linux/sysfs.cxx',
-
-    'src/vfs/mime-type/mime-action.cxx',
-    'src/vfs/mime-type/mime-type.cxx',
-    'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
 
 spacefm = build_target(
@@ -530,7 +634,11 @@ spacefm = build_target(
     include_directories: incdir,
     install: true,
     install_dir: bindir,
-    dependencies: dependencies,
+    dependencies: [
+        base_dependencies,
+        gtk3_dependencies,
+        dep_vfs_gtk3,
+    ],
     cpp_pch: 'pch/pch.hxx',
 )
 

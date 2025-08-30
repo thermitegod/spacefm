@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,17 +15,12 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
+#include <filesystem>
 
-namespace utils
+namespace vfs::utils
 {
-/**
- * @brief Shell Quote - quote and escape a string
- *
- * @param[in] str The string to be quoted
- *
- * @return a quoted string, if string is empty returns empty quotes
- */
-[[nodiscard]] std::string shell_quote(const std::string_view str) noexcept;
-} // namespace utils
+[[nodiscard]] bool has_read_permission(const std::filesystem::path& path) noexcept;
+[[nodiscard]] bool has_write_permission(const std::filesystem::path& path) noexcept;
+[[nodiscard]] bool has_execute_permission(const std::filesystem::path& path) noexcept;
+[[nodiscard]] bool check_directory_permissions(const std::filesystem::path& path) noexcept;
+} // namespace vfs::utils

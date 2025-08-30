@@ -1,19 +1,3 @@
-# shared code
-sources_vfs = files(
-    'lib/logger.cxx',
-
-    'lib/utils/permissions.cxx',
-
-    'lib/vfs/file.cxx',
-    'lib/vfs/mime-type.cxx',
-    'lib/vfs/user-dirs.cxx',
-
-    'lib/vfs/utils/utils.cxx',
-
-	'lib/vfs/mime-type/chrome/mime-utils.cxx',
-	'lib/vfs/mime-type/mime-type.cxx',
-)
-
 # About
 incdir_about = include_directories('about')
 sources_about = files(
@@ -28,21 +12,18 @@ spacefm = build_target(
     include_directories: incdir_about,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
 # App Chooser
-incdir_chooser = include_directories(['app-chooser', 'lib', '../src/datatypes'])
+incdir_chooser = include_directories(['app-chooser', '../src', '../src/datatypes'])
 sources_chooser = files(
     'app-chooser/main.cxx',
     'app-chooser/app-chooser.cxx',
+
+    '../src/logger.cxx',
 )
-sources_chooser += sources_vfs
 
 spacefm = build_target(
     'spacefm_app_chooser',
@@ -51,15 +32,7 @@ spacefm = build_target(
     include_directories: incdir_chooser,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-
-        concurrencpp_dep,
-        pugixml_dep,
-    ],
+    dependencies: dep_vfs_gtk4,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -77,12 +50,7 @@ spacefm = build_target(
     include_directories: incdir_action,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -102,12 +70,7 @@ spacefm = build_target(
     include_directories: incdir_error,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -125,12 +88,7 @@ spacefm = build_target(
     include_directories: incdir_action,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -148,22 +106,18 @@ spacefm = build_target(
     include_directories: incdir_chooser,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
 # File Create
-incdir_create = include_directories(['file-create', 'lib', '../src/datatypes'])
+incdir_create = include_directories(['file-create', '../src', '../src/datatypes'])
 sources_create = files(
     'file-create/main.cxx',
     'file-create/create.cxx',
+
+    '../src/logger.cxx',
 )
-sources_create += sources_vfs
 
 spacefm = build_target(
     'spacefm_create',
@@ -172,24 +126,18 @@ spacefm = build_target(
     include_directories: incdir_create,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-
-        pugixml_dep,
-    ],
+    dependencies: dep_vfs_gtk4,
     cpp_pch: '../pch/pch.hxx',
 )
 
 # File Rename
-incdir_rename = include_directories(['file-rename', 'lib', '../src/datatypes'])
+incdir_rename = include_directories(['file-rename', '../src', '../src/datatypes'])
 sources_rename = files(
     'file-rename/main.cxx',
     'file-rename/rename.cxx',
+
+    '../src/logger.cxx',
 )
-sources_rename += sources_vfs
 
 spacefm = build_target(
     'spacefm_rename',
@@ -198,14 +146,7 @@ spacefm = build_target(
     include_directories: incdir_rename,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-
-        pugixml_dep,
-    ],
+    dependencies: dep_vfs_gtk4,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -224,12 +165,7 @@ spacefm = build_target(
     include_directories: incdir_keybinding,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -248,12 +184,7 @@ spacefm = build_target(
     include_directories: incdir_keybinding_set,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -271,12 +202,7 @@ spacefm = build_target(
     include_directories: incdir_message,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -294,12 +220,7 @@ spacefm = build_target(
     include_directories: incdir_pattern,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -317,17 +238,12 @@ spacefm = build_target(
     include_directories: incdir_preference,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )
 
 # Properties
-incdir_properties = include_directories(['properties', 'lib', '../src/datatypes'])
+incdir_properties = include_directories(['properties', '../src', '../src/datatypes'])
 sources_properties = files(
     'properties/main.cxx',
     'properties/properties.cxx',
@@ -336,8 +252,9 @@ sources_properties = files(
 
     'properties/media/audio-video-metadata.cxx',
     'properties/media/image-metadata.cxx',
+
+    '../src/logger.cxx',
 )
-sources_properties += sources_vfs
 
 spacefm = build_target(
     'spacefm_properties',
@@ -347,13 +264,7 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-
-        concurrencpp_dep,
-        pugixml_dep,
+        dep_vfs_gtk4,
         media_dependencies,
     ],
     cpp_pch: '../pch/pch.hxx',
@@ -373,11 +284,6 @@ spacefm = build_target(
     include_directories: incdir_text,
     install: true,
     install_dir: bindir,
-    dependencies: [
-        gtkmm4_dep,
-        glibmm4_dep,
-        giomm4_dep,
-        sigc_dep,
-    ],
+    dependencies: gtk4_dependencies,
     cpp_pch: '../pch/pch.hxx',
 )

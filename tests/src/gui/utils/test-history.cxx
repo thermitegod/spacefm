@@ -17,7 +17,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/gui/utils/history.hxx"
+#include "gui/utils/history.hxx"
 
 TEST_SUITE("navigation/selection history" * doctest::description(""))
 {

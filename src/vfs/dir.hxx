@@ -30,10 +30,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "settings/settings.hxx"
-
 #include "vfs/file.hxx"
 #include "vfs/monitor.hxx"
+#include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 
 #include "concurrency.hxx"
@@ -45,7 +44,7 @@ class dir final : public std::enable_shared_from_this<dir>
   public:
     dir() = delete;
     explicit dir(const std::filesystem::path& path,
-                 const std::shared_ptr<config::settings>& settings) noexcept;
+                 const std::shared_ptr<vfs::settings>& settings) noexcept;
     ~dir() noexcept;
     dir(const dir& other) = delete;
     dir(dir&& other) = delete;
@@ -53,7 +52,7 @@ class dir final : public std::enable_shared_from_this<dir>
     dir& operator=(dir&& other) = delete;
 
     [[nodiscard]] static std::shared_ptr<vfs::dir>
-    create(const std::filesystem::path& path, const std::shared_ptr<config::settings>& settings,
+    create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
            const bool permanent = false) noexcept;
 
     // unloads thumbnails in every vfs::dir
@@ -148,7 +147,7 @@ class dir final : public std::enable_shared_from_this<dir>
     concurrencpp::result<concurrencpp::result<bool>> executor_result_;
     concurrencpp::async_lock lock_;
 
-    std::shared_ptr<config::settings> settings_;
+    std::shared_ptr<vfs::settings> settings_;
 
   public:
     // Signals

@@ -46,7 +46,11 @@ class desktop final
     [[nodiscard]] std::string_view exec() const noexcept;
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] std::string_view icon_name() const noexcept;
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(i32 size) const noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] GdkPixbuf* icon(i32 size) const noexcept;
+#endif
     [[nodiscard]] bool use_terminal() const noexcept;
     [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
                                  const std::filesystem::path& file_path) const;

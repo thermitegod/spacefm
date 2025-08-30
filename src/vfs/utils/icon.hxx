@@ -13,11 +13,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <expected>
+#include <string_view>
+#include <system_error>
 
-#include <filesystem>
+#include <glibmm.h>
+#include <gtkmm.h>
 
-namespace utils
+#include <ztd/ztd.hxx>
+namespace vfs::utils
 {
-[[nodiscard]] bool has_execute_permission(const std::filesystem::path& path) noexcept;
-} // namespace utils
+#if (GTK_MAJOR_VERSION == 4)
+std::expected<Glib::RefPtr<Gtk::IconPaintable>, std::error_code>
+load_icon(const std::string_view icon_name, const i32 icon_size) noexcept;
+
+#elif (GTK_MAJOR_VERSION == 3)
+
+GdkPixbuf* load_icon(const std::string_view icon_name, i32 icon_size) noexcept;
+
+#endif
+} // namespace vfs::utils

@@ -30,6 +30,7 @@
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
 #include "vfs/monitor.hxx"
+#include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 #include "vfs/volume.hxx"
 
@@ -44,7 +45,7 @@ static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
 vfs::dir::dir(const std::filesystem::path& path,
-              const std::shared_ptr<config::settings>& settings) noexcept
+              const std::shared_ptr<vfs::settings>& settings) noexcept
     : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
@@ -72,8 +73,8 @@ vfs::dir::~dir() noexcept
 }
 
 std::shared_ptr<vfs::dir>
-vfs::dir::create(const std::filesystem::path& path,
-                 const std::shared_ptr<config::settings>& settings, const bool permanent) noexcept
+vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
+                 const bool permanent) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
     if (global::dir_smart_cache.contains(path))
@@ -132,7 +133,11 @@ vfs::dir::hidden_files() const noexcept
 void
 vfs::dir::update_avoid_changes() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4) // TODO
+    this->avoid_changes_ = false;
+#elif (GTK_MAJOR_VERSION == 3)
     this->avoid_changes_ = vfs::volume_dir_avoid_changes(this->path_);
+#endif
 }
 
 void

@@ -25,10 +25,11 @@
 #include <vector>
 
 #include <gdkmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "settings/settings.hxx"
+#include "vfs/settings.hxx"
 
 namespace vfs
 {
@@ -46,7 +47,7 @@ class mime_type final
   public:
     mime_type() = delete;
     explicit mime_type(const std::string_view type,
-                       const std::shared_ptr<config::settings>& settings) noexcept;
+                       const std::shared_ptr<vfs::settings>& settings) noexcept;
     ~mime_type() noexcept;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
@@ -55,13 +56,17 @@ class mime_type final
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_file(const std::filesystem::path& path,
-                     const std::shared_ptr<config::settings>& settings = nullptr) noexcept;
+                     const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_type(const std::string_view type,
-                     const std::shared_ptr<config::settings>& settings = nullptr) noexcept;
+                     const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
 
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const bool big) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] GdkPixbuf* icon(const bool big) noexcept;
+#endif
 
     // Get mime-type string
     [[nodiscard]] std::string_view type() const noexcept;
@@ -90,7 +95,7 @@ class mime_type final
 
   private:
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create(const std::string_view type, const std::shared_ptr<config::settings>& settings) noexcept;
+    create(const std::string_view type, const std::shared_ptr<vfs::settings>& settings) noexcept;
 
     std::string type_;
     std::string description_;
@@ -99,12 +104,17 @@ class mime_type final
 
     struct icon_data final
     {
+#if (GTK_MAJOR_VERSION == 4)
+        Glib::RefPtr<Gtk::IconPaintable> big{nullptr};
+        Glib::RefPtr<Gtk::IconPaintable> small{nullptr};
+#elif (GTK_MAJOR_VERSION == 3)
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};
+#endif
     };
     icon_data icon_;
 
-    std::shared_ptr<config::settings> settings_;
+    std::shared_ptr<vfs::settings> settings_;
 };
 
 [[nodiscard]] std::optional<std::filesystem::path>

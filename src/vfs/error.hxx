@@ -40,6 +40,10 @@ enum class error_code : std::int32_t
     // Find in path errors
     program_unknown,
     program_not_in_path,
+    // Icon Load errors
+    icon_load,
+    icon_theme_load,
+    icon_unknown,
 };
 
 const std::error_category& error_category() noexcept;

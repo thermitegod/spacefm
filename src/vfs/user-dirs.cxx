@@ -23,49 +23,81 @@
 std::filesystem::path
 vfs::user::desktop() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DESKTOP);
+#endif
 }
 
 std::filesystem::path
 vfs::user::documents() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOCUMENTS);
+#endif
 }
 
 std::filesystem::path
 vfs::user::download() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOWNLOAD);
+#endif
 }
 
 std::filesystem::path
 vfs::user::music() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::MUSIC);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_MUSIC);
+#endif
 }
 
 std::filesystem::path
 vfs::user::pictures() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::PICTURES);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PICTURES);
+#endif
 }
 
 std::filesystem::path
 vfs::user::public_share() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PUBLIC_SHARE);
+#endif
 }
 
 std::filesystem::path
 vfs::user::templates() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_TEMPLATES);
+#endif
 }
 
 std::filesystem::path
 vfs::user::videos() noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS);
+#elif (GTK_MAJOR_VERSION == 3)
     return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_VIDEOS);
+#endif
 }
 
 std::filesystem::path

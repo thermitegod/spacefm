@@ -15,12 +15,26 @@
 
 #pragma once
 
-#include <filesystem>
+#include <cstdint>
 
-namespace utils
+namespace vfs
 {
-[[nodiscard]] bool has_read_permission(const std::filesystem::path& path) noexcept;
-[[nodiscard]] bool has_write_permission(const std::filesystem::path& path) noexcept;
-[[nodiscard]] bool has_execute_permission(const std::filesystem::path& path) noexcept;
-[[nodiscard]] bool check_directory_permissions(const std::filesystem::path& path) noexcept;
-} // namespace utils
+class task final
+{
+  public:
+    enum class type : std::uint8_t
+    {
+        move,
+        copy,
+        trash,
+        del,
+        link,
+        chmod,
+        chown,
+        exec,
+        last,
+    };
+
+    task();
+};
+} // namespace vfs

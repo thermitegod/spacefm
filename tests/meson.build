@@ -9,33 +9,21 @@ test_sources = files()
 # Spacefm Source Files
 test_sources += files(
     # SFM
-    'spacefm/concurrency.cxx',
-    'spacefm/types.cxx',
-    'spacefm/logger.cxx',
-
-    'spacefm/utils/permissions.cxx',
+    '../src/types.cxx',
+    '../src/logger.cxx',
 
     # Settings
-    'spacefm/settings/settings.cxx',
+    '../src/settings/settings.cxx',
 
     # GUI
-    'spacefm/gui/natsort/strnatcmp.cxx',
-    'spacefm/gui/utils/history.cxx',
-
-    # VFS
-    'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
-    'spacefm/vfs/utils/utils.cxx',
-    'spacefm/vfs/clipboard.cxx',
-    'spacefm/vfs/error.cxx',
-    'spacefm/vfs/execute.cxx',
-    'spacefm/vfs/user-dirs.cxx',
+    '../src/gui/natsort/strnatcmp.cxx',
+    '../src/gui/utils/history.cxx',
 )
 
 # Test Source Files
 test_sources += files(
     'src/main.cxx',
 
-    'src/utils/test-permissions.cxx',
 
     # SFM
     'src/base/test-types.cxx',
@@ -45,20 +33,20 @@ test_sources += files(
     'src/gui/utils/test-history.cxx',
 
     # VFS
-    'src/vfs/mime-type/chrome/mime-utils.cxx',
-    'src/vfs/utils/test-utils.cxx',
-    'src/vfs/utils/test-file-ops.cxx',
     'src/vfs/test-clipboard.cxx',
     'src/vfs/test-error.cxx',
     'src/vfs/test-execute.cxx',
+
+    'src/vfs/utils/test-utils.cxx',
+    'src/vfs/utils/test-file-ops.cxx',
+    'src/vfs/utils/test-permissions.cxx',
+
+    'src/vfs/mime-type/chrome/test-mime-utils.cxx',
 )
 
 ## Build
 
-incdir_tests = include_directories(['src', 'spacefm'])
-
-dependencies_tests = [doctest_dep]
-dependencies_tests += dependencies
+incdir_tests = include_directories(['src', '../src'])
 
 test_suite = build_target(
     'test_suite',
@@ -66,7 +54,13 @@ test_suite = build_target(
     target_type: 'executable',
     include_directories: incdir_tests,
     install: false,
-    dependencies: dependencies_tests,
+    dependencies: [
+        doctest_dep,
+
+        base_dependencies,
+        gtk4_dependencies,
+        dep_vfs_gtk4,
+    ],
     cpp_pch: '../pch/pch.hxx',
 )
 

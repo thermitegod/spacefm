@@ -26,27 +26,26 @@
 
 #include <ztd/ztd.hxx>
 
-#include "settings/settings.hxx"
-
-#include "vfs/app-desktop.hxx"
 #include "vfs/file.hxx"
 #include "vfs/mime-type.hxx"
+#include "vfs/settings.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/thumbnails/thumbnails.hxx"
+#include "vfs/utils/icon.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path,
-                  const std::shared_ptr<config::settings>& settings) noexcept
+                  const std::shared_ptr<vfs::settings>& settings) noexcept
 {
     return std::make_shared<vfs::file>(path, settings);
 }
 
 vfs::file::file(const std::filesystem::path& path,
-                const std::shared_ptr<config::settings>& settings) noexcept
+                const std::shared_ptr<vfs::settings>& settings) noexcept
     : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
@@ -76,7 +75,8 @@ vfs::file::file(const std::filesystem::path& path,
 
 vfs::file::~file() noexcept
 {
-    // logger::debug<logger::domain::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
+// logger::debug<logger::domain::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
+#if (GTK_MAJOR_VERSION == 3)
     if (this->thumbnail_.big)
     {
         g_object_unref(this->thumbnail_.big);
@@ -85,6 +85,7 @@ vfs::file::~file() noexcept
     {
         g_object_unref(this->thumbnail_.small);
     }
+#endif
 }
 
 bool
@@ -133,8 +134,6 @@ vfs::file::update() noexcept
         std::format("{}", std::chrono::floor<std::chrono::seconds>(this->ctime()));
     this->display_mtime_ =
         std::format("{}", std::chrono::floor<std::chrono::seconds>(this->mtime()));
-
-    this->load_special_info();
 
     // Cause file prem string to be regenerated as needed
     this->display_perm_.clear();
@@ -247,9 +246,57 @@ vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
     }
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+
+Glib::RefPtr<Gtk::IconPaintable>
+vfs::file::icon(const thumbnail_size size) noexcept
+{
+    ztd::panic_if(this->settings_ == nullptr, "Function disabled");
+
+    if (size == thumbnail_size::big)
+    {
+        if (this->is_directory())
+        {
+            return vfs::utils::load_icon(this->special_directory_get_icon_name(),
+                                         this->settings_->icon_size_big)
+                .value_or(nullptr);
+        }
+
+        return this->mime_type_->icon(true);
+    }
+    else
+    {
+        if (this->is_directory())
+        {
+            return vfs::utils::load_icon(this->special_directory_get_icon_name(),
+                                         this->settings_->icon_size_small)
+                .value_or(nullptr);
+        }
+
+        return this->mime_type_->icon(false);
+    }
+}
+
+Glib::RefPtr<Gdk::Texture>
+vfs::file::thumbnail(const thumbnail_size size) const noexcept
+{
+    if (size == thumbnail_size::big)
+    {
+        return this->thumbnail_.big;
+    }
+    else
+    {
+        return this->thumbnail_.small;
+    }
+}
+
+#elif (GTK_MAJOR_VERSION == 3)
+
 GdkPixbuf*
 vfs::file::icon(const thumbnail_size size) noexcept
 {
+    ztd::panic_if(this->settings_ == nullptr, "Function disabled");
+
     if (size == thumbnail_size::big)
     {
         if (this->is_desktop_entry() && this->thumbnail_.big)
@@ -303,24 +350,34 @@ vfs::file::thumbnail(const thumbnail_size size) const noexcept
     }
 }
 
+#endif
+
 void
 vfs::file::unload_thumbnail(const thumbnail_size size) noexcept
 {
     if (size == thumbnail_size::big)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        this->thumbnail_.big = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
         if (this->thumbnail_.big)
         {
             g_object_unref(this->thumbnail_.big);
             this->thumbnail_.big = nullptr;
         }
+#endif
     }
     else
     {
+#if (GTK_MAJOR_VERSION == 4)
+        this->thumbnail_.small = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
         if (this->thumbnail_.small)
         {
             g_object_unref(this->thumbnail_.small);
             this->thumbnail_.small = nullptr;
         }
+#endif
     }
 }
 
@@ -678,6 +735,93 @@ vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
 void
 vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
+    ztd::panic_if(this->settings_ == nullptr, "Function disabled");
+
+#if (GTK_MAJOR_VERSION == 4)
+    // TODO do something better
+    auto icon_to_pixbuf = [](const Glib::RefPtr<Gtk::IconPaintable>& icon)
+    {
+        return Gdk::Texture::create_for_pixbuf(
+            Gdk::Pixbuf::create_from_file(icon->get_file()->get_path(),
+                                          icon->get_intrinsic_width(),
+                                          icon->get_intrinsic_height()));
+    };
+
+    if (size == thumbnail_size::big)
+    {
+        if (this->thumbnail_.big)
+        {
+            return;
+        }
+
+        std::error_code ec;
+        const bool exists = std::filesystem::exists(this->path_, ec);
+        if (ec || !exists)
+        {
+            return;
+        }
+
+        Glib::RefPtr<Gdk::Texture> thumbnail = nullptr;
+        if (this->mime_type_->is_image())
+        {
+            thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
+                                                      this->settings_->icon_size_big);
+        }
+        else if (this->mime_type_->is_video())
+        {
+            thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
+                                                      this->settings_->icon_size_big);
+        }
+
+        if (thumbnail)
+        {
+            this->thumbnail_.big = thumbnail;
+        }
+        else
+        {
+            // fallback to mime_type icon
+            this->thumbnail_.big = icon_to_pixbuf(this->icon(thumbnail_size::big));
+        }
+    }
+    else
+    {
+        if (this->thumbnail_.small)
+        {
+            return;
+        }
+
+        std::error_code ec;
+        const bool exists = std::filesystem::exists(this->path_, ec);
+        if (ec || !exists)
+        {
+            return;
+        }
+
+        Glib::RefPtr<Gdk::Texture> thumbnail = nullptr;
+        if (this->mime_type_->is_image())
+        {
+            thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
+                                                      this->settings_->icon_size_small);
+        }
+        else if (this->mime_type_->is_video())
+        {
+            thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
+                                                      this->settings_->icon_size_small);
+        }
+
+        if (thumbnail)
+        {
+            this->thumbnail_.small = thumbnail;
+        }
+        else
+        {
+            // fallback to mime_type icon
+            this->thumbnail_.small = icon_to_pixbuf(this->icon(thumbnail_size::small));
+        }
+    }
+
+#elif (GTK_MAJOR_VERSION == 3)
+
     if (size == thumbnail_size::big)
     {
         if (this->thumbnail_.big)
@@ -750,45 +894,5 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
             this->thumbnail_.small = this->icon(thumbnail_size::small);
         }
     }
-}
-
-void
-vfs::file::load_special_info() noexcept
-{
-    if (!this->name_.ends_with(".desktop"))
-    {
-        return;
-    }
-
-    this->is_special_desktop_entry_ = true;
-
-    const auto desktop = vfs::desktop::create(this->path_);
-    if (!desktop)
-    {
-        return;
-    }
-
-    if (desktop->icon_name().empty())
-    {
-        return;
-    }
-
-    const auto big_size = this->settings_->icon_size_big;
-    const auto small_size = this->settings_->icon_size_small;
-    if (this->thumbnail_.big == nullptr)
-    {
-        GdkPixbuf* icon = desktop->icon(big_size);
-        if (icon)
-        {
-            this->thumbnail_.big = icon;
-        }
-    }
-    if (this->thumbnail_.small == nullptr)
-    {
-        GdkPixbuf* icon = desktop->icon(small_size);
-        if (icon)
-        {
-            this->thumbnail_.small = icon;
-        }
-    }
+#endif
 }

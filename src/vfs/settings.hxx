@@ -13,38 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
+#pragma once
 
 #include <ztd/ztd.hxx>
 
-#include "utils/permissions.hxx"
+// VFS only settings
 
-bool
-utils::has_execute_permission(const std::filesystem::path& path) noexcept
+namespace vfs
 {
-    if (!std::filesystem::exists(path))
-    {
-        return false;
-    }
-
-    const auto stat = ztd::stat::create(path);
-    if (!stat)
-    {
-        return false;
-    }
-
-    const auto uid = getuid();
-    const auto gid = getgid();
-
-    if (stat->uid() == uid)
-    {
-        return stat->mode().data() & S_IXUSR;
-    }
-
-    if (stat->gid() == gid)
-    {
-        return stat->mode().data() & S_IXGRP;
-    }
-
-    return stat->mode().data() & S_IXOTH;
-}
+struct settings
+{
+    i32 icon_size_big;
+    i32 icon_size_small;
+    i32 icon_size_tool;
+};
+} // namespace vfs

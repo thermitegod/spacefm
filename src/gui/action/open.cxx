@@ -28,8 +28,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/permissions.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/archiver.hxx"
@@ -43,6 +41,8 @@
 #include "vfs/app-desktop.hxx"
 #include "vfs/execute.hxx"
 #include "vfs/file.hxx"
+
+#include "vfs/utils/permissions.hxx"
 
 #include "logger.hxx"
 
@@ -70,8 +70,8 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
     const bool extract_here = xset_get_b(xset::name::archive_default_extract);
 
     // determine default archive action in this dir
-    if (extract_here &&
-        (::utils::has_read_permission(parent->cwd) && ::utils::has_write_permission(parent->cwd)))
+    if (extract_here && (vfs::utils::has_read_permission(parent->cwd) &&
+                         vfs::utils::has_write_permission(parent->cwd)))
     {
         // Extract Here
         gui::archiver::extract(parent->browser, selected_files, parent->cwd);

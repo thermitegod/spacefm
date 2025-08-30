@@ -35,8 +35,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "utils/permissions.hxx"
-
 #include "xset/xset.hxx"
 
 #include "gui/dialog/text.hxx"
@@ -47,6 +45,7 @@
 #include "vfs/trash-can.hxx"
 #include "vfs/volume.hxx"
 
+#include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
@@ -833,7 +832,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file) noexcept
         return;
     }
 
-    if (!::utils::has_read_permission(src_file) || !::utils::has_write_permission(src_file))
+    if (!vfs::utils::has_read_permission(src_file) || !vfs::utils::has_write_permission(src_file))
     {
         // this->task_error(errno, "Trashing", src_file);
         logger::error<logger::domain::vfs>("Trashing failed missing RW permissions '{}'",

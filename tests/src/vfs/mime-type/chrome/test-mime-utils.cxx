@@ -19,7 +19,7 @@
 
 #include <doctest/doctest.h>
 
-#include "spacefm/vfs/mime-type/chrome/mime-utils.hxx"
+#include "vfs/mime-type/chrome/mime-utils.hxx"
 
 TEST_SUITE("vfs::detail::mime_type::chrome" * doctest::description(""))
 {
