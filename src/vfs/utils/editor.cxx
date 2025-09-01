@@ -46,7 +46,7 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
 
     if (!editor->ends_with(".desktop"))
     {
-        logger::error<logger::domain::vfs>("Editor is not set to a .desktop file");
+        logger::error<logger::vfs>("Editor is not set to a .desktop file");
         return;
     }
 

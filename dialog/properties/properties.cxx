@@ -482,7 +482,7 @@ PropertiesDialog::init_media_info_tab() noexcept
 
     for (const auto& item : metadata)
     {
-        // logger::debug<logger::domain::ptk>("description={}   value={}", item.description, item.value);
+        // logger::debug<logger::ptk>("description={}   value={}", item.description, item.value);
         Gtk::Label description_label(item.description.data());
         Gtk::Label value_label(item.value.data());
         value_label.set_xalign(1.0f);

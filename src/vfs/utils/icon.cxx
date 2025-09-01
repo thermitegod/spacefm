@@ -45,9 +45,9 @@ vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size) noe
     auto icon = icon_theme->lookup_icon(icon_name.data(), icon_size.data());
     if (!icon)
     {
-        logger::error<logger::domain::vfs>("Failed to load the '{}' icon from theme '{}'",
-                                           icon_name,
-                                           icon_theme->property_theme_name().get_name());
+        logger::error<logger::vfs>("Failed to load the '{}' icon from theme '{}'",
+                                   icon_name,
+                                   icon_theme->property_theme_name().get_name());
         return std::unexpected{vfs::error_code::icon_load};
     }
 

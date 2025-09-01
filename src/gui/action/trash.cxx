@@ -43,7 +43,7 @@ gui::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
 
     if (selected_files.empty())
     {
-        logger::warn<logger::domain::gui>("Trying to trash an empty file list");
+        logger::warn<logger::gui>("Trying to trash an empty file list");
         return;
     }
 

@@ -68,8 +68,8 @@ vfs::trash_can::toplevel(const std::filesystem::path& path) noexcept
     std::filesystem::path mount_path = path;
     std::filesystem::path last_path;
 
-    // logger::info<logger::domain::vfs>("id mount {}", device(mount_path));
-    // logger::info<logger::domain::vfs>("id       {}", id);
+    // logger::info<logger::vfs>("id mount {}", device(mount_path));
+    // logger::info<logger::vfs>("id       {}", id);
 
     // walk up the path until it gets to the root of the device
     while (mount_id(mount_path) == id)
@@ -78,8 +78,8 @@ vfs::trash_can::toplevel(const std::filesystem::path& path) noexcept
         mount_path = mount_path.parent_path();
     }
 
-    // logger::info<logger::domain::vfs>("last path   {}", last_path);
-    // logger::info<logger::domain::vfs>("mount point {}", mount_path);
+    // logger::info<logger::vfs>("last path   {}", last_path);
+    // logger::info<logger::vfs>("mount point {}", mount_path);
 
     return last_path;
 }
@@ -122,21 +122,19 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
         if (path.string().ends_with("/Trash") ||
             path.string().ends_with(std::format("/.Trash-{}", getuid())))
         {
-            logger::warn<logger::domain::vfs>("Refusing to trash the Trash Dir: {}", path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Dir: {}", path.string());
             return true;
         }
         else if (path.string().ends_with("/Trash/files") ||
                  path.string().ends_with(std::format("/.Trash-{}/files", getuid())))
         {
-            logger::warn<logger::domain::vfs>("Refusing to trash the Trash Files Dir: {}",
-                                              path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Files Dir: {}", path.string());
             return true;
         }
         else if (path.string().ends_with("/Trash/info") ||
                  path.string().ends_with(std::format("/.Trash-{}/info", getuid())))
         {
-            logger::warn<logger::domain::vfs>("Refusing to trash the Trash Info Dir: {}",
-                                              path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Info Dir: {}", path.string());
             return true;
         }
     }
@@ -147,7 +145,7 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
 
-    // logger::info<logger::domain::vfs>("moved to trash: {}", path);
+    // logger::info<logger::vfs>("moved to trash: {}", path);
 
     return true;
 }
@@ -237,9 +235,9 @@ vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
 {
     const auto target_path = this->files_path_ / target_filename;
 
-    // logger::info<logger::domain::vfs>("fp {}", this->files_path);
-    // logger::info<logger::domain::vfs>("ip {}", this->info_path);
-    // logger::info<logger::domain::vfs>("tp {}", target_path);
+    // logger::info<logger::vfs>("fp {}", this->files_path);
+    // logger::info<logger::vfs>("ip {}", this->info_path);
+    // logger::info<logger::vfs>("tp {}", target_path);
 
     std::filesystem::rename(path, target_path);
 }

@@ -57,7 +57,7 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
     {
-        // logger::info<logger::domain::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
+        // logger::info<logger::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
         const auto& cache = desktops_cache.at(desktop_file);
 
         const auto desktop_stat = ztd::stat::create(cache.desktop.path());
@@ -65,7 +65,7 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
         {
             return cache.desktop;
         }
-        // logger::info<logger::domain::vfs>("vfs::desktop({}) changed on disk, reloading", logger::utils::ptr(desktop));
+        // logger::info<logger::vfs>("vfs::desktop({}) changed on disk, reloading", logger::utils::ptr(desktop));
     }
 
     auto desktop = vfs::desktop(desktop_file);
@@ -82,14 +82,14 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
     }
 
     desktops_cache.insert({desktop_file, {desktop, stat->mtime()}});
-    // logger::info<logger::domain::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file.string());
+    // logger::info<logger::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file.string());
     return desktop;
 }
 
 vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
     : filename_(desktop_file.filename()), path_(desktop_file)
 {
-    // logger::info<logger::domain::vfs>("vfs::desktop::desktop({})", logger::utils::ptr(this));
+    // logger::info<logger::vfs>("vfs::desktop::desktop({})", logger::utils::ptr(this));
 }
 
 vfs::error_code
@@ -143,8 +143,7 @@ vfs::desktop::parse_desktop_file() noexcept
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
-            logger::error<logger::domain::vfs>("Error opening desktop file: {}",
-                                               this->path_.string());
+            logger::error<logger::vfs>("Error opening desktop file: {}", this->path_.string());
             return vfs::error_code::file_open_failure;
         }
         this->path_ = relative_full_path;
@@ -152,7 +151,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (!loaded)
     {
-        logger::error<logger::domain::vfs>("Failed to load desktop file: {}", this->path_.string());
+        logger::error<logger::vfs>("Failed to load desktop file: {}", this->path_.string());
         return vfs::error_code::parse_error;
     }
 
@@ -441,7 +440,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         // if (!this->desktop_entry_.exec.ends_with("%F") ||
         //     !this->desktop_entry_.exec.ends_with("%U"))
         // {
-        //     logger::error<logger::domain::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", this->path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", this->path_.string());
         //     return std::nullopt;
         // }
 
@@ -470,7 +469,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         // if (!this->desktop_entry_.exec.ends_with("%f") ||
         //     !this->desktop_entry_.exec.ends_with("%u"))
         // {
-        //     logger::error<logger::domain::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", this->path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", this->path_.string());
         //     return std::nullopt;
         // }
 
@@ -496,7 +495,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         add_files = true;
     }
 
-    logger::warn_if<logger::domain::vfs>(
+    logger::warn_if<logger::vfs>(
         !add_files && !file_list.empty(),
         "Malformed desktop file, trying to open a desktop file without file/url "
         "keys with a file list: {}",
@@ -578,8 +577,7 @@ vfs::desktop::open_file(const std::filesystem::path& working_dir,
 {
     if (this->desktop_entry_.exec.empty())
     {
-        logger::error<logger::domain::vfs>("Desktop Exec is empty, command not found: {}",
-                                           this->filename_);
+        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", this->filename_);
         return false;
     }
 
@@ -595,8 +593,7 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
 {
     if (this->desktop_entry_.exec.empty())
     {
-        logger::error<logger::domain::vfs>("Desktop Exec is empty, command not found: {}",
-                                           this->filename_);
+        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", this->filename_);
         return false;
     }
 

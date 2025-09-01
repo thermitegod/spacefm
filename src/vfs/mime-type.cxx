@@ -81,7 +81,7 @@ vfs::mime_type::mime_type(const std::string_view type,
     this->description_ = icon_data[1];
     if (this->description_.empty() && this->type_ != vfs::constants::mime_type::unknown)
     {
-        logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
+        logger::warn<logger::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto mime_unknown =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, settings);
         if (mime_unknown)
@@ -174,7 +174,7 @@ vfs::mime_type::icon(const bool big) noexcept
     }
     if (this->description_.empty())
     {
-        logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
+        logger::warn<logger::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto vfs_mime =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         if (vfs_mime)
@@ -307,7 +307,7 @@ vfs::mime_type::icon(const bool big) noexcept
     }
     if (this->description_.empty())
     {
-        logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
+        logger::warn<logger::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto vfs_mime =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         if (vfs_mime)
@@ -416,7 +416,7 @@ vfs::mime_type::set_default_action(const std::string_view desktop_id) const noex
 {
     if (!desktop_id.ends_with(".desktop"))
     {
-        logger::error<logger::domain::vfs>("Setting default action requires a desktop file");
+        logger::error<logger::vfs>("Setting default action requires a desktop file");
         return;
     }
 

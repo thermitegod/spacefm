@@ -109,7 +109,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
         return false;
     }
 
-    logger::info<logger::domain::gui>("EXEC({})={}", desktop->path().string(), desktop->exec());
+    logger::info<logger::gui>("EXEC({})={}", desktop->path().string(), desktop->exec());
 
     const auto opened = desktop->open_files(parent->cwd, open_files);
     if (!opened)
@@ -232,7 +232,7 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
             }
             catch (const std::filesystem::filesystem_error& e)
             {
-                logger::warn<logger::domain::gui>("{}", e.what());
+                logger::warn<logger::gui>("{}", e.what());
                 continue;
             }
         }

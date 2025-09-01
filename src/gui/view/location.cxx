@@ -314,7 +314,7 @@ gui::view::location::chdir(GtkTreeView* location_view,
 std::shared_ptr<vfs::volume>
 gui::view::location::selected_volume(GtkTreeView* location_view) noexcept
 {
-    // logger::info<logger::domain::gui>("gui::view::location::selected_volume    view = {}", location_view);
+    // logger::info<logger::gui>("gui::view::location::selected_volume    view = {}", location_view);
     GtkTreeIter it;
 
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
@@ -332,7 +332,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
                  gui::browser* browser) noexcept
 {
     (void)col;
-    // logger::info<logger::domain::gui>("on_row_activated   view = {}", view);
+    // logger::info<logger::gui>("on_row_activated   view = {}", view);
     if (!browser)
     {
         return;
@@ -459,7 +459,7 @@ gui::view::location::create(gui::browser* browser) noexcept
 
     GtkWidget* view = gtk_tree_view_new_with_model(model);
     g_object_unref(G_OBJECT(model));
-    // logger::info<logger::domain::gui>("gui::view::location::create   view = {}", view);
+    // logger::info<logger::gui>("gui::view::location::create   view = {}", view);
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
@@ -852,7 +852,7 @@ static bool
 on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexcept
 {
     (void)task;
-    // logger::info<logger::domain::gui>("on_autoopen_cb");
+    // logger::info<logger::gui>("on_autoopen_cb");
     for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
@@ -1209,7 +1209,7 @@ volume_is_visible(const std::shared_ptr<vfs::volume>& vol) noexcept
 void
 gui::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
 {
-    // logger::info<logger::domain::gui>("gui::view::location::on_action");
+    // logger::info<logger::gui>("gui::view::location::on_action");
     if (!view)
     {
         return;
@@ -1399,7 +1399,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
         return false;
     }
 
-    // logger::info<logger::domain::gui>("on_button_press_event   view = {}", view);
+    // logger::info<logger::gui>("on_button_press_event   view = {}", view);
     auto* browser = static_cast<gui::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     browser->focus_me();
 

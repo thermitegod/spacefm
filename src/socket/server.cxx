@@ -38,8 +38,8 @@ spacefm::server::server_thread() noexcept
 
     server.bind(std::format("tcp://localhost:{}", SOCKET_PORT));
 
-    logger::debug<logger::domain::socket>("starting socket thread {}",
-                                          std::format("tcp://localhost:{}", SOCKET_PORT));
+    logger::debug<logger::socket>("starting socket thread {}",
+                                  std::format("tcp://localhost:{}", SOCKET_PORT));
 
     while (true)
     {
@@ -50,18 +50,18 @@ spacefm::server::server_thread() noexcept
             // Process the command and generate a response
             const std::string command(static_cast<char*>(request.data()), request.size());
 
-            logger::info<logger::domain::socket>("request: {}", command);
+            logger::info<logger::socket>("request: {}", command);
             const auto [ret, result] = socket::command(command);
 
             const auto response = socket::socket_response_data{ret.data(), result};
             const auto buffer = glz::write_json(response);
             if (!buffer)
             {
-                logger::info<logger::domain::socket>("Failed to create response: {}",
-                                                     glz::format_error(buffer));
+                logger::info<logger::socket>("Failed to create response: {}",
+                                             glz::format_error(buffer));
                 continue;
             }
-            logger::info<logger::domain::socket>("result : {}", buffer.value());
+            logger::info<logger::socket>("result : {}", buffer.value());
 
             // Send the response back to the sender
             zmq::message_t reply(buffer->size());

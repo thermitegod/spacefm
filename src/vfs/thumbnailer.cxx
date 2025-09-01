@@ -28,14 +28,14 @@
 
 vfs::thumbnailer::thumbnailer() noexcept
 {
-    // logger::debug<logger::domain::vfs>("vfs::thumbnailer::thumbnailer({})", logger::utils::ptr(this));
+    // logger::debug<logger::vfs>("vfs::thumbnailer::thumbnailer({})", logger::utils::ptr(this));
     this->executor_ = global::runtime.thread_executor();
     this->executor_result_ = this->executor_->submit([this] { return this->thumbnailer_thread(); });
 }
 
 vfs::thumbnailer::~thumbnailer() noexcept
 {
-    // logger::debug<logger::domain::vfs>("vfs::thumbnailer::~thumbnailer({})", logger::utils::ptr(this));
+    // logger::debug<logger::vfs>("vfs::thumbnailer::~thumbnailer({})", logger::utils::ptr(this));
     {
         auto guard = this->lock_.lock(this->executor_);
         this->abort_ = true;
@@ -48,7 +48,7 @@ vfs::thumbnailer::~thumbnailer() noexcept
 concurrencpp::result<void>
 vfs::thumbnailer::request(vfs::thumbnailer::request_data request) noexcept
 {
-    // logger::debug<logger::domain::vfs>("vfs::thumbnailer::request({})    {}", logger::utils::ptr(this), request.file->name());
+    // logger::debug<logger::vfs>("vfs::thumbnailer::request({})    {}", logger::utils::ptr(this), request.file->name());
     {
         auto guard = co_await this->lock_.lock(this->executor_);
         this->queue_.push(request);
@@ -78,7 +78,7 @@ vfs::thumbnailer::thumbnailer_thread() noexcept
         {
             request.file->load_thumbnail(request.size);
             // Slow down for debugging.
-            // logger::debug<logger::domain::vfs>("thumbnail loaded: {}", request.file->name());
+            // logger::debug<logger::vfs>("thumbnail loaded: {}", request.file->name());
             // std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 

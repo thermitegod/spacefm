@@ -591,7 +591,7 @@ gui_file_list_set_sort_func(GtkTreeSortable* sortable, std::int32_t sort_column_
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    logger::warn<logger::domain::gui>("gui_file_list_set_sort_func: Not supported");
+    logger::warn<logger::gui>("gui_file_list_set_sort_func: Not supported");
 }
 
 static void
@@ -602,7 +602,7 @@ gui_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    logger::warn<logger::domain::gui>("gui_file_list_set_default_sort_func: Not supported");
+    logger::warn<logger::gui>("gui_file_list_set_default_sort_func: Not supported");
 }
 
 static std::int32_t
@@ -918,7 +918,7 @@ gui::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file
 void
 gui::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    // logger::debug<logger::domain::gui>("LOADED: {}", file->name());
+    // logger::debug<logger::gui>("LOADED: {}", file->name());
     if (!file)
     {
         return;
@@ -976,7 +976,7 @@ gui::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
             else
             {
                 this->dir->load_thumbnail(file, this->thumbnail_size);
-                // logger::debug<logger::domain::gui>("REQUEST: {}", file->name());
+                // logger::debug<logger::gui>("REQUEST: {}", file->name());
             }
         }
     }

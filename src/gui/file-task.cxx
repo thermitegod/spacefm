@@ -88,13 +88,13 @@ gui::file_task::file_task(const vfs::file_task::type type,
     }
 
     // GThread *self = g_thread_self();
-    // logger::info<logger::domain::gui>("GUI_THREAD = {}", logger::utils::ptr(self));
-    // logger::info<logger::domain::gui>("gui::file_task::file_task({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("GUI_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::gui>("gui::file_task::file_task({}) DONE", logger::utils::ptr(this));
 }
 
 gui::file_task::~file_task() noexcept
 {
-    // logger::info<logger::domain::gui>("gui::file_task::~file_task({})", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::~file_task({})", logger::utils::ptr(this));
     if (this->timeout_ != 0)
     {
         g_source_remove(this->timeout_.data());
@@ -127,7 +127,7 @@ gui::file_task::~file_task() noexcept
     gtk_text_buffer_set_text(this->log_buf_, "", -1);
     g_object_unref(this->log_buf_);
 
-    // logger::info<logger::domain::gui>("gui::file_task::~file_task({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::~file_task({}) DONE", logger::utils::ptr(this));
 }
 
 void
@@ -306,12 +306,12 @@ static bool
 on_progress_timer(gui::file_task* ptask) noexcept
 {
     // GThread *self = g_thread_self ();
-    // logger::info<logger::domain::gui>("PROGRESS_TIMER_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::gui>("PROGRESS_TIMER_THREAD = {}", logger::utils::ptr(self));
 
     // query condition?
     if (ptask->query_cond_ && ptask->query_cond_ != ptask->query_cond_last_)
     {
-        // logger::info<logger::domain::gui>("QUERY = {}  mutex = {}", logger::utils::ptr(ptask->query_cond), logger::utils::ptr(ptask->task->mutex));
+        // logger::info<logger::gui>("QUERY = {}  mutex = {}", logger::utils::ptr(ptask->query_cond), logger::utils::ptr(ptask->task->mutex));
         ptask->restart_timeout_ = (ptask->timeout_ != 0);
         if (ptask->timeout_ != 0)
         {
@@ -358,7 +358,7 @@ on_progress_timer(gui::file_task* ptask) noexcept
         return true;
     }
     ptask->progress_count_ = 0;
-    // logger::info<logger::domain::gui>("on_progress_timer ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::gui>("on_progress_timer ptask={}", logger::utils::ptr(ptask));
 
     if (ptask->is_completed())
     {
@@ -388,7 +388,7 @@ on_progress_timer(gui::file_task* ptask) noexcept
         if (!ptask->progress_dlg_ || (ptask->err_count_ == 0 && !ptask->keep_dlg_))
         {
             delete ptask;
-            // logger::info<logger::domain::gui>("on_progress_timer DONE false-COMPLETE ptask={}", logger::utils::ptr(ptask));
+            // logger::info<logger::gui>("on_progress_timer DONE false-COMPLETE ptask={}", logger::utils::ptr(ptask));
             return false;
         }
         else if (ptask->progress_dlg_ && ptask->err_count_ != 0)
@@ -396,14 +396,14 @@ on_progress_timer(gui::file_task* ptask) noexcept
             gtk_window_present(GTK_WINDOW(ptask->progress_dlg_));
         }
     }
-    // logger::info<logger::domain::gui>("on_progress_timer DONE true ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::gui>("on_progress_timer DONE true ptask={}", logger::utils::ptr(ptask));
     return !ptask->is_completed();
 }
 
 static bool
 gui_file_task_add_main(gui::file_task* ptask) noexcept
 {
-    // logger::info<logger::domain::gui>("gui_file_task_add_main ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::gui>("gui_file_task_add_main ptask={}", logger::utils::ptr(ptask));
     if (ptask->timeout_ != 0)
     {
         g_source_remove(ptask->timeout_.data());
@@ -425,14 +425,14 @@ gui_file_task_add_main(gui::file_task* ptask) noexcept
 
     on_progress_timer(ptask);
 
-    // logger::info<logger::domain::gui>("gui_file_task_add_main DONE ptask={}", logger::utils::ptr(ptask));
+    // logger::info<logger::gui>("gui_file_task_add_main DONE ptask={}", logger::utils::ptr(ptask));
     return false;
 }
 
 void
 gui::file_task::run() noexcept
 {
-    // logger::info<logger::domain::gui>("gui::file_task::run({})", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::run({})", logger::utils::ptr(this));
     // wait this long to first show task in manager, popup
     this->timeout_ = g_timeout_add(500, (GSourceFunc)gui_file_task_add_main, this);
     this->progress_timer_ = 0;
@@ -446,14 +446,14 @@ gui::file_task::run() noexcept
         }
     }
     this->progress_timer_ = g_timeout_add(50, (GSourceFunc)on_progress_timer, this);
-    // logger::info<logger::domain::gui>("gui::file_task::run({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::run({}) DONE", logger::utils::ptr(this));
 }
 
 bool
 gui::file_task::cancel() noexcept
 {
     // GThread *self = g_thread_self ();
-    // logger::info<logger::domain::gui>("CANCEL_THREAD = {}", logger::utils::ptr(self));
+    // logger::info<logger::gui>("CANCEL_THREAD = {}", logger::utils::ptr(self));
     if (this->timeout_ != 0)
     {
         g_source_remove(this->timeout_.data());
@@ -731,7 +731,7 @@ gui::file_task::progress_open() noexcept
         return;
     }
 
-    // logger::info<logger::domain::gui>("gui::file_task::progress_open");
+    // logger::info<logger::gui>("gui::file_task::progress_open");
 
     // create dialog
     this->progress_dlg_ =
@@ -1082,7 +1082,7 @@ gui::file_task::progress_open() noexcept
                                  0);
 
     this->progress_count_ = 50; // trigger fast display
-    // logger::info<logger::domain::gui>("gui::file_task::progress_open DONE");
+    // logger::info<logger::gui>("gui::file_task::progress_open DONE");
 }
 
 void
@@ -1097,7 +1097,7 @@ gui::file_task::progress_update() noexcept
         return;
     }
 
-    // logger::info<logger::domain::gui>("gui::file_task::progress_update({})", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::progress_update({})", logger::utils::ptr(this));
 
     std::string ufile_path;
 
@@ -1300,7 +1300,7 @@ gui::file_task::progress_update() noexcept
     {
         // scroll to end if scrollbar is mostly down
 
-        // logger::info<logger::domain::gui>("    scroll to end line {}", this->log_end,
+        // logger::info<logger::gui>("    scroll to end line {}", this->log_end,
         // gtk_text_buffer_get_line_count(this->log_buf));
         gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(this->error_view_),
                                      this->log_end_,
@@ -1384,7 +1384,7 @@ gui::file_task::progress_update() noexcept
         }
     }
     gtk_label_set_text(this->errors_, errs.data());
-    // logger::info<logger::domain::gui>("gui::file_task::progress_update({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::progress_update({}) DONE", logger::utils::ptr(this));
 }
 
 void
@@ -1408,12 +1408,12 @@ gui::file_task::set_recursive(const bool recursive) noexcept
 void
 gui::file_task::update() noexcept
 {
-    // logger::info<logger::domain::gui>("gui::file_task::update({})", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::update({})", logger::utils::ptr(this));
     // calculate updated display data
 
     if (!this->trylock())
     {
-        // logger::info<logger::domain::gui>("UPDATE LOCKED");
+        // logger::info<logger::gui>("UPDATE LOCKED");
         return;
     }
 
@@ -1430,7 +1430,7 @@ gui::file_task::update() noexcept
             {
                 cur_speed = (this->task->progress - this->task->last_progress) /
                             u64::create(since_last.count());
-                // logger::info<logger::domain::gui>("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
+                // logger::info<logger::gui>("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
                 this->task->last_elapsed = elapsed;
                 this->task->last_speed = cur_speed;
                 this->task->last_progress = this->task->progress;
@@ -1745,7 +1745,7 @@ gui::file_task::update() noexcept
     }
 
     this->task->unlock();
-    // logger::info<logger::domain::gui>("gui::file_task::update({}) DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::update({}) DONE", logger::utils::ptr(this));
 }
 
 static void
@@ -1867,7 +1867,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
     switch (state)
     {
         case vfs::file_task::state::finish:
-            // logger::info<logger::domain::gui>("vfs::file_task::state::finish");
+            // logger::info<logger::gui>("vfs::file_task::state::finish");
 
             ptask->complete_ = true;
 
@@ -1882,7 +1882,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             break;
         case vfs::file_task::state::query_overwrite:
             // 0; GThread *self = g_thread_self ();
-            // logger::info<logger::domain::gui>("TASK_THREAD = {}", logger::utils::ptr(self));
+            // logger::info<logger::gui>("TASK_THREAD = {}", logger::utils::ptr(self));
             task->lock();
             ptask->query_new_dest_ = (char**)state_data;
             *ptask->query_new_dest_ = nullptr;
@@ -1902,10 +1902,10 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             task->unlock();
             break;
         case vfs::file_task::state::error:
-            // logger::info<logger::domain::gui>("vfs::file_task::state::error");
+            // logger::info<logger::gui>("vfs::file_task::state::error");
             task->lock();
             task->err_count += 1;
-            // logger::info<logger::domain::gui>("    ptask->item_count = {}", task->current_item );
+            // logger::info<logger::gui>("    ptask->item_count = {}", task->current_item );
 
             if (task->type_ == vfs::file_task::type::exec)
             {
@@ -2162,7 +2162,7 @@ on_query_button_press(GtkWidget* widget, gui::file_task* ptask) noexcept
 void
 gui::file_task::query_overwrite() noexcept
 {
-    // logger::info<logger::domain::gui>("gui::file_task::query_overwrite({}) ", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::file_task::query_overwrite({}) ", logger::utils::ptr(this));
     GtkWidget* dlg = nullptr;
     GtkWidget* parent_win = nullptr;
     GtkTextIter iter;

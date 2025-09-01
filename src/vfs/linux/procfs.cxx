@@ -33,9 +33,9 @@ vfs::linux::procfs::mountinfo() noexcept
     const auto buffer = vfs::utils::read_file(MOUNTINFO);
     if (!buffer)
     {
-        logger::error<logger::domain::vfs>("Failed to read mountinfo: {} {}",
-                                           MOUNTINFO,
-                                           buffer.error().message());
+        logger::error<logger::vfs>("Failed to read mountinfo: {} {}",
+                                   MOUNTINFO,
+                                   buffer.error().message());
         return mounts;
     }
 
@@ -49,9 +49,9 @@ vfs::linux::procfs::mountinfo() noexcept
         const auto fields = ztd::split(line, " ");
         if (fields.size() != 11)
         {
-            logger::error<logger::domain::vfs>("Invalid mountinfo entry: size={}, line={}",
-                                               fields.size(),
-                                               line);
+            logger::error<logger::vfs>("Invalid mountinfo entry: size={}, line={}",
+                                       fields.size(),
+                                       line);
             continue;
         }
 
@@ -71,19 +71,19 @@ vfs::linux::procfs::mountinfo() noexcept
         mount.mount_source = fields[9];
         mount.super_options = fields[10];
 
-        // logger::info<logger::domain::vfs>("==========================================");
-        // logger::info<logger::domain::vfs>("mount.mount_id        = {}", mount.mount_id);
-        // logger::info<logger::domain::vfs>("mount.parent_id       = {}", mount.parent_id);
-        // logger::info<logger::domain::vfs>("mount.major           = {}", mount.major);
-        // logger::info<logger::domain::vfs>("mount.minor           = {}", mount.minor);
-        // logger::info<logger::domain::vfs>("mount.root            = {}", mount.root);
-        // logger::info<logger::domain::vfs>("mount.mount_point     = {}", mount.mount_point);
-        // logger::info<logger::domain::vfs>("mount.mount_options   = {}", mount.mount_options);
-        // logger::info<logger::domain::vfs>("mount.optional_fields = {}", mount.optional_fields);
-        // logger::info<logger::domain::vfs>("mount.separator       = {}", mount.separator);
-        // logger::info<logger::domain::vfs>("mount.filesystem_type = {}", mount.filesystem_type);
-        // logger::info<logger::domain::vfs>("mount.mount_source    = {}", mount.mount_source);
-        // logger::info<logger::domain::vfs>("mount.super_options   = {}", mount.super_options);
+        // logger::info<logger::vfs>("==========================================");
+        // logger::info<logger::vfs>("mount.mount_id        = {}", mount.mount_id);
+        // logger::info<logger::vfs>("mount.parent_id       = {}", mount.parent_id);
+        // logger::info<logger::vfs>("mount.major           = {}", mount.major);
+        // logger::info<logger::vfs>("mount.minor           = {}", mount.minor);
+        // logger::info<logger::vfs>("mount.root            = {}", mount.root);
+        // logger::info<logger::vfs>("mount.mount_point     = {}", mount.mount_point);
+        // logger::info<logger::vfs>("mount.mount_options   = {}", mount.mount_options);
+        // logger::info<logger::vfs>("mount.optional_fields = {}", mount.optional_fields);
+        // logger::info<logger::vfs>("mount.separator       = {}", mount.separator);
+        // logger::info<logger::vfs>("mount.filesystem_type = {}", mount.filesystem_type);
+        // logger::info<logger::vfs>("mount.mount_source    = {}", mount.mount_source);
+        // logger::info<logger::vfs>("mount.super_options   = {}", mount.super_options);
 
         mounts.push_back(mount);
     }

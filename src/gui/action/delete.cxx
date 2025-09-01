@@ -43,7 +43,7 @@ gui::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
 
     if (selected_files.empty())
     {
-        logger::warn<logger::domain::gui>("Trying to delete an empty file list");
+        logger::warn<logger::gui>("Trying to delete an empty file list");
         return;
     }
 

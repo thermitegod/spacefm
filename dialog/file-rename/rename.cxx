@@ -856,7 +856,7 @@ RenameDialog::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         path = full_path.parent_path();
     }
 
-    // logger::info<logger::domain::ptk>("path={}   full={}", path, full_path);
+    // logger::info<logger::ptk>("path={}   full={}", path, full_path);
 
     // tests
     bool full_path_exists = false;

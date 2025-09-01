@@ -25,7 +25,7 @@
 
 namespace logger
 {
-enum class domain : std::uint8_t
+enum domain : std::uint8_t
 {
     basic,
     dev,
@@ -41,7 +41,7 @@ void initialize() noexcept;
 void initialize(const std::unordered_map<std::string, std::string>& options,
                 const std::filesystem::path& logfile = "") noexcept;
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 trace(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -52,7 +52,7 @@ trace(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 trace_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -62,7 +62,7 @@ trace_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 debug(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -73,7 +73,7 @@ debug(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 debug_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -83,7 +83,7 @@ debug_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 info(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -94,7 +94,7 @@ info(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 info_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -104,7 +104,7 @@ info_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 warn(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -115,7 +115,7 @@ warn(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 warn_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -125,7 +125,7 @@ warn_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 error(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -136,7 +136,7 @@ error(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 error_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -146,7 +146,7 @@ error_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 critical(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
@@ -157,7 +157,7 @@ critical(std::format_string<Args...> fmt, Args&&... args) noexcept
     }
 }
 
-template<domain d = domain::basic, typename... Args>
+template<domain d = basic, typename... Args>
 void
 critical_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {

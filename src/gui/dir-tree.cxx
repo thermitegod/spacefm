@@ -431,7 +431,7 @@ gui_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexce
 
     if (!node)
     {
-        logger::error<logger::domain::gui>("!node");
+        logger::error<logger::gui>("!node");
         return -1;
     }
     return node->n_children;

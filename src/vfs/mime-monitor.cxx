@@ -59,14 +59,14 @@ mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
     if (global::mime_change_timer != 0)
     {
         // timer is already running, so ignore request
-        // logger::debug<logger::domain::vfs>("MIME-UPDATE already set");
+        // logger::debug<logger::vfs>("MIME-UPDATE already set");
         return;
     }
 
     // update mime database in 2 seconds
     global::mime_change_timer =
         g_timeout_add_seconds(2, (GSourceFunc)mime_monitor::on_mime_change_timer, nullptr);
-    // logger::debug<logger::domain::vfs>("MIME-UPDATE timer started");
+    // logger::debug<logger::vfs>("MIME-UPDATE timer started");
 }
 
 namespace global
@@ -79,7 +79,7 @@ mime_monitor::on_mime_change_timer(void* user_data) noexcept
 {
     (void)user_data;
 
-    // logger::debug<logger::domain::vfs>("MIME-UPDATE on_timer");
+    // logger::debug<logger::vfs>("MIME-UPDATE on_timer");
     vfs::execute::command_line_async("update-mime-database {}/mime", vfs::user::data().string());
     vfs::execute::command_line_async("update-desktop-database {}/applications",
                                      vfs::user::data().string());
@@ -105,7 +105,7 @@ vfs::mime_monitor() noexcept
 
     global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path, nullptr));
 
-    // logger::debug<logger::domain::vfs>("MIME-UPDATE watch started");
+    // logger::debug<logger::vfs>("MIME-UPDATE watch started");
     global::user_mime_monitor->dir->signal_file_created().connect(
         [](auto f) { mime_monitor::on_mime_change(f); });
     global::user_mime_monitor->dir->signal_file_changed().connect(

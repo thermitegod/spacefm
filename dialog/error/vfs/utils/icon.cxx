@@ -35,14 +35,12 @@ vfs::utils::load_icon(const std::string_view icon_name, const std::int32_t icon_
         }
         else
         {
-            // logger::error<logger::domain::vfs>("Failed to load the '{}' icon from theme '{}'",
-            //                                    icon_name,
-            //                                    theme->property_theme_name().get_name());
+            // logger::error<logger::vfs>("Failed to load the '{}' icon from theme '{}'", icon_name, theme->property_theme_name().get_name());
         }
     }
     else
     {
-        // logger::error<logger::domain::vfs>("Failed to load a theme");
+        // logger::error<logger::vfs>("Failed to load a theme");
     }
 
     return icon;

@@ -66,9 +66,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
     const auto request_data = glz::read_json<socket::socket_request_data>(socket_commands_json);
     if (!request_data)
     {
-        logger::error<logger::domain::gui>(
-            "Failed to decode json: {}",
-            glz::format_error(request_data.error(), socket_commands_json));
+        logger::error<logger::gui>("Failed to decode json: {}",
+                                   glz::format_error(request_data.error(), socket_commands_json));
 
         return {SOCKET_FAILURE,
                 std::format("Failed to decode json: {}",
@@ -1482,7 +1481,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const auto task_data = glz::read_json<socket::socket_task_data>(data[0]);
             if (!task_data)
             {
-                logger::error<logger::domain::gui>(
+                logger::error<logger::gui>(
                     "Failed to decode json: {}",
                     glz::format_error(task_data.error(), socket_commands_json));
 
@@ -1633,7 +1632,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const auto raw_file_task_data = glz::read_json<socket::socket_file_task_data>(data[0]);
             if (!raw_file_task_data)
             {
-                logger::error<logger::domain::gui>(
+                logger::error<logger::gui>(
                     "Failed to decode json: {}",
                     glz::format_error(raw_file_task_data.error(), socket_commands_json));
 

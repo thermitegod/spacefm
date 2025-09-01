@@ -130,7 +130,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
 
-    // logger::debug<logger::domain::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
+    // logger::debug<logger::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
@@ -155,7 +155,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
-        // logger::debug<logger::domain::vfs>("Existing thumb: {}", thumbnail_file);
+        // logger::debug<logger::vfs>("Existing thumb: {}", thumbnail_file);
 #if (GTK_MAJOR_VERSION == 4)
         try
         {
@@ -163,10 +163,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         }
         catch (const Glib::Error& e)
         { // broken/corrupt/empty thumbnail
-            logger::error<logger::domain::vfs>(
-                "Loading existing thumbnail for file '{}' failed with: {}",
-                file->path().string(),
-                e.what());
+            logger::error<logger::vfs>("Loading existing thumbnail for file '{}' failed with: {}",
+                                       file->path().string(),
+                                       e.what());
             std::filesystem::remove(thumbnail_file);
         }
 
@@ -217,10 +216,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         }
         else
         { // broken/corrupt/empty thumbnail
-            logger::error<logger::domain::vfs>(
-                "Loading existing thumbnail for file '{}' failed with: {}",
-                file->path().string(),
-                error->message);
+            logger::error<logger::vfs>("Loading existing thumbnail for file '{}' failed with: {}",
+                                       file->path().string(),
+                                       error->message);
             g_error_free(error);
 
             // delete the bad thumbnail file
@@ -231,7 +229,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
     if (!thumbnail || !is_metadata_valid(file, metadata_mtime, metadata_uri, metadata_size))
     {
-        // logger::debug<logger::domain::vfs>("New thumb: {}", thumbnail_file);
+        // logger::debug<logger::vfs>("New thumb: {}", thumbnail_file);
 
 #if (GTK_MAJOR_VERSION == 3)
         if (thumbnail)
@@ -275,8 +273,8 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
         if (result.exit_status != 0 || !std::filesystem::exists(thumbnail_file))
         {
-            logger::error<logger::domain::vfs>("Failed to create thumbnail for '{}'",
-                                               file->path().string());
+            logger::error<logger::vfs>("Failed to create thumbnail for '{}'",
+                                       file->path().string());
             return nullptr;
         }
 
@@ -287,10 +285,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         }
         catch (const Glib::Error& e)
         {
-            logger::error<logger::domain::vfs>(
-                "Loading new thumbnail for file '{}' failed with: {}",
-                file->path().string(),
-                e.what());
+            logger::error<logger::vfs>("Loading new thumbnail for file '{}' failed with: {}",
+                                       file->path().string(),
+                                       e.what());
             return nullptr;
         }
 #elif (GTK_MAJOR_VERSION == 3)
@@ -298,10 +295,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
         if (!thumbnail)
         {
-            logger::error<logger::domain::vfs>(
-                "Loading new thumbnail for file '{}' failed with: {}",
-                file->path().string(),
-                error->message);
+            logger::error<logger::vfs>("Loading new thumbnail for file '{}' failed with: {}",
+                                       file->path().string(),
+                                       error->message);
             g_error_free(error);
             return nullptr;
         }

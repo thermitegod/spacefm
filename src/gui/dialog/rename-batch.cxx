@@ -37,7 +37,7 @@ gui::dialog::batch_rename_files(gui::browser* browser, const std::filesystem::pa
     (void)cwd;
     (void)files;
 
-    logger::debug<logger::domain::vfs>("gui::dialog::batch_rename_files");
+    logger::debug<logger::vfs>("gui::dialog::batch_rename_files");
 
     return 0;
 }

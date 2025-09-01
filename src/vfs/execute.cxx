@@ -37,7 +37,7 @@ vfs::execute::quote(const std::string_view str) noexcept
 vfs::execute::sync_data
 vfs::execute::command_line_sync(const std::string_view command) noexcept
 {
-    logger::info<logger::domain::execute>("{}", command);
+    logger::info<logger::execute>("{}", command);
 
     sync_data data;
     Glib::spawn_command_line_sync(command.data(),
@@ -51,7 +51,7 @@ vfs::execute::command_line_sync(const std::string_view command) noexcept
 void
 vfs::execute::command_line_async(const std::string_view command) noexcept
 {
-    logger::info<logger::domain::execute>("{}", command);
+    logger::info<logger::execute>("{}", command);
 
     Glib::spawn_command_line_async(command.data());
 }

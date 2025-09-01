@@ -463,12 +463,12 @@ on_address_bar_activate(GtkWidget* entry, gui::browser* browser) noexcept
     }
     else if (std::filesystem::is_block_file(dir_path))
     { // open block device
-        // logger::info<logger::domain::gui>("opening block device: {}", dir_path);
+        // logger::info<logger::gui>("opening block device: {}", dir_path);
         gui::view::location::open_block(dir_path, false);
     }
     else
     { // do nothing for other special files
-        // logger::info<logger::domain::gui>("special file ignored: {}", dir_path);
+        // logger::info<logger::gui>("special file ignored: {}", dir_path);
         // return;
     }
 
@@ -480,7 +480,7 @@ static bool
 on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
 {
     const auto button = gdk_button_event_get_button(event);
-    // logger::info<logger::domain::gui>("on_tool_icon_button_press  {}   button = {}", set->menu.label.value_or(""), button);
+    // logger::info<logger::gui>("on_tool_icon_button_press  {}   button = {}", set->menu.label.value_or(""), button);
 
     const auto type = gdk_event_get_event_type(event);
     if (type != GdkEventType::GDK_BUTTON_PRESS)
@@ -496,7 +496,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 
     if (button == GDK_BUTTON_PRIMARY && keymod == 0)
     { // left click and no modifier
-        // logger::debug<logger::domain::gui>("set={}  menu={}", set->name(), magic_enum::enum_name(set->menu.type));
+        // logger::debug<logger::gui>("set={}  menu={}", set->name(), magic_enum::enum_name(set->menu.type));
         set->browser->on_action(set->xset_name);
         return true;
     }
@@ -525,7 +525,7 @@ add_toolbar_item(gui::browser* browser, GtkBox* toolbar, const xset::name item) 
     }
     else
     {
-        logger::warn<logger::domain::gui>("set missing icon {}", set->name());
+        logger::warn<logger::gui>("set missing icon {}", set->name());
         image =
             gtk_image_new_from_icon_name("application-x-executable", (GtkIconSize)icon_size.data());
     }
@@ -550,7 +550,7 @@ add_toolbar_item(gui::browser* browser, GtkBox* toolbar, const xset::name item) 
 void
 gui::browser::rebuild_toolbox() noexcept
 {
-    // logger::info<logger::domain::gui>("rebuild_toolbox");
+    // logger::info<logger::gui>("rebuild_toolbox");
 
     this->path_bar_ = gui::path_bar_new(this);
     // clang-format off
@@ -790,7 +790,7 @@ static void
 gui_browser_finalize(GObject* obj) noexcept
 {
     gui::browser* browser = PTK_FILE_BROWSER_REINTERPRET(obj);
-    // logger::info<logger::domain::gui>("gui_browser_finalize");
+    // logger::info<logger::gui>("gui_browser_finalize");
 
     browser->dir_ = nullptr;
 
@@ -1796,7 +1796,7 @@ init_list_view(gui::browser* browser, GtkTreeView* list_view) noexcept
             else
             {
                 gtk_tree_view_column_set_fixed_width(col, width.data());
-                // logger::info<logger::domain::gui>("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
+                // logger::info<logger::gui>("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
             }
         }
 
@@ -1958,12 +1958,12 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
         // and because exo_icon_view has no get_drag_dest_row
         const char* dest_dir =
             folder_view_get_drop_dir(browser, browser->drag_x_, browser->drag_y_);
-        // logger::info<logger::domain::gui>("FB DnD dest_dir = {}", dest_dir );
+        // logger::info<logger::gui>("FB DnD dest_dir = {}", dest_dir );
         if (dest_dir)
         {
             if (browser->pending_drag_status_)
             {
-                // logger::debug<logger::domain::gui>("DnD DEFAULT");
+                // logger::debug<logger::gui>("DnD DEFAULT");
 
                 // We only want to update drag status, not really want to drop
                 gdk_drag_status(drag_context,
@@ -2024,7 +2024,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     if (browser->drag_source_dev_ != dest_dev ||
                         browser->drag_source_inode_ == dest_inode)
                     { // src and dest are on different devices or same dir
-                        // logger::debug<logger::domain::gui>("DnD COPY");
+                        // logger::debug<logger::gui>("DnD COPY");
                         gdk_drag_status(drag_context,
                                         GdkDragAction::GDK_ACTION_COPY,
                                         static_cast<guint32>(time));
@@ -2032,7 +2032,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     }
                     else
                     {
-                        // logger::debug<logger::domain::gui>("DnD MOVE");
+                        // logger::debug<logger::gui>("DnD MOVE");
                         gdk_drag_status(drag_context,
                                         GdkDragAction::GDK_ACTION_MOVE,
                                         static_cast<guint32>(time));
@@ -2059,7 +2059,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
                     if (!file_list.empty())
                     {
-                        // logger::info<logger::domain::gui>("DnD dest_dir = {}", dest_dir);
+                        // logger::info<logger::gui>("DnD dest_dir = {}", dest_dir);
 
                         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 
@@ -2539,7 +2539,7 @@ bool
 gui::browser::chdir(const std::filesystem::path& new_path,
                     const gui::utils::history::mode mode) noexcept
 {
-    // logger::debug<logger::domain::gui>("gui::browser::chdir");
+    // logger::debug<logger::gui>("gui::browser::chdir");
 
     // this->button_press_ = false;
     this->is_drag_ = false;
@@ -2555,7 +2555,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
 
     if (!std::filesystem::exists(new_path))
     {
-        // logger::error<logger::domain::gui>("Failed to chdir into nonexistent path '{}'", new_path.string());
+        // logger::error<logger::gui>("Failed to chdir into nonexistent path '{}'", new_path.string());
         return false;
     }
     const auto path = std::filesystem::absolute(new_path);
@@ -2900,7 +2900,7 @@ gui::browser::go_home() noexcept
 void
 gui::browser::go_tab(tab_t tab) noexcept
 {
-    // logger::info<logger::domain::gui>("gui::wrapper::browser::go_tab fb={}", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::wrapper::browser::go_tab fb={}", logger::utils::ptr(this));
 
     switch (tab.data())
     {
@@ -3069,7 +3069,7 @@ void
 gui::browser::close_tab() noexcept
 {
     global::closed_tabs_restore[this->panel_].push_back(this->cwd());
-    // logger::info<logger::domain::gui>("close_tab() fb={}, path={}", logger::utils::ptr(this), closed_tabs_restore[this->panel_].back());
+    // logger::info<logger::gui>("close_tab() fb={}, path={}", logger::utils::ptr(this), closed_tabs_restore[this->panel_].back());
 
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(this), GTK_TYPE_NOTEBOOK));
@@ -3131,13 +3131,13 @@ gui::browser::restore_tab() noexcept
 {
     if (global::closed_tabs_restore[this->panel_].empty())
     {
-        logger::info<logger::domain::gui>("No tabs to restore for panel {}", this->panel_);
+        logger::info<logger::gui>("No tabs to restore for panel {}", this->panel_);
         return;
     }
 
     const auto file_path = global::closed_tabs_restore[this->panel_].back();
     global::closed_tabs_restore[this->panel_].pop_back();
-    // logger::info<logger::domain::gui>("restore_tab() fb={}, panel={} path={}", logger::utils::ptr(this), this->panel_, file_path);
+    // logger::info<logger::gui>("restore_tab() fb={}, panel={} path={}", logger::utils::ptr(this), this->panel_, file_path);
 
     MainWindow* main_window = this->main_window_;
 
@@ -3726,7 +3726,7 @@ gui::browser::unselect_all() const noexcept
 void
 gui::browser::select_last() const noexcept
 {
-    // logger::debug<logger::domain::gui>("select_last");
+    // logger::debug<logger::gui>("select_last");
     const auto selected_files = this->history_->get_selection(this->cwd());
     if (selected_files && !selected_files->empty())
     {
@@ -4103,7 +4103,7 @@ gui::browser::show_thumbnails(const u32 max_file_size, const bool large_icons) n
 void
 gui::browser::update_views() noexcept
 {
-    // logger::debug<logger::domain::gui>("gui::browser::update_views fb={}  (panel {})", logger::utils::ptr(this), this->mypanel);
+    // logger::debug<logger::gui>("gui::browser::update_views fb={}  (panel {})", logger::utils::ptr(this), this->mypanel);
 
     // hide/show browser widgets based on user settings
     const panel_t p = this->panel_;
@@ -4191,7 +4191,7 @@ gui::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // logger::info<logger::domain::gui>("    set slide_x = {}", pos);
+    // logger::info<logger::gui>("    set slide_x = {}", pos);
     if (pos > 0)
     {
         gtk_paned_set_position(this->hpane, pos.data());
@@ -4203,7 +4203,7 @@ gui::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // logger::info<logger::domain::gui>("    slide_y = {}", pos);
+    // logger::info<logger::gui>("    slide_y = {}", pos);
     gtk_paned_set_position(this->side_vpane_top, pos.data());
 
     // side_vpane_bottom
@@ -4212,7 +4212,7 @@ gui::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // logger::info<logger::domain::gui>( "    slide_s = {}", pos);
+    // logger::info<logger::gui>( "    slide_s = {}", pos);
     gtk_paned_set_position(this->side_vpane_bottom, pos.data());
 
     // Large Icons - option for Detailed and Compact list views
@@ -4237,7 +4237,7 @@ gui::browser::update_views() noexcept
         // Set column widths for this panel context
         if (GTK_IS_TREE_VIEW(this->folder_view_))
         {
-            // logger::info<logger::domain::gui>("    set widths   mode = {}", mode);
+            // logger::info<logger::gui>("    set widths   mode = {}", mode);
             for (const auto i : std::views::iota(0uz, global::columns.size()))
             {
                 GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(this->folder_view_),
@@ -4255,11 +4255,11 @@ gui::browser::update_views() noexcept
                         const auto set = xset::set::get(column.xset_name, p, mode);
                         const auto width =
                             set->y ? i32::create(set->y.value()).value_or(100_i32) : 100_i32;
-                        // logger::info<logger::domain::gui>("        {}\t{}", width, title );
+                        // logger::info<logger::gui>("        {}\t{}", width, title );
                         if (width != 0)
                         {
                             gtk_tree_view_column_set_fixed_width(col, width.data());
-                            // logger::info<logger::domain::gui>("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
+                            // logger::info<logger::gui>("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
                         }
                         // set column visibility
                         gtk_tree_view_column_set_visible(col,
@@ -4289,7 +4289,7 @@ gui::browser::update_views() noexcept
     // Show Hidden
     this->show_hidden_files(xset_get_b_panel(p, xset::panel::show_hidden));
 
-    // logger::info<logger::domain::gui>("gui::browser::update_views fb={} DONE", logger::utils::ptr(this));
+    // logger::info<logger::gui>("gui::browser::update_views fb={} DONE", logger::utils::ptr(this));
 }
 
 void
@@ -4368,7 +4368,7 @@ gui::browser::save_column_widths() const noexcept
     {
         const panel_t p = this->panel_;
         const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-        // logger::debug<logger::domain::gui>("save_columns  fb={} (panel {})  mode = {}", logger::utils::ptr(this), p, mode);
+        // logger::debug<logger::gui>("save_columns  fb={} (panel {})  mode = {}", logger::utils::ptr(this), p, mode);
         for (const auto i : std::views::iota(0uz, global::columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<std::int32_t>(i));
@@ -4387,7 +4387,7 @@ gui::browser::save_column_widths() const noexcept
                     if (width > 0)
                     {
                         set->y = std::format("{}", width);
-                        // logger::info<logger::domain::gui>("        {}\t{}", width, title);
+                        // logger::info<logger::gui>("        {}\t{}", width, title);
                     }
 
                     break;
@@ -4413,19 +4413,19 @@ gui::browser::slider_release(GtkPaned* pane) const noexcept
             set->x = std::format("{}", pos);
         }
         this->main_window_->panel_slide_x[p] = pos;
-        // logger::debug<logger::domain::gui>("    slide_x = {}", pos);
+        // logger::debug<logger::gui>("    slide_x = {}", pos);
     }
     else
     {
         i32 pos = 0;
-        // logger::debug<logger::domain::gui>("gui::browser::slider_release fb={}  (panel {})  mode = {}", logger::utils::ptr(this), p, logger::utils::ptr(mode));
+        // logger::debug<logger::gui>("gui::browser::slider_release fb={}  (panel {})  mode = {}", logger::utils::ptr(this), p, logger::utils::ptr(mode));
         pos = gtk_paned_get_position(this->side_vpane_top);
         if (!this->main_window_->fullscreen)
         {
             set->y = std::format("{}", pos);
         }
         this->main_window_->panel_slide_y[p] = pos;
-        // logger::debug<logger::domain::gui>("    slide_y = {}  ", pos);
+        // logger::debug<logger::gui>("    slide_y = {}  ", pos);
 
         pos = gtk_paned_get_position(this->side_vpane_bottom);
         if (!this->main_window_->fullscreen)
@@ -4433,7 +4433,7 @@ gui::browser::slider_release(GtkPaned* pane) const noexcept
             set->s = std::format("{}", pos);
         }
         this->main_window_->panel_slide_s[p] = pos;
-        // logger::debug<logger::domain::gui>("    slide_s = {}", pos);
+        // logger::debug<logger::gui>("    slide_s = {}", pos);
     }
     return false;
 }
@@ -4448,7 +4448,7 @@ gui::browser::rebuild_toolbars() const noexcept
 void
 gui::browser::update_selection_history() const noexcept
 {
-    // logger::debug<logger::domain::gui>("selection history: {}", cwd.string());
+    // logger::debug<logger::gui>("selection history: {}", cwd.string());
 
     const auto selected_files = this->selected_files();
     if (selected_files.empty())
@@ -4949,7 +4949,7 @@ gui::browser::update_statusbar() const noexcept
                 {
                     std::filesystem::path target_path;
 
-                    // logger::info<logger::domain::gui>("LINK: {}", file->path());
+                    // logger::info<logger::gui>("LINK: {}", file->path());
                     if (!target.is_absolute())
                     {
                         // relative link
@@ -5272,7 +5272,7 @@ void
 gui::browser::on_action(const xset::name setname) noexcept
 {
     const auto set = xset::set::get(setname);
-    // logger::info<logger::domain::gui>("gui::browser::on_action {}", set->name());
+    // logger::info<logger::gui>("gui::browser::on_action {}", set->name());
 
     if (set->name().starts_with("book_"))
     {
@@ -5457,7 +5457,7 @@ gui::browser::on_action(const xset::name setname) noexcept
 
         const auto panel_num = ztd::removeprefix(set->name(), "panel_");
         const auto panel = panel_t::create(panel_num).value_or(INVALID_PANEL);
-        // logger::debug<logger::domain::gui>("ACTION panel={}", panel);
+        // logger::debug<logger::gui>("ACTION panel={}", panel);
 
         if (is_valid_panel(panel))
         {
@@ -5577,7 +5577,7 @@ gui_browser_delay_focus(gui::browser* browser) noexcept
 {
     if (GTK_IS_WIDGET(browser) && GTK_IS_WIDGET(browser->folder_view()))
     {
-        // logger::info<logger::domain::gui>("delayed_focus_browser fb={}", logger::utils::ptr(browser));
+        // logger::info<logger::gui>("delayed_focus_browser fb={}", logger::utils::ptr(browser));
         if (GTK_IS_WIDGET(browser) && GTK_IS_WIDGET(browser->folder_view()))
         {
             gtk_widget_grab_focus(browser->folder_view());

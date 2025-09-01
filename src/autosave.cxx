@@ -36,7 +36,7 @@ autosave::request_add() noexcept
     const std::scoped_lock<std::mutex> lock(requests->mutex);
 
     requests->total += 1;
-    logger::trace<logger::domain::autosave>("adding request, total {}", requests->total);
+    logger::trace<logger::autosave>("adding request, total {}", requests->total);
     requests->pending = true;
 }
 
@@ -45,7 +45,7 @@ autosave::request_cancel() noexcept
 {
     const std::scoped_lock<std::mutex> lock(requests->mutex);
 
-    logger::trace<logger::domain::autosave>("canceling request");
+    logger::trace<logger::autosave>("canceling request");
     requests->total = 0;
     requests->pending = false;
 }
@@ -58,7 +58,7 @@ static concurrencpp::timer timer;
 void
 autosave::create(const std::function<void()> autosave_func) noexcept
 {
-    logger::trace<logger::domain::autosave>("starting autosave thread");
+    logger::trace<logger::autosave>("starting autosave thread");
 
     using namespace std::chrono_literals;
 
@@ -69,13 +69,13 @@ autosave::create(const std::function<void()> autosave_func) noexcept
         global::runtime.thread_executor(),
         [&autosave_func]
         {
-            logger::trace<logger::domain::autosave>("checking for pending autosave requests");
+            logger::trace<logger::autosave>("checking for pending autosave requests");
             if (requests->pending)
             {
                 {
                     const std::scoped_lock<std::mutex> lock(requests->mutex);
 
-                    logger::trace<logger::domain::autosave>(
+                    logger::trace<logger::autosave>(
                         "found autosave requests, saving settings, total request for this period {}",
                         requests->total);
                     requests->total = 0;

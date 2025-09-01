@@ -110,9 +110,9 @@ ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& cont
     const auto buffer = vfs::utils::read_file(path, max_size);
     if (!buffer)
     {
-        logger::error<logger::domain::vfs>("Failed to read file: {} {}",
-                                           path.string(),
-                                           buffer.error().message());
+        logger::error<logger::vfs>("Failed to read file: {} {}",
+                                   path.string(),
+                                   buffer.error().message());
         return false;
     }
 
@@ -201,21 +201,20 @@ ReadInt(const std::string& buf, uint32_t offset, const std::string& field_name, 
 {
     if (offset > buf.size() - 4 || (offset & 0x3))
     {
-        logger::error<logger::domain::vfs>("Invalid offset={} for {}, string size={}",
-                                           offset,
-                                           field_name,
-                                           buf.size());
+        logger::error<logger::vfs>("Invalid offset={} for {}, string size={}",
+                                   offset,
+                                   field_name,
+                                   buf.size());
         return false;
     }
     *result = ntohl(*reinterpret_cast<const uint32_t*>(buf.c_str() + offset));
     if (*result < min_result || *result > max_result)
     {
-        logger::error<logger::domain::vfs>(
-            "Invalid {} = {} not between min_result={} and max_result={}",
-            field_name,
-            *result,
-            min_result,
-            max_result);
+        logger::error<logger::vfs>("Invalid {} = {} not between min_result={} and max_result={}",
+                                   field_name,
+                                   *result,
+                                   min_result,
+                                   max_result);
         return false;
     }
     return true;
@@ -251,14 +250,13 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     std::string buf;
     if (!ReadFileToStringWithMaxSize(file_path, buf, kMaxMimeTypesFileSize))
     {
-        logger::error<logger::domain::vfs>("Failed reading in mime.cache file: {}",
-                                           file_path.string());
+        logger::error<logger::vfs>("Failed reading in mime.cache file: {}", file_path.string());
         return false;
     }
 
     if (buf.size() < kHeaderSize)
     {
-        logger::error<logger::domain::vfs>("Invalid mime.cache file size={}", buf.size());
+        logger::error<logger::vfs>("Invalid mime.cache file size={}", buf.size());
         return false;
     }
 
@@ -272,7 +270,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     }
     if (buf[alias_list_offset - 1] != 0)
     {
-        logger::error<logger::domain::vfs>(
+        logger::error<logger::vfs>(
             "Invalid mime.cache file does not contain null prior to ALIAS_LIST_OFFSET={}",
             alias_list_offset);
         return false;
@@ -382,14 +380,14 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
             // Check limits.
             if (++num_nodes > kMaxNodes)
             {
-                logger::error<logger::domain::vfs>("Exceeded maxium number of nodes={}", kMaxNodes);
+                logger::error<logger::vfs>("Exceeded maxium number of nodes={}", kMaxNodes);
                 return false;
             }
             if (node.ext.size() > kMaxExtSize)
             {
-                logger::warn<logger::domain::vfs>("Ignoring large extension exceeds size={} ext={}",
-                                                  kMaxExtSize,
-                                                  node.ext);
+                logger::warn<logger::vfs>("Ignoring large extension exceeds size={} ext={}",
+                                          kMaxExtSize,
+                                          node.ext);
                 continue;
             }
 

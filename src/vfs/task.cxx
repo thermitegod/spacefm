@@ -19,5 +19,5 @@
 
 vfs::task::task()
 {
-    logger::debug<logger::domain::vfs>("TODO");
+    logger::debug<logger::vfs>("TODO");
 }

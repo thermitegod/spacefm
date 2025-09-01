@@ -48,7 +48,7 @@ read_file(const std::filesystem::path& path,
     auto file = std::ifstream(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to open file for reading: {}", path.string());
+        logger::error<logger::vfs>("Failed to open file for reading: {}", path.string());
         return std::unexpected{vfs::error_code::file_open_failure};
     }
 
@@ -68,7 +68,7 @@ read_file(const std::filesystem::path& path,
 
     if (file.fail() && !file.eof()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to read file: {}", path.string());
+        logger::error<logger::vfs>("Failed to read file: {}", path.string());
         return std::unexpected{vfs::error_code::file_read_failure};
     }
 
@@ -76,7 +76,7 @@ read_file(const std::filesystem::path& path,
 
     if (file.is_open()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to close file: {}", path.string());
+        logger::error<logger::vfs>("Failed to close file: {}", path.string());
         return std::unexpected{vfs::error_code::file_close_failure};
     }
 
@@ -97,7 +97,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
     auto file = std::ifstream(path, std::ios::in | std::ios::binary);
     if (!file.is_open()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to open file for reading: {}", path.string());
+        logger::error<logger::vfs>("Failed to open file for reading: {}", path.string());
         return std::unexpected{vfs::error_code::file_open_failure};
     }
 
@@ -109,7 +109,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
 
     if (file.fail() && !file.eof()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to read file: {}", path.string());
+        logger::error<logger::vfs>("Failed to read file: {}", path.string());
         return std::unexpected{vfs::error_code::file_read_failure};
     }
 
@@ -117,7 +117,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
 
     if (file.is_open()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to close file: {}", path.string());
+        logger::error<logger::vfs>("Failed to close file: {}", path.string());
         return std::unexpected{vfs::error_code::file_close_failure};
     }
 
@@ -138,7 +138,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
     auto file = std::ofstream(path.c_str(), std::ios::out);
     if (!file.is_open()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to open file for writing: {}", path.string());
+        logger::error<logger::vfs>("Failed to open file for writing: {}", path.string());
         return {vfs::error_code::file_open_failure};
     }
 
@@ -146,7 +146,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
 
     if (file.fail()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to write file: {}", path.string());
+        logger::error<logger::vfs>("Failed to write file: {}", path.string());
         return {vfs::error_code::file_write_failure};
     }
 
@@ -154,7 +154,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
 
     if (file.fail()) [[unlikely]]
     {
-        logger::error<logger::domain::vfs>("Failed to close file: {}", path.string());
+        logger::error<logger::vfs>("Failed to close file: {}", path.string());
         return {vfs::error_code::file_close_failure};
     }
 

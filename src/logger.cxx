@@ -42,22 +42,21 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
         spdlog::level::level_enum default_level;
         std::string_view format;
     };
-    static constexpr ztd::map<logger::domain,
-                              default_logger_options_data,
-                              magic_enum::enum_count<logger::domain>()>
-        default_logger_options{{
-            {logger::domain::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
+    static constexpr ztd::
+        map<logger::domain, default_logger_options_data, magic_enum::enum_count<logger::domain>()>
+            default_logger_options{{
+                {logger::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
 #if defined(DEV_MODE)
-            {logger::domain::dev, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+                {logger::dev, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 #else
-            {logger::domain::dev, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+                {logger::dev, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 #endif
-            {logger::domain::autosave, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t%v%$"}},
-            {logger::domain::execute, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
-            {logger::domain::socket, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
-            {logger::domain::gui, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
-            {logger::domain::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
-        }};
+                {logger::autosave, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t%v%$"}},
+                {logger::execute, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+                {logger::socket, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+                {logger::gui, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+                {logger::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+            }};
 
     spdlog::sink_ptr file_sink = nullptr;
     if (!logfile.empty())

@@ -48,7 +48,7 @@ vfs::file::file(const std::filesystem::path& path,
                 const std::shared_ptr<vfs::settings>& settings) noexcept
     : path_(path), settings_(settings)
 {
-    // logger::debug<logger::domain::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
+    // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
 
     if (this->path_ == "/")
@@ -68,14 +68,12 @@ vfs::file::file(const std::filesystem::path& path,
 
     const auto result = this->update();
 
-    logger::error_if<logger::domain::vfs>(!result,
-                                          "Failed to create vfs::file for {}",
-                                          path.string());
+    logger::error_if<logger::vfs>(!result, "Failed to create vfs::file for {}", path.string());
 }
 
 vfs::file::~file() noexcept
 {
-// logger::debug<logger::domain::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
+// logger::debug<logger::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
 #if (GTK_MAJOR_VERSION == 3)
     if (this->thumbnail_.big)
     {
@@ -100,7 +98,7 @@ vfs::file::update() noexcept
     }
     this->stat_ = stat.value();
 
-    // logger::debug<logger::domain::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
+    // logger::debug<logger::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
 
     this->mime_type_ = vfs::mime_type::create_from_file(this->path_, this->settings_);
 
@@ -741,8 +739,8 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
     if (this->path_.string().starts_with(thumbnail_cache.parent.string()))
     {
         // TODO use cache images directly
-        logger::debug<logger::domain::vfs>("Not generating thumbnails in cache path: {}",
-                                           this->path_.string());
+        logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}",
+                                   this->path_.string());
         return;
     }
 

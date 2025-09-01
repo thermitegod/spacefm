@@ -127,7 +127,7 @@ image_metadata(const std::filesystem::path& path) noexcept
     GExiv2Metadata* metadata = gexiv2_metadata_new();
     if (!gexiv2_metadata_open_path(metadata, path.c_str(), &error))
     {
-        logger::error<logger::domain::vfs>("Error opening metadata: {}", error->message);
+        logger::error<logger::vfs>("Error opening metadata: {}", error->message);
         g_error_free(error);
         return data;
     }
@@ -135,7 +135,7 @@ image_metadata(const std::filesystem::path& path) noexcept
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(path.c_str(), &error);
     if (pixbuf == nullptr)
     {
-        logger::error<logger::domain::vfs>("Failed to load image: {}", error->message);
+        logger::error<logger::vfs>("Failed to load image: {}", error->message);
         g_error_free(error);
         return data;
     }
