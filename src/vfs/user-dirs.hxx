@@ -21,115 +21,116 @@ namespace vfs::user
 {
 /**
  * @brief User desktop directory
- *
  * @return The XDG directory XDG_DESKTOP_DIR.
  */
 [[nodiscard]] std::filesystem::path desktop() noexcept;
 
 /**
  * @brief User documents directory
- *
  * @return The XDG directory XDG_DOCUMENTS_DIR.
  */
 [[nodiscard]] std::filesystem::path documents() noexcept;
 
 /**
  * @brief User download directory
- *
  * @return The XDG directory XDG_DOWNLOAD_DIR.
  */
 [[nodiscard]] std::filesystem::path download() noexcept;
 
 /**
  * @brief User music directory
- *
  * @return The XDG directory XDG_MUSIC_DIR.
  */
 [[nodiscard]] std::filesystem::path music() noexcept;
 
 /**
  * @brief User pictures directory
- *
  * @return The XDG directory XDG_PICTURES_DIR.
  */
 [[nodiscard]] std::filesystem::path pictures() noexcept;
 
 /**
  * @brief User share directory
- *
  * @return The XDG directory XDG_PUBLICSHARE_DIR.
  */
 [[nodiscard]] std::filesystem::path public_share() noexcept;
 
 /**
  * @brief User templates directory
- *
  * @return The XDG directory XDG_TEMPLATES_DIR.
  */
 [[nodiscard]] std::filesystem::path templates() noexcept;
 
 /**
  * @brief User videos directory
- *
  * @return The XDG directory XDG_VIDEOS_DIR.
  */
 [[nodiscard]] std::filesystem::path videos() noexcept;
 
 /**
  * @brief User home directory
- *
  * @return The users home directory.
  */
 [[nodiscard]] std::filesystem::path home() noexcept;
 
 /**
  * @brief User cache directory
- *
  * @return The XDG directory XDG_CACHE_HOME.
  */
 [[nodiscard]] std::filesystem::path cache() noexcept;
 
 /**
  * @brief User data directory
- *
  * @return The XDG directory XDG_DATA_HOME.
  */
 [[nodiscard]] std::filesystem::path data() noexcept;
 
 /**
  * @brief User config directory
- *
  * @return The XDG directory XDG_CONFIG_HOME.
  */
 [[nodiscard]] std::filesystem::path config() noexcept;
 
 /**
  * @brief User runtime directory
- *
  * @return The XDG directory XDG_RUNTIME_DIR.
  */
 [[nodiscard]] std::filesystem::path runtime() noexcept;
+
+struct thumbnail_cache_data final
+{
+    // https://specifications.freedesktop.org/thumbnail-spec/latest/directory.html
+    std::filesystem::path parent;
+    std::filesystem::path normal;
+    std::filesystem::path large;
+    std::filesystem::path x_large;
+    std::filesystem::path xx_large;
+    std::filesystem::path fail;
+};
+
+/**
+ * @brief User thumbnail cache directory
+ * @return The XDG directory XDG_CACHE_HOME/thumbnails/<size>.
+ */
+[[nodiscard]] thumbnail_cache_data thumbnail_cache() noexcept;
 } // namespace vfs::user
 
 namespace vfs::program
 {
 /**
  * @brief Set the Programs config directory
- *
  * @param[in] path Set the path for the programs config directory
  */
 void config(const std::filesystem::path& path) noexcept;
 
 /**
  * @brief Programs config directory
- *
  * @return The Programs config directory.
  */
 [[nodiscard]] std::filesystem::path config() noexcept;
 
 /**
  * @brief Programs tmp directory
- *
  * @return The Programs tmp directory.
  */
 [[nodiscard]] std::filesystem::path tmp() noexcept;

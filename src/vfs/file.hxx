@@ -28,6 +28,7 @@
 
 #include "vfs/mime-type.hxx"
 #include "vfs/settings.hxx"
+#include "vfs/user-dirs.hxx"
 
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 

@@ -130,6 +130,21 @@ vfs::user::runtime() noexcept
     return Glib::get_user_runtime_dir();
 }
 
+vfs::user::thumbnail_cache_data
+vfs::user::thumbnail_cache() noexcept
+{
+    static const auto data = thumbnail_cache_data{
+        .parent = vfs::user::cache() / "thumbnails",
+        .normal = vfs::user::cache() / "thumbnails/normal",
+        .large = vfs::user::cache() / "thumbnails/large",
+        .x_large = vfs::user::cache() / "thumbnails/x-large",
+        .xx_large = vfs::user::cache() / "thumbnails/xx-large",
+        .fail = vfs::user::cache() /
+                std::format("thumbnails/fail/{}-{}", PACKAGE_NAME, PACKAGE_VERSION),
+    };
+    return data;
+}
+
 namespace global
 {
 static std::filesystem::path config_path = vfs::user::config() / PACKAGE_NAME;

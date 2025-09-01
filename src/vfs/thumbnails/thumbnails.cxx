@@ -38,6 +38,13 @@
 
 #include "logger.hxx"
 
+// Based on spec v0.9.0
+// https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
+// Not implemented
+// - No thumbnail creation failure <https://specifications.freedesktop.org/thumbnail-spec/latest/failures.html>
+// - No thumbnail delete <https://specifications.freedesktop.org/thumbnail-spec/latest/delete.html>
+// - No shared thumbnail <https://specifications.freedesktop.org/thumbnail-spec/latest/shared.html>
+
 enum class thumbnail_size : std::uint16_t
 {
     normal = 128,
@@ -52,6 +59,40 @@ enum class thumbnail_mode : std::uint8_t
     video,
 };
 
+[[nodiscard]] static bool
+is_metadata_valid(const std::shared_ptr<vfs::file>& file,
+                  std::chrono::system_clock::time_point mtime, std::string_view uri,
+                  usize size) noexcept
+{
+    if (std::chrono::time_point_cast<std::chrono::seconds>(file->mtime()) !=
+        std::chrono::time_point_cast<std::chrono::seconds>(mtime))
+    {
+        return false;
+    }
+
+    if (uri.starts_with("file://"))
+    {
+        if (file->uri() != uri)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (file->path() != uri)
+        {
+            return false;
+        }
+    }
+
+    if (file->size() != size)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 #if (GTK_MAJOR_VERSION == 4)
 static Glib::RefPtr<Gdk::Texture>
 #elif (GTK_MAJOR_VERSION == 3)
@@ -60,32 +101,28 @@ static GdkPixbuf*
 thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
                  const thumbnail_mode mode) noexcept
 {
-    const auto [thumbnail_create_size, thumbnail_cache] =
-        [](const auto thumb_size) -> std::pair<std::uint32_t, std::filesystem::path>
-    {
-        assert(thumb_size <= 1024);
+    static thread_local auto cache_dirs = vfs::user::thumbnail_cache();
 
+    const auto [thumbnail_create_size,
+                thumbnail_cache] = [thumb_size]() -> std::pair<std::uint32_t, std::filesystem::path>
+    {
         if (thumb_size <= 128)
         {
-            return {magic_enum::enum_integer(thumbnail_size::normal),
-                    vfs::user::cache() / "thumbnails/normal"};
+            return {magic_enum::enum_integer(thumbnail_size::normal), cache_dirs.normal};
         }
         else if (thumb_size <= 256)
         {
-            return {magic_enum::enum_integer(thumbnail_size::large),
-                    vfs::user::cache() / "thumbnails/large"};
+            return {magic_enum::enum_integer(thumbnail_size::large), cache_dirs.large};
         }
         else if (thumb_size <= 512)
         {
-            return {magic_enum::enum_integer(thumbnail_size::x_large),
-                    vfs::user::cache() / "thumbnails/x-large"};
+            return {magic_enum::enum_integer(thumbnail_size::x_large), cache_dirs.x_large};
         }
         else // if (thumb_size <= 1024)
         {
-            return {magic_enum::enum_integer(thumbnail_size::xx_large),
-                    vfs::user::cache() / "thumbnails/xx-large"};
+            return {magic_enum::enum_integer(thumbnail_size::xx_large), cache_dirs.xx_large};
         }
-    }(thumb_size);
+    }();
 
     const auto md5 = Botan::HashFunction::create("MD5");
     md5->update(file->uri());
@@ -105,8 +142,10 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         return nullptr;
     }
 
-    // load existing thumbnail
-    std::chrono::system_clock::time_point embeded_mtime;
+    // thumbnail metadata
+    std::chrono::system_clock::time_point metadata_mtime;
+    std::string metadata_uri;
+    usize metadata_size;
 
 #if (GTK_MAJOR_VERSION == 4)
     Glib::RefPtr<Gdk::Pixbuf> thumbnail = nullptr;
@@ -126,18 +165,30 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         { // broken/corrupt/empty thumbnail
             logger::error<logger::domain::vfs>(
                 "Loading existing thumbnail for file '{}' failed with: {}",
-                file->name(),
+                file->path().string(),
                 e.what());
             std::filesystem::remove(thumbnail_file);
         }
 
         if (thumbnail)
         {
-            const auto thumb_mtime = thumbnail->get_option("tEXt::Thumb::MTime");
-            if (!thumb_mtime.empty())
+            const auto metadata_mtime_raw = thumbnail->get_option("tEXt::Thumb::MTime");
+            if (!metadata_mtime_raw.empty())
             {
-                embeded_mtime = std::chrono::system_clock::from_time_t(
-                    ztd::from_string<std::time_t>(thumb_mtime.data()).value_or(0));
+                metadata_mtime = std::chrono::system_clock::from_time_t(
+                    ztd::from_string<std::time_t>(metadata_mtime_raw.data()).value_or(0));
+            }
+
+            const auto metadata_uri_raw = thumbnail->get_option("tEXt::Thumb::URI");
+            if (!metadata_uri_raw.empty())
+            {
+                metadata_uri = metadata_uri_raw.data();
+            }
+
+            const auto metadata_size_raw = thumbnail->get_option("tEXt::Thumb::Size");
+            if (!metadata_size_raw.empty())
+            {
+                metadata_size = usize::create(metadata_size_raw.data()).value_or(0);
             }
         }
 #elif (GTK_MAJOR_VERSION == 3)
@@ -145,18 +196,30 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
         if (thumbnail)
         {
-            const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
-            if (thumb_mtime != nullptr)
+            const char* metadata_mtime_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
+            if (metadata_mtime_raw != nullptr)
             {
-                const auto result = ztd::from_string<std::time_t>(thumb_mtime);
-                embeded_mtime = std::chrono::system_clock::from_time_t(result.value_or(0));
+                const auto result = ztd::from_string<std::time_t>(metadata_mtime_raw);
+                metadata_mtime = std::chrono::system_clock::from_time_t(result.value_or(0));
+            }
+
+            const char* metadata_uri_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::URI");
+            if (metadata_uri_raw != nullptr)
+            {
+                metadata_uri = metadata_uri_raw;
+            }
+
+            const char* metadata_size_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::Size");
+            if (metadata_size_raw != nullptr)
+            {
+                metadata_size = usize::create(metadata_size_raw).value_or(0);
             }
         }
         else
         { // broken/corrupt/empty thumbnail
             logger::error<logger::domain::vfs>(
                 "Loading existing thumbnail for file '{}' failed with: {}",
-                file->name(),
+                file->path().string(),
                 error->message);
             g_error_free(error);
 
@@ -166,10 +229,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 #endif
     }
 
-    if (!thumbnail ||
-        // on disk thumbnail metadata does not store mtime nanoseconds
-        std::chrono::time_point_cast<std::chrono::seconds>(embeded_mtime) !=
-            std::chrono::time_point_cast<std::chrono::seconds>(mtime))
+    if (!thumbnail || !is_metadata_valid(file, metadata_mtime, metadata_uri, metadata_size))
     {
         // logger::debug<logger::domain::vfs>("New thumb: {}", thumbnail_file);
 
@@ -215,7 +275,8 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
         if (result.exit_status != 0 || !std::filesystem::exists(thumbnail_file))
         {
-            logger::error<logger::domain::vfs>("Failed to create thumbnail for '{}'", file->name());
+            logger::error<logger::domain::vfs>("Failed to create thumbnail for '{}'",
+                                               file->path().string());
             return nullptr;
         }
 
@@ -227,10 +288,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         catch (const Glib::Error& e)
         {
             logger::error<logger::domain::vfs>(
-                "Loading existing thumbnail for file '{}' failed with: {}",
-                file->name(),
+                "Loading new thumbnail for file '{}' failed with: {}",
+                file->path().string(),
                 e.what());
-
             return nullptr;
         }
 #elif (GTK_MAJOR_VERSION == 3)
@@ -239,8 +299,8 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         if (!thumbnail)
         {
             logger::error<logger::domain::vfs>(
-                "Loading existing thumbnail for file '{}' failed with: {}",
-                file->name(),
+                "Loading new thumbnail for file '{}' failed with: {}",
+                file->path().string(),
                 error->message);
             g_error_free(error);
             return nullptr;
@@ -271,41 +331,31 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     return Gdk::Texture::create_for_pixbuf(
         thumbnail->scale_simple(new_width.data(), new_height.data(), Gdk::InterpType::BILINEAR));
 #elif (GTK_MAJOR_VERSION == 3)
-    GdkPixbuf* thumbnail_scaled = gdk_pixbuf_scale_simple(thumbnail,
-                                                          new_width.data(),
-                                                          new_height.data(),
-                                                          GdkInterpType::GDK_INTERP_BILINEAR);
+    GdkPixbuf* scaled = gdk_pixbuf_scale_simple(thumbnail,
+                                                new_width.data(),
+                                                new_height.data(),
+                                                GdkInterpType::GDK_INTERP_BILINEAR);
     g_object_unref(thumbnail);
-    return thumbnail_scaled;
+    return scaled;
 #endif
 }
 
 #if (GTK_MAJOR_VERSION == 4)
-
 Glib::RefPtr<Gdk::Texture>
-vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
-{
-    return thumbnail_create(file, thumb_size, thumbnail_mode::image);
-}
-
-Glib::RefPtr<Gdk::Texture>
-vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
-{
-    return thumbnail_create(file, thumb_size, thumbnail_mode::video);
-}
-
 #elif (GTK_MAJOR_VERSION == 3)
-
 GdkPixbuf*
+#endif
 vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::image);
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+Glib::RefPtr<Gdk::Texture>
+#elif (GTK_MAJOR_VERSION == 3)
 GdkPixbuf*
+#endif
 vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::video);
 }
-
-#endif

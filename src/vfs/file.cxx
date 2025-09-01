@@ -737,6 +737,15 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
     ztd::panic_if(this->settings_ == nullptr, "Function disabled");
 
+    static const auto thumbnail_cache = vfs::user::thumbnail_cache();
+    if (this->path_.string().starts_with(thumbnail_cache.parent.string()))
+    {
+        // TODO use cache images directly
+        logger::debug<logger::domain::vfs>("Not generating thumbnails in cache path: {}",
+                                           this->path_.string());
+        return;
+    }
+
 #if (GTK_MAJOR_VERSION == 4)
     // TODO do something better
     auto icon_to_pixbuf = [](const Glib::RefPtr<Gtk::IconPaintable>& icon)
