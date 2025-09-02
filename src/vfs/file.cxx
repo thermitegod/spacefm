@@ -23,6 +23,7 @@
 #include <system_error>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

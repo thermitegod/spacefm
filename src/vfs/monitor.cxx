@@ -29,6 +29,7 @@
 #include <sys/inotify.h>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <magic_enum/magic_enum.hpp>

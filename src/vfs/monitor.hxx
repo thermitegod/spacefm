@@ -20,6 +20,7 @@
 #include <filesystem>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
