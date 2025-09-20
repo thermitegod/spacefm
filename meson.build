@@ -425,6 +425,25 @@ foreach a: features
     add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
 
+# Logger Lib
+
+logger_sources = files(
+    'src/logger.cxx',
+)
+
+logger_lib = static_library(
+    'logger',
+    logger_sources,
+    include_directories : include_directories('src'),
+    dependencies : spdlog_dep,
+)
+
+logger_dep = declare_dependency(
+    link_with : logger_lib,
+    include_directories : include_directories('src'),
+    dependencies : spdlog_dep,
+)
+
 # VFS Lib
 
 vfs_gtk3_sources = files(
@@ -509,16 +528,17 @@ vfs_gtk4_sources = files(
 )
 
 # VFS gtk4
-vfs_gtk4_dependencies = gtk4_dependencies
-vfs_gtk4_dependencies += [
-    spdlog_dep,
+vfs_gtk4_dependencies = [
+    gtk4_dependencies,
+
+    logger_dep,
     concurrencpp_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
 ]
 
-lib_vfs_gtk4 = static_library(
+vfs_gtk4_lib = static_library(
     'vfs_gtk4',
     vfs_gtk4_sources,
     include_directories : include_directories('src'),
@@ -526,23 +546,24 @@ lib_vfs_gtk4 = static_library(
     cpp_pch: 'pch/pch.hxx',
 )
 
-dep_vfs_gtk4 = declare_dependency(
-    link_with : lib_vfs_gtk4,
+vfs_gtk4_dep = declare_dependency(
+    link_with : vfs_gtk4_lib,
     include_directories : include_directories('src'),
     dependencies : vfs_gtk4_dependencies,
 )
 
 # VFS gtk3
-vfs_gtk3_dependencies = gtk3_dependencies
-vfs_gtk3_dependencies += [
-    spdlog_dep,
+vfs_gtk3_dependencies = [
+    gtk3_dependencies,
+
+    logger_dep,
     concurrencpp_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
 ]
 
-lib_vfs_gtk3 = static_library(
+vfs_gtk3_lib = static_library(
     'vfs_gtk3',
     vfs_gtk3_sources,
     include_directories : include_directories('src'),
@@ -550,8 +571,8 @@ lib_vfs_gtk3 = static_library(
     cpp_pch: 'pch/pch.hxx',
 )
 
-dep_vfs_gtk3 = declare_dependency(
-    link_with : lib_vfs_gtk3,
+vfs_gtk3_dep = declare_dependency(
+    link_with : vfs_gtk3_lib,
     include_directories : include_directories('src'),
     dependencies : vfs_gtk3_dependencies,
 )
@@ -561,7 +582,6 @@ dep_vfs_gtk3 = declare_dependency(
 sources += files(
     'src/autosave.cxx',
     'src/concurrency.cxx',
-    'src/logger.cxx',
     'src/main.cxx',
     'src/settings.cxx',
     'src/single-instance.cxx',
@@ -636,8 +656,7 @@ spacefm = build_target(
     install_dir: bindir,
     dependencies: [
         base_dependencies,
-        gtk3_dependencies,
-        dep_vfs_gtk3,
+        vfs_gtk3_dep,
     ],
     cpp_pch: 'pch/pch.hxx',
 )

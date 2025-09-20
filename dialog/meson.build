@@ -21,8 +21,6 @@ incdir_chooser = include_directories(['app-chooser', '../src', '../src/datatypes
 sources_chooser = files(
     'app-chooser/main.cxx',
     'app-chooser/app-chooser.cxx',
-
-    '../src/logger.cxx',
 )
 
 spacefm = build_target(
@@ -32,7 +30,7 @@ spacefm = build_target(
     include_directories: incdir_chooser,
     install: true,
     install_dir: bindir,
-    dependencies: dep_vfs_gtk4,
+    dependencies: vfs_gtk4_dep,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -115,8 +113,6 @@ incdir_create = include_directories(['file-create', '../src', '../src/datatypes'
 sources_create = files(
     'file-create/main.cxx',
     'file-create/create.cxx',
-
-    '../src/logger.cxx',
 )
 
 spacefm = build_target(
@@ -126,7 +122,7 @@ spacefm = build_target(
     include_directories: incdir_create,
     install: true,
     install_dir: bindir,
-    dependencies: dep_vfs_gtk4,
+    dependencies: vfs_gtk4_dep,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -135,8 +131,6 @@ incdir_rename = include_directories(['file-rename', '../src', '../src/datatypes'
 sources_rename = files(
     'file-rename/main.cxx',
     'file-rename/rename.cxx',
-
-    '../src/logger.cxx',
 )
 
 spacefm = build_target(
@@ -146,7 +140,7 @@ spacefm = build_target(
     include_directories: incdir_rename,
     install: true,
     install_dir: bindir,
-    dependencies: dep_vfs_gtk4,
+    dependencies: vfs_gtk4_dep,
     cpp_pch: '../pch/pch.hxx',
 )
 
@@ -252,8 +246,6 @@ sources_properties = files(
 
     'properties/media/audio-video-metadata.cxx',
     'properties/media/image-metadata.cxx',
-
-    '../src/logger.cxx',
 )
 
 spacefm = build_target(
@@ -264,7 +256,7 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: [
-        dep_vfs_gtk4,
+        vfs_gtk4_dep,
         media_dependencies,
     ],
     cpp_pch: '../pch/pch.hxx',

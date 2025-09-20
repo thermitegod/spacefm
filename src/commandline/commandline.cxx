@@ -145,7 +145,7 @@ setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
         ->check(
             [&opt](const auto& value)
             {
-                auto log_levels = magic_enum::enum_names<spdlog::level::level_enum>();
+                auto log_levels = magic_enum::enum_names<logger::detail::loglevel>();
                 auto valid_domains = magic_enum::enum_names<logger::domain>();
 
                 const auto pos = value.find('=');

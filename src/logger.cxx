@@ -95,3 +95,38 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
         spdlog::register_logger(logger);
     }
 }
+
+void
+logger::detail::logger(const logger::detail::loglevel level, const domain d,
+                       const std::string_view msg) noexcept
+{
+    auto l = spdlog::get(magic_enum::enum_name(d).data());
+    if (!l)
+    {
+        return;
+    }
+
+    switch (level)
+    {
+        case detail::loglevel::trace:
+            l->trace(msg);
+            break;
+        case detail::loglevel::debug:
+            l->debug(msg);
+            break;
+        case detail::loglevel::info:
+            l->info(msg);
+            break;
+        case detail::loglevel::warn:
+            l->warn(msg);
+            break;
+        case detail::loglevel::err:
+            l->error(msg);
+            break;
+        case detail::loglevel::critical:
+            l->critical(msg);
+            break;
+        case detail::loglevel::off:
+            break;
+    }
+}

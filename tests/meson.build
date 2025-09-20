@@ -10,7 +10,6 @@ test_sources = files()
 test_sources += files(
     # SFM
     '../src/types.cxx',
-    '../src/logger.cxx',
 
     # Settings
     '../src/settings/settings.cxx',
@@ -59,7 +58,7 @@ test_suite = build_target(
 
         base_dependencies,
         gtk4_dependencies,
-        dep_vfs_gtk4,
+        vfs_gtk4_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )

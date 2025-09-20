@@ -2,8 +2,6 @@
 incdir = include_directories(['thumbnails', '../src'])
 sources = files(
     'thumbnails/thumbnails.cxx',
-
-    '../src/logger.cxx',
 )
 
 spacefm = build_target(
@@ -15,7 +13,7 @@ spacefm = build_target(
     install_dir: bindir,
     dependencies: [
         cli11_dep,
-        dep_vfs_gtk4,
+        vfs_gtk4_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )

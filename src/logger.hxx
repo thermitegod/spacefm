@@ -17,11 +17,9 @@
 
 #include <filesystem>
 #include <format>
+#include <string>
+#include <string_view>
 #include <unordered_map>
-
-#include <magic_enum/magic_enum.hpp>
-
-#include <spdlog/spdlog.h>
 
 namespace logger
 {
@@ -36,6 +34,22 @@ enum domain : std::uint8_t
     vfs,
 };
 
+namespace detail
+{
+enum loglevel : std::uint8_t
+{
+    trace,
+    debug,
+    info,
+    warn,
+    err,
+    critical,
+    off,
+};
+
+void logger(const loglevel level, const domain d, const std::string_view msg) noexcept;
+} // namespace detail
+
 void initialize() noexcept;
 
 void initialize(const std::unordered_map<std::string, std::string>& options,
@@ -45,11 +59,7 @@ template<domain d = basic, typename... Args>
 void
 trace(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->trace(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::trace, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
@@ -59,6 +69,7 @@ trace_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     if (cond)
     {
         trace<d>(fmt, std::forward<Args>(args)...);
+        // detail::trace(d, std::format(fmt, std::forward<Args>(args)...));
     }
 }
 
@@ -66,11 +77,7 @@ template<domain d = basic, typename... Args>
 void
 debug(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->debug(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::debug, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
@@ -87,11 +94,7 @@ template<domain d = basic, typename... Args>
 void
 info(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->info(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::info, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
@@ -108,11 +111,7 @@ template<domain d = basic, typename... Args>
 void
 warn(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->warn(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::warn, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
@@ -129,11 +128,7 @@ template<domain d = basic, typename... Args>
 void
 error(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->error(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::err, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
@@ -150,11 +145,7 @@ template<domain d = basic, typename... Args>
 void
 critical(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
-    if (l)
-    {
-        l->critical(std::format(fmt, std::forward<Args>(args)...));
-    }
+    detail::logger(detail::critical, d, std::format(fmt, std::forward<Args>(args)...));
 }
 
 template<domain d = basic, typename... Args>
