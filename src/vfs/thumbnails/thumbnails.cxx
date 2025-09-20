@@ -23,11 +23,14 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
+#include <glaze/glaze.hpp>
+
 #include <magic_enum/magic_enum.hpp>
 
 #include <botan/hash.h>
 #include <botan/hex.h>
 
+#include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
 #include "vfs/execute.hxx"
@@ -41,9 +44,38 @@
 // Based on spec v0.9.0
 // https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
 // Not implemented
-// - No thumbnail creation failure <https://specifications.freedesktop.org/thumbnail-spec/latest/failures.html>
 // - No thumbnail delete <https://specifications.freedesktop.org/thumbnail-spec/latest/delete.html>
 // - No shared thumbnail <https://specifications.freedesktop.org/thumbnail-spec/latest/shared.html>
+
+struct fail final
+{
+    std::string uri;
+    std::time_t mtime;
+    u64 size;
+    std::string mimetype;
+};
+
+static void
+create_fail(const std::shared_ptr<vfs::file>& file, const std::filesystem::path& path) noexcept
+{
+    if (!std::filesystem::is_directory(path.parent_path()))
+    {
+        std::filesystem::create_directories(path.parent_path());
+    }
+
+    const auto fail_data = fail{
+        file->uri().data(),
+        std::chrono::system_clock::to_time_t(file->mtime()),
+        file->size(),
+        file->mime_type()->type().data(),
+    };
+
+    std::string buffer;
+    const auto ec =
+        glz::write_file_json<glz::opts{.prettify = true}>(fail_data, path.c_str(), buffer);
+
+    logger::error_if(ec, "Failed to create thumbnail fail file: {}", glz::format_error(ec, buffer));
+}
 
 enum class thumbnail_size : std::uint16_t
 {
@@ -124,11 +156,21 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         }
     }();
 
-    const auto md5 = Botan::HashFunction::create("MD5");
-    md5->update(file->uri());
-    const auto hash = Botan::hex_encode(md5->final(), false);
+    const auto hash = [&file]()
+    {
+        const auto md5 = Botan::HashFunction::create("MD5");
+        md5->update(file->uri());
+        return Botan::hex_encode(md5->final(), false);
+    }();
 
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
+    const auto fail_file = cache_dirs.fail / std::format("{}.json", hash);
+    if (std::filesystem::exists(fail_file))
+    {
+        logger::trace<logger::vfs>("failed to create thumbnail the past: {}",
+                                   file->path().string());
+        return nullptr;
+    }
 
     // logger::debug<logger::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
@@ -275,6 +317,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         {
             logger::error<logger::vfs>("Failed to create thumbnail for '{}'",
                                        file->path().string());
+
+            create_fail(file, fail_file);
+
             return nullptr;
         }
 
@@ -288,6 +333,10 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             logger::error<logger::vfs>("Loading new thumbnail for file '{}' failed with: {}",
                                        file->path().string(),
                                        e.what());
+
+            create_fail(file, fail_file);
+            std::filesystem::remove(thumbnail_file);
+
             return nullptr;
         }
 #elif (GTK_MAJOR_VERSION == 3)
@@ -299,6 +348,10 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
                                        file->path().string(),
                                        error->message);
             g_error_free(error);
+
+            create_fail(file, fail_file);
+            std::filesystem::remove(thumbnail_file);
+
             return nullptr;
         }
 #endif
