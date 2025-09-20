@@ -100,5 +100,5 @@ main(int argc, char** argv)
     std::ranges::for_each(files,
                           [](auto& file) { file->load_thumbnail(vfs::file::thumbnail_size::big); });
 
-    std::exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
