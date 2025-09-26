@@ -167,7 +167,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     const auto fail_file = cache_dirs.fail / std::format("{}.json", hash);
     if (std::filesystem::exists(fail_file))
     {
-        logger::trace<logger::vfs>("failed to create thumbnail the past: {}",
+        logger::trace<logger::vfs>("failed to create thumbnail in the past: {}",
                                    file->path().string());
         return nullptr;
     }
