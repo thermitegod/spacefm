@@ -126,6 +126,27 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
 }
 
 #if (GTK_MAJOR_VERSION == 4)
+/**
+ * Like the deprecated gdk_texture_new_for_pixbuf() and Gdk::Texture::create_for_pixbuf().
+ */
+static Glib::RefPtr<Gdk::Texture>
+create_texture_for_pixbuf(const Glib::RefPtr<const Gdk::Pixbuf>& pixbuf) noexcept
+{
+    // Taken from https://gitlab.gnome.org/GNOME/gtkmm/-/commit/feceb41cd988d4b1bdbc7aab0d095d1aa859f547
+
+    const auto bytes = Glib::Bytes::create(pixbuf->get_pixels(),
+                                           static_cast<std::uint64_t>(pixbuf->get_height()) *
+                                               static_cast<std::uint64_t>(pixbuf->get_rowstride()));
+    return Gdk::MemoryTexture::create(pixbuf->get_width(),
+                                      pixbuf->get_height(),
+                                      pixbuf->get_has_alpha() ? Gdk::MemoryTexture::Format::R8G8B8A8
+                                                              : Gdk::MemoryTexture::Format::R8G8B8,
+                                      bytes,
+                                      static_cast<std::uint64_t>(pixbuf->get_rowstride()));
+}
+#endif
+
+#if (GTK_MAJOR_VERSION == 4)
 static Glib::RefPtr<Gdk::Texture>
 #elif (GTK_MAJOR_VERSION == 3)
 static GdkPixbuf*
@@ -377,7 +398,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     }
 
 #if (GTK_MAJOR_VERSION == 4)
-    return Gdk::Texture::create_for_pixbuf(
+    return create_texture_for_pixbuf(
         thumbnail->scale_simple(new_width.data(), new_height.data(), Gdk::InterpType::BILINEAR));
 #elif (GTK_MAJOR_VERSION == 3)
     GdkPixbuf* scaled = gdk_pixbuf_scale_simple(thumbnail,

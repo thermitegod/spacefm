@@ -51,7 +51,8 @@ vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size) noe
         return std::unexpected{vfs::error_code::icon_load};
     }
 
-    logger::info("load_icon name = {}", icon->get_icon_name().data());
+    // TODO gtk-4.20 deprecated
+    // logger::info("load_icon name = {}", icon->get_icon_name().data());
 
     return icon;
 }

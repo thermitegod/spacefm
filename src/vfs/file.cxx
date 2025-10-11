@@ -731,6 +731,27 @@ vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
     }
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+/**
+ * Like the deprecated gdk_texture_new_for_pixbuf() and Gdk::Texture::create_for_pixbuf().
+ */
+static Glib::RefPtr<Gdk::Texture>
+create_texture_for_pixbuf(const Glib::RefPtr<const Gdk::Pixbuf>& pixbuf) noexcept
+{
+    // Taken from https://gitlab.gnome.org/GNOME/gtkmm/-/commit/feceb41cd988d4b1bdbc7aab0d095d1aa859f547
+
+    const auto bytes = Glib::Bytes::create(pixbuf->get_pixels(),
+                                           static_cast<std::uint64_t>(pixbuf->get_height()) *
+                                               static_cast<std::uint64_t>(pixbuf->get_rowstride()));
+    return Gdk::MemoryTexture::create(pixbuf->get_width(),
+                                      pixbuf->get_height(),
+                                      pixbuf->get_has_alpha() ? Gdk::MemoryTexture::Format::R8G8B8A8
+                                                              : Gdk::MemoryTexture::Format::R8G8B8,
+                                      bytes,
+                                      static_cast<std::uint64_t>(pixbuf->get_rowstride()));
+}
+#endif
+
 void
 vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
@@ -749,7 +770,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
     // TODO do something better
     auto icon_to_pixbuf = [](const Glib::RefPtr<Gtk::IconPaintable>& icon)
     {
-        return Gdk::Texture::create_for_pixbuf(
+        return create_texture_for_pixbuf(
             Gdk::Pixbuf::create_from_file(icon->get_file()->get_path(),
                                           icon->get_intrinsic_width(),
                                           icon->get_intrinsic_height()));
