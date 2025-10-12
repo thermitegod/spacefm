@@ -11,7 +11,7 @@ CC=clang CXX=clang++ meson setup \
     -Dwith-system-concurrencpp=true \
     -Dwith-system-glaze=true \
     -Dwith-system-magic-enum=true \
-    -Dwith-system-spdlog=true \
+    -Dwith-system-spdlog=false \
     -Dwith-system-ztd=true \
     --buildtype=debugoptimized \
     -Db_lto=true -Db_lto_mode=thin -Db_thinlto_cache=true \

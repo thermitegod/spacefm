@@ -427,13 +427,9 @@ endforeach
 
 # Logger Lib
 
-logger_sources = files(
-    'src/logger.cxx',
-)
-
 logger_lib = static_library(
     'logger',
-    logger_sources,
+    files('src/logger.cxx'),
     include_directories : include_directories('src'),
     dependencies : spdlog_dep,
 )
