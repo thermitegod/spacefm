@@ -12,7 +12,6 @@ CC=clang CXX=clang++ meson setup \
     -Dwith-system-glaze=true \
     -Dwith-system-magic-enum=true \
     -Dwith-system-spdlog=true \
-    -Dwith-system-toml11=false \
     -Dwith-system-ztd=true \
     --buildtype=debugoptimized \
     -Db_lto=true -Db_lto_mode=thin -Db_thinlto_cache=true \

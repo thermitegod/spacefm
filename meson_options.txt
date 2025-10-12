@@ -76,13 +76,6 @@ option(
 )
 
 option(
-    'with-system-toml11',
-    type : 'boolean',
-    value: false,
-    description : 'Use system toml11 instead of bundled version'
-)
-
-option(
     'with-system-ztd',
     type : 'boolean',
     value: false,
