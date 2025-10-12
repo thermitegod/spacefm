@@ -3,6 +3,7 @@ build/
 
 # meson subprojects
 subprojects/packagecache/
+subprojects/.wraplock
 
 #cppcheck
 spacefm.cppcheck
