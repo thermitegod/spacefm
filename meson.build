@@ -432,6 +432,7 @@ logger_lib = static_library(
     files('src/logger.cxx'),
     include_directories : include_directories('src'),
     dependencies : spdlog_dep,
+    install: false,
 )
 
 logger_dep = declare_dependency(
@@ -539,6 +540,7 @@ vfs_gtk4_lib = static_library(
     vfs_gtk4_sources,
     include_directories : include_directories('src'),
     dependencies : vfs_gtk4_dependencies,
+    install: false,
     cpp_pch: 'pch/pch.hxx',
 )
 
@@ -564,6 +566,7 @@ vfs_gtk3_lib = static_library(
     vfs_gtk3_sources,
     include_directories : include_directories('src'),
     dependencies : vfs_gtk3_dependencies,
+    install: false,
     cpp_pch: 'pch/pch.hxx',
 )
 
