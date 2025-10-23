@@ -105,17 +105,16 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
 [[nodiscard]] std::int32_t
 strnatcmp(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
 {
-    // TODO use placeholder variable when switching to c++26
-    const auto [basename_lhs, ext_lhs, multi_lhs] = vfs::utils::split_basename_extension(lhs);
-    const auto [basename_rhs, ext_rhs, multi_rhs] = vfs::utils::split_basename_extension(rhs);
+    const auto [stem_lhs, extension_lhs] = vfs::utils::filename_stem_and_extension(lhs);
+    const auto [stem_rhs, extension_rhs] = vfs::utils::filename_stem_and_extension(rhs);
 
     std::int32_t result{0};
-    if (!basename_lhs.empty() && !basename_rhs.empty())
+    if (!stem_lhs.empty() && !stem_rhs.empty())
     {
-        result = strnatcmp0(basename_lhs, basename_rhs, fold_case);
+        result = strnatcmp0(stem_lhs, stem_rhs, fold_case);
         if (result == 0)
         {
-            result = strnatcmp0(ext_lhs, ext_rhs, fold_case);
+            result = strnatcmp0(extension_lhs, extension_rhs, fold_case);
         }
     }
     return result;

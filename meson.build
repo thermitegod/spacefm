@@ -224,7 +224,7 @@ glibmm3_dep = dependency('glibmm-2.4', required: true)
 giomm3_dep = dependency('giomm-2.4', required: true)
 
 # Gtk4 CPP
-gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.20.0')
+gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
 glibmm4_dep = dependency('glibmm-2.68', required: true)
 giomm4_dep = dependency('giomm-2.68', required: true)
 

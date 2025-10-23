@@ -2328,7 +2328,7 @@ gui::file_task::query_overwrite() noexcept
     const std::string src_dir = current_file.parent_path();
     const std::string dest_dir = current_dest.parent_path();
 
-    const auto filename_parts = vfs::utils::split_basename_extension(filename);
+    const auto [_, extension] = vfs::utils::filename_stem_and_extension(filename);
 
     const std::string unique_name = vfs::utils::unique_path(dest_dir, filename, "-copy");
     const std::string new_name_plain =
@@ -2336,9 +2336,7 @@ gui::file_task::query_overwrite() noexcept
     const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";
 
     const std::int32_t pos =
-        !filename_parts.extension.empty()
-            ? static_cast<std::int32_t>(filename.size() - filename_parts.extension.size() - 1)
-            : -1;
+        !extension.empty() ? static_cast<std::int32_t>(filename.size() - extension.size() - 1) : -1;
 
     // create dialog
     if (this->progress_dlg_)

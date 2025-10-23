@@ -45,39 +45,26 @@ vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
 #endif
 }
 
-vfs::utils::split_basename_extension_data
-vfs::utils::split_basename_extension(const std::filesystem::path& filename) noexcept
+std::array<std::string, 2>
+vfs::utils::filename_stem_and_extension(const std::filesystem::path& filename) noexcept
 {
-    if (std::filesystem::is_directory(filename))
+    auto f = filename.string();
+
+    const auto pos = f.find_last_of('.');
+    if (pos != std::string::npos && pos != 0 && pos != f.length() - 1)
     {
-        return {filename.string(), "", false};
-    }
-
-    // Find the last dot in the filename
-    const auto dot_pos = filename.string().find_last_of('.');
-
-    // Check if the dot is not at the beginning or end of the filename
-    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.string().length() - 1)
-    {
-        const auto split = ztd::rpartition(filename.string(), ".");
-
-        // Check if the extension is a compressed tar archive
-        if (split[0].ends_with(".tar"))
+        const auto [stem, _, extension] = ztd::rpartition(f, ".");
+        if (stem.ends_with(".tar"))
         {
-            // Find the second last dot in the filename
-            const auto split_second = ztd::rpartition(split[0], ".");
-
-            return {split_second[0], std::format(".{}.{}", split_second[2], split[2]), true};
+            const auto [stem2, _, extension2] = ztd::rpartition(stem, ".");
+            return {stem2, std::format(".{}.{}", extension2, extension)};
         }
         else
         {
-            // Return the basename and the extension
-            return {split[0], std::format(".{}", split[2]), false};
+            return {stem, std::format(".{}", extension)};
         }
     }
-
-    // No valid extension found, return the whole filename as the basename
-    return {filename.string(), "", false};
+    return {f, ""};
 }
 
 std::filesystem::path
@@ -87,13 +74,13 @@ vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem
     assert(!path.empty());
     assert(!filename.empty());
 
-    const auto parts = split_basename_extension(filename);
+    const auto [stem, extension] = filename_stem_and_extension(filename);
 
     u32 n = 1;
-    auto unique_path = path / std::format("{}{}", parts.basename, parts.extension);
+    auto unique_path = path / std::format("{}{}", stem, extension);
     while (std::filesystem::exists(unique_path))
     { // need to see broken symlinks
-        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, n, parts.extension);
+        unique_path = path / std::format("{}{}{}{}", stem, tag, n, extension);
         n += 1;
     }
 

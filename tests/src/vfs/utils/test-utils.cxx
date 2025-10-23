@@ -78,71 +78,65 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
         }
     }
 
-    TEST_CASE("vfs::utils::split_basename_extension")
+    TEST_CASE("vfs::utils::filename_stem_and_extension")
     {
         REQUIRE(std::filesystem::exists(test_data_path));
 
         SUBCASE("empty")
         {
-            const auto result = vfs::utils::split_basename_extension("");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension("");
 
-            CHECK_EQ(result.basename, "");
-            CHECK_EQ(result.extension, "");
-            CHECK_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(stem, "");
+            CHECK_EQ(extension, "");
         }
 
-        SUBCASE("missing extension")
+        SUBCASE("no extension")
         {
-            const auto result = vfs::utils::split_basename_extension("test");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test");
 
-            CHECK_EQ(result.basename, "test");
-            CHECK_EQ(result.extension, "");
-            CHECK_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(stem, "test");
+            CHECK_EQ(extension, "");
         }
 
         SUBCASE("multiple extension")
         {
-            const auto result = vfs::utils::split_basename_extension("test.tar.gz");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test.tar.gz");
 
-            CHECK_EQ(result.basename, "test");
-            CHECK_EQ(result.extension, ".tar.gz");
-            CHECK_EQ(result.is_multipart_extension, true);
+            CHECK_EQ(stem, "test");
+            CHECK_EQ(extension, ".tar.gz");
         }
 
         SUBCASE("single extension")
         {
-            const auto result = vfs::utils::split_basename_extension("test.txt");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test.txt");
 
-            CHECK_EQ(result.basename, "test");
-            CHECK_EQ(result.extension, ".txt");
-            CHECK_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(stem, "test");
+            CHECK_EQ(extension, ".txt");
         }
 
-        SUBCASE("hidden")
+        SUBCASE("hidden no extension")
         {
-            const auto result = vfs::utils::split_basename_extension(".hidden");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension(".hidden");
 
-            CHECK_EQ(result.basename, ".hidden");
-            CHECK_EQ(result.extension, "");
-            CHECK_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(stem, ".hidden");
+            CHECK_EQ(extension, "");
         }
 
         SUBCASE("hidden single extension")
         {
-            const auto result = vfs::utils::split_basename_extension(".hidden.txt");
+            const auto [stem, extension] = vfs::utils::filename_stem_and_extension(".hidden.txt");
 
-            CHECK_EQ(result.basename, ".hidden");
-            CHECK_EQ(result.extension, ".txt");
-            CHECK_EQ(result.is_multipart_extension, false);
+            CHECK_EQ(stem, ".hidden");
+            CHECK_EQ(extension, ".txt");
         }
 
         SUBCASE("hidden multiple extension")
         {
-            const auto result = vfs::utils::split_basename_extension(".hidden.tar.zst");
+            const auto [stem, extension] =
+                vfs::utils::filename_stem_and_extension(".hidden.tar.zst");
 
-            CHECK_EQ(result.basename, ".hidden");
-            CHECK_EQ(result.extension, ".tar.zst");
-            CHECK_EQ(result.is_multipart_extension, true);
+            CHECK_EQ(stem, ".hidden");
+            CHECK_EQ(extension, ".tar.zst");
         }
     }
 }

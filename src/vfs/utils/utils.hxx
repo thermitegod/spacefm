@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <array>
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -27,20 +28,14 @@ namespace vfs::utils
 {
 [[nodiscard]] std::string format_file_size(u64 size_in_bytes, bool decimal = true) noexcept;
 
-struct split_basename_extension_data final
-{
-    std::string basename;
-    std::string extension;
-    bool is_multipart_extension;
-};
 /**
- * Split a filename into its basename and extension,
- * unlike using std::filesystem::path::filename/std::filesystem::path::extension
- * this will support multi part extensions such as .tar.gz,.tar.zst,etc..
- * will not set an extension if the filename is a directory.
+ * Split a filename into its stem and extension,
+ * unlike using std::filesystem::path::stem/std::filesystem::path::extension
+ * this will support multi part extensions such as tar archives, i.e. .tar.gz,.tar.zst,etc...
+ * does not check if the filename is a directory, that should be checked by the caller.
  */
-[[nodiscard]] split_basename_extension_data
-split_basename_extension(const std::filesystem::path& filename) noexcept;
+[[nodiscard]] std::array<std::string, 2>
+filename_stem_and_extension(const std::filesystem::path& filename) noexcept;
 
 /**
  * @brief unique_path

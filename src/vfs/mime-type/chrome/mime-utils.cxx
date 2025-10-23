@@ -401,8 +401,8 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
 std::string
 vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& filepath) noexcept
 {
-    const std::string ext = vfs::utils::split_basename_extension(filepath).extension;
-    if (ext.empty())
+    const auto [_, extension] = vfs::utils::filename_stem_and_extension(filepath);
+    if (extension.empty())
     {
         return "application/octet-stream";
     }
@@ -446,7 +446,7 @@ vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& fil
         }
     }
 
-    const auto it = mime_type_map.find(ext.substr(1));
+    const auto it = mime_type_map.find(extension.substr(1));
     return it != mime_type_map.cend() ? it->second.mime_type
                                       : std::string("application/octet-stream");
 }

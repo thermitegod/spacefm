@@ -840,9 +840,9 @@ CreateDialog::select_input() noexcept
 
     if (this->file_ && !this->file_->is_directory())
     {
-        const auto [basename, ext, _] = vfs::utils::split_basename_extension(full_name);
+        const auto [stem, extension] = vfs::utils::filename_stem_and_extension(full_name);
 
-        end_iter = buf_full_name_->get_iter_at_offset(static_cast<std::int32_t>(basename.size()));
+        end_iter = buf_full_name_->get_iter_at_offset(static_cast<std::int32_t>(stem.size()));
     }
 
     this->buf_full_name_->select_range(start_iter, end_iter);
