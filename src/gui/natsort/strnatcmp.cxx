@@ -28,9 +28,9 @@
 #include <cctype>
 #include <cstdint>
 
-#include "vfs/utils/utils.hxx"
+#include "gui/natsort/strnatcmp.hxx"
 
-#include "strnatcmp.hxx"
+#include "vfs/utils/utils.hxx"
 
 [[nodiscard]] static std::int32_t
 strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
@@ -52,10 +52,9 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
 
             float val_lhs{};
             float val_rhs{};
-            // TODO use placeholder variable when switching to c++26
-            const auto [ptr_lhs, ec_lhs] =
+            const auto [_, ec_lhs] =
                 std::from_chars(num_lhs.data(), num_lhs.data() + num_lhs.size(), val_lhs);
-            const auto [ptr_rhs, ec_rhs] =
+            const auto [_, ec_rhs] =
                 std::from_chars(num_rhs.data(), num_rhs.data() + num_rhs.size(), val_rhs);
             if (ec_lhs == std::errc() && ec_rhs == std::errc())
             {
