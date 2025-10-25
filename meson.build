@@ -481,6 +481,13 @@ vfs_gtk3_sources = files(
     'src/vfs/mime-type/mime-action.cxx',
     'src/vfs/mime-type/mime-type.cxx',
     'src/vfs/mime-type/chrome/mime-utils.cxx',
+
+    'src/vfs/notify-cpp/event.cxx',
+    'src/vfs/notify-cpp/file_system_event.cxx',
+    'src/vfs/notify-cpp/inotify.cxx',
+    'src/vfs/notify-cpp/notification.cxx',
+    'src/vfs/notify-cpp/notify.cxx',
+    'src/vfs/notify-cpp/notify_controller.cxx',
 )
 
 vfs_gtk4_sources = files(
@@ -522,6 +529,13 @@ vfs_gtk4_sources = files(
     'src/vfs/mime-type/mime-action.cxx',
     'src/vfs/mime-type/mime-type.cxx',
     'src/vfs/mime-type/chrome/mime-utils.cxx',
+
+    'src/vfs/notify-cpp/event.cxx',
+    'src/vfs/notify-cpp/file_system_event.cxx',
+    'src/vfs/notify-cpp/inotify.cxx',
+    'src/vfs/notify-cpp/notification.cxx',
+    'src/vfs/notify-cpp/notify.cxx',
+    'src/vfs/notify-cpp/notify_controller.cxx',
 )
 
 # VFS gtk4

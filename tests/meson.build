@@ -2,12 +2,13 @@
 
 doctest_dep = dependency('doctest', required : true)
 
-## Test Source files
+## Spacefm Test Source files
 
-test_sources = files()
+test_sources_sfm = files()
 
-# Spacefm Source Files
-test_sources += files(
+# Spacefm Source Files, do not need to do vfs source
+# files they get done through the vfs static_library
+test_sources_sfm += files(
     # SFM
     '../src/types.cxx',
 
@@ -20,18 +21,16 @@ test_sources += files(
 )
 
 # Test Source Files
-test_sources += files(
+test_sources_sfm += files(
     'src/main.cxx',
 
-
-    # SFM
     'src/base/test-types.cxx',
 
-    # GUI
+    # gui
     'src/gui/natsort/test-natsort.cxx',
     'src/gui/utils/test-history.cxx',
 
-    # VFS
+    # vfs
     'src/vfs/test-clipboard.cxx',
     'src/vfs/test-error.cxx',
     'src/vfs/test-execute.cxx',
@@ -40,18 +39,17 @@ test_sources += files(
     'src/vfs/utils/test-file-ops.cxx',
     'src/vfs/utils/test-permissions.cxx',
 
+    # vfs - chrome
     'src/vfs/mime-type/chrome/test-mime-utils.cxx',
 )
 
 ## Build
 
-incdir_tests = include_directories(['src', '../src'])
-
 test_suite = build_target(
     'test_suite',
-    sources: test_sources,
+    sources: test_sources_sfm,
     target_type: 'executable',
-    include_directories: incdir_tests,
+    include_directories: include_directories(['src', '../src']),
     install: false,
     dependencies: [
         doctest_dep,
@@ -63,4 +61,29 @@ test_suite = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
-test('SpaceFM Test Suite', test_suite)
+# notify-cpp
+
+# Test Source Files
+test_sources_inotify = files(
+    'src/main.cxx',
+
+    'src/vfs/notify-cpp/event_handler_test.cxx',
+    'src/vfs/notify-cpp/inotify_controller_test.cxx',
+)
+
+test_suite_notify_inotify = build_target(
+    'test_suite_inotify',
+    sources: test_sources_inotify,
+    target_type: 'executable',
+    include_directories: include_directories(['src', '../src']),
+    install: false,
+    dependencies: [
+        doctest_dep,
+
+        vfs_gtk4_dep,
+    ],
+    cpp_pch: '../pch/pch.hxx',
+)
+
+test('Test Suite - SpaceFM', test_suite)
+test('Test Suite - vendor notify-cpp, inotify', test_suite_notify_inotify)

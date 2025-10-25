@@ -51,7 +51,7 @@ const std::error_category& error_category() noexcept;
 inline std::error_code
 make_error_code(vfs::error_code e) noexcept
 {
-    return std::error_code{static_cast<int>(e), error_category()};
+    return std::error_code{static_cast<std::int32_t>(e), error_category()};
 }
 } // namespace vfs
 

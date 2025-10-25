@@ -1,0 +1,162 @@
+/*
+ * Copyright (c) 2017 Erik Zenker <erikzenker@hotmail.com>
+ * Copyright (c) 2018 Rafael Sadowski <rafael@sizeofvoid.org>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include <filesystem>
+#include <functional>
+#include <set>
+
+#include "vfs/notify-cpp/inotify.hxx"
+#include "vfs/notify-cpp/notification.hxx"
+#include "vfs/notify-cpp/notify.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
+
+notify::inotify_controller::inotify_controller() : notify_controller(new inotify) {}
+
+notify::notify_controller::notify_controller(notify_base* n) : notify_(n) {}
+
+notify::notify_controller&
+notify::notify_controller::watch_file(const file_system_event& fse)
+{
+    this->notify_->watch_file(fse);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::watch_directory(const file_system_event& fse)
+{
+    this->notify_->watch_directory(fse);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::watch_path_recursively(const file_system_event& fse)
+{
+    this->notify_->watch_path_recursively(fse);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::unwatch(const std::filesystem::path& f)
+{
+    this->notify_->unwatch(f);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::ignore(const std::filesystem::path& p) noexcept
+{
+    this->notify_->ignore(p);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::ignore_once(const std::filesystem::path& p) noexcept
+{
+    this->notify_->ignore_once(p);
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::on_event(const notify::event event,
+                                    const event_observer& event_observer) noexcept
+{
+    this->event_observer_[event] = event_observer;
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::on_events(const std::set<notify::event>& events,
+                                     const event_observer& event_observer) noexcept
+{
+    for (const auto event : events)
+    {
+        this->event_observer_[event] = event_observer;
+    }
+    return *this;
+}
+
+notify::notify_controller&
+notify::notify_controller::on_unexpected_event(const event_observer& event_observer) noexcept
+{
+    this->unexpected_event_observer_ = event_observer;
+    return *this;
+}
+
+void
+notify::notify_controller::run() noexcept
+{
+    while (!this->notify_->is_stopped())
+    {
+        this->run_once();
+    }
+}
+
+void
+notify::notify_controller::run_once() noexcept
+{
+    const auto fse = this->notify_->get_next_event();
+    if (!fse)
+    {
+        return;
+    }
+
+    const auto event = fse->event();
+    const auto observers = find_observer(event);
+
+    if (observers.empty())
+    {
+        if (this->unexpected_event_observer_)
+        {
+            this->unexpected_event_observer_({event, fse->path()});
+        }
+    }
+    else
+    {
+        for (const auto& observer : observers)
+        {
+            /* handle observed processes */
+            auto event_observer = observer.second;
+            event_observer({observer.first, fse->path()});
+        }
+    }
+}
+
+void
+notify::notify_controller::stop() noexcept
+{
+    this->notify_->stop();
+}
+
+std::vector<std::pair<notify::event, notify::event_observer>>
+notify::notify_controller::find_observer(const notify::event e) const noexcept
+{
+    std::vector<std::pair<notify::event, event_observer>> observers;
+    for (const auto& observer : this->event_observer_)
+    {
+        if ((observer.first & e) == e)
+        {
+            observers.emplace_back(observer.first, observer.second);
+        }
+    }
+    return observers;
+}
