@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <thread>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -28,7 +29,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/monitor.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
 
 #define PTK_DIR_TREE(obj)             (static_cast<gui::dir_tree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<gui::dir_tree*>(obj))
@@ -56,6 +57,13 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
     /* <private> */
     struct node : public std::enable_shared_from_this<node>
     {
+        node() = default;
+        ~node()
+        {
+            this->notifier.stop();
+            this->notifier_thread.join();
+        }
+
         [[nodiscard]] static std::shared_ptr<node> create() noexcept;
         [[nodiscard]] static std::shared_ptr<node>
         create(gui::dir_tree* tree, const std::shared_ptr<node>& parent,
@@ -71,15 +79,15 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         std::shared_ptr<node> last{nullptr};
         gui::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
-        vfs::monitor monitor;
+        notify::notify_controller notifier = notify::inotify_controller();
+        std::thread notifier_thread;
 
         std::shared_ptr<node> get_nth_node(std::int32_t n) const noexcept;
         std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
         std::ptrdiff_t get_node_index(const std::shared_ptr<node>& child) const noexcept;
 
-        /* file monitor callback */
-        void on_monitor_event(const vfs::monitor::event event,
-                              const std::filesystem::path& path) noexcept;
+        void on_file_created(const std::filesystem::path& path) noexcept;
+        void on_file_deleted(const std::filesystem::path& path) noexcept;
     };
     std::shared_ptr<node> root{nullptr};
 

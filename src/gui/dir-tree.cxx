@@ -36,7 +36,8 @@
 #include "gui/utils/utils.hxx"
 
 #include "vfs/file.hxx"
-#include "vfs/monitor.hxx"
+#include "vfs/notify-cpp/event.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
 
 #include "vfs/utils/icon.hxx"
 
@@ -627,9 +628,23 @@ gui::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
 
     if (std::filesystem::is_directory(path))
     {
-        node->monitor = vfs::monitor(path);
-        node->monitor.signal_filesystem_event().connect([node](auto e, auto p)
-                                                        { node->on_monitor_event(e, p); });
+        node->notifier.watch_directory({path, notify::event::all})
+            .on_events(
+                {
+                    notify::event::create,
+                    notify::event::moved_to,
+                },
+                [node](const notify::notification& notification)
+                { node->on_file_created(notification.path()); })
+            .on_events(
+                {
+                    notify::event::delete_self,
+                    notify::event::delete_sub,
+                    notify::event::moved_from,
+                },
+                [node](const notify::notification& notification)
+                { node->on_file_deleted(notification.path()); });
+        node->notifier_thread = std::thread([node]() { node->notifier.run(); });
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
@@ -672,7 +687,7 @@ gui::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
         {
             return;
         }
-        node->monitor = vfs::monitor();
+        node->notifier = notify::inotify_controller();
 
         std::shared_ptr<gui::dir_tree::node> child;
         std::shared_ptr<gui::dir_tree::node> next;
@@ -778,47 +793,48 @@ gui::dir_tree::node::find_node(const std::string_view name) const noexcept
 }
 
 void
-gui::dir_tree::node::on_monitor_event(const vfs::monitor::event event,
-                                      const std::filesystem::path& path) noexcept
+gui::dir_tree::node::on_file_created(const std::filesystem::path& path) noexcept
 {
     auto child = this->find_node(path.filename().string());
 
-    if (event == vfs::monitor::event::created)
+    if (!child)
     {
-        if (!child)
+        /* remove place holder */
+        if (this->n_children == 1 && !this->children->file)
         {
-            /* remove place holder */
-            if (this->n_children == 1 && !this->children->file)
+            child = this->children;
+        }
+        else
+        {
+            child = nullptr;
+        }
+        if (std::filesystem::is_directory(path))
+        {
+            this->tree->insert_child(this->shared_from_this(), path.parent_path());
+            if (child)
             {
-                child = this->children;
-            }
-            else
-            {
-                child = nullptr;
-            }
-            if (std::filesystem::is_directory(path))
-            {
-                this->tree->insert_child(this->shared_from_this(), path.parent_path());
-                if (child)
-                {
-                    this->tree->delete_child(child);
-                }
+                this->tree->delete_child(child);
             }
         }
     }
-    else if (event == vfs::monitor::event::deleted)
+}
+
+void
+gui::dir_tree::node::on_file_deleted(const std::filesystem::path& path) noexcept
+{
+    auto child = this->find_node(path.filename().string());
+
+    if (child)
     {
-        if (child)
-        {
-            this->tree->delete_child(child);
-        }
-        /* //MOD Change is not needed?  Creates this warning and triggers subsequent
-         * errors and causes visible redrawing problems:
-        Gtk-CRITICAL **: /tmp/buildd/gtk+2.0-2.24.3/gtk/gtktreeview.c:6072
-        (validate_visible_area): assertion `has_next' failed. There is a disparity between the
-        internal view of the GtkTreeView, and the GtkTreeModel.  This generally means that the
-        model has changed without letting the view know.  Any display from now on is likely to
-        be incorrect.
-        */
+        this->tree->delete_child(child);
     }
+
+    /* //MOD Change is not needed?  Creates this warning and triggers subsequent
+     * errors and causes visible redrawing problems:
+    Gtk-CRITICAL **: /tmp/buildd/gtk+2.0-2.24.3/gtk/gtktreeview.c:6072
+    (validate_visible_area): assertion `has_next' failed. There is a disparity between the
+    internal view of the GtkTreeView, and the GtkTreeModel.  This generally means that the
+    model has changed without letting the view know.  Any display from now on is likely to
+    be incorrect.
+    */
 }

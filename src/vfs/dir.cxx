@@ -30,7 +30,8 @@
 
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
-#include "vfs/monitor.hxx"
+#include "vfs/notify-cpp/event.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
 #include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 #include "vfs/volume.hxx"
@@ -51,8 +52,61 @@ vfs::dir::dir(const std::filesystem::path& path,
 {
     // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
 
-    this->monitor_.signal_filesystem_event().connect([this](auto e, auto p)
-                                                     { this->on_monitor_event(e, p); });
+    this->notifier_
+        .watch_directory({path,
+                          {
+                              notify::event::create,
+                              notify::event::moved_to,
+                              notify::event::delete_self,
+                              notify::event::delete_sub,
+                              notify::event::moved_from,
+                              notify::event::umount,
+                              notify::event::modify,
+                              notify::event::attrib,
+                          }})
+        .on_events(
+            {
+                notify::event::create,
+                notify::event::moved_to,
+            },
+            [this](const notify::notification& notification)
+            {
+                // logger::info<logger::vfs>("EVENT(created) {}, {}", notification.event(), notification.path().string());
+
+                this->emit_file_created(notification.path(), false);
+            })
+        .on_events(
+            {
+                notify::event::delete_self,
+                notify::event::delete_sub,
+                notify::event::moved_from,
+                notify::event::umount,
+            },
+            [this](const notify::notification& notification)
+            {
+                // logger::info<logger::vfs>("EVENT(deleted) {}, {}", notification.event(), notification.path().string());
+
+                this->emit_file_deleted(notification.path());
+            })
+        .on_events(
+            {
+                notify::event::modify,
+                notify::event::attrib,
+            },
+            [this](const notify::notification& notification)
+            {
+                // logger::info<logger::vfs>("EVENT(modify) {}, {}", notification.event(), notification.path().string());
+
+                this->emit_file_changed(notification.path(), false);
+            })
+        .on_unexpected_event(
+            [](const notify::notification& notification)
+            {
+                logger::warn<logger::vfs>("BUG unhandled inotify event: {}, {}",
+                                          notification.event(),
+                                          notification.path().string());
+            });
+    this->thread = std::thread([this]() { this->notifier_.run(); });
 
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
                                                           { this->emit_thumbnail_loaded(a); });
@@ -71,6 +125,9 @@ vfs::dir::~dir() noexcept
     this->signal_file_thumbnail_loaded_.clear();
 
     this->executor_result_.get().get();
+
+    this->notifier_.stop();
+    this->thread.join();
 }
 
 std::shared_ptr<vfs::dir>
@@ -314,27 +371,6 @@ vfs::dir::refresh_thread() noexcept
     this->running_refresh_ = false;
 
     co_return true;
-}
-
-/* Callback function which will be called when monitored events happen */
-void
-vfs::dir::on_monitor_event(const vfs::monitor::event event,
-                           const std::filesystem::path& path) noexcept
-{
-    switch (event)
-    {
-        case vfs::monitor::event::created:
-            this->emit_file_created(path, false);
-            break;
-        case vfs::monitor::event::deleted:
-            this->emit_file_deleted(path);
-            break;
-        case vfs::monitor::event::changed:
-            this->emit_file_changed(path, false);
-            break;
-        case vfs::monitor::event::other:
-            break;
-    }
 }
 
 void

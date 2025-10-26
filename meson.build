@@ -455,7 +455,6 @@ vfs_gtk3_sources = files(
     'src/vfs/file-task.cxx',
     'src/vfs/mime-type.cxx',
     'src/vfs/mime-monitor.cxx',
-    'src/vfs/monitor.cxx',
     'src/vfs/terminals.cxx',
     'src/vfs/thumbnailer.cxx',
     'src/vfs/trash-can.cxx',
@@ -502,7 +501,6 @@ vfs_gtk4_sources = files(
     # 'src/vfs/file-task.cxx', # TODO rewrite in vfs/task.cxx
     'src/vfs/mime-type.cxx',
     'src/vfs/mime-monitor.cxx',
-    'src/vfs/monitor.cxx',
     'src/vfs/task.cxx',
     'src/vfs/terminals.cxx',
     'src/vfs/thumbnailer.cxx',

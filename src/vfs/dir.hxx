@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include <glibmm.h>
@@ -31,7 +32,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/monitor.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
 #include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 
@@ -96,9 +97,6 @@ class dir final : public std::enable_shared_from_this<dir>
     concurrencpp::result<bool> load_thread() noexcept;
     concurrencpp::result<bool> refresh_thread() noexcept;
 
-    void on_monitor_event(const vfs::monitor::event event,
-                          const std::filesystem::path& path) noexcept;
-
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
     [[nodiscard]] std::shared_ptr<vfs::file>
@@ -120,7 +118,9 @@ class dir final : public std::enable_shared_from_this<dir>
     std::vector<std::shared_ptr<vfs::file>> files_;
 
     vfs::thumbnailer thumbnailer_;
-    vfs::monitor monitor_{this->path_};
+
+    notify::notify_controller notifier_ = notify::inotify_controller();
+    std::thread thread;
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_;
     std::vector<std::filesystem::path> created_files_;
