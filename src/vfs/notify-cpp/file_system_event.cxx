@@ -27,7 +27,7 @@
 #include "vfs/notify-cpp/file_system_event.hxx"
 
 notify::file_system_event::file_system_event(const std::filesystem::path& path)
-    : event_(notify::event::open), path_(path)
+    : event_(notify::event::all), path_(path)
 {
 }
 
