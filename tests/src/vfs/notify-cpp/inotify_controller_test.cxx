@@ -24,6 +24,7 @@
 #include <chrono>
 #include <filesystem>
 #include <future>
+#include <stdexcept>
 #include <thread>
 
 #define DOCTEST_CONFIG_DOUBLE_STRINGIFY
@@ -45,19 +46,21 @@ using namespace notify;
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotAcceptNotExistingPaths")
 {
     CHECK_THROWS_AS(
-        inotify_controller().watch_path_recursively(std::filesystem::path("/not/existing/path/")),
+        inotify_controller().watch_path_recursively({"/not/existing/path/", event::all}),
         std::invalid_argument);
-    CHECK_THROWS_AS(inotify_controller().watch_file(std::filesystem::path("/not/existing/file")),
+    CHECK_THROWS_AS(inotify_controller().watch_file({"/not/existing/file", event::all}),
                     std::invalid_argument);
 }
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnOpenEvent")
 {
-    notify_controller notifier = inotify_controller()
-                                     .watch_file({test_file_one_, event::close})
-                                     .on_event(event::close,
-                                               [&](const notification& notification)
-                                               { promised_open_.set_value(notification); });
+    notify_controller notifier = inotify_controller();
+    notifier.watch_file({test_file_one_, event::close})
+        .on_event(event::close,
+                  [&](const notification& notification) { promised_open_.set_value(notification); })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread([&notifier]() { notifier.run_once(); });
 
@@ -81,37 +84,14 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
     CHECK((watch_on & event::moved_from) != event::moved_from);
 
     notifier.watch_file({test_file_one_, watch_on})
-        .on_events({event::open, event::close_write},
-                   [&](const notification& notification)
-                   {
-                       switch (notification.event())
-                       {
-                           case event::open:
-                               promised_open_.set_value(notification);
-                               break;
-                           case event::close_write:
-                               promised_close_no_write_.set_value(notification);
-                               break;
-                           case event::access:
-                           case event::modify:
-                           case event::attrib:
-                           case event::close_nowrite:
-                           case event::moved_from:
-                           case event::moved_to:
-                           case event::create:
-                           case event::delete_sub:
-                           case event::delete_self:
-                           case event::move_self:
-                           case event::umount:
-                           case event::queue_overflow:
-                           case event::ignored:
-                           case event::none:
-                           case event::close:
-                           case event::move:
-                           case event::all:
-                               break;
-                       }
-                   });
+        .on_event(event::open,
+                  [&](const notification& notification) { promised_open_.set_value(notification); })
+        .on_event(event::close_write,
+                  [&](const notification& notification)
+                  { promised_close_no_write_.set_value(notification); })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread(
         [&notifier]()
@@ -133,7 +113,8 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRunOnce")
 {
-    notify_controller notifier = inotify_controller().watch_file(test_file_one_);
+    notify_controller notifier = inotify_controller();
+    notifier.watch_file(test_file_one_);
 
     std::jthread thread([&notifier]() { notifier.run_once(); });
 
@@ -158,7 +139,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
 {
     size_t counter = 0;
     inotify_controller notifier = inotify_controller();
-    notifier.watch_file(test_file_one_)
+    notifier.watch_file({test_file_one_, event::open})
         .ignore_once(test_file_one_)
         .on_event(event::open,
                   [&](const notification& notification)
@@ -170,7 +151,10 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
                       {
                           promised_counter_.set_value(counter);
                       }
-                  });
+                  })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread([&notifier]() { notifier.run(); });
 
@@ -187,12 +171,14 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFile")
 {
-    notify_controller notifier = inotify_controller()
-                                     .ignore(test_file_one_)
-                                     .watch_file({test_file_one_, event::close})
-                                     .on_event(event::close,
-                                               [&](const notification& notification)
-                                               { promised_open_.set_value(notification); });
+    notify_controller notifier = inotify_controller();
+    notifier.ignore(test_file_one_)
+        .watch_file({test_file_one_, event::close})
+        .on_event(event::close,
+                  [&](const notification& notification) { promised_open_.set_value(notification); })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread([&notifier]() { notifier.run_once(); });
 
@@ -207,36 +193,12 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFile")
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldWatchPathRecursively")
 {
     inotify_controller notifier = inotify_controller();
-    notifier.watch_path_recursively(test_directory_)
+    notifier.watch_path_recursively({test_directory_, event::open})
         .on_event(event::open,
-                  [&](const notification& notification)
-                  {
-                      switch (notification.event())
-                      {
-                          case event::open:
-                              promised_open_.set_value(notification);
-                              break;
-                          case event::access:
-                          case event::modify:
-                          case event::attrib:
-                          case event::close_write:
-                          case event::close_nowrite:
-                          case event::moved_from:
-                          case event::moved_to:
-                          case event::create:
-                          case event::delete_sub:
-                          case event::delete_self:
-                          case event::move_self:
-                          case event::umount:
-                          case event::queue_overflow:
-                          case event::ignored:
-                          case event::none:
-                          case event::close:
-                          case event::move:
-                          case event::all:
-                              break;
-                      }
-                  });
+                  [&](const notification& notification) { promised_open_.set_value(notification); })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread([&notifier]() { notifier.run_once(); });
 
@@ -266,11 +228,6 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldCallUserDefinedUnexpectedExcepti
 {
     std::promise<void> observer_called;
 
-    notify_controller notifier2 =
-        inotify_controller()
-            .watch_file(test_file_one_)
-            .on_unexpected_event([&](const notification&) { observer_called.set_value(); });
-
     notify_controller notifier = inotify_controller();
     notifier.watch_file(test_file_one_)
         .on_unexpected_event([&](const notification&) { observer_called.set_value(); });
@@ -287,7 +244,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "countEvents")
 {
     size_t counter = 0;
     inotify_controller notifier = inotify_controller();
-    notifier.watch_file(test_file_one_)
+    notifier.watch_file({test_file_one_, event::open})
         .on_event(event::open,
                   [&](const notification& notification)
                   {
@@ -298,7 +255,10 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "countEvents")
                       {
                           promised_counter_.set_value(counter);
                       }
-                  });
+                  })
+        .on_unexpected_event(
+            [](const notification& notification)
+            { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread([&notifier]() { notifier.run(); });
 
