@@ -110,16 +110,12 @@ notify::notify_base::check_watch_directory(const file_system_event& fse) const
 void
 notify::notify_base::watch_path_recursively(const file_system_event& fse)
 {
-    if (!this->check_watch_directory(fse))
-    {
-        return;
-    }
-
+    this->watch_directory(fse);
     for (const auto& p : std::filesystem::recursive_directory_iterator(fse.path()))
     {
-        if (this->check_watch_file({p, fse.event()}))
+        if (p.is_directory())
         {
-            this->watch_file({p, fse.event()});
+            this->watch_directory({p, fse.event()});
         }
     }
 }
