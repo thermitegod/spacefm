@@ -39,7 +39,6 @@
 
 #include "vfs/utils/file-ops.hxx"
 
-#include "concurrency.hxx"
 #include "logger.hxx"
 
 namespace global
@@ -121,7 +120,10 @@ vfs::dir::~dir() noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), this->path_.string());
 
-    this->shutdown_ = true;
+    {
+        std::lock_guard<std::mutex> lock(this->loader_mutex_);
+        this->shutdown_ = true;
+    }
 
     this->signal_file_created_.clear();
     this->signal_file_changed_.clear();
@@ -129,13 +131,13 @@ vfs::dir::~dir() noexcept
     this->signal_file_listed_.clear();
     this->signal_file_thumbnail_loaded_.clear();
 
-    this->executor_result_.get().get();
-
     this->thumbnailer_.stop();
     this->thumbnailer_thread_.join();
 
     this->notifier_.stop();
     this->notifier_thread_.join();
+
+    this->loader_thread_.join();
 }
 
 std::shared_ptr<vfs::dir>
@@ -168,8 +170,8 @@ vfs::dir::post_initialize() noexcept
 
     this->update_avoid_changes();
 
-    this->executor_ = global::runtime.thread_executor();
-    this->executor_result_ = this->executor_->submit([this] { return this->load_thread(); });
+    this->loader_thread_ = std::jthread([this]() { this->load_thread(); });
+    pthread_setname_np(this->loader_thread_.native_handle(), "loader");
 }
 
 const std::filesystem::path&
@@ -260,12 +262,12 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
     return false;
 }
 
-concurrencpp::result<bool>
+void
 vfs::dir::load_thread() noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), this->path_.string());
 
-    auto guard = co_await this->lock_.lock(this->executor_);
+    std::unique_lock<std::mutex> lock(this->loader_mutex_);
 
     this->load_complete_ = false;
     this->xhidden_count_ = 0;
@@ -280,7 +282,7 @@ vfs::dir::load_thread() noexcept
         {
             if (this->shutdown_)
             {
-                co_return true;
+                return;
             }
 
             if (this->is_file_user_hidden(dfile.path()))
@@ -297,8 +299,6 @@ vfs::dir::load_thread() noexcept
 
     this->load_complete_ = true;
     this->load_complete_initial_ = true;
-
-    co_return true;
 }
 
 void
@@ -307,14 +307,15 @@ vfs::dir::refresh() noexcept
     if (this->load_complete_initial_ && !this->running_refresh_)
     {
         // Only allow a refresh if the inital load has been completed.
-        this->executor_result_ = this->executor_->submit([this] { return this->refresh_thread(); });
+        this->loader_thread_ = std::jthread([this]() { this->refresh_thread(); });
+        pthread_setname_np(this->loader_thread_.native_handle(), "loader");
     }
 }
 
-concurrencpp::result<bool>
+void
 vfs::dir::refresh_thread() noexcept
 {
-    auto guard = co_await this->lock_.lock(this->executor_);
+    std::unique_lock<std::mutex> lock(this->loader_mutex_);
 
     this->load_complete_ = false;
     this->running_refresh_ = true;
@@ -377,8 +378,6 @@ vfs::dir::refresh_thread() noexcept
 
     this->load_complete_ = true;
     this->running_refresh_ = false;
-
-    co_return true;
 }
 
 void

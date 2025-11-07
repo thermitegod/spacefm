@@ -36,8 +36,6 @@
 #include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 
-#include "concurrency.hxx"
-
 namespace vfs
 {
 class dir final : public std::enable_shared_from_this<dir>
@@ -69,9 +67,7 @@ class dir final : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool avoid_changes() const noexcept;
     void update_avoid_changes() noexcept;
 
-    // The dir has finished loading
     [[nodiscard]] bool is_loaded() const noexcept;
-    // The dir is still loading
     [[nodiscard]] bool is_loading() const noexcept;
 
     [[nodiscard]] bool is_directory_empty() const noexcept;
@@ -94,8 +90,8 @@ class dir final : public std::enable_shared_from_this<dir>
     // this is because this* only becomes a valid pointer after the constructor has finished.
     void post_initialize() noexcept;
 
-    concurrencpp::result<bool> load_thread() noexcept;
-    concurrencpp::result<bool> refresh_thread() noexcept;
+    void load_thread() noexcept;
+    void refresh_thread() noexcept;
 
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
@@ -116,6 +112,9 @@ class dir final : public std::enable_shared_from_this<dir>
 
     std::filesystem::path path_;
     std::vector<std::shared_ptr<vfs::file>> files_;
+
+    std::mutex loader_mutex_;
+    std::jthread loader_thread_;
 
     vfs::thumbnailer thumbnailer_;
     std::jthread thumbnailer_thread_;
@@ -142,11 +141,6 @@ class dir final : public std::enable_shared_from_this<dir>
     std::mutex files_lock_;
     std::mutex changed_files_lock_;
     std::mutex created_files_lock_;
-
-    // Concurrency
-    std::shared_ptr<concurrencpp::thread_executor> executor_;
-    concurrencpp::result<concurrencpp::result<bool>> executor_result_;
-    concurrencpp::async_lock lock_;
 
     std::shared_ptr<vfs::settings> settings_;
 
