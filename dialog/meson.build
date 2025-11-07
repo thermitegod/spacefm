@@ -242,8 +242,6 @@ sources_properties = files(
     'properties/main.cxx',
     'properties/properties.cxx',
 
-    'properties/concurrency.cxx',
-
     'properties/media/audio-video-metadata.cxx',
     'properties/media/image-metadata.cxx',
 )

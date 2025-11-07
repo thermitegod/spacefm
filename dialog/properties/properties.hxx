@@ -15,15 +15,16 @@
 
 #pragma once
 
+#include <condition_variable>
 #include <filesystem>
+#include <mutex>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 #include <gtkmm.h>
 
 #include "vfs/file.hxx"
-
-#include "concurrency.hxx"
 
 class PropertiesDialog : public Gtk::ApplicationWindow
 {
@@ -47,7 +48,7 @@ class PropertiesDialog : public Gtk::ApplicationWindow
 
   private:
     void calc_total_size_of_files(const std::filesystem::path& path) noexcept;
-    concurrencpp::result<void> calc_size() noexcept;
+    void calc_size() noexcept;
     void on_update_labels() noexcept;
 
     void init_file_info_tab() noexcept;
@@ -63,10 +64,8 @@ class PropertiesDialog : public Gtk::ApplicationWindow
     u64 total_count_file_{0};
     u64 total_count_dir_{0};
 
-    // Concurrency
-    std::shared_ptr<concurrencpp::thread_executor> executor_;
-    concurrencpp::result<concurrencpp::result<void>> executor_result_;
-    concurrencpp::async_condition_variable condition_;
-    concurrencpp::async_lock lock_;
-    bool abort_{false};
+    std::jthread thread_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    bool abort_ = false;
 };

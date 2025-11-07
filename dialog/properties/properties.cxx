@@ -130,8 +130,6 @@ class PropertiesPage : public Gtk::Box
 
 PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 {
-    this->executor_ = global::runtime.thread_executor();
-
     const auto data = glz::read_json<datatype::properties::request>(json_data);
     if (!data)
     {
@@ -202,10 +200,11 @@ void
 PropertiesDialog::on_button_close_clicked()
 {
     {
-        auto guard = this->lock_.lock(this->executor_);
+        std::lock_guard<std::mutex> lock(this->mutex_);
         this->abort_ = true;
     }
-    this->condition_.notify_all();
+
+    this->thread_.join();
 
     this->close();
 }
@@ -260,12 +259,12 @@ PropertiesDialog::calc_total_size_of_files(const std::filesystem::path& path) no
     }
 }
 
-concurrencpp::result<void>
+void
 PropertiesDialog::calc_size() noexcept
 {
     for (const auto& file : this->file_list_)
     {
-        auto guard = co_await this->lock_.lock(this->executor_);
+        std::unique_lock<std::mutex> lock(this->mutex_);
 
         if (this->abort_)
         {
@@ -285,8 +284,6 @@ PropertiesDialog::calc_size() noexcept
 
         on_update_labels();
     }
-
-    co_return;
 }
 
 void
@@ -425,7 +422,7 @@ PropertiesDialog::init_file_info_tab() noexcept
     }
     if (need_calc_size)
     {
-        this->executor_result_ = this->executor_->submit([this] { return this->calc_size(); });
+        this->thread_ = std::jthread([this]() { this->calc_size(); });
     }
 
     if (multiple_files)
