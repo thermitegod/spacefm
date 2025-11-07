@@ -16,81 +16,81 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <memory>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "vfs/thumbnailer.hxx"
 
-#include "concurrency.hxx"
-
-vfs::thumbnailer::thumbnailer() noexcept
+void
+vfs::thumbnailer::request(const request_data& request) noexcept
 {
-    // logger::debug<logger::vfs>("vfs::thumbnailer::thumbnailer({})", logger::utils::ptr(this));
-    this->executor_ = global::runtime.thread_executor();
-    this->executor_result_ = this->executor_->submit([this] { return this->thumbnailer_thread(); });
-}
-
-vfs::thumbnailer::~thumbnailer() noexcept
-{
-    // logger::debug<logger::vfs>("vfs::thumbnailer::~thumbnailer({})", logger::utils::ptr(this));
     {
-        auto guard = this->lock_.lock(this->executor_);
-        this->abort_ = true;
-    }
-    this->condition_.notify_all();
-
-    this->executor_result_.get().get();
-}
-
-concurrencpp::result<void>
-vfs::thumbnailer::request(vfs::thumbnailer::request_data request) noexcept
-{
-    // logger::debug<logger::vfs>("vfs::thumbnailer::request({})    {}", logger::utils::ptr(this), request.file->name());
-    {
-        auto guard = co_await this->lock_.lock(this->executor_);
+        std::lock_guard<std::mutex> lock(this->mutex_);
         this->queue_.push(request);
     }
-    this->condition_.notify_one();
+    this->cv_.notify_one();
 }
 
-concurrencpp::result<bool>
-vfs::thumbnailer::thumbnailer_thread() noexcept
+void
+vfs::thumbnailer::run() noexcept
 {
-    while (true)
+    while (!this->is_stopped())
     {
-        auto guard = co_await this->lock_.lock(this->executor_);
-        co_await this->condition_.await(this->executor_,
-                                        guard,
-                                        [this] { return this->abort_ || !this->queue_.empty(); });
+        this->run_once();
+    }
+}
 
-        if (this->abort_)
+void
+vfs::thumbnailer::run_once() noexcept
+{
+    request_data request;
+    {
+        std::unique_lock<std::mutex> lock(this->mutex_);
+        this->cv_.wait(lock, [this] { return this->is_stopped() || !this->queue_.empty(); });
+
+        if (this->is_stopped() && this->queue_.empty())
         {
-            break;
+            return;
         }
 
-        const auto request = this->queue_.front();
-        this->queue_.pop();
-
-        if (!request.file->is_thumbnail_loaded(request.size))
+        if (!this->queue_.empty())
         {
-            request.file->load_thumbnail(request.size);
-            // Slow down for debugging.
-            // logger::debug<logger::vfs>("thumbnail loaded: {}", request.file->name());
-            // std::this_thread::sleep_for(std::chrono::seconds(1));
+            request = this->queue_.front();
+            this->queue_.pop();
         }
-
-        if (this->abort_)
-        {
-            // since thumbnail generation can take an indeterminate amount of time there
-            // needs to be another abort check before calling the callback.
-            break;
-        }
-
-        this->signal_thumbnail_created_.emit(request.file);
     }
 
-    co_return true;
+    if (!request.file->is_thumbnail_loaded(request.size))
+    {
+        request.file->load_thumbnail(request.size);
+        // Slow down for debugging.
+        // logger::debug<logger::vfs>("thumbnail loaded: {}", request.file->name());
+        // std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    if (this->is_stopped())
+    {
+        // since thumbnail generation can take an indeterminate amount of time there
+        // needs to be another abort check before calling the callback.
+        return;
+    }
+
+    this->signal_thumbnail_created().emit(request.file);
+}
+
+void
+vfs::thumbnailer::stop() noexcept
+{
+    {
+        std::lock_guard<std::mutex> lock(this->mutex_);
+        this->stopped_ = true;
+    }
+    this->cv_.notify_all();
+}
+
+bool
+vfs::thumbnailer::is_stopped() const noexcept
+{
+    return this->stopped_;
 }

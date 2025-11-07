@@ -17,11 +17,12 @@
 #include <chrono>
 #include <filesystem>
 #include <format>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <vector>
+
+#include <pthread.h>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -111,6 +112,9 @@ vfs::dir::dir(const std::filesystem::path& path,
 
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
                                                           { this->emit_thumbnail_loaded(a); });
+
+    this->thumbnailer_thread_ = std::jthread([this]() { this->thumbnailer_.run(); });
+    pthread_setname_np(this->thumbnailer_thread_.native_handle(), "thumbnailer");
 }
 
 vfs::dir::~dir() noexcept
@@ -126,6 +130,9 @@ vfs::dir::~dir() noexcept
     this->signal_file_thumbnail_loaded_.clear();
 
     this->executor_result_.get().get();
+
+    this->thumbnailer_.stop();
+    this->thumbnailer_thread_.join();
 
     this->notifier_.stop();
     this->notifier_thread_.join();
