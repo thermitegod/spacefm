@@ -41,13 +41,6 @@ option(
 )
 
 option(
-    'with-system-concurrencpp',
-    type : 'boolean',
-    value: false,
-    description : 'Use system concurrencpp instead of bundled version'
-)
-
-option(
     'with-system-glaze',
     type : 'boolean',
     value: false,

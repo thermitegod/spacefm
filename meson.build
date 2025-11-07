@@ -313,16 +313,6 @@ if get_option('exo')
     features += '-DUSE_EXO'
 endif
 
-if get_option('with-system-concurrencpp')
-    concurrencpp_dep = dependency('concurrencpp', required: true)
-    base_dependencies += concurrencpp_dep
-else
-    cmake = import('cmake')
-    concurrencpp_proj = cmake.subproject('concurrencpp', required: true)
-    concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
-    base_dependencies += concurrencpp_dep
-endif
-
 if get_option('with-system-glaze')
     glaze_dep = dependency('glaze', required: true)
     base_dependencies += glaze_dep
@@ -535,7 +525,6 @@ vfs_gtk4_dependencies = [
     gtk4_dependencies,
 
     logger_dep,
-    concurrencpp_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
@@ -561,7 +550,6 @@ vfs_gtk3_dependencies = [
     gtk3_dependencies,
 
     logger_dep,
-    concurrencpp_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
@@ -586,7 +574,6 @@ vfs_gtk3_dep = declare_dependency(
 
 sources += files(
     'src/autosave.cxx',
-    'src/concurrency.cxx',
     'src/main.cxx',
     'src/settings.cxx',
     'src/single-instance.cxx',

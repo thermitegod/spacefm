@@ -81,11 +81,4 @@ class AppChooserDialog : public Gtk::ApplicationWindow
 
   private:
     std::shared_ptr<vfs::mime_type> type_;
-
-    // Concurrency
-    // std::shared_ptr<concurrencpp::thread_executor> executor_;
-    // concurrencpp::result<concurrencpp::result<void>> executor_result_;
-    // concurrencpp::async_condition_variable condition_;
-    // concurrencpp::async_lock lock_;
-    // bool abort_{false};
 };
