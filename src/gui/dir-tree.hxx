@@ -80,7 +80,7 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         gui::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
         notify::notify_controller notifier = notify::inotify_controller();
-        std::thread notifier_thread;
+        std::jthread notifier_thread;
 
         std::shared_ptr<node> get_nth_node(std::int32_t n) const noexcept;
         std::shared_ptr<node> find_node(const std::string_view name) const noexcept;

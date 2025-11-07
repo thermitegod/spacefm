@@ -120,7 +120,7 @@ class dir final : public std::enable_shared_from_this<dir>
     vfs::thumbnailer thumbnailer_;
 
     notify::notify_controller notifier_ = notify::inotify_controller();
-    std::thread thread;
+    std::jthread notifier_thread_;
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_;
     std::vector<std::filesystem::path> created_files_;

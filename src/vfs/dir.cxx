@@ -106,7 +106,8 @@ vfs::dir::dir(const std::filesystem::path& path,
                                           notification.event(),
                                           notification.path().string());
             });
-    this->thread = std::thread([this]() { this->notifier_.run(); });
+    this->notifier_thread_ = std::jthread([this]() { this->notifier_.run(); });
+    pthread_setname_np(this->notifier_thread_.native_handle(), "notifier");
 
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
                                                           { this->emit_thumbnail_loaded(a); });
@@ -127,7 +128,7 @@ vfs::dir::~dir() noexcept
     this->executor_result_.get().get();
 
     this->notifier_.stop();
-    this->thread.join();
+    this->notifier_thread_.join();
 }
 
 std::shared_ptr<vfs::dir>
