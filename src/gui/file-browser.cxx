@@ -929,24 +929,6 @@ gui::browser::update_tab_label() noexcept
     }
 }
 
-void
-gui::browser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file) noexcept
-{
-    if (file == nullptr)
-    {
-        // The current directory itself changed
-        if (!std::filesystem::is_directory(this->cwd()))
-        {
-            // current directory does not exist - was renamed
-            this->close_tab();
-        }
-    }
-    else
-    {
-        this->signal_change_content_.emit(this);
-    }
-}
-
 static void
 on_sort_col_changed(GtkTreeSortable* sortable, gui::browser* browser) noexcept
 {
@@ -1054,19 +1036,22 @@ gui::browser::on_dir_file_listed() noexcept
     this->signal_file_created_.disconnect();
     this->signal_file_changed_.disconnect();
     this->signal_file_deleted_.disconnect();
+    this->signal_directory_deleted_.disconnect();
 
     this->signal_file_created_ = this->dir_->signal_file_created().connect(
-        [this](auto a) { this->on_folder_content_changed(a); });
+        [this](const auto&) { this->signal_change_content().emit(this); });
     this->signal_file_changed_ = this->dir_->signal_file_changed().connect(
-        [this](auto a) { this->on_folder_content_changed(a); });
+        [this](const auto&) { this->signal_change_content().emit(this); });
     this->signal_file_deleted_ = this->dir_->signal_file_deleted().connect(
-        [this](auto a) { this->on_folder_content_changed(a); });
+        [this](const auto&) { this->signal_change_content().emit(this); });
+    this->signal_directory_deleted_ =
+        this->dir_->signal_directory_deleted().connect([this]() { this->close_tab(); });
 
     this->update_model();
 
-    this->signal_chdir_after_.emit(this);
-    this->signal_change_content_.emit(this);
-    this->signal_change_selection_.emit(this);
+    this->signal_chdir_after().emit(this);
+    this->signal_change_content().emit(this);
+    this->signal_change_selection().emit(this);
 
     if (this->side_dir)
     {
@@ -3082,9 +3067,7 @@ gui::browser::close_tab() noexcept
     this->slider_release(nullptr);
     this->save_column_widths();
 
-    // remove page can also be used to destroy - same result
-    // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
-    gtk_widget_destroy(GTK_WIDGET(this));
+    gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(main_window->notebook));
 
     if (!this->settings_->always_show_tabs)
     {
@@ -3095,31 +3078,27 @@ gui::browser::close_tab() noexcept
     }
 
     if (gtk_notebook_get_n_pages(notebook) == 0)
-    {
+    { // all tabs closed, open new tab
         main_window->new_tab(vfs::user::home());
-        gui::browser* a_browser =
+        gui::browser* browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, 0));
-        a_browser->update_views();
-        main_window->set_window_title(a_browser);
-        if (xset_get_b(xset::name::main_save_tabs))
-        {
-            autosave::request_add();
-        }
-        return;
+        browser->update_views();
+        main_window->set_window_title(browser);
     }
-
-    // update view of new current tab
-    const auto cur_tabx = gtk_notebook_get_current_page(main_window->notebook);
-    if (cur_tabx != -1)
+    else
     {
-        gui::browser* a_browser =
-            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
-        a_browser->update_views();
-        a_browser->update_statusbar();
-        // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
+        // update view of new current tab
+        const auto cur_tabx = gtk_notebook_get_current_page(main_window->notebook);
+        if (cur_tabx != -1)
+        {
+            gui::browser* browser =
+                PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
+            browser->update_views();
+            browser->update_statusbar();
+            main_window->set_window_title(browser);
+        }
     }
 
-    main_window->set_window_title(this);
     if (xset_get_b(xset::name::main_save_tabs))
     {
         autosave::request_add();

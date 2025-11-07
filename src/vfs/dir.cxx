@@ -77,10 +77,8 @@ vfs::dir::dir(const std::filesystem::path& path,
             })
         .on_events(
             {
-                notify::event::delete_self,
                 notify::event::delete_sub,
                 notify::event::moved_from,
-                notify::event::umount,
             },
             [this](const notify::notification& notification)
             {
@@ -99,6 +97,18 @@ vfs::dir::dir(const std::filesystem::path& path,
 
                 this->emit_file_changed(notification.path(), false);
             })
+        .on_events(
+            {
+                notify::event::delete_self,
+                notify::event::umount,
+            },
+            [this](const notify::notification&)
+            {
+                // logger::info<logger::vfs>("EVENT(self delete) {}, {}", notification.event(), notification.path().string());
+
+                this->signal_directory_deleted().emit();
+            })
+        .on_event(notify::event::ignored, [](const notify::notification&) { /* NOOP */ })
         .on_unexpected_event(
             [](const notify::notification& notification)
             {
@@ -125,11 +135,12 @@ vfs::dir::~dir() noexcept
         this->shutdown_ = true;
     }
 
-    this->signal_file_created_.clear();
-    this->signal_file_changed_.clear();
-    this->signal_file_deleted_.clear();
-    this->signal_file_listed_.clear();
-    this->signal_file_thumbnail_loaded_.clear();
+    this->signal_file_created().clear();
+    this->signal_file_changed().clear();
+    this->signal_file_deleted().clear();
+    this->signal_file_listed().clear();
+    this->signal_thumbnail_loaded().clear();
+    this->signal_directory_deleted().clear();
 
     this->thumbnailer_.stop();
     this->thumbnailer_thread_.join();
@@ -295,7 +306,7 @@ vfs::dir::load_thread() noexcept
         }
     }
 
-    this->signal_file_listed_.emit();
+    this->signal_file_listed().emit();
 
     this->load_complete_ = true;
     this->load_complete_initial_ = true;
@@ -459,7 +470,7 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
                                this->files_.end());
             if (file)
             {
-                this->signal_file_deleted_.emit(file);
+                this->signal_file_deleted().emit(file);
             }
         }
     }
@@ -500,7 +511,7 @@ vfs::dir::update_changed_files() noexcept
     {
         if (this->update_file_info(file))
         {
-            this->signal_file_changed_.emit(file);
+            this->signal_file_changed().emit(file);
         }
         // else was deleted, signaled, and unrefed in update_file_info
     }
@@ -537,7 +548,7 @@ vfs::dir::update_created_files() noexcept
                 const auto file = vfs::file::create(full_path, this->settings_);
                 this->files_.push_back(file);
 
-                this->signal_file_created_.emit(file);
+                this->signal_file_created().emit(file);
             }
             // else file does not exist in filesystem
         }
@@ -546,7 +557,7 @@ vfs::dir::update_created_files() noexcept
             // file already exists in dir this->files_
             if (this->update_file_info(file_found))
             {
-                this->signal_file_changed_.emit(file_found);
+                this->signal_file_changed().emit(file_found);
             }
             // else was deleted, signaled, and unrefed in update_file_info
         }
@@ -600,19 +611,6 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
         return;
     }
 
-    if (path.filename() == this->path_.filename() && !std::filesystem::exists(this->path_))
-    {
-        /* Special Case: The directory itself was deleted... */
-        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
-
-        /* clear the whole list */
-        this->files_.clear();
-
-        this->signal_file_deleted_.emit(nullptr);
-
-        return;
-    }
-
     const auto file_found = this->find_file(path.filename());
     if (file_found)
     {
@@ -645,7 +643,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
     if (path == this->path_)
     {
         // Special Case: The directory itself was changed
-        this->signal_file_changed_.emit(nullptr);
+        this->signal_file_changed().emit(nullptr);
         return;
     }
 
@@ -668,7 +666,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 
                 this->notify_file_change(std::chrono::milliseconds(500));
 
-                this->signal_file_changed_.emit(file_found);
+                this->signal_file_changed().emit(file_found);
             }
         }
     }
@@ -686,6 +684,6 @@ vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 
     if (std::ranges::contains(this->files_, file))
     {
-        this->signal_file_thumbnail_loaded_.emit(file);
+        this->signal_thumbnail_loaded().emit(file);
     }
 }

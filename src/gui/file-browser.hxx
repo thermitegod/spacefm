@@ -298,7 +298,6 @@ struct browser
 
   public:
     // signal
-    void on_folder_content_changed(const std::shared_ptr<vfs::file>& file) noexcept;
     void on_dir_file_listed() noexcept;
 
     // Signals
@@ -360,6 +359,7 @@ struct browser
     // Signals we connect to
     sigc::connection signal_file_created_;
     sigc::connection signal_file_deleted_;
+    sigc::connection signal_directory_deleted_;
     sigc::connection signal_file_changed_;
     sigc::connection signal_file_listed_;
 };

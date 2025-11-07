@@ -148,33 +148,42 @@ class dir final : public std::enable_shared_from_this<dir>
     // Signals
 
     [[nodiscard]] auto
-    signal_file_changed()
+    signal_file_changed() noexcept
     {
         return this->signal_file_changed_;
     }
 
     [[nodiscard]] auto
-    signal_file_created()
+    signal_file_created() noexcept
     {
         return this->signal_file_created_;
     }
 
     [[nodiscard]] auto
-    signal_file_deleted()
+    signal_file_deleted() noexcept
     {
         return this->signal_file_deleted_;
     }
 
     [[nodiscard]] auto
-    signal_file_listed()
+    signal_file_listed() noexcept
     {
         return this->signal_file_listed_;
     }
 
     [[nodiscard]] auto
-    signal_thumbnail_loaded()
+    signal_thumbnail_loaded() noexcept
     {
         return this->signal_file_thumbnail_loaded_;
+    }
+
+    /**
+     * The directory this vfs::dir was created for has been deleted
+     */
+    [[nodiscard]] auto
+    signal_directory_deleted() noexcept
+    {
+        return this->signal_directory_deleted_;
     }
 
   private:
@@ -184,5 +193,6 @@ class dir final : public std::enable_shared_from_this<dir>
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_deleted_;
     sigc::signal<void()> signal_file_listed_;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
+    sigc::signal<void()> signal_directory_deleted_;
 };
 } // namespace vfs

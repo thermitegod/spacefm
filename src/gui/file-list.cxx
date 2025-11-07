@@ -740,6 +740,7 @@ gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
     if (this->dir)
     {
         g_list_free(this->files);
+        this->files = nullptr;
 
         this->signal_file_changed.disconnect();
         this->signal_file_created.disconnect();
@@ -747,12 +748,13 @@ gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
         this->signal_file_thumbnail_loaded.disconnect();
     }
 
-    this->dir = new_dir;
-    this->files = nullptr;
     if (!new_dir)
     {
         return;
     }
+
+    this->dir = new_dir;
+    this->files = nullptr;
 
     this->signal_file_changed = this->dir->signal_file_changed().connect(
         [this](auto f) { this->on_file_list_file_changed(f); });
