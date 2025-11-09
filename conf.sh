@@ -7,7 +7,6 @@ CC=clang CXX=clang++ meson setup \
     -Dtests=true \
     -Ddev=true \
     -Dtools=true \
-    -Dwith-system-cli11=true \
     -Dwith-system-concurrencpp=true \
     -Dwith-system-glaze=true \
     -Dwith-system-magic-enum=true \

@@ -1,9 +1,6 @@
 [submodule "subprojects/ztd"]
 	path = subprojects/ztd
 	url = https://github.com/thermitegod/ztd.git
-[submodule "subprojects/CLI11"]
-	path = subprojects/CLI11
-	url = https://github.com/CLIUtils/CLI11
 [submodule "subprojects/magic_enum"]
 	path = subprojects/magic_enum
 	url = https://github.com/Neargye/magic_enum

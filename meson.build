@@ -212,6 +212,8 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 ## system dependencies
 
+cli11_dep = dependency('CLI11', required: true)
+
 libudev_dep = dependency('libudev', required: true)
 botan_dep = dependency('botan-3', required: true)
 
@@ -246,6 +248,7 @@ gtk4_dependencies = [
 ]
 
 base_dependencies = [
+    cli11_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
@@ -308,15 +311,6 @@ if get_option('exo')
     exo_dep = dependency('exo-2', required: true)
     gtk3_dependencies += exo_dep
     features += '-DUSE_EXO'
-endif
-
-if get_option('with-system-cli11')
-    cli11_dep = dependency('CLI11', required: true)
-    base_dependencies += cli11_dep
-else
-    cli11_dep_proj = subproject('CLI11', required: true)
-    cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
-    base_dependencies += cli11_dep
 endif
 
 if get_option('with-system-concurrencpp')
