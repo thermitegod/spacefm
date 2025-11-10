@@ -585,11 +585,6 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
         return;
     }
 
-    if (path == this->path_)
-    { // Special Case: The directory itself was created?
-        return;
-    }
-
     const std::scoped_lock<std::mutex> created_files_lock(this->created_files_lock_);
 
     this->created_files_.push_back(path.filename());
