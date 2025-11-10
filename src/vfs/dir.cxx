@@ -73,7 +73,7 @@ vfs::dir::dir(const std::filesystem::path& path,
             {
                 // logger::info<logger::vfs>("EVENT(created) {}, {}", notification.event(), notification.path().string());
 
-                this->emit_file_created(notification.path(), false);
+                this->on_file_created(notification.path());
             })
         .on_events(
             {
@@ -84,7 +84,7 @@ vfs::dir::dir(const std::filesystem::path& path,
             {
                 // logger::info<logger::vfs>("EVENT(deleted) {}, {}", notification.event(), notification.path().string());
 
-                this->emit_file_deleted(notification.path());
+                this->on_file_deleted(notification.path());
             })
         .on_events(
             {
@@ -95,7 +95,7 @@ vfs::dir::dir(const std::filesystem::path& path,
             {
                 // logger::info<logger::vfs>("EVENT(modify) {}, {}", notification.event(), notification.path().string());
 
-                this->emit_file_changed(notification.path(), false);
+                this->on_file_changed(notification.path());
             })
         .on_events(
             {
@@ -120,7 +120,7 @@ vfs::dir::dir(const std::filesystem::path& path,
     pthread_setname_np(this->notifier_thread_.native_handle(), "notifier");
 
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
-                                                          { this->emit_thumbnail_loaded(a); });
+                                                          { this->on_thumbnail_loaded(a); });
 
     this->thumbnailer_thread_ = std::jthread([this]() { this->thumbnailer_.run(); });
     pthread_setname_np(this->thumbnailer_thread_.native_handle(), "thumbnailer");
@@ -353,7 +353,7 @@ vfs::dir::refresh_thread() noexcept
         const auto filename = dfile.path().filename();
         if (this->find_file(filename) == nullptr)
         {
-            this->emit_file_created(filename, false);
+            this->on_file_created(filename);
         }
     }
 
@@ -368,7 +368,7 @@ vfs::dir::refresh_thread() noexcept
         if (this->is_file_user_hidden(file->path()))
         {
             // Use the delete signal to properly remove this file from the file list.
-            this->emit_file_deleted(file->name());
+            this->on_file_deleted(file->name());
 
             this->xhidden_count_ += 1;
             continue;
@@ -578,15 +578,9 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 
 /* signal handlers */
 void
-vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexcept
+vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
 {
-    if (this->shutdown_)
-    {
-        return;
-    }
-
-    // Ignore avoid_changes for creation of files
-    if (!force && this->avoid_changes_)
+    if (this->shutdown_ || this->avoid_changes_)
     {
         return;
     }
@@ -604,7 +598,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexc
 }
 
 void
-vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
+vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
 {
     if (this->shutdown_)
     {
@@ -626,16 +620,11 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 }
 
 void
-vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexcept
+vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
 {
-    // logger::info<logger::vfs>("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
+    // logger::info<logger::vfs>("vfs::dir::on_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
 
-    if (this->shutdown_)
-    {
-        return;
-    }
-
-    if (!force && this->avoid_changes_)
+    if (this->shutdown_ || this->avoid_changes_)
     {
         return;
     }
@@ -654,13 +643,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 
         if (!std::ranges::contains(this->changed_files_, file_found))
         {
-            if (force)
-            {
-                this->changed_files_.push_back(file_found);
-
-                this->notify_file_change(std::chrono::milliseconds(100));
-            }
-            else if (this->update_file_info(file_found)) // update file info the first time
+            if (this->update_file_info(file_found)) // update file info the first time
             {
                 this->changed_files_.push_back(file_found);
 
@@ -673,7 +656,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 }
 
 void
-vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
+vfs::dir::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (this->shutdown_)
     {

@@ -79,12 +79,6 @@ class dir final : public std::enable_shared_from_this<dir>
     void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     void enable_thumbnails(const bool enabled) noexcept;
 
-    /* emit signals */
-    void emit_file_created(const std::filesystem::path& path, bool force) noexcept;
-    void emit_file_deleted(const std::filesystem::path& path) noexcept;
-    void emit_file_changed(const std::filesystem::path& path, bool force) noexcept;
-    void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
-
   private:
     // this function is to be called right after a vfs::dir is created in ::create().
     // this is because this* only becomes a valid pointer after the constructor has finished.
@@ -92,8 +86,6 @@ class dir final : public std::enable_shared_from_this<dir>
 
     void load_thread() noexcept;
     void refresh_thread() noexcept;
-
-    void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
     [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
@@ -103,6 +95,15 @@ class dir final : public std::enable_shared_from_this<dir>
     void load_user_hidden_files() noexcept;
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
+
+    // handle file events
+    void on_file_created(const std::filesystem::path& path) noexcept;
+    void on_file_deleted(const std::filesystem::path& path) noexcept;
+    void on_file_changed(const std::filesystem::path& path) noexcept;
+    void on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
+
+    // batch handling for file events
+    void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
     // file change notify
     void update_created_files() noexcept;

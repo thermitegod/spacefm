@@ -2748,8 +2748,6 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
         // select file
         if (std::filesystem::equivalent(cwd, ao->browser->cwd()))
         {
-            const auto file = vfs::file::create(ao->path);
-            ao->browser->dir_->emit_file_created(file->name(), true);
             ao->browser->select_file(ao->path);
         }
 
