@@ -624,10 +624,10 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
         return;
     }
 
-    if (path == this->path_)
+    if (this->path_ == path)
     {
         // Special Case: The directory itself was changed
-        this->signal_file_changed().emit(nullptr);
+        // this->signal_file_changed().emit(nullptr);
         return;
     }
 
