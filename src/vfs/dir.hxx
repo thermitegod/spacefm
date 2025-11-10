@@ -80,10 +80,6 @@ class dir final : public std::enable_shared_from_this<dir>
     void enable_thumbnails(const bool enabled) noexcept;
 
   private:
-    // this function is to be called right after a vfs::dir is created in ::create().
-    // this is because this* only becomes a valid pointer after the constructor has finished.
-    void post_initialize() noexcept;
-
     void load_thread() noexcept;
     void refresh_thread() noexcept;
 

@@ -124,6 +124,11 @@ vfs::dir::dir(const std::filesystem::path& path,
 
     this->thumbnailer_thread_ = std::jthread([this]() { this->thumbnailer_.run(); });
     pthread_setname_np(this->thumbnailer_thread_.native_handle(), "thumbnailer");
+
+    this->update_avoid_changes();
+
+    this->loader_thread_ = std::jthread([this]() { this->load_thread(); });
+    pthread_setname_np(this->loader_thread_.native_handle(), "loader");
 }
 
 vfs::dir::~dir() noexcept
@@ -168,21 +173,9 @@ vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::s
             [&path, &settings]() { return std::make_shared<vfs::dir>(path, settings); },
             permanent);
         // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());
-        dir->post_initialize();
     }
     // logger::debug<logger::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path.string());
     return dir;
-}
-
-void
-vfs::dir::post_initialize() noexcept
-{
-    // logger::debug<logger::vfs>("vfs::dir::post_initialize({})     {}", logger::utils::ptr(this), this->path_.string());
-
-    this->update_avoid_changes();
-
-    this->loader_thread_ = std::jthread([this]() { this->load_thread(); });
-    pthread_setname_np(this->loader_thread_.native_handle(), "loader");
 }
 
 const std::filesystem::path&
