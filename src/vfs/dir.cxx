@@ -385,8 +385,8 @@ vfs::dir::refresh_thread() noexcept
 void
 vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    const auto action = [size](const auto& dir) { dir->unload_thumbnails(size); };
-    std::ranges::for_each(global::dir_smart_cache.items(), action);
+    std::ranges::for_each(global::dir_smart_cache.items(),
+                          [size](const auto& dir) { dir->unload_thumbnails(size); });
 }
 
 std::shared_ptr<vfs::file>
@@ -394,8 +394,9 @@ vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
     const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
-    const auto action = [&filename](const auto& file) { return file->name() == filename.string(); };
-    const auto it = std::ranges::find_if(this->files_, action);
+    const auto it = std::ranges::find_if(this->files_,
+                                         [&filename](const auto& file)
+                                         { return file->name() == filename.string(); });
     if (it != this->files_.cend())
     {
         return *it;
