@@ -215,8 +215,6 @@ vfs::dir::update_avoid_changes() noexcept
 void
 vfs::dir::load_user_hidden_files() noexcept
 {
-    // Read .hidden into string
-
     const auto hidden_path = this->path_ / ".hidden";
 
     if (!std::filesystem::is_regular_file(hidden_path))
@@ -254,16 +252,16 @@ vfs::dir::load_user_hidden_files() noexcept
 bool
 vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
 {
-    // ignore if in .hidden
-    if (this->user_hidden_files_)
+    if (!this->user_hidden_files_)
     {
-        const auto filename = path.filename();
-
-        const auto is_user_hidden = [&filename](const auto& hide_filename)
-        { return filename == hide_filename; };
-        return std::ranges::any_of(this->user_hidden_files_.value(), is_user_hidden);
+        return false;
     }
-    return false;
+
+    const auto filename = path.filename();
+
+    return std::ranges::any_of(*this->user_hidden_files_,
+                               [&filename](const auto& hide_filename)
+                               { return filename == hide_filename; });
 }
 
 void
