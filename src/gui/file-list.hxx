@@ -18,6 +18,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include <glibmm.h>
@@ -70,7 +71,7 @@ struct file_list
 
     /* <private> */
     std::shared_ptr<vfs::dir> dir{nullptr};
-    GList* files{nullptr};
+    GList* files_{nullptr};
 
     bool show_hidden{true};
     // GObjects do not work with std::string
@@ -102,9 +103,12 @@ struct file_list
 
   public:
     // signals
-    void on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept;
-    void on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept;
-    void on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept;
+    void
+    on_file_list_file_created(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+    void
+    on_file_list_file_deleted(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+    void
+    on_file_list_file_changed(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
     void on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // Signals we connect to

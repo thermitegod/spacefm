@@ -85,7 +85,8 @@ class dir final : public std::enable_shared_from_this<dir>
 
     [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
-    [[nodiscard]] bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
+    [[nodiscard]] bool update_file(const std::shared_ptr<vfs::file>& file) noexcept;
+    void remove_file(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // dir .hidden file
     void load_user_hidden_files() noexcept;
@@ -98,29 +99,19 @@ class dir final : public std::enable_shared_from_this<dir>
     void on_file_changed(const std::filesystem::path& path) noexcept;
     void on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
-    // batch handling for file events
-    void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
-
-    // file change notify
-    void update_created_files() noexcept;
-    void update_changed_files() noexcept;
-    bool timer_running_ = false;
-    Glib::SignalTimeout timer_ = Glib::signal_timeout();
-
     std::filesystem::path path_;
-    std::vector<std::shared_ptr<vfs::file>> files_;
 
-    std::mutex loader_mutex_;
+    std::vector<std::shared_ptr<vfs::file>> files_;
+    std::mutex files_lock_;
+
     std::jthread loader_thread_;
+    std::mutex loader_mutex_;
 
     vfs::thumbnailer thumbnailer_;
     std::jthread thumbnailer_thread_;
 
     notify::notify_controller notifier_ = notify::inotify_controller();
     std::jthread notifier_thread_;
-
-    std::vector<std::shared_ptr<vfs::file>> changed_files_;
-    std::vector<std::filesystem::path> created_files_;
 
     bool avoid_changes_{true}; // disable file events, for nfs mount locations.
 
@@ -135,9 +126,31 @@ class dir final : public std::enable_shared_from_this<dir>
 
     u64 xhidden_count_{0};
 
-    std::mutex files_lock_;
-    std::mutex changed_files_lock_;
-    std::mutex created_files_lock_;
+    // batch handling for file events
+    void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
+    // file change notify
+    void update_created_files() noexcept;
+    void update_changed_files() noexcept;
+    void update_deleted_files() noexcept;
+    bool timer_running_ = false;
+    Glib::SignalTimeout timer_ = Glib::signal_timeout();
+
+    struct file_events
+    {
+        std::mutex lock;
+        std::vector<std::shared_ptr<vfs::file>> deleted;
+        std::vector<std::shared_ptr<vfs::file>> changed;
+        std::vector<std::filesystem::path> created; // filenames only
+
+        void
+        clear() noexcept
+        {
+            deleted.clear();
+            changed.clear();
+            created.clear();
+        }
+    };
+    file_events events_;
 
     std::shared_ptr<vfs::settings> settings_;
 
@@ -145,21 +158,21 @@ class dir final : public std::enable_shared_from_this<dir>
     // Signals
 
     [[nodiscard]] auto
-    signal_file_changed() noexcept
+    signal_files_changed() noexcept
     {
-        return this->signal_file_changed_;
+        return this->signal_files_changed_;
     }
 
     [[nodiscard]] auto
-    signal_file_created() noexcept
+    signal_files_created() noexcept
     {
-        return this->signal_file_created_;
+        return this->signal_files_created_;
     }
 
     [[nodiscard]] auto
-    signal_file_deleted() noexcept
+    signal_files_deleted() noexcept
     {
-        return this->signal_file_deleted_;
+        return this->signal_files_deleted_;
     }
 
     [[nodiscard]] auto
@@ -185,9 +198,9 @@ class dir final : public std::enable_shared_from_this<dir>
 
   private:
     // Signals
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_created_;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_changed_;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_deleted_;
+    sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_created_;
+    sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_changed_;
+    sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_deleted_;
     sigc::signal<void()> signal_file_listed_;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
     sigc::signal<void()> signal_directory_deleted_;

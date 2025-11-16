@@ -168,7 +168,7 @@ gui_file_list_get_type() noexcept
 static void
 gui_file_list_init(gui::file_list* list) noexcept
 {
-    list->files = nullptr;
+    list->files_ = nullptr;
     list->sort_order = (GtkSortType)-1;
     list->sort_col = gui::file_list::column::name;
     list->stamp = gui::utils::stamp().data();
@@ -299,12 +299,12 @@ gui_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     const auto n = indices[0]; /* the n-th top level row */
 
-    if (std::cmp_greater_equal(n, g_list_length(list->files) /* || n < 0 */))
+    if (std::cmp_greater_equal(n, g_list_length(list->files_) /* || n < 0 */))
     {
         return false;
     }
 
-    GList* l = g_list_nth(list->files, static_cast<std::uint32_t>(n));
+    GList* l = g_list_nth(list->files_, static_cast<std::uint32_t>(n));
     assert(l != nullptr);
 
     /* We simply store a pointer in the iter */
@@ -328,7 +328,7 @@ gui_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
     GList* l = (GList*)iter->user_data;
 
     GtkTreePath* path = gtk_tree_path_new();
-    gtk_tree_path_append_index(path, g_list_index(list->files, l->data));
+    gtk_tree_path_append_index(path, g_list_index(list->files_, l->data));
     return path;
 }
 
@@ -482,8 +482,8 @@ gui_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
 
     /* Set iter to first item in list */
     iter->stamp = list->stamp;
-    iter->user_data = list->files;
-    iter->user_data2 = list->files->data;
+    iter->user_data = list->files_;
+    iter->user_data2 = list->files_->data;
     return true;
 }
 
@@ -505,7 +505,7 @@ gui_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexc
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
     {
-        return static_cast<std::int32_t>(g_list_length(list->files));
+        return static_cast<std::int32_t>(g_list_length(list->files_));
     }
     return 0; /* otherwise, this is easy again for a list */
 }
@@ -526,12 +526,12 @@ gui_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
     }
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (std::cmp_greater_equal(n, g_list_length(list->files)))
+    if (std::cmp_greater_equal(n, g_list_length(list->files_)))
     { //  || n < 0)
         return false;
     }
 
-    GList* l = g_list_nth(list->files, static_cast<std::uint32_t>(n));
+    GList* l = g_list_nth(list->files_, static_cast<std::uint32_t>(n));
     assert(l != nullptr);
 
     iter->stamp = list->stamp;
@@ -710,7 +710,7 @@ gui_file_info_list_sort(gui::file_list* list) noexcept
             vec.push_back(static_cast<vfs::file*>(l->data)->shared_from_this());
         }
         return vec;
-    }(list->files);
+    }(list->files_);
 
     std::ranges::sort(file_list,
                       [&list](const auto& a, const auto& b)
@@ -739,8 +739,8 @@ gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 
     if (this->dir)
     {
-        g_list_free(this->files);
-        this->files = nullptr;
+        g_list_free(this->files_);
+        this->files_ = nullptr;
 
         this->signal_file_changed.disconnect();
         this->signal_file_created.disconnect();
@@ -754,20 +754,20 @@ gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
     }
 
     this->dir = new_dir;
-    this->files = nullptr;
+    this->files_ = nullptr;
 
-    this->signal_file_changed = this->dir->signal_file_changed().connect(
-        [this](auto f) { this->on_file_list_file_changed(f); });
-    this->signal_file_created = this->dir->signal_file_created().connect(
-        [this](auto f) { this->on_file_list_file_created(f); });
-    this->signal_file_deleted = this->dir->signal_file_deleted().connect(
-        [this](auto f) { this->on_file_list_file_deleted(f); });
+    this->signal_file_changed = this->dir->signal_files_changed().connect(
+        [this](const auto& files) { this->on_file_list_file_changed(files); });
+    this->signal_file_created = this->dir->signal_files_created().connect(
+        [this](const auto& files) { this->on_file_list_file_created(files); });
+    this->signal_file_deleted = this->dir->signal_files_deleted().connect(
+        [this](const auto& files) { this->on_file_list_file_deleted(files); });
 
     for (const auto& file : new_dir->files())
     {
         if ((this->show_hidden || !file->is_hidden()) && this->is_pattern_match(file->name()))
         {
-            this->files = g_list_prepend(this->files, file.get());
+            this->files_ = g_list_prepend(this->files_, file.get());
         }
     }
 }
@@ -775,13 +775,13 @@ gui::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 void
 gui::file_list::sort() noexcept
 {
-    if (g_list_length(this->files) <= 1)
+    if (g_list_length(this->files_) <= 1)
     {
         return;
     }
 
     /* sort the list */
-    this->files = gui_file_info_list_sort(this);
+    this->files_ = gui_file_info_list_sort(this);
 
     GtkTreePath* path = gtk_tree_path_new();
     gtk_tree_model_rows_reordered(GTK_TREE_MODEL(this), path, nullptr, nullptr);
@@ -796,18 +796,18 @@ gui::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
         return;
     }
 
-    this->files = g_list_append(this->files, file.get());
+    this->files_ = g_list_append(this->files_, file.get());
 
     this->sort();
 
-    GList* l = g_list_find(this->files, file.get());
+    GList* l = g_list_find(this->files_, file.get());
 
     GtkTreeIter it;
     it.stamp = this->stamp;
     it.user_data = l;
     it.user_data2 = file.get();
 
-    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files, l->data), -1);
+    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files_, l->data), -1);
     gtk_tree_model_row_inserted(GTK_TREE_MODEL(this), path, &it);
     gtk_tree_path_free(path);
 }
@@ -825,7 +825,7 @@ gui::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
         return;
     }
 
-    GList* l = g_list_find(this->files, file.get());
+    GList* l = g_list_find(this->files_, file.get());
     if (!l)
     {
         return;
@@ -836,85 +836,77 @@ gui::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
     it.user_data = l;
     it.user_data2 = l->data;
 
-    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files, l->data), -1);
+    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files_, l->data), -1);
     gtk_tree_model_row_changed(GTK_TREE_MODEL(this), path, &it);
     gtk_tree_path_free(path);
 }
 
 void
-gui::file_list::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_changed(
+    const std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
-    if (!file || !this->dir)
+    for (const auto& file : files)
     {
-        return;
-    }
+        this->file_changed(file);
 
-    this->file_changed(file);
+        const auto now = std::chrono::system_clock::now();
 
-    // check if reloading of thumbnail is needed.
-    // See also desktop-window.c:on_file_changed()
-    const auto now = std::chrono::system_clock::now();
-
-    if (this->max_thumbnail != 0 &&
-        ((file->mime_type()->is_video() && (now - file->mtime() > std::chrono::seconds(5))) ||
-         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
-    {
-        if (!file->is_thumbnail_loaded(this->thumbnail_size))
+        if (this->max_thumbnail != 0 &&
+            ((file->mime_type()->is_video() && (now - file->mtime() > std::chrono::seconds(5))) ||
+             (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
         {
-            this->dir->load_thumbnail(file, this->thumbnail_size);
+            if (!file->is_thumbnail_loaded(this->thumbnail_size))
+            {
+                this->dir->load_thumbnail(file, this->thumbnail_size);
+            }
         }
     }
 }
 
 void
-gui::file_list::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_created(
+    const std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
-    this->file_created(file);
-
-    /* check if reloading of thumbnail is needed. */
-    if (this->max_thumbnail != 0 &&
-        (file->mime_type()->is_video() ||
-         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
+    for (const auto& file : files)
     {
-        if (!file->is_thumbnail_loaded(this->thumbnail_size))
+        this->file_created(file);
+
+        /* check if reloading of thumbnail is needed. */
+        if (this->max_thumbnail != 0 &&
+            (file->mime_type()->is_video() ||
+             (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
         {
-            this->dir->load_thumbnail(file, this->thumbnail_size);
+            if (!file->is_thumbnail_loaded(this->thumbnail_size))
+            {
+                this->dir->load_thumbnail(file, this->thumbnail_size);
+            }
         }
     }
 }
 
 void
-gui::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
+gui::file_list::on_file_list_file_deleted(
+    const std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
-    /* If there is no file info, that means the dir itself was deleted. */
-    if (!file)
+    for (const auto& file : files)
     {
-        /* Clear the whole list */
-        GtkTreePath* path = gtk_tree_path_new_from_indices(0, -1);
-        for (GList* l = this->files; l; l = this->files)
+        if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
         {
-            gtk_tree_model_row_deleted(GTK_TREE_MODEL(this), path);
+            continue;
         }
+
+        GList* l = g_list_find(this->files_, file.get());
+        if (!l)
+        {
+            continue;
+        }
+
+        GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files_, l->data), -1);
+        gtk_tree_model_row_deleted(GTK_TREE_MODEL(this), path);
         gtk_tree_path_free(path);
-        return;
+
+        this->files_ = g_list_delete_link(this->files_, l);
     }
-
-    if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
-    {
-        return;
-    }
-
-    GList* l = g_list_find(this->files, file.get());
-    if (!l)
-    {
-        return;
-    }
-
-    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files, l->data), -1);
-    gtk_tree_model_row_deleted(GTK_TREE_MODEL(this), path);
-    gtk_tree_path_free(path);
-
-    this->files = g_list_delete_link(this->files, l);
 }
 
 void
@@ -943,7 +935,7 @@ gui::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
 
             this->signal_file_thumbnail_loaded.disconnect();
 
-            for (GList* l = this->files; l; l = g_list_next(l))
+            for (GList* l = this->files_; l; l = g_list_next(l))
             {
                 const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
                 if ((file->mime_type()->is_image() || file->mime_type()->is_video()) &&
@@ -964,7 +956,7 @@ gui::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
     this->signal_file_thumbnail_loaded = this->dir->signal_thumbnail_loaded().connect(
         [this](auto f) { this->on_file_list_file_thumbnail_loaded(f); });
 
-    for (GList* l = this->files; l; l = g_list_next(l))
+    for (GList* l = this->files_; l; l = g_list_next(l))
     {
         const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
         if (this->max_thumbnail != 0 &&

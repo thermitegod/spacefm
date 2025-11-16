@@ -1038,11 +1038,11 @@ gui::browser::on_dir_file_listed() noexcept
     this->signal_file_deleted_.disconnect();
     this->signal_directory_deleted_.disconnect();
 
-    this->signal_file_created_ = this->dir_->signal_file_created().connect(
+    this->signal_file_created_ = this->dir_->signal_files_created().connect(
         [this](const auto&) { this->signal_change_content().emit(this); });
-    this->signal_file_changed_ = this->dir_->signal_file_changed().connect(
+    this->signal_file_changed_ = this->dir_->signal_files_changed().connect(
         [this](const auto&) { this->signal_change_content().emit(this); });
-    this->signal_file_deleted_ = this->dir_->signal_file_deleted().connect(
+    this->signal_file_deleted_ = this->dir_->signal_files_deleted().connect(
         [this](const auto&) { this->signal_change_content().emit(this); });
     this->signal_directory_deleted_ =
         this->dir_->signal_directory_deleted().connect([this]() { this->close_tab(); });
