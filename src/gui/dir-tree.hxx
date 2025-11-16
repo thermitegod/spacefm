@@ -61,7 +61,10 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         ~node()
         {
             this->notifier.stop();
-            this->notifier_thread.join();
+            if (this->notifier_thread.joinable())
+            {
+                this->notifier_thread.join();
+            }
         }
 
         [[nodiscard]] static std::shared_ptr<node> create() noexcept;
