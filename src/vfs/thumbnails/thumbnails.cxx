@@ -96,12 +96,15 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
                   std::chrono::system_clock::time_point mtime, std::string_view uri,
                   usize size) noexcept
 {
+    (void)uri;
+
     if (std::chrono::time_point_cast<std::chrono::seconds>(file->mtime()) !=
         std::chrono::time_point_cast<std::chrono::seconds>(mtime))
     {
         return false;
     }
 
+#if 0 // TODO CJK problems with on disk uri in thumbnails metadata
     if (uri.starts_with("file://"))
     {
         if (file->uri() != uri)
@@ -116,6 +119,7 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
             return false;
         }
     }
+#endif
 
     if (file->size() != size)
     {
