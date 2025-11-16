@@ -48,6 +48,7 @@
 #include "vfs/app-desktop.hxx"
 #include "vfs/bookmarks.hxx"
 #include "vfs/file.hxx"
+#include "vfs/mime-monitor.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/linux/self.hxx"
@@ -302,6 +303,7 @@ main(int argc, char* argv[]) noexcept
 
     // Initialize vfs system
     vfs::volume_init();
+    vfs::mime_monitor_init();
 
     // load user bookmarks
     vfs::bookmarks::load();
@@ -313,6 +315,7 @@ main(int argc, char* argv[]) noexcept
     std::atexit(tmp_clean);
     std::atexit(autosave::close);
     std::atexit(vfs::volume_finalize);
+    std::atexit(vfs::mime_monitor_shutdown);
 
     const auto data = std::make_shared<app_data>();
     data->opts = opts.value();

@@ -14,102 +14,62 @@
  */
 
 #include <filesystem>
-#include <format>
-#include <memory>
+#include <thread>
 
-#include <glibmm.h>
-
-#include <ztd/ztd.hxx>
-
-#include "vfs/dir.hxx"
 #include "vfs/execute.hxx"
 #include "vfs/mime-monitor.hxx"
+#include "vfs/notify-cpp/event.hxx"
+#include "vfs/notify-cpp/notify_controller.hxx"
 #include "vfs/user-dirs.hxx"
 
-namespace global
+namespace
 {
-u32 mime_change_timer = 0;
-}
-
-struct mime_monitor
-{
-    mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir) {}
-
-    [[nodiscard]] static const std::shared_ptr<mime_monitor>
-    create(const std::shared_ptr<vfs::dir>& dir) noexcept;
-
-    std::shared_ptr<vfs::dir> dir;
-
-    // signals
-    static void on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept;
-    static bool on_mime_change_timer(void* user_data) noexcept;
-};
-
-const std::shared_ptr<mime_monitor>
-mime_monitor::create(const std::shared_ptr<vfs::dir>& dir) noexcept
-{
-    return std::make_shared<mime_monitor>(dir);
-}
+notify::notify_controller notifier = notify::inotify_controller();
+std::jthread thread;
+} // namespace
 
 void
-mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
+vfs::mime_monitor_init() noexcept
 {
-    (void)file;
-
-    if (global::mime_change_timer != 0)
-    {
-        // timer is already running, so ignore request
-        // logger::debug<logger::vfs>("MIME-UPDATE already set");
-        return;
-    }
-
-    // update mime database in 2 seconds
-    global::mime_change_timer =
-        g_timeout_add_seconds(2, (GSourceFunc)mime_monitor::on_mime_change_timer, nullptr);
-    // logger::debug<logger::vfs>("MIME-UPDATE timer started");
-}
-
-namespace global
-{
-std::shared_ptr<mime_monitor> user_mime_monitor = nullptr;
-}
-
-bool
-mime_monitor::on_mime_change_timer(void* user_data) noexcept
-{
-    (void)user_data;
-
-    // logger::debug<logger::vfs>("MIME-UPDATE on_timer");
-    vfs::execute::command_line_async("update-mime-database {}/mime", vfs::user::data().string());
-    vfs::execute::command_line_async("update-desktop-database {}/applications",
-                                     vfs::user::data().string());
-
-    g_source_remove(global::mime_change_timer.data());
-    global::mime_change_timer = 0;
-    return false;
-}
-
-void
-vfs::mime_monitor() noexcept
-{
-    if (global::user_mime_monitor)
-    {
-        return;
-    }
-
     const auto path = vfs::user::data() / "mime" / "packages";
     if (!std::filesystem::is_directory(path))
     {
         return;
     }
 
-    global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path, nullptr));
+    notifier
+        .watch_directory({path,
+                          {
+                              notify::event::attrib,
+                              notify::event::close_write,
+                              notify::event::moved_from,
+                              notify::event::moved_to,
+                              notify::event::create,
+                              notify::event::delete_sub,
+                          }})
+        .on_unexpected_event( // this can technically be used as the default handler
+            [](const notify::notification&)
+            {
+                if (std::filesystem::exists(vfs::user::data() / "mime"))
+                {
+                    vfs::execute::command_line_async("update-mime-database {}/mime",
+                                                     vfs::user::data().string());
+                }
 
-    // logger::debug<logger::vfs>("MIME-UPDATE watch started");
-    global::user_mime_monitor->dir->signal_file_created().connect(
-        [](auto f) { mime_monitor::on_mime_change(f); });
-    global::user_mime_monitor->dir->signal_file_changed().connect(
-        [](auto f) { mime_monitor::on_mime_change(f); });
-    global::user_mime_monitor->dir->signal_file_deleted().connect(
-        [](auto f) { mime_monitor::on_mime_change(f); });
+                if (std::filesystem::exists(vfs::user::data() / "applications"))
+                {
+                    vfs::execute::command_line_async("update-desktop-database {}/applications",
+                                                     vfs::user::data().string());
+                }
+            });
+
+    thread = std::jthread([&]() { notifier.run(); });
+    pthread_setname_np(thread.native_handle(), "mime notifier");
+}
+
+void
+vfs::mime_monitor_shutdown() noexcept
+{
+    notifier.stop();
+    thread.join();
 }

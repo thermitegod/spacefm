@@ -2162,8 +2162,6 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             {
                 vfs::utils::open_editor(mime_file);
             }
-
-            vfs::mime_monitor();
             break;
         }
         case gui::file_menu::app_job::view_type:
@@ -2204,7 +2202,6 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                                                        path,
                                                        gui::browser::open_action::new_tab);
             }
-            vfs::mime_monitor();
             break;
         }
         case gui::file_menu::app_job::update:

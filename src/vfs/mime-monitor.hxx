@@ -17,5 +17,6 @@
 
 namespace vfs
 {
-void mime_monitor() noexcept;
-}
+void mime_monitor_init() noexcept;
+void mime_monitor_shutdown() noexcept;
+} // namespace vfs
