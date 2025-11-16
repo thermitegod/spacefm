@@ -39,6 +39,7 @@
 #include "vfs/app-desktop.hxx"
 #include "vfs/execute.hxx"
 #include "vfs/mime-type.hxx"
+#include "vfs/settings.hxx"
 #include "vfs/terminals.hxx"
 #include "vfs/user-dirs.hxx"
 
@@ -116,7 +117,13 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
     const auto main_editor = xset_get_s(xset::name::editor);
     if (!main_editor)
     {
-        const auto mime_type = vfs::mime_type::create_from_type("text/plain");
+        const auto mime_type =
+            vfs::mime_type::create_from_type("text/plain",
+                                             std::make_shared<vfs::settings>(vfs::settings{
+                                                 .icon_size_big = settings->icon_size_big,
+                                                 .icon_size_small = settings->icon_size_small,
+                                                 .icon_size_tool = settings->icon_size_small,
+                                             }));
         const auto default_app = mime_type->default_action();
         if (default_app)
         {

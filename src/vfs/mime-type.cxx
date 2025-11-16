@@ -210,7 +210,8 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             /* FIXME: fallback to icon of parent mime-type */
             const auto unknown =
-                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, nullptr);
+                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown,
+                                                 this->settings_);
             icon = unknown->icon(big);
         }
         else /* unknown */
@@ -343,7 +344,8 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             /* FIXME: fallback to icon of parent mime-type */
             const auto unknown =
-                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, nullptr);
+                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown,
+                                                 this->settings_);
             icon = unknown->icon(big);
         }
         else /* unknown */
