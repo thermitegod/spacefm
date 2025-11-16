@@ -298,10 +298,10 @@ vfs::dir::load_thread() noexcept
         }
     }
 
-    this->signal_file_listed().emit();
-
     this->load_complete_ = true;
     this->load_complete_initial_ = true;
+
+    this->signal_file_listed().emit();
 }
 
 void
@@ -381,6 +381,8 @@ vfs::dir::refresh_thread() noexcept
 
     this->load_complete_ = true;
     this->running_refresh_ = false;
+
+    this->signal_file_listed().emit();
 }
 
 void

@@ -2619,7 +2619,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
 
     if (this->dir_->is_loaded())
     {
-        // TODO - if the dir is loaded from cache then it will not run the file_listed signal.
+        // TODO - if the dir is loaded from cache then it will not emit the file listed signal.
         // this should be a tmp workaround
         this->on_dir_file_listed();
     }
@@ -3094,7 +3094,6 @@ gui::browser::close_tab() noexcept
             gui::browser* browser =
                 PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
             browser->update_views();
-            browser->update_statusbar();
             main_window->set_window_title(browser);
         }
     }

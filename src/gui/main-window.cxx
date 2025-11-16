@@ -1598,13 +1598,15 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, gui::browser* browser) noex
 void
 MainWindow::on_browser_before_chdir(gui::browser* browser) noexcept
 {
-    browser->update_statusbar();
+    (void)browser;
+    // browser->update_statusbar();
 }
 
 void
 MainWindow::on_browser_begin_chdir(gui::browser* browser) noexcept
 {
-    browser->update_statusbar();
+    (void)browser;
+    // browser->update_statusbar();
 }
 
 void
