@@ -602,6 +602,7 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::view_thumb);
         set->menu.label = "_Thumbnails (global)"; // in View|Panel View|Style
         set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     // Help
@@ -2342,7 +2343,7 @@ xset_defaults() noexcept
             const auto set = xset::set::get(xset::panel::show_dirtree, p);
             set->menu.label = "T_ree";
             set->menu.type = xset::set::menu_type::check;
-            set->b = xset::set::enabled::yes;
+            // set->b = xset::set::enabled::no;
             if (p != 1)
             {
                 set->shared_key = xset::set::get(xset::name::panel1_show_dirtree);
@@ -2353,7 +2354,6 @@ xset_defaults() noexcept
             const auto set = xset::set::get(xset::panel::list_detailed, p);
             set->menu.label = "_Detailed";
             set->menu.type = xset::set::menu_type::radio;
-            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset::set::get(xset::name::panel1_list_detailed);
@@ -2364,6 +2364,7 @@ xset_defaults() noexcept
             const auto set = xset::set::get(xset::panel::list_icons, p);
             set->menu.label = "_Icons";
             set->menu.type = xset::set::menu_type::radio;
+            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset::set::get(xset::name::panel1_list_icons);

@@ -27,13 +27,13 @@ namespace datatype
 struct settings
 {
     // General Settings
-    bool show_thumbnails{false};
+    bool show_thumbnails{true};
     bool thumbnail_size_limit{true};
     std::uint32_t thumbnail_max_size{8 << 20}; // 8 MiB
 
     i32 icon_size_big{48};
-    i32 icon_size_small{22};
-    i32 icon_size_tool{22};
+    i32 icon_size_small{48};
+    i32 icon_size_tool{0};
 
     bool click_executes{false};
 
