@@ -987,6 +987,7 @@ gui::browser::update_model(const std::string_view pattern) noexcept
     this->file_list_ = GTK_TREE_MODEL(list);
     if (old_list)
     {
+        reinterpret_cast<gui::file_list*>(old_list)->dir = nullptr;
         g_object_unref(G_OBJECT(old_list));
     }
 
@@ -3076,6 +3077,9 @@ gui::browser::close_tab() noexcept
             gtk_notebook_set_show_tabs(notebook, false);
         }
     }
+
+    this->dir_ = nullptr;
+    reinterpret_cast<gui::file_list*>(this->file_list_)->dir = nullptr;
 
     if (gtk_notebook_get_n_pages(notebook) == 0)
     { // all tabs closed, open new tab
