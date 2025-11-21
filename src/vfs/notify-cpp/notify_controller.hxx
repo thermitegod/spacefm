@@ -107,7 +107,7 @@ class notify_controller
 
     std::unordered_map<event, event_observer> event_observer_;
 
-    event_observer unexpected_event_observer_;
+    event_observer unexpected_event_observer_ = [](const notification&) {};
 };
 
 class inotify_controller : public notify_controller

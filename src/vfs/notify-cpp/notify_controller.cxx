@@ -121,23 +121,17 @@ notify::notify_controller::run_once() noexcept
         return;
     }
 
-    const auto event = fse->event();
-    const auto observers = find_observer(event);
+    const auto observers = this->find_observer(fse->event());
 
     if (observers.empty())
     {
-        if (this->unexpected_event_observer_)
-        {
-            this->unexpected_event_observer_({event, fse->path()});
-        }
+        this->unexpected_event_observer_({fse->event(), fse->path()});
     }
     else
     {
-        for (const auto& observer : observers)
-        {
-            /* handle observed processes */
-            auto event_observer = observer.second;
-            event_observer({observer.first, fse->path()});
+        for (const auto& [event, observer] : observers)
+        { /* handle observed processes */
+            observer({event, fse->path()});
         }
     }
 }
@@ -152,11 +146,11 @@ std::vector<std::pair<notify::event, notify::event_observer>>
 notify::notify_controller::find_observer(const notify::event e) const noexcept
 {
     std::vector<std::pair<notify::event, event_observer>> observers;
-    for (const auto& observer : this->event_observer_)
+    for (const auto& [event, observer] : this->event_observer_)
     {
-        if ((observer.first & e) == e)
+        if ((event & e) == e)
         {
-            observers.emplace_back(observer.first, observer.second);
+            observers.emplace_back(event, observer);
         }
     }
     return observers;
