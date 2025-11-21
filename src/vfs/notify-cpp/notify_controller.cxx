@@ -23,6 +23,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <set>
 
 #include "vfs/notify-cpp/inotify.hxx"
@@ -30,9 +31,9 @@
 #include "vfs/notify-cpp/notify.hxx"
 #include "vfs/notify-cpp/notify_controller.hxx"
 
-notify::inotify_controller::inotify_controller() : notify_controller(new inotify) {}
+notify::inotify_controller::inotify_controller() : notify_controller(std::make_shared<inotify>()) {}
 
-notify::notify_controller::notify_controller(notify_base* n) : notify_(n) {}
+notify::notify_controller::notify_controller(const std::shared_ptr<notify_base>& n) : notify_(n) {}
 
 notify::notify_controller&
 notify::notify_controller::watch_file(const file_system_event& fse)

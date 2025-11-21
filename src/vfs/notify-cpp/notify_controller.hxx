@@ -25,6 +25,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <set>
 #include <unordered_map>
 
@@ -38,7 +39,7 @@ using event_observer = std::function<void(const notification&)>;
 class notify_controller
 {
   public:
-    notify_controller(notify_base*);
+    notify_controller(const std::shared_ptr<notify_base>&);
     notify_controller() = default;
 
     void run() noexcept;
@@ -98,8 +99,7 @@ class notify_controller
     notify_controller& on_unexpected_event(const event_observer& event_observer) noexcept;
 
   protected:
-    notify_base* notify_ = nullptr;
-    // std::unique_ptr<Notify> notify_ = nullptr;
+    std::shared_ptr<notify_base> notify_ = nullptr;
 
   private:
     [[nodiscard]] std::vector<std::pair<event, event_observer>>
