@@ -21,6 +21,8 @@
 
 #include <cassert>
 
+#include <pthread.h>
+
 #include <gdkmm.h>
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -291,7 +293,8 @@ main(int argc, char* argv[]) noexcept
 
 #if defined(HAVE_SOCKET)
     // Start a thread to receive socket messages
-    const std::jthread socket_server(spacefm::server::server_thread);
+    std::jthread socket_server(spacefm::server::server_thread);
+    pthread_setname_np(socket_server.native_handle(), "socket_server");
 #endif
 
     // load config file
