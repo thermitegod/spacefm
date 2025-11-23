@@ -16,6 +16,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <stop_token>
 #include <thread>
 
 #include <pthread.h>
@@ -28,18 +29,11 @@
 class autosave_backend
 {
   public:
-    void run() noexcept;
-    void run_once() noexcept;
-    void stop() noexcept;
+    void run(const std::stop_token& stoken) noexcept;
+    void run_once(const std::stop_token& stoken) noexcept;
 
     void add() noexcept;
     void cancel() noexcept;
-
-    [[nodiscard]] bool
-    is_stopped() const noexcept
-    {
-        return this->stopped_;
-    }
 
     void
     set_autosave_func(const std::function<void()>& autosave_func) noexcept
@@ -49,8 +43,7 @@ class autosave_backend
 
   private:
     std::mutex mutex_;
-    std::condition_variable cv_;
-    bool stopped_ = false;
+    std::condition_variable_any cv_;
     std::chrono::minutes thread_sleep_ = std::chrono::minutes(5);
 
     std::function<void()> autosave_func_;
@@ -59,22 +52,22 @@ class autosave_backend
 };
 
 void
-autosave_backend::run() noexcept
+autosave_backend::run(const std::stop_token& stoken) noexcept
 {
-    while (!this->is_stopped())
+    while (!stoken.stop_requested())
     {
-        this->run_once();
+        this->run_once(stoken);
     }
 }
 
 void
-autosave_backend::run_once() noexcept
+autosave_backend::run_once(const std::stop_token& stoken) noexcept
 {
     {
         std::unique_lock<std::mutex> lock(this->mutex_);
-        this->cv_.wait_for(lock, this->thread_sleep_, [this] { return this->is_stopped(); });
+        this->cv_.wait_for(lock, stoken, this->thread_sleep_, [this]() { return this->pending_; });
 
-        if (this->is_stopped())
+        if (stoken.stop_requested())
         {
             return;
         }
@@ -83,29 +76,17 @@ autosave_backend::run_once() noexcept
     logger::trace<logger::autosave>("checking for pending autosave requests");
     if (this->pending_)
     {
-        {
-            const std::scoped_lock<std::mutex> lock(this->mutex_);
+        const std::scoped_lock<std::mutex> lock(this->mutex_);
 
-            logger::trace<logger::autosave>(
-                "found autosave requests, saving settings, total request for this period {}",
-                this->total_);
+        logger::trace<logger::autosave>(
+            "found autosave requests, saving settings, total request for this period {}",
+            this->total_);
 
-            this->autosave_func_();
+        this->autosave_func_();
 
-            this->total_ = 0;
-            this->pending_ = false;
-        }
+        this->total_ = 0;
+        this->pending_ = false;
     }
-}
-
-void
-autosave_backend::stop() noexcept
-{
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-        this->stopped_ = true;
-    }
-    this->cv_.notify_all();
 }
 
 void
@@ -153,13 +134,13 @@ autosave::create(const std::function<void()>& autosave_func) noexcept
 
     logger::trace<logger::autosave>("starting autosave thread");
 
-    autosave_thread_ = std::jthread([&]() { autosave_.run(); });
+    autosave_thread_ = std::jthread([&](const std::stop_token& stoken) { autosave_.run(stoken); });
     pthread_setname_np(autosave_thread_.native_handle(), "autosave");
 }
 
 void
 autosave::close() noexcept
 {
-    autosave_.stop();
+    autosave_thread_.request_stop();
     autosave_thread_.join();
 }
