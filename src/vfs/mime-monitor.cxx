@@ -63,13 +63,13 @@ vfs::mime_monitor_init() noexcept
                 }
             });
 
-    thread = std::jthread([&]() { notifier.run(); });
+    thread = std::jthread([&](const std::stop_token& stoken) { notifier.run(stoken); });
     pthread_setname_np(thread.native_handle(), "mime notifier");
 }
 
 void
 vfs::mime_monitor_shutdown() noexcept
 {
-    notifier.stop();
+    thread.request_stop();
     thread.join();
 }

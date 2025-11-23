@@ -60,9 +60,9 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         node() = default;
         ~node()
         {
-            this->notifier.stop();
             if (this->notifier_thread.joinable())
             {
+                this->notifier_thread.request_stop();
                 this->notifier_thread.join();
             }
         }

@@ -24,6 +24,7 @@
 #pragma once
 #include <filesystem>
 #include <memory>
+#include <stop_token>
 #include <unordered_map>
 
 #include <cstdint>
@@ -70,7 +71,8 @@ class inotify : public notify_base
      *        loop.
      * @return A new file_system_event
      */
-    [[nodiscard]] std::shared_ptr<file_system_event> get_next_event() override;
+    [[nodiscard]] std::shared_ptr<file_system_event>
+    get_next_event(const std::stop_token& stoken) override;
     [[nodiscard]] std::uint32_t get_event_mask(const notify::event event) const override;
 
   private:

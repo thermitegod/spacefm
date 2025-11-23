@@ -42,28 +42,6 @@ notify::notify_base::ignore_once(const std::filesystem::path& p) noexcept
     this->ignored_once_.push_back(p);
 }
 
-void
-notify::notify_base::stop() noexcept
-{
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-        this->stopped_ = true;
-    }
-    this->cv_.notify_all();
-}
-
-bool
-notify::notify_base::is_stopped() const noexcept
-{
-    return this->stopped_;
-}
-
-bool
-notify::notify_base::is_running() const noexcept
-{
-    return !this->stopped_;
-}
-
 bool
 notify::notify_base::is_ignored_once(const std::filesystem::path& p) noexcept
 {

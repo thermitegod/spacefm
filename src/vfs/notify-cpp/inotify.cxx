@@ -27,6 +27,7 @@
 #include <filesystem>
 #include <memory>
 #include <stdexcept>
+#include <stop_token>
 #include <string>
 
 #include <cstring>
@@ -131,7 +132,7 @@ notify::inotify::wd_to_path(const std::int32_t wd) const noexcept
 }
 
 std::shared_ptr<notify::file_system_event>
-notify::inotify::get_next_event()
+notify::inotify::get_next_event(const std::stop_token& stoken)
 {
     static constexpr std::size_t MAX_EVENTS = 4096;
     static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));
@@ -141,13 +142,13 @@ notify::inotify::get_next_event()
 
     std::array<char, EVENT_BUF_LEN> buffer{};
 
-    while (this->queue_.empty() && this->is_running())
+    while (this->queue_.empty() && !stoken.stop_requested())
     {
         std::ptrdiff_t length = 0;
         buffer.fill('\0');
-        while (length <= 0 && this->is_running())
+        while (length <= 0 && !stoken.stop_requested())
         {
-            this->cv_.wait_for(lock, this->thread_sleep_, [this] { return this->is_stopped(); });
+            this->cv_.wait_for(lock, stoken, this->thread_sleep_, []() { return true; });
 
             length = read(this->inotify_fd_, buffer.data(), buffer.size());
             if (length == -1)
@@ -159,13 +160,13 @@ notify::inotify::get_next_event()
             }
         }
 
-        if (this->is_stopped())
+        if (stoken.stop_requested())
         {
             return nullptr;
         }
 
         std::size_t i = 0;
-        while (std::cmp_less(i, length) && this->is_running())
+        while (std::cmp_less(i, length) && !stoken.stop_requested())
         {
             const auto* event = reinterpret_cast<inotify_event*>(&buffer[i]);
             if (!event)
@@ -201,7 +202,7 @@ notify::inotify::get_next_event()
         }
     }
 
-    if (this->is_stopped() || this->queue_.empty())
+    if (stoken.stop_requested() || this->queue_.empty())
     {
         return nullptr;
     }

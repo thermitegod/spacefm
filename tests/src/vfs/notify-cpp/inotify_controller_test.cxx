@@ -25,6 +25,7 @@
 #include <filesystem>
 #include <future>
 #include <stdexcept>
+#include <stop_token>
 #include <thread>
 
 #define DOCTEST_CONFIG_DOUBLE_STRINGIFY
@@ -62,7 +63,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnOpenEvent")
             [](const notification& notification)
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
     open_file(test_file_one_);
 
@@ -71,6 +72,8 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnOpenEvent")
     const auto notify = future_open_event.get();
     CHECK(notify.event() == event::close);
     CHECK(notify.path() == test_file_one_);
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -94,10 +97,10 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
     std::jthread thread(
-        [&notifier]()
+        [&notifier](const std::stop_token& stoken)
         {
-            notifier.run_once();
-            notifier.run_once();
+            notifier.run_once(stoken);
+            notifier.run_once(stoken);
         });
 
     open_file(test_file_one_);
@@ -108,6 +111,8 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
     CHECK(future_open.get().event() == event::open);
     CHECK(future_close_no_write.wait_for(timeout_) == std::future_status::ready);
     CHECK(future_close_no_write.get().event() == event::close_write);
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -116,10 +121,9 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRunOnce")
     notify_controller notifier = inotify_controller();
     notifier.watch_file(test_file_one_);
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
-    notifier.stop();
-
+    thread.request_stop();
     thread.join();
 }
 
@@ -128,10 +132,9 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRun")
     inotify_controller notifier = inotify_controller();
     notifier.watch_file(test_file_one_);
 
-    std::jthread thread([&notifier]() { notifier.run(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run(stoken); });
 
-    notifier.stop();
-
+    thread.request_stop();
     thread.join();
 }
 
@@ -156,7 +159,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
             [](const notification& notification)
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
-    std::jthread thread([&notifier]() { notifier.run(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run(stoken); });
 
     // Known bug if the events to fast on the same file inotify(7) create only one event so we have to wait
     open_file(test_file_one_);
@@ -165,7 +168,8 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
 
     auto future_open = promised_counter_.get_future();
     CHECK(future_open.wait_for(std::chrono::seconds(1)) == std::future_status::ready);
-    notifier.stop();
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -180,13 +184,14 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFile")
             [](const notification& notification)
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
     open_file(test_file_one_);
 
     auto future_open_event = promised_open_.get_future();
     CHECK(future_open_event.wait_for(timeout_) == std::future_status::timeout);
-    notifier.stop();
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -200,14 +205,14 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldWatchPathRecursively")
             [](const notification& notification)
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
     open_file(test_file_one_);
 
     auto future_open = promised_open_.get_future();
     CHECK(future_open.wait_for(timeout_) == std::future_status::ready);
 
-    notifier.stop();
+    thread.request_stop();
     thread.join();
 }
 
@@ -216,11 +221,12 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldUnwatchPath")
     inotify_controller notifier = inotify_controller();
     notifier.watch_file(test_file_one_).unwatch(test_file_one_);
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
     open_file(test_file_one_);
     CHECK(promised_open_.get_future().wait_for(timeout_) != std::future_status::ready);
-    notifier.stop();
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -232,11 +238,13 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldCallUserDefinedUnexpectedExcepti
     notifier.watch_file(test_file_one_)
         .on_unexpected_event([&](const notification&) { observer_called.set_value(); });
 
-    std::jthread thread([&notifier]() { notifier.run_once(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
 
     open_file(test_file_one_);
 
     CHECK(observer_called.get_future().wait_for(timeout_) == std::future_status::ready);
+
+    thread.request_stop();
     thread.join();
 }
 
@@ -260,7 +268,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "countEvents")
             [](const notification& notification)
             { CHECK_MESSAGE(false, std::format("unexpected event: {}", notification.event())); });
 
-    std::jthread thread([&notifier]() { notifier.run(); });
+    std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run(stoken); });
 
     // Known bug if the events to fast on the same file inotify(7) create only one event so we have to wait
     open_file(test_file_one_);
@@ -270,6 +278,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "countEvents")
     auto future_open = promised_counter_.get_future();
     CHECK(future_open.wait_for(std::chrono::seconds(1)) == std::future_status::ready);
     CHECK(future_open.get() == 2);
-    notifier.stop();
+
+    thread.request_stop();
     thread.join();
 }

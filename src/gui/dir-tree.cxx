@@ -644,7 +644,8 @@ gui::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
                 },
                 [node](const notify::notification& notification)
                 { node->on_file_deleted(notification.path()); });
-        node->notifier_thread = std::jthread([node]() { node->notifier.run(); });
+        node->notifier_thread =
+            std::jthread([node](const std::stop_token& stoken) { node->notifier.run(stoken); });
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {

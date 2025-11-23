@@ -28,6 +28,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <stop_token>
 #include <vector>
 
 #include "vfs/notify-cpp/event.hxx"
@@ -48,11 +49,8 @@ class notify_base
     virtual void watch_directory(const file_system_event&) = 0;
     virtual void unwatch(const file_system_event&) = 0;
 
-    [[nodiscard]] virtual std::shared_ptr<file_system_event> get_next_event() = 0;
-
-    void stop() noexcept;
-    [[nodiscard]] bool is_stopped() const noexcept;
-    [[nodiscard]] bool is_running() const noexcept;
+    [[nodiscard]] virtual std::shared_ptr<file_system_event>
+    get_next_event(const std::stop_token& stoken) = 0;
 
     [[nodiscard]] virtual std::uint32_t get_event_mask(const notify::event) const = 0;
 
@@ -71,8 +69,7 @@ class notify_base
     std::queue<std::shared_ptr<file_system_event>> queue_;
 
     std::mutex mutex_;
-    std::condition_variable cv_;
-    std::atomic<bool> stopped_ = false;
+    std::condition_variable_any cv_;
     std::chrono::milliseconds thread_sleep_ = std::chrono::milliseconds(250);
 
   private:

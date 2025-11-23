@@ -25,6 +25,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include <stop_token>
 
 #include "vfs/notify-cpp/inotify.hxx"
 #include "vfs/notify-cpp/notification.hxx"
@@ -104,18 +105,18 @@ notify::notify_controller::on_unexpected_event(const event_observer& event_obser
 }
 
 void
-notify::notify_controller::run() noexcept
+notify::notify_controller::run(const std::stop_token& stoken) noexcept
 {
-    while (!this->notify_->is_stopped())
+    while (!stoken.stop_requested())
     {
-        this->run_once();
+        this->run_once(stoken);
     }
 }
 
 void
-notify::notify_controller::run_once() noexcept
+notify::notify_controller::run_once(const std::stop_token& stoken) noexcept
 {
-    const auto fse = this->notify_->get_next_event();
+    const auto fse = this->notify_->get_next_event(stoken);
     if (!fse)
     {
         return;
@@ -134,12 +135,6 @@ notify::notify_controller::run_once() noexcept
             observer({event, fse->path()});
         }
     }
-}
-
-void
-notify::notify_controller::stop() noexcept
-{
-    this->notify_->stop();
 }
 
 std::vector<std::pair<notify::event, notify::event_observer>>

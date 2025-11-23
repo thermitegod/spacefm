@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include <stop_token>
 #include <unordered_map>
 
 #include "vfs/notify-cpp/notification.hxx"
@@ -42,9 +43,8 @@ class notify_controller
     notify_controller(const std::shared_ptr<notify_base>&);
     notify_controller() = default;
 
-    void run() noexcept;
-    void run_once() noexcept;
-    void stop() noexcept;
+    void run(const std::stop_token& stoken) noexcept;
+    void run_once(const std::stop_token& stoken) noexcept;
 
     /**
      * @brief Add watch to a file.
