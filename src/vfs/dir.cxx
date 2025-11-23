@@ -278,22 +278,21 @@ vfs::dir::load_thread() noexcept
     // load this dirs .hidden file
     this->load_user_hidden_files();
 
+    for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
-
-        for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
+        if (this->shutdown_)
         {
-            if (this->shutdown_)
-            {
-                return;
-            }
+            return;
+        }
 
-            if (this->is_file_user_hidden(dfile.path()))
-            {
-                this->xhidden_count_ += 1;
-                continue;
-            }
+        if (this->is_file_user_hidden(dfile.path()))
+        {
+            this->xhidden_count_ += 1;
+            continue;
+        }
 
+        {
+            const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
             this->files_.push_back(vfs::file::create(dfile.path(), this->settings_));
         }
     }
@@ -349,35 +348,43 @@ vfs::dir::refresh_thread() noexcept
         }
     }
 
-    for (const auto& file : this->files_)
+    std::vector<std::shared_ptr<vfs::file>> new_hidden;
     {
-        if (this->shutdown_)
+        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+        for (const auto& file : this->files_)
         {
-            break;
-        }
+            if (this->shutdown_)
+            {
+                break;
+            }
 
-        // Check if existing files have been hidden
-        if (this->is_file_user_hidden(file->path()))
-        {
-            // Use the delete signal to properly remove this file from the file list.
-            this->on_file_deleted(file->name());
+            // Check if existing files have been hidden
+            if (this->is_file_user_hidden(file->path()))
+            {
+                // Use the delete signal to properly remove this file from the file list.
+                new_hidden.push_back(file);
 
-            this->xhidden_count_ += 1;
-            continue;
-        }
+                this->xhidden_count_ += 1;
+                continue;
+            }
 
-        // reload thumbnails if already loaded
-        if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::big))
-        {
-            file->unload_thumbnail(vfs::file::thumbnail_size::big);
-            file->load_thumbnail(vfs::file::thumbnail_size::big);
-        }
-        if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::small))
-        {
-            file->unload_thumbnail(vfs::file::thumbnail_size::small);
-            file->load_thumbnail(vfs::file::thumbnail_size::small);
+            // reload thumbnails if already loaded
+            if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::big))
+            {
+                file->unload_thumbnail(vfs::file::thumbnail_size::big);
+                file->load_thumbnail(vfs::file::thumbnail_size::big);
+            }
+            if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::small))
+            {
+                file->unload_thumbnail(vfs::file::thumbnail_size::small);
+                file->load_thumbnail(vfs::file::thumbnail_size::small);
+            }
         }
     }
+
+    // have to do this here because on_file_deleted() also uses files_lock_
+    std::ranges::for_each(new_hidden,
+                          [this](const auto& file) { this->on_file_deleted(file->name()); });
 
     this->load_complete_ = true;
     this->running_refresh_ = false;
@@ -494,13 +501,23 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
         this->timer_.connect_once(
             [this]()
             {
-                const std::scoped_lock<std::mutex> lock(this->events_.lock);
+                {
+                    const std::scoped_lock<std::mutex> lock(this->events_.deleted_lock);
+                    this->update_deleted_files();
+                    this->events_.deleted.clear();
+                }
 
-                this->update_created_files();
-                this->update_changed_files();
-                this->update_deleted_files();
+                {
+                    const std::scoped_lock<std::mutex> lock(this->events_.changed_lock);
+                    this->update_changed_files();
+                    this->events_.changed.clear();
+                }
 
-                this->events_.clear();
+                {
+                    const std::scoped_lock<std::mutex> lock(this->events_.created_lock);
+                    this->update_created_files();
+                    this->events_.created.clear();
+                }
 
                 this->timer_running_ = false;
             },
@@ -597,9 +614,10 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
         return;
     }
 
-    const std::scoped_lock<std::mutex> lock(this->events_.lock);
-
-    this->events_.created.push_back(path.filename());
+    {
+        const std::scoped_lock<std::mutex> lock(this->events_.created_lock);
+        this->events_.created.push_back(path.filename());
+    }
 
     this->notify_file_change(std::chrono::milliseconds(200));
 }
@@ -615,15 +633,14 @@ vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
     const auto file = this->find_file(path.filename());
     if (file)
     {
-        const std::scoped_lock<std::mutex> lock(this->events_.lock);
-
+        const std::scoped_lock<std::mutex> lock(this->events_.deleted_lock);
         if (!std::ranges::contains(this->events_.deleted, file))
         {
             this->events_.deleted.push_back(file);
-
-            this->notify_file_change(std::chrono::milliseconds(200));
         }
     }
+
+    this->notify_file_change(std::chrono::milliseconds(200));
 }
 
 void
@@ -642,18 +659,17 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
     const auto file = this->find_file(path.filename());
     if (file)
     {
-        const std::scoped_lock<std::mutex> lock(this->events_.lock);
-
+        const std::scoped_lock<std::mutex> lock(this->events_.changed_lock);
         if (!std::ranges::contains(this->events_.changed, file))
         {
             if (this->update_file(file)) // update file info the first time
             {
                 this->events_.changed.push_back(file);
-
-                this->notify_file_change(std::chrono::milliseconds(500));
             }
         }
     }
+
+    this->notify_file_change(std::chrono::milliseconds(500));
 }
 
 void

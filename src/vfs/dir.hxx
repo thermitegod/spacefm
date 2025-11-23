@@ -137,18 +137,14 @@ class dir final : public std::enable_shared_from_this<dir>
 
     struct file_events
     {
-        std::mutex lock;
+        std::mutex deleted_lock;
         std::vector<std::shared_ptr<vfs::file>> deleted;
-        std::vector<std::shared_ptr<vfs::file>> changed;
-        std::vector<std::filesystem::path> created; // filenames only
 
-        void
-        clear() noexcept
-        {
-            deleted.clear();
-            changed.clear();
-            created.clear();
-        }
+        std::mutex changed_lock;
+        std::vector<std::shared_ptr<vfs::file>> changed;
+
+        std::mutex created_lock;
+        std::vector<std::filesystem::path> created; // filenames only
     };
     file_events events_;
 
