@@ -815,7 +815,11 @@ gui::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 void
 gui::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    if (!this->dir || this->dir->is_loading())
+    if (!this->dir)
+    {
+        return;
+    }
+    if (this->dir && this->dir->is_loading())
     {
         return;
     }

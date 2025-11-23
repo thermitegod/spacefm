@@ -17,10 +17,12 @@
 
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <stop_token>
 #include <thread>
 #include <vector>
 
@@ -80,8 +82,8 @@ class dir final : public std::enable_shared_from_this<dir>
     void enable_thumbnails(const bool enabled) noexcept;
 
   private:
-    void load_thread() noexcept;
-    void refresh_thread() noexcept;
+    void load_thread(const std::stop_token& stoken) noexcept;
+    void refresh_thread(const std::stop_token& stoken) noexcept;
 
     [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
@@ -113,18 +115,10 @@ class dir final : public std::enable_shared_from_this<dir>
     notify::notify_controller notifier_ = notify::inotify_controller();
     std::jthread notifier_thread_;
 
-    bool avoid_changes_{true}; // disable file events, for nfs mount locations.
-
-    bool load_complete_{false};         // is dir loaded, initial load or refresh
-    bool load_complete_initial_{false}; // is dir loaded, initial load only, blocks refresh
-
-    bool running_refresh_{false}; // is a refresh currently being run.
-
     bool enable_thumbnails_{true};
-
-    bool shutdown_{false}; // use to signal that we are being destructed
-
-    u64 xhidden_count_{0};
+    bool avoid_changes_{true};            // disable file events, for nfs mount locations.
+    std::atomic_bool load_running_{true}; // is dir loaded, initial load or refresh
+    u64 xhidden_count_;                   // filenames starting with '.' and user hidden files
 
     // batch handling for file events
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;

@@ -20,6 +20,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <stop_token>
 #include <vector>
 
 #include <pthread.h>
@@ -127,18 +128,14 @@ vfs::dir::dir(const std::filesystem::path& path,
 
     this->update_avoid_changes();
 
-    this->loader_thread_ = std::jthread([this]() { this->load_thread(); });
+    this->loader_thread_ =
+        std::jthread([this](const std::stop_token& stoken) { this->load_thread(stoken); });
     pthread_setname_np(this->loader_thread_.native_handle(), "loader");
 }
 
 vfs::dir::~dir() noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), this->path_.string());
-
-    {
-        std::lock_guard<std::mutex> lock(this->loader_mutex_);
-        this->shutdown_ = true;
-    }
 
     this->signal_files_created().clear();
     this->signal_files_changed().clear();
@@ -154,6 +151,7 @@ vfs::dir::~dir() noexcept
     this->notifier_.stop();
     this->notifier_thread_.join();
 
+    this->loader_thread_.request_stop();
     this->loader_thread_.join();
 }
 
@@ -266,13 +264,13 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
 }
 
 void
-vfs::dir::load_thread() noexcept
+vfs::dir::load_thread(const std::stop_token& stoken) noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), this->path_.string());
 
     std::unique_lock<std::mutex> lock(this->loader_mutex_);
 
-    this->load_complete_ = false;
+    this->load_running_ = true;
     this->xhidden_count_ = 0;
 
     // load this dirs .hidden file
@@ -280,7 +278,7 @@ vfs::dir::load_thread() noexcept
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        if (this->shutdown_)
+        if (stoken.stop_requested())
         {
             return;
         }
@@ -297,8 +295,7 @@ vfs::dir::load_thread() noexcept
         }
     }
 
-    this->load_complete_ = true;
-    this->load_complete_initial_ = true;
+    this->load_running_ = false;
 
     this->signal_file_listed().emit();
 }
@@ -306,22 +303,20 @@ vfs::dir::load_thread() noexcept
 void
 vfs::dir::refresh() noexcept
 {
-    if (this->load_complete_initial_ && !this->running_refresh_)
+    if (!this->load_running_)
     {
-        // Only allow a refresh if the inital load has been completed.
-        this->loader_thread_ = std::jthread([this]() { this->refresh_thread(); });
+        this->loader_thread_ =
+            std::jthread([this](const std::stop_token& stoken) { this->refresh_thread(stoken); });
         pthread_setname_np(this->loader_thread_.native_handle(), "loader");
     }
 }
 
 void
-vfs::dir::refresh_thread() noexcept
+vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
 {
     std::unique_lock<std::mutex> lock(this->loader_mutex_);
 
-    this->load_complete_ = false;
-    this->running_refresh_ = true;
-
+    this->load_running_ = true;
     this->xhidden_count_ = 0;
 
     // reload this dirs .hidden file
@@ -329,7 +324,7 @@ vfs::dir::refresh_thread() noexcept
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        if (this->shutdown_)
+        if (stoken.stop_requested())
         {
             break;
         }
@@ -353,7 +348,7 @@ vfs::dir::refresh_thread() noexcept
         const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
         for (const auto& file : this->files_)
         {
-            if (this->shutdown_)
+            if (stoken.stop_requested())
             {
                 break;
             }
@@ -386,8 +381,7 @@ vfs::dir::refresh_thread() noexcept
     std::ranges::for_each(new_hidden,
                           [this](const auto& file) { this->on_file_deleted(file->name()); });
 
-    this->load_complete_ = true;
-    this->running_refresh_ = false;
+    this->load_running_ = false;
 
     this->signal_file_listed().emit();
 }
@@ -452,13 +446,13 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 bool
 vfs::dir::is_loading() const noexcept
 {
-    return !this->load_complete_;
+    return this->load_running_;
 }
 
 bool
 vfs::dir::is_loaded() const noexcept
 {
-    return this->load_complete_;
+    return !this->load_running_;
 }
 
 bool
@@ -609,7 +603,7 @@ vfs::dir::update_created_files() noexcept
 void
 vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
 {
-    if (this->shutdown_ || this->avoid_changes_)
+    if (this->avoid_changes_)
     {
         return;
     }
@@ -625,7 +619,7 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
 void
 vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
 {
-    if (this->shutdown_)
+    if (this->avoid_changes_)
     {
         return;
     }
@@ -646,7 +640,7 @@ vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
 void
 vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
 {
-    if (this->shutdown_ || this->avoid_changes_)
+    if (this->avoid_changes_)
     {
         return;
     }
@@ -675,11 +669,6 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
 void
 vfs::dir::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    if (this->shutdown_)
-    {
-        return;
-    }
-
     const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
     if (std::ranges::contains(this->files_, file))
