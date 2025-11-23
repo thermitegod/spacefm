@@ -107,6 +107,8 @@ notify::notify_controller::on_unexpected_event(const event_observer& event_obser
 void
 notify::notify_controller::run(const std::stop_token& stoken) noexcept
 {
+    // std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
+
     while (!stoken.stop_requested())
     {
         this->run_once(stoken);
@@ -116,6 +118,8 @@ notify::notify_controller::run(const std::stop_token& stoken) noexcept
 void
 notify::notify_controller::run_once(const std::stop_token& stoken) noexcept
 {
+    std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
+
     const auto fse = this->notify_->get_next_event(stoken);
     if (!fse)
     {

@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <format>
-#include <mutex>
 #include <stdexcept>
 #include <vector>
 

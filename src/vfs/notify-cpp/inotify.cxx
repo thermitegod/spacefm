@@ -22,6 +22,7 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <cstddef>
 #include <filesystem>
@@ -32,9 +33,13 @@
 
 #include <cstring>
 
+#include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include <sys/inotify.h>
 
 #include "vfs/notify-cpp/inotify.hxx"
+
+#include "logger.hxx"
 
 // #define PRINT_DBG
 #if defined(PRINT_DBG)
@@ -48,11 +53,52 @@ notify::inotify::inotify() : inotify_fd_(0)
     {
         throw std::runtime_error(std::format("inotify init failed: {}", std::strerror(errno)));
     }
+
+    this->event_fd_ = eventfd(0, EFD_NONBLOCK);
+    if (this->event_fd_ == -1)
+    {
+        throw std::runtime_error(std::format("eventfd init failed: {}", std::strerror(errno)));
+    }
+
+    this->epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
+    if (this->epoll_fd_ == -1)
+    {
+        throw std::runtime_error(std::format("epoll init failed: {}", std::strerror(errno)));
+    }
+
+    std::int32_t result = 0;
+    epoll_event event{};
+
+    event = {.events = EPOLLIN, .data = {.fd = this->event_fd_}};
+    result = epoll_ctl(this->epoll_fd_, EPOLL_CTL_ADD, this->event_fd_, &event);
+    if (result == -1)
+    {
+        throw std::runtime_error(
+            std::format("failed to add eventfd to epoll: {}", std::strerror(errno)));
+    }
+
+    event = {.events = EPOLLIN, .data = {.fd = this->inotify_fd_}};
+    result = epoll_ctl(this->epoll_fd_, EPOLL_CTL_ADD, this->inotify_fd_, &event);
+    if (result == -1)
+    {
+        throw std::runtime_error(
+            std::format("failed to add inotify to epoll: {}", std::strerror(errno)));
+    }
 }
 
 notify::inotify::~inotify()
 {
+    // logger::debug<logger::vfs>("notify::inotify::~inotify({})", static_cast<void*>(this));
     close(this->inotify_fd_);
+    close(this->event_fd_);
+    close(this->epoll_fd_);
+}
+
+void
+notify::inotify::stop() noexcept
+{
+    std::uint64_t value = 1;
+    auto _ = write(this->event_fd_, &value, sizeof(value));
 }
 
 void
@@ -132,23 +178,48 @@ notify::inotify::wd_to_path(const std::int32_t wd) const noexcept
 }
 
 std::shared_ptr<notify::file_system_event>
+notify::inotify::get_next_event_from_queue() noexcept
+{
+    auto event = this->queue_.front();
+    this->queue_.pop();
+    return event;
+}
+
+std::shared_ptr<notify::file_system_event>
 notify::inotify::get_next_event(const std::stop_token& stoken)
 {
     static constexpr std::size_t MAX_EVENTS = 4096;
     static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));
     static constexpr std::size_t EVENT_BUF_LEN = (MAX_EVENTS * (EVENT_SIZE + 16));
 
-    std::unique_lock<std::mutex> lock(this->mutex_);
+    if (!this->queue_.empty())
+    {
+        return this->get_next_event_from_queue();
+    }
 
+    std::ptrdiff_t length = 0;
     std::array<char, EVENT_BUF_LEN> buffer{};
 
-    while (this->queue_.empty() && !stoken.stop_requested())
+    while (!stoken.stop_requested())
     {
-        std::ptrdiff_t length = 0;
-        buffer.fill('\0');
-        while (length <= 0 && !stoken.stop_requested())
+        std::array<epoll_event, 1> events{};
+
+        const auto nfds = epoll_pwait(this->epoll_fd_, events.data(), events.size(), -1, nullptr);
+        if (nfds == -1)
         {
-            this->cv_.wait_for(lock, stoken, this->thread_sleep_, []() { return true; });
+            return nullptr;
+        }
+
+        if (nfds == 0)
+        {
+            continue;
+        }
+
+        const auto& event = events.front();
+
+        if (event.data.fd == this->inotify_fd_)
+        {
+            buffer.fill('\0');
 
             length = read(this->inotify_fd_, buffer.data(), buffer.size());
             if (length == -1)
@@ -158,48 +229,48 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
                     continue;
                 }
             }
+            break;
         }
+        else if (event.data.fd == this->event_fd_)
+        {
+            continue;
+        }
+    }
 
-        if (stoken.stop_requested())
+    std::size_t i = 0;
+    while (std::cmp_less(i, length) && !stoken.stop_requested())
+    {
+        const auto* event = reinterpret_cast<inotify_event*>(&buffer[i]);
+        if (!event)
         {
             return nullptr;
         }
 
-        std::size_t i = 0;
-        while (std::cmp_less(i, length) && !stoken.stop_requested())
+        const auto path = this->wd_to_path(event->wd);
+
+        if (!this->is_ignored_once(path))
         {
-            const auto* event = reinterpret_cast<inotify_event*>(&buffer[i]);
-            if (!event)
-            {
-                return nullptr;
-            }
+            // remove IN_ISDIR bit from event mask, if the
+            // mask is (IN_CREATE | IN_ISDIR) we only want IN_CREATE
+            // TODO, report event occurred to a directory
+            const auto mask = event->mask & static_cast<std::uint32_t>(IN_ISDIR)
+                                  ? event->mask & ~static_cast<std::uint32_t>(IN_ISDIR)
+                                  : event->mask;
 
-            const auto path = this->wd_to_path(event->wd);
-
-            if (!this->is_ignored_once(path))
-            {
-                // remove IN_ISDIR bit from event mask, if the
-                // mask is (IN_CREATE | IN_ISDIR) we only want IN_CREATE
-                // TODO, report event occurred to a directory
-                const auto mask = event->mask & static_cast<std::uint32_t>(IN_ISDIR)
-                                      ? event->mask & ~static_cast<std::uint32_t>(IN_ISDIR)
-                                      : event->mask;
-
-                this->queue_.push(
-                    std::make_shared<file_system_event>(event->len ? path / event->name : path,
-                                                        event_handler::get_inotify(mask)));
+            this->queue_.push(
+                std::make_shared<file_system_event>(event->len ? path / event->name : path,
+                                                    event_handler::get_inotify(mask)));
 
 #if defined(PRINT_DBG)
-                std::println("raw = {}\t| lookup = {},{}\t| cookie = {}\t| {}",
-                             event->mask,
-                             event_handler::get_inotify(mask),
-                             static_cast<std::uint32_t>(event_handler::get_inotify(mask)),
-                             event->cookie,
-                             event->len ? (path / event->name).string() : path.string());
+            std::println("raw = {}\t| lookup = {},{}\t| cookie = {}\t| {}",
+                         event->mask,
+                         event_handler::get_inotify(mask),
+                         static_cast<std::uint32_t>(event_handler::get_inotify(mask)),
+                         event->cookie,
+                         event->len ? (path / event->name).string() : path.string());
 #endif
-            }
-            i += EVENT_SIZE + event->len;
         }
+        i += EVENT_SIZE + event->len;
     }
 
     if (stoken.stop_requested() || this->queue_.empty())
@@ -207,10 +278,7 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
         return nullptr;
     }
 
-    // Return next event
-    auto event = this->queue_.front();
-    this->queue_.pop();
-    return event;
+    return this->get_next_event_from_queue();
 }
 
 std::uint32_t

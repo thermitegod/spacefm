@@ -22,11 +22,8 @@
 
 #pragma once
 
-#include <chrono>
-#include <condition_variable>
 #include <filesystem>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <stop_token>
 #include <vector>
@@ -59,6 +56,8 @@ class notify_base
 
     void watch_path_recursively(const file_system_event& fse);
 
+    virtual void stop() noexcept = 0;
+
   protected:
     [[nodiscard]] bool check_watch_file(const file_system_event& fse) const;
     [[nodiscard]] bool check_watch_directory(const file_system_event& fse) const;
@@ -67,10 +66,6 @@ class notify_base
     [[nodiscard]] std::filesystem::path path_from_fd(const std::int32_t fd) const noexcept;
 
     std::queue<std::shared_ptr<file_system_event>> queue_;
-
-    std::mutex mutex_;
-    std::condition_variable_any cv_;
-    std::chrono::milliseconds thread_sleep_ = std::chrono::milliseconds(250);
 
   private:
     std::vector<std::filesystem::path> ignored_;

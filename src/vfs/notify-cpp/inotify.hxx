@@ -22,6 +22,7 @@
  */
 
 #pragma once
+
 #include <filesystem>
 #include <memory>
 #include <stop_token>
@@ -75,7 +76,11 @@ class inotify : public notify_base
     get_next_event(const std::stop_token& stoken) override;
     [[nodiscard]] std::uint32_t get_event_mask(const notify::event event) const override;
 
+    void stop() noexcept override;
+
   private:
+    std::shared_ptr<notify::file_system_event> get_next_event_from_queue() noexcept;
+
     [[nodiscard]] std::filesystem::path wd_to_path(const std::int32_t wd) const noexcept;
 
     void watch(const file_system_event& fse);
@@ -87,6 +92,9 @@ class inotify : public notify_base
     void remove_watch(const std::int32_t wd) const;
 
     std::unordered_map<std::int32_t, std::filesystem::path> directory_map_;
+
     std::int32_t inotify_fd_;
+    std::int32_t event_fd_;
+    std::int32_t epoll_fd_;
 };
 } // namespace notify
