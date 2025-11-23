@@ -21,6 +21,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <stop_token>
 
 #include <gdkmm.h>
 
@@ -41,11 +42,8 @@ class thumbnailer
 
     void request(const request_data& request) noexcept;
 
-    void run() noexcept;
-    void run_once() noexcept;
-    void stop() noexcept;
-
-    [[nodiscard]] bool is_stopped() const noexcept;
+    void run(const std::stop_token& stoken) noexcept;
+    void run_once(const std::stop_token& stoken) noexcept;
 
     [[nodiscard]] auto
     signal_thumbnail_created() noexcept
@@ -57,8 +55,7 @@ class thumbnailer
     std::queue<request_data> queue_;
 
     std::mutex mutex_;
-    std::condition_variable cv_;
-    bool stopped_ = false;
+    std::condition_variable_any cv_;
 
     // Signals
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_thumbnail_created_;

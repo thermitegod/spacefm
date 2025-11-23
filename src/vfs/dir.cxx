@@ -123,7 +123,8 @@ vfs::dir::dir(const std::filesystem::path& path,
     this->thumbnailer_.signal_thumbnail_created().connect([this](auto a)
                                                           { this->on_thumbnail_loaded(a); });
 
-    this->thumbnailer_thread_ = std::jthread([this]() { this->thumbnailer_.run(); });
+    this->thumbnailer_thread_ =
+        std::jthread([this](const std::stop_token& stoken) { this->thumbnailer_.run(stoken); });
     pthread_setname_np(this->thumbnailer_thread_.native_handle(), "thumbnailer");
 
     this->update_avoid_changes();
@@ -145,7 +146,7 @@ vfs::dir::~dir() noexcept
     this->signal_thumbnail_loaded().clear();
     this->signal_directory_deleted().clear();
 
-    this->thumbnailer_.stop();
+    this->thumbnailer_thread_.request_stop();
     this->thumbnailer_thread_.join();
 
     this->notifier_.stop();

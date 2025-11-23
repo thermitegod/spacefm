@@ -16,6 +16,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stop_token>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -33,23 +35,23 @@ vfs::thumbnailer::request(const request_data& request) noexcept
 }
 
 void
-vfs::thumbnailer::run() noexcept
+vfs::thumbnailer::run(const std::stop_token& stoken) noexcept
 {
-    while (!this->is_stopped())
+    while (!stoken.stop_requested())
     {
-        this->run_once();
+        this->run_once(stoken);
     }
 }
 
 void
-vfs::thumbnailer::run_once() noexcept
+vfs::thumbnailer::run_once(const std::stop_token& stoken) noexcept
 {
     request_data request;
     {
         std::unique_lock<std::mutex> lock(this->mutex_);
-        this->cv_.wait(lock, [this] { return this->is_stopped() || !this->queue_.empty(); });
+        this->cv_.wait(lock, stoken, [this] { return !queue_.empty(); });
 
-        if (this->is_stopped() && this->queue_.empty())
+        if (stoken.stop_requested()) // && this->queue_.empty())
         {
             return;
         }
@@ -69,28 +71,10 @@ vfs::thumbnailer::run_once() noexcept
         // std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    if (this->is_stopped())
+    if (!stoken.stop_requested())
     {
         // since thumbnail generation can take an indeterminate amount of time there
         // needs to be another abort check before calling the callback.
-        return;
+        this->signal_thumbnail_created().emit(request.file);
     }
-
-    this->signal_thumbnail_created().emit(request.file);
-}
-
-void
-vfs::thumbnailer::stop() noexcept
-{
-    {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-        this->stopped_ = true;
-    }
-    this->cv_.notify_all();
-}
-
-bool
-vfs::thumbnailer::is_stopped() const noexcept
-{
-    return this->stopped_;
 }
