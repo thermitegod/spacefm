@@ -126,7 +126,7 @@ main(int argc, char** argv)
             }
 
             const auto thumbnail_real_path = metadata_uri.starts_with("file://")
-                                                 ? ztd::removeprefix(metadata_uri, "file://")
+                                                 ? ztd::remove_prefix(metadata_uri, "file://")
                                                  : metadata_uri;
             if (!std::filesystem::exists(thumbnail_real_path))
             {

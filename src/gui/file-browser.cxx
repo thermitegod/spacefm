@@ -5316,7 +5316,7 @@ gui::browser::on_action(const xset::name setname) noexcept
             }
             else
             {
-                const auto tab = ztd::removeprefix(set->name(), "tab_");
+                const auto tab = ztd::remove_prefix(set->name(), "tab_");
                 i = tab_t::create(tab).value_or(INVALID_TAB);
             }
             this->go_tab(i);
@@ -5437,14 +5437,14 @@ gui::browser::on_action(const xset::name setname) noexcept
     {
         const auto mode = this->main_window_->panel_context.at(this->panel_);
 
-        const auto panel_num = ztd::removeprefix(set->name(), "panel_");
+        const auto panel_num = ztd::remove_prefix(set->name(), "panel_");
         const auto panel = panel_t::create(panel_num).value_or(INVALID_PANEL);
         // logger::debug<logger::gui>("ACTION panel={}", panel);
 
         if (is_valid_panel(panel))
         {
             const std::string fullxname = std::format("panel{}_", panel);
-            const std::string xname = ztd::removeprefix(set->name(), fullxname);
+            const std::string xname = ztd::remove_prefix(set->name(), fullxname);
             if (xname == "show_hidden") // shared key
             {
                 this->show_hidden_files(xset_get_b_panel(this->panel_, xset::panel::show_hidden));

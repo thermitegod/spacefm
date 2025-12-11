@@ -2385,7 +2385,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         }
         else
         {
-            const auto panel = ztd::removeprefix(set->name(), "panel_");
+            const auto panel = ztd::remove_prefix(set->name(), "panel_");
             i = panel_t::create(panel).value_or(INVALID_PANEL);
         }
         this->focus_panel(i);

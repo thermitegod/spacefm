@@ -1098,7 +1098,7 @@ on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     const auto set = xset::set::get(xset::name::dev_show_hide_volumes);
     if (vol)
     {
-        const std::string devid = ztd::removeprefix(vol->udi(), "/");
+        const std::string devid = ztd::remove_prefix(vol->udi(), "/");
 
         msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc.value(),
@@ -1128,7 +1128,7 @@ on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
     const auto set = xset::set::get(xset::name::dev_automount_volumes);
     if (vol)
     {
-        const std::string devid = ztd::removeprefix(vol->udi(), "/");
+        const std::string devid = ztd::remove_prefix(vol->udi(), "/");
 
         msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc.value(),

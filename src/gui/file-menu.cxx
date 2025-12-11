@@ -3015,7 +3015,7 @@ gui_file_menu_action(gui::browser* browser, const xset_t& set) noexcept
         }
         else
         {
-            const auto panel = ztd::removeprefix(set->name(), "open_in_panel_");
+            const auto panel = ztd::remove_prefix(set->name(), "open_in_panel_");
             i = panel_t::create(panel).value_or(INVALID_PANEL);
         }
         data->browser->open_in_panel(i, data->file_path);
@@ -3039,7 +3039,7 @@ gui_file_menu_action(gui::browser* browser, const xset_t& set) noexcept
             }
             else
             {
-                const auto tab = ztd::removeprefix(set->name(), "opentab_");
+                const auto tab = ztd::remove_prefix(set->name(), "opentab_");
                 i = tab_t::create(tab).value_or(INVALID_TAB);
             }
             data->browser->open_in_tab(data->file_path, i);

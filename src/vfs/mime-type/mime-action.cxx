@@ -519,7 +519,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
         kf.set_string("Desktop Entry", "NoDisplay", "true");
 #endif
 
-        const std::string name = ztd::removesuffix(desktop_id, desktop_ext);
+        const std::string name = ztd::remove_suffix(desktop_id, desktop_ext);
         cust_template = std::format("{}-usercustom-{}.desktop", name, replace_txt);
 
 #if (GTK_MAJOR_VERSION == 4)

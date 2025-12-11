@@ -493,7 +493,7 @@ CreateDialog::on_button_ok_clicked()
             { // symlink to root
                 break;
             }
-            entry_text = ztd::removesuffix(entry_text, "/");
+            entry_text = ztd::remove_suffix(entry_text, "/");
         }
 
         const std::string target = entry_text;
