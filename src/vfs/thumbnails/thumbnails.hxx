@@ -28,10 +28,10 @@
 namespace vfs::detail::thumbnail
 {
 #if (GTK_MAJOR_VERSION == 4)
-Glib::RefPtr<Gdk::Texture> image(const std::shared_ptr<vfs::file>& file,
-                                 const i32 thumb_size) noexcept;
-Glib::RefPtr<Gdk::Texture> video(const std::shared_ptr<vfs::file>& file,
-                                 const i32 thumb_size) noexcept;
+Glib::RefPtr<Gdk::Paintable> image(const std::shared_ptr<vfs::file>& file,
+                                   const i32 thumb_size) noexcept;
+Glib::RefPtr<Gdk::Paintable> video(const std::shared_ptr<vfs::file>& file,
+                                   const i32 thumb_size) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
 GdkPixbuf* image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;
 GdkPixbuf* video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;

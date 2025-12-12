@@ -280,13 +280,9 @@ if get_option('dev')
     preprocessor += [
         '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tools/scripts')),
 
-        # GTK
-        '-DGTK_DISABLE_DEPRECATED',
-        '-DGDK_DISABLE_DEPRECATED',
-        '-DG_DISABLE_DEPRECATED',
         # GTKMM
-        '-DGTKMM_DISABLE_DEPRECATED',
-        '-DGDKMM_DISABLE_DEPRECATED',
+        # '-DGTKMM_DISABLE_DEPRECATED', # Gdk::Pixbuf
+        # '-DGDKMM_DISABLE_DEPRECATED', # Gdk::Pixbuf
         '-DGLIBMM_DISABLE_DEPRECATED',
         '-DGIOMM_DISABLE_DEPRECATED',
     ]

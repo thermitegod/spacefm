@@ -276,7 +276,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
     }
 }
 
-Glib::RefPtr<Gdk::Texture>
+Glib::RefPtr<Gdk::Paintable>
 vfs::file::thumbnail(const thumbnail_size size) const noexcept
 {
     if (size == thumbnail_size::big)
@@ -731,27 +731,6 @@ vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
     }
 }
 
-#if (GTK_MAJOR_VERSION == 4)
-/**
- * Like the deprecated gdk_texture_new_for_pixbuf() and Gdk::Texture::create_for_pixbuf().
- */
-static Glib::RefPtr<Gdk::Texture>
-create_texture_for_pixbuf(const Glib::RefPtr<const Gdk::Pixbuf>& pixbuf) noexcept
-{
-    // Taken from https://gitlab.gnome.org/GNOME/gtkmm/-/commit/feceb41cd988d4b1bdbc7aab0d095d1aa859f547
-
-    const auto bytes = Glib::Bytes::create(pixbuf->get_pixels(),
-                                           static_cast<std::uint64_t>(pixbuf->get_height()) *
-                                               static_cast<std::uint64_t>(pixbuf->get_rowstride()));
-    return Gdk::MemoryTexture::create(pixbuf->get_width(),
-                                      pixbuf->get_height(),
-                                      pixbuf->get_has_alpha() ? Gdk::MemoryTexture::Format::R8G8B8A8
-                                                              : Gdk::MemoryTexture::Format::R8G8B8,
-                                      bytes,
-                                      static_cast<std::uint64_t>(pixbuf->get_rowstride()));
-}
-#endif
-
 void
 vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
@@ -767,15 +746,6 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
     }
 
 #if (GTK_MAJOR_VERSION == 4)
-    // TODO do something better
-    auto icon_to_pixbuf = [](const Glib::RefPtr<Gtk::IconPaintable>& icon)
-    {
-        return create_texture_for_pixbuf(
-            Gdk::Pixbuf::create_from_file(icon->get_file()->get_path(),
-                                          icon->get_intrinsic_width(),
-                                          icon->get_intrinsic_height()));
-    };
-
     if (size == thumbnail_size::big)
     {
         if (this->thumbnail_.big)
@@ -790,7 +760,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
             return;
         }
 
-        Glib::RefPtr<Gdk::Texture> thumbnail = nullptr;
+        Glib::RefPtr<Gdk::Paintable> thumbnail;
         if (this->mime_type_->is_image())
         {
             thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
@@ -809,7 +779,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         else
         {
             // fallback to mime_type icon
-            this->thumbnail_.big = icon_to_pixbuf(this->icon(thumbnail_size::big));
+            this->thumbnail_.big = this->icon(thumbnail_size::big);
         }
     }
     else
@@ -826,7 +796,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
             return;
         }
 
-        Glib::RefPtr<Gdk::Texture> thumbnail = nullptr;
+        Glib::RefPtr<Gdk::Paintable> thumbnail;
         if (this->mime_type_->is_image())
         {
             thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
@@ -845,7 +815,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         else
         {
             // fallback to mime_type icon
-            this->thumbnail_.small = icon_to_pixbuf(this->icon(thumbnail_size::small));
+            this->thumbnail_.small = this->icon(thumbnail_size::small);
         }
     }
 

@@ -86,7 +86,7 @@ class file final : public std::enable_shared_from_this<file>
     };
 #if (GTK_MAJOR_VERSION == 4)
     Glib::RefPtr<Gtk::IconPaintable> icon(const thumbnail_size size) noexcept;
-    Glib::RefPtr<Gdk::Texture> thumbnail(const thumbnail_size size) const noexcept;
+    Glib::RefPtr<Gdk::Paintable> thumbnail(const thumbnail_size size) const noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
     GdkPixbuf* icon(const thumbnail_size size) noexcept;
     GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
@@ -149,8 +149,8 @@ class file final : public std::enable_shared_from_this<file>
     struct thumbnail_data final
     {
 #if (GTK_MAJOR_VERSION == 4)
-        Glib::RefPtr<Gdk::Texture> big{nullptr};
-        Glib::RefPtr<Gdk::Texture> small{nullptr};
+        Glib::RefPtr<Gdk::Paintable> big;
+        Glib::RefPtr<Gdk::Paintable> small;
 #elif (GTK_MAJOR_VERSION == 3)
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};
