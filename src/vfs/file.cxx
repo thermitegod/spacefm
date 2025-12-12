@@ -257,8 +257,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             return vfs::utils::load_icon(this->special_directory_get_icon_name(),
-                                         this->settings_->icon_size_big)
-                .value_or(nullptr);
+                                         this->settings_->icon_size_big);
         }
 
         return this->mime_type_->icon(true);
@@ -268,8 +267,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             return vfs::utils::load_icon(this->special_directory_get_icon_name(),
-                                         this->settings_->icon_size_small)
-                .value_or(nullptr);
+                                         this->settings_->icon_size_small);
         }
 
         return this->mime_type_->icon(false);

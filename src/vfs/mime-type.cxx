@@ -145,7 +145,7 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (this->type_ == vfs::constants::mime_type::directory)
     {
-        icon = vfs::utils::load_icon("folder", icon_size).value_or(nullptr);
+        icon = vfs::utils::load_icon("folder", icon_size);
         if (big)
         {
             this->icon_.big = icon;
@@ -163,7 +163,7 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (!mime_icon.empty())
     {
-        icon = vfs::utils::load_icon(mime_icon, icon_size).value_or(nullptr);
+        icon = vfs::utils::load_icon(mime_icon, icon_size);
     }
     if (!mime_desc.empty())
     {
@@ -192,13 +192,13 @@ vfs::mime_type::icon(const bool big) noexcept
             const std::string icon_name = ztd::replace(this->type_, "/", "-");
 
             // is there an icon named foo-bar?
-            icon = vfs::utils::load_icon(icon_name, icon_size).value_or(nullptr);
+            icon = vfs::utils::load_icon(icon_name, icon_size);
             // fallback try foo-x-generic
             if (!icon)
             {
                 const auto mime = ztd::partition(this->type_, "/")[0];
                 const std::string generic_icon_name = std::format("{}-x-generic", mime);
-                icon = vfs::utils::load_icon(generic_icon_name, icon_size).value_or(nullptr);
+                icon = vfs::utils::load_icon(generic_icon_name, icon_size);
             }
         }
     }
@@ -216,7 +216,7 @@ vfs::mime_type::icon(const bool big) noexcept
         }
         else /* unknown */
         {
-            icon = vfs::utils::load_icon("unknown", icon_size).value_or(nullptr);
+            icon = vfs::utils::load_icon("unknown", icon_size);
         }
     }
 

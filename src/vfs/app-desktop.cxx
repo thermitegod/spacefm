@@ -379,13 +379,8 @@ vfs::desktop::icon(i32 size) const noexcept
 
     if (!this->desktop_entry_.icon.empty())
     {
-        desktop_icon = vfs::utils::load_icon(this->desktop_entry_.icon, size).value_or(nullptr);
-    }
-
-    // fallback to generic icon
-    if (!desktop_icon)
-    {
-        desktop_icon = vfs::utils::load_icon("application-x-executable", size).value_or(nullptr);
+        desktop_icon =
+            vfs::utils::load_icon(this->desktop_entry_.icon, size, "application-x-executable");
     }
     return desktop_icon;
 }

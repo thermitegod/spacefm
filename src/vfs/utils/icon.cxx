@@ -22,39 +22,33 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/error.hxx"
-
 #include "vfs/utils/icon.hxx"
 
 #include "logger.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
 
-std::expected<Glib::RefPtr<Gtk::IconPaintable>, std::error_code>
-vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size) noexcept
+Glib::RefPtr<Gtk::IconPaintable>
+vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size,
+                      const std::string_view fallback) noexcept
 {
-    const auto icon_theme = Gtk::IconTheme::create();
+    auto display = Gdk::Display::get_default();
+    if (!display)
+    {
+        return nullptr;
+    }
+
+    const auto icon_theme = Gtk::IconTheme::get_for_display(display);
 
     if (!icon_theme->has_icon(icon_name.data()))
     {
         logger::warn("Icon theme '{}' is missing icon name = {}",
                      icon_theme->property_theme_name().get_value().data(),
                      icon_name);
+        return icon_theme->lookup_icon(fallback.data(), icon_size.data());
     }
 
-    auto icon = icon_theme->lookup_icon(icon_name.data(), icon_size.data());
-    if (!icon)
-    {
-        logger::error<logger::vfs>("Failed to load the '{}' icon from theme '{}'",
-                                   icon_name,
-                                   icon_theme->property_theme_name().get_name());
-        return std::unexpected{vfs::error_code::icon_load};
-    }
-
-    // TODO gtk-4.20 deprecated
-    // logger::info("load_icon name = {}", icon->get_icon_name().data());
-
-    return icon;
+    return icon_theme->lookup_icon(icon_name.data(), icon_size.data());
 }
 
 #elif (GTK_MAJOR_VERSION == 3)

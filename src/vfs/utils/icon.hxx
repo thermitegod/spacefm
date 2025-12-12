@@ -13,9 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <expected>
 #include <string_view>
-#include <system_error>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -24,8 +22,9 @@
 namespace vfs::utils
 {
 #if (GTK_MAJOR_VERSION == 4)
-std::expected<Glib::RefPtr<Gtk::IconPaintable>, std::error_code>
-load_icon(const std::string_view icon_name, const i32 icon_size) noexcept;
+Glib::RefPtr<Gtk::IconPaintable>
+load_icon(const std::string_view icon_name, const i32 icon_size,
+          const std::string_view fallback = "text-x-generic") noexcept;
 
 #elif (GTK_MAJOR_VERSION == 3)
 
