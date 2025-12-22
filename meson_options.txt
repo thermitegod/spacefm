@@ -48,13 +48,6 @@ option(
 )
 
 option(
-    'with-system-magic-enum',
-    type : 'boolean',
-    value: false,
-    description : 'Use system magic_enum instead of bundled version'
-)
-
-option(
     'with-system-spdlog',
     type : 'boolean',
     value: false,

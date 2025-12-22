@@ -213,7 +213,7 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 ## system dependencies
 
 cli11_dep = dependency('CLI11', required: true)
-
+magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
 libudev_dep = dependency('libudev', required: true)
 botan_dep = dependency('botan-3', required: true)
 
@@ -249,6 +249,7 @@ gtk4_dependencies = [
 
 base_dependencies = [
     cli11_dep,
+    magic_enum_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,
@@ -314,16 +315,6 @@ if get_option('with-system-glaze')
     base_dependencies += glaze_dep
 else
     incdir += include_directories('subprojects/glaze/include')
-endif
-
-if get_option('with-system-magic-enum')
-    magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
-    base_dependencies += magic_enum_dep
-else
-    # TODO this is still building tests
-    magic_enum_proj = subproject('magic_enum', required: true, default_options: ['test=false'])
-    magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
-    base_dependencies += magic_enum_dep
 endif
 
 if get_option('with-system-spdlog')
