@@ -48,13 +48,6 @@ option(
 )
 
 option(
-    'with-system-spdlog',
-    type : 'boolean',
-    value: false,
-    description : 'Use system spdlog instead of bundled version'
-)
-
-option(
     'with-system-ztd',
     type : 'boolean',
     value: false,

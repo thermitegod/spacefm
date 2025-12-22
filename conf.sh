@@ -8,7 +8,6 @@ CC=clang CXX=clang++ meson setup \
     -Ddev=true \
     -Dtools=true \
     -Dwith-system-glaze=true \
-    -Dwith-system-spdlog=false \
     -Dwith-system-ztd=true \
     --buildtype=debugoptimized \
     -Db_lto=true -Db_lto_mode=thin -Db_thinlto_cache=true \

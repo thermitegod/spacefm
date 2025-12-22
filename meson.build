@@ -317,19 +317,6 @@ else
     incdir += include_directories('subprojects/glaze/include')
 endif
 
-if get_option('with-system-spdlog')
-    spdlog_dep = dependency('spdlog', required: true)
-    base_dependencies += spdlog_dep
-else
-    cmake = import('cmake')
-    # use std::format over bundled fmt::format
-    cmake_opt_var = cmake.subproject_options()
-    cmake_opt_var.add_cmake_defines({'SPDLOG_USE_STD_FORMAT': '1'})
-    spdlog_proj = cmake.subproject('spdlog', required: true, options: cmake_opt_var)
-    spdlog_dep = spdlog_proj.dependency('spdlog')
-    base_dependencies += spdlog_dep
-endif
-
 if get_option('with-system-ztd')
     ztd_dep = dependency('ztd', required: true)
     base_dependencies += ztd_dep
@@ -397,6 +384,8 @@ foreach a: features
 endforeach
 
 # Logger Lib
+
+spdlog_dep = dependency('spdlog', required: true)
 
 logger_lib = static_library(
     'logger',
