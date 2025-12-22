@@ -310,7 +310,7 @@ if get_option('exo')
 endif
 
 if get_option('with-system-glaze')
-    glaze_dep = dependency('glaze', required: true)
+    glaze_dep = dependency('glaze', required: true, version: '>=6.3.0')
     base_dependencies += glaze_dep
 else
     incdir += include_directories('subprojects/glaze/include')
