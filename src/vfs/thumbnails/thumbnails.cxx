@@ -139,33 +139,36 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 {
     static thread_local auto cache_dirs = vfs::user::thumbnail_cache();
 
-    const auto [thumbnail_create_size,
-                thumbnail_cache] = [thumb_size]() -> std::pair<std::uint32_t, std::filesystem::path>
-    {
-        if (thumb_size <= 128)
+    const auto [thumbnail_create_size, thumbnail_cache] = std::invoke(
+        [](const auto size) -> std::pair<std::uint32_t, std::filesystem::path>
         {
-            return {magic_enum::enum_integer(thumbnail_size::normal), cache_dirs.normal};
-        }
-        else if (thumb_size <= 256)
-        {
-            return {magic_enum::enum_integer(thumbnail_size::large), cache_dirs.large};
-        }
-        else if (thumb_size <= 512)
-        {
-            return {magic_enum::enum_integer(thumbnail_size::x_large), cache_dirs.x_large};
-        }
-        else // if (thumb_size <= 1024)
-        {
-            return {magic_enum::enum_integer(thumbnail_size::xx_large), cache_dirs.xx_large};
-        }
-    }();
+            if (size <= 128)
+            {
+                return {magic_enum::enum_integer(thumbnail_size::normal), cache_dirs.normal};
+            }
+            else if (size <= 256)
+            {
+                return {magic_enum::enum_integer(thumbnail_size::large), cache_dirs.large};
+            }
+            else if (size <= 512)
+            {
+                return {magic_enum::enum_integer(thumbnail_size::x_large), cache_dirs.x_large};
+            }
+            else // if (size <= 1024)
+            {
+                return {magic_enum::enum_integer(thumbnail_size::xx_large), cache_dirs.xx_large};
+            }
+        },
+        thumb_size);
 
-    const auto hash = [&file]()
-    {
-        const auto md5 = Botan::HashFunction::create("MD5");
-        md5->update(file->uri());
-        return Botan::hex_encode(md5->final(), false);
-    }();
+    const auto hash = std::invoke(
+        [](const auto& file)
+        {
+            const auto md5 = Botan::HashFunction::create("MD5");
+            md5->update(file->uri());
+            return Botan::hex_encode(md5->final(), false);
+        },
+        file);
 
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
     const auto fail_file = cache_dirs.fail / std::format("{}.json", hash);
