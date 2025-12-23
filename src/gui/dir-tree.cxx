@@ -36,8 +36,7 @@
 #include "gui/utils/utils.hxx"
 
 #include "vfs/file.hxx"
-#include "vfs/notify-cpp/event.hxx"
-#include "vfs/notify-cpp/notify_controller.hxx"
+#include "vfs/notify-cpp/controller.hxx"
 
 #include "vfs/utils/icon.hxx"
 
@@ -688,7 +687,7 @@ gui::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
         {
             return;
         }
-        node->notifier = notify::inotify_controller();
+        node->notifier = notify::controller();
 
         std::shared_ptr<gui::dir_tree::node> child;
         std::shared_ptr<gui::dir_tree::node> next;

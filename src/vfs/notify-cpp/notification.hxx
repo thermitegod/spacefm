@@ -32,7 +32,7 @@ namespace notify
 class notification
 {
   public:
-    notification(const notify::event event, const std::filesystem::path& path);
+    notification(const notify::event event, const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] std::filesystem::path path() const noexcept;
     [[nodiscard]] notify::event event() const noexcept;

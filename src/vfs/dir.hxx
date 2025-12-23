@@ -34,7 +34,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/notify-cpp/notify_controller.hxx"
+#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/settings.hxx"
 #include "vfs/thumbnailer.hxx"
 
@@ -112,7 +112,7 @@ class dir final : public std::enable_shared_from_this<dir>
     vfs::thumbnailer thumbnailer_;
     std::jthread thumbnailer_thread_;
 
-    notify::notify_controller notifier_ = notify::inotify_controller();
+    notify::controller notifier_;
     std::jthread notifier_thread_;
 
     bool enable_thumbnails_{true};

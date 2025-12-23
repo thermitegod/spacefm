@@ -123,7 +123,7 @@ namespace event_handler
 template<> struct std::formatter<notify::event> : std::formatter<std::string>
 {
     auto
-    format(const notify::event& event, format_context& ctx) const
+    format(const notify::event& event, format_context& ctx) const noexcept
     {
         constexpr auto resolve_name = [](notify::event event) -> std::string
         {

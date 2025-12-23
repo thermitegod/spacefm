@@ -18,13 +18,12 @@
 
 #include "vfs/execute.hxx"
 #include "vfs/mime-monitor.hxx"
-#include "vfs/notify-cpp/event.hxx"
-#include "vfs/notify-cpp/notify_controller.hxx"
+#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/user-dirs.hxx"
 
 namespace
 {
-notify::notify_controller notifier = notify::inotify_controller();
+notify::controller notifier;
 std::jthread thread;
 } // namespace
 

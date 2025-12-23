@@ -26,19 +26,19 @@
 
 #include "vfs/notify-cpp/file_system_event.hxx"
 
-notify::file_system_event::file_system_event(const std::filesystem::path& path)
+notify::file_system_event::file_system_event(const std::filesystem::path& path) noexcept
     : event_(notify::event::all), path_(path)
 {
 }
 
 notify::file_system_event::file_system_event(const std::filesystem::path& path,
-                                             const notify::event event)
+                                             const notify::event event) noexcept
     : event_(event), path_(path)
 {
 }
 
 notify::file_system_event::file_system_event(const std::filesystem::path& path,
-                                             const std::set<notify::event>& events)
+                                             const std::set<notify::event>& events) noexcept
     : path_(path)
 {
     for (const auto& event : events)

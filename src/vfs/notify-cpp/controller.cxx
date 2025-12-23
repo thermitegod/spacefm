@@ -27,68 +27,65 @@
 #include <set>
 #include <stop_token>
 
-#include "vfs/notify-cpp/inotify.hxx"
+#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/notify-cpp/notification.hxx"
 #include "vfs/notify-cpp/notify.hxx"
-#include "vfs/notify-cpp/notify_controller.hxx"
 
-notify::inotify_controller::inotify_controller() : notify_controller(std::make_shared<inotify>()) {}
+namespace notify
+{
+controller::controller() : notify_(std::make_shared<inotify>()) {}
 
-notify::notify_controller::notify_controller(const std::shared_ptr<notify_base>& n) : notify_(n) {}
-
-notify::notify_controller&
-notify::notify_controller::watch_file(const file_system_event& fse)
+controller&
+controller::watch_file(const file_system_event& fse)
 {
     this->notify_->watch_file(fse);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::watch_directory(const file_system_event& fse)
+controller&
+controller::watch_directory(const file_system_event& fse)
 {
     this->notify_->watch_directory(fse);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::watch_path_recursively(const file_system_event& fse)
+controller&
+controller::watch_path_recursively(const file_system_event& fse)
 {
     this->notify_->watch_path_recursively(fse);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::unwatch(const std::filesystem::path& f)
+controller&
+controller::unwatch(const std::filesystem::path& f)
 {
     this->notify_->unwatch(f);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::ignore(const std::filesystem::path& p) noexcept
+controller&
+controller::ignore(const std::filesystem::path& p) noexcept
 {
     this->notify_->ignore(p);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::ignore_once(const std::filesystem::path& p) noexcept
+controller&
+controller::ignore_once(const std::filesystem::path& p) noexcept
 {
     this->notify_->ignore_once(p);
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::on_event(const notify::event event,
-                                    const event_observer& event_observer) noexcept
+controller&
+controller::on_event(const event event, const event_observer& event_observer) noexcept
 {
     this->event_observer_[event] = event_observer;
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::on_events(const std::set<notify::event>& events,
-                                     const event_observer& event_observer) noexcept
+controller&
+controller::on_events(const std::set<event>& events, const event_observer& event_observer) noexcept
 {
     for (const auto event : events)
     {
@@ -97,15 +94,15 @@ notify::notify_controller::on_events(const std::set<notify::event>& events,
     return *this;
 }
 
-notify::notify_controller&
-notify::notify_controller::on_unexpected_event(const event_observer& event_observer) noexcept
+controller&
+controller::on_unexpected_event(const event_observer& event_observer) noexcept
 {
     this->unexpected_event_observer_ = event_observer;
     return *this;
 }
 
 void
-notify::notify_controller::run(const std::stop_token& stoken) noexcept
+controller::run(const std::stop_token& stoken) noexcept
 {
     // std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
 
@@ -116,7 +113,7 @@ notify::notify_controller::run(const std::stop_token& stoken) noexcept
 }
 
 void
-notify::notify_controller::run_once(const std::stop_token& stoken) noexcept
+controller::run_once(const std::stop_token& stoken) noexcept
 {
     std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
 
@@ -142,7 +139,7 @@ notify::notify_controller::run_once(const std::stop_token& stoken) noexcept
 }
 
 std::vector<std::pair<notify::event, notify::event_observer>>
-notify::notify_controller::find_observer(const notify::event e) const noexcept
+controller::find_observer(const notify::event e) const noexcept
 {
     std::vector<std::pair<notify::event, event_observer>> observers;
     for (const auto& [event, observer] : this->event_observer_)
@@ -154,3 +151,4 @@ notify::notify_controller::find_observer(const notify::event e) const noexcept
     }
     return observers;
 }
+} // namespace notify

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2017 Erik Zenker <erikzenker@hotmail.com>
  * Copyright (c) 2018 Rafael Sadowski <rafael.sadowski@computacenter.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,48 +27,88 @@
 #include <memory>
 #include <queue>
 #include <stop_token>
+#include <unordered_map>
 #include <vector>
 
-#include "vfs/notify-cpp/event.hxx"
+#include <cstdint>
+
 #include "vfs/notify-cpp/file_system_event.hxx"
 
-/**
- * @brief Base class
- */
 namespace notify
 {
-class notify_base
+class inotify
 {
   public:
-    notify_base() = default;
-    virtual ~notify_base() = default;
+    inotify();
+    ~inotify() noexcept;
 
-    virtual void watch_file(const file_system_event&) = 0;
-    virtual void watch_directory(const file_system_event&) = 0;
-    virtual void unwatch(const file_system_event&) = 0;
+    /**
+     * @brief Adds a single file to the list of watches.
+     * @param path that will be watched
+     */
+    void watch_file(const file_system_event& fse);
 
-    [[nodiscard]] virtual std::shared_ptr<file_system_event>
-    get_next_event(const std::stop_token& stoken) = 0;
+    /**
+     * @brief Adds a single directory to the list of watches.
+     * @param path that will be watched
+     */
+    void watch_directory(const file_system_event& fse);
 
-    [[nodiscard]] virtual std::uint32_t get_event_mask(const notify::event) const = 0;
+    /**
+     * @brief Add watch to a directory, recursively.
+     * @param fse that will be watched
+     */
+    void watch_path_recursively(const file_system_event& fse);
+
+    /**
+     * @brief remove watch for a file or directory.
+     * @param path that will be unwatched
+     */
+
+    /**
+     * @brief Remove watch for a file or directory. This is not done recursively.
+     * @param fse - filesystem event to remove
+     */
+    void unwatch(const file_system_event& fse);
 
     void ignore(const std::filesystem::path& p) noexcept;
     void ignore_once(const std::filesystem::path& p) noexcept;
 
-    void watch_path_recursively(const file_system_event& fse);
+    /**
+     * @brief Blocking wait on new events of watched files/directories
+     *        specified on the eventmask. file_system_event's
+     *        will be returned one by one. Thus this
+     *        function can be called in some while(true)
+     *        loop.
+     * @return A new file_system_event
+     */
+    [[nodiscard]] std::shared_ptr<file_system_event> get_next_event(const std::stop_token& stoken);
+    [[nodiscard]] std::uint32_t get_event_mask(const event event) const;
 
-    virtual void stop() noexcept = 0;
+    void stop() const noexcept;
 
-  protected:
+  private:
     [[nodiscard]] bool check_watch_file(const file_system_event& fse) const;
     [[nodiscard]] bool check_watch_directory(const file_system_event& fse) const;
     [[nodiscard]] bool is_ignored(const std::filesystem::path& p) const noexcept;
     [[nodiscard]] bool is_ignored_once(const std::filesystem::path& p) noexcept;
+
+    [[nodiscard]] std::shared_ptr<file_system_event> get_next_event_from_queue() noexcept;
+
+    [[nodiscard]] std::filesystem::path wd_to_path(const std::int32_t wd) const noexcept;
     [[nodiscard]] std::filesystem::path path_from_fd(const std::int32_t fd) const noexcept;
+
+    void watch(const file_system_event& fse);
+    void remove_watch(const std::int32_t wd) const;
+
+    std::unordered_map<std::int32_t, std::filesystem::path> directory_map_;
+
+    std::int32_t inotify_fd_;
+    std::int32_t event_fd_;
+    std::int32_t epoll_fd_;
 
     std::queue<std::shared_ptr<file_system_event>> queue_;
 
-  private:
     std::vector<std::filesystem::path> ignored_;
     std::vector<std::filesystem::path> ignored_once_;
 };

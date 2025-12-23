@@ -31,8 +31,8 @@
 #define DOCTEST_CONFIG_DOUBLE_STRINGIFY
 #include <doctest/doctest.h>
 
+#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/notify-cpp/event.hxx"
-#include "vfs/notify-cpp/notify_controller.hxx"
 
 #include "doctest_utils.hxx"
 #include "filesystem_event_helper.hxx"
@@ -46,16 +46,15 @@ using namespace notify;
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotAcceptNotExistingPaths")
 {
-    CHECK_THROWS_AS(
-        inotify_controller().watch_path_recursively({"/not/existing/path/", event::all}),
-        std::invalid_argument);
-    CHECK_THROWS_AS(inotify_controller().watch_file({"/not/existing/file", event::all}),
+    CHECK_THROWS_AS(controller().watch_path_recursively({"/not/existing/path/", event::all}),
+                    std::invalid_argument);
+    CHECK_THROWS_AS(controller().watch_file({"/not/existing/file", event::all}),
                     std::invalid_argument);
 }
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnOpenEvent")
 {
-    notify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file({test_file_one_, event::close})
         .on_event(event::close,
                   [&](const notification& notification) { promised_open_.set_value(notification); })
@@ -79,7 +78,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnOpenEvent")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
 {
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
 
     event watch_on = event::open | event::close_write;
     CHECK((watch_on & event::close_write) == event::close_write);
@@ -118,7 +117,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldNotifyOnMultipleEvents")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRunOnce")
 {
-    notify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file(test_file_one_);
 
     std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
@@ -129,7 +128,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRunOnce")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRun")
 {
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file(test_file_one_);
 
     std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run(stoken); });
@@ -141,7 +140,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldStopRun")
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
 {
     size_t counter = 0;
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file({test_file_one_, event::open})
         .ignore_once(test_file_one_)
         .on_event(event::open,
@@ -175,7 +174,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFileOnce")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFile")
 {
-    notify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.ignore(test_file_one_)
         .watch_file({test_file_one_, event::close})
         .on_event(event::close,
@@ -197,7 +196,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldIgnoreFile")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldWatchPathRecursively")
 {
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_path_recursively({test_directory_, event::open})
         .on_event(event::open,
                   [&](const notification& notification) { promised_open_.set_value(notification); })
@@ -218,7 +217,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldWatchPathRecursively")
 
 TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldUnwatchPath")
 {
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file(test_file_one_).unwatch(test_file_one_);
 
     std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run_once(stoken); });
@@ -234,7 +233,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldCallUserDefinedUnexpectedExcepti
 {
     std::promise<void> observer_called;
 
-    notify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file(test_file_one_)
         .on_unexpected_event([&](const notification&) { observer_called.set_value(); });
 
@@ -251,7 +250,7 @@ TEST_CASE_FIXTURE(FilesystemEventHelper, "shouldCallUserDefinedUnexpectedExcepti
 TEST_CASE_FIXTURE(FilesystemEventHelper, "countEvents")
 {
     size_t counter = 0;
-    inotify_controller notifier = inotify_controller();
+    controller notifier = controller();
     notifier.watch_file({test_file_one_, event::open})
         .on_event(event::open,
                   [&](const notification& notification)

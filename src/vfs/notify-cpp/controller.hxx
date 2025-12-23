@@ -37,11 +37,10 @@ namespace notify
 {
 using event_observer = std::function<void(const notification&)>;
 
-class notify_controller
+class controller
 {
   public:
-    notify_controller(const std::shared_ptr<notify_base>&);
-    notify_controller() = default;
+    controller();
 
     void run(const std::stop_token& stoken) noexcept;
     void run_once(const std::stop_token& stoken) noexcept;
@@ -50,56 +49,53 @@ class notify_controller
      * @brief Add watch to a file.
      * @param fse that will be watched
      */
-    notify_controller& watch_file(const file_system_event& fse);
+    controller& watch_file(const file_system_event& fse);
 
     /**
      * @brief Add watch to a directory.
      * @param fse that will be watched
      */
-    notify_controller& watch_directory(const file_system_event& fse);
+    controller& watch_directory(const file_system_event& fse);
 
     /**
      * @brief Add watch to a directory, recursively.
      * @param fse that will be watched
      */
-    notify_controller& watch_path_recursively(const file_system_event& fse);
+    controller& watch_path_recursively(const file_system_event& fse);
 
     /**
      * @brief Remove watch for a file or a directory.
      * @param path that will be unwatched
      */
-    notify_controller& unwatch(const std::filesystem::path& f);
+    controller& unwatch(const std::filesystem::path& f);
 
     /**
      * @brief Ignore all events for a path.
      */
-    notify_controller& ignore(const std::filesystem::path& p) noexcept;
+    controller& ignore(const std::filesystem::path& p) noexcept;
 
     /**
      * @brief Ignore all events for a path once. After an event gets
      *        ignored future events will trigger the EventObserver
      */
-    notify_controller& ignore_once(const std::filesystem::path& p) noexcept;
+    controller& ignore_once(const std::filesystem::path& p) noexcept;
 
     /**
      * @brief Install an EventObserver for a single event. An event can have a single EventObserver.
      */
-    notify_controller& on_event(event event, const event_observer& event_observer) noexcept;
+    controller& on_event(event event, const event_observer& event_observer) noexcept;
 
     /**
      * @brief Install an EventObserver for multiple events. An event can have a single EventObserver.
      */
-    notify_controller& on_events(const std::set<event>& event,
-                                 const event_observer& event_observer) noexcept;
+    controller& on_events(const std::set<event>& event,
+                          const event_observer& event_observer) noexcept;
 
     /**
      * @brief Install a custom EventObserver for events that are being watched and are not
      *        handled by on_event() or on_events().
      */
-    notify_controller& on_unexpected_event(const event_observer& event_observer) noexcept;
-
-  protected:
-    std::shared_ptr<notify_base> notify_ = nullptr;
+    controller& on_unexpected_event(const event_observer& event_observer) noexcept;
 
   private:
     [[nodiscard]] std::vector<std::pair<event, event_observer>>
@@ -108,11 +104,7 @@ class notify_controller
     std::unordered_map<event, event_observer> event_observer_;
 
     event_observer unexpected_event_observer_ = [](const notification&) {};
-};
 
-class inotify_controller : public notify_controller
-{
-  public:
-    inotify_controller();
+    std::shared_ptr<inotify> notify_ = nullptr;
 };
 } // namespace notify

@@ -37,21 +37,22 @@ class file_system_event
      * @brief file_system_event
      * @param path - path to install watch at
      */
-    file_system_event(const std::filesystem::path& path);
+    file_system_event(const std::filesystem::path& path) noexcept;
 
     /**
      * @brief file_system_event
      * @param path - path to install watch at
      * @param event - bitmask of events to be watched for
      */
-    file_system_event(const std::filesystem::path& path, const notify::event event);
+    file_system_event(const std::filesystem::path& path, const notify::event event) noexcept;
 
     /**
      * @brief file_system_event
      * @param path - path to install watch at
      * @param events - set of events to be watched for
      */
-    file_system_event(const std::filesystem::path& path, const std::set<notify::event>& events);
+    file_system_event(const std::filesystem::path& path,
+                      const std::set<notify::event>& events) noexcept;
 
     [[nodiscard]] std::filesystem::path path() const noexcept;
     [[nodiscard]] event event() const noexcept;

@@ -25,7 +25,8 @@
 
 #include "vfs/notify-cpp/notification.hxx"
 
-notify::notification::notification(const notify::event event, const std::filesystem::path& path)
+notify::notification::notification(const notify::event event,
+                                   const std::filesystem::path& path) noexcept
     : event_(event), path_(path)
 {
 }
