@@ -17,11 +17,12 @@
 
 #pragma once
 
-#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <optional>
 #include <thread>
+
+#include <cstddef>
 
 #include <glibmm.h>
 #include <gtkmm.h>
