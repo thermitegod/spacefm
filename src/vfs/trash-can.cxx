@@ -30,28 +30,29 @@
 
 #include "logger.hxx"
 
+// TODO
+// - create_trash_info() reuse mount_id and toplevel, merge into vfs::trash_can::trash?
+
 namespace global
 {
 const std::shared_ptr<vfs::trash_can> trash_can = vfs::trash_can::create();
 }
 
-////////////////
-
 vfs::trash_can::trash_can() noexcept
 {
-    const auto stat = *ztd::statx::create(vfs::user::home(), ztd::statx::symlink::follow);
+    const auto stat = ztd::statx::create(vfs::user::home(), ztd::statx::symlink::follow);
 
-    const auto home_id = stat.mount_id();
+    const auto home_id = stat->mount_id();
     const auto user_trash = vfs::user::data() / "Trash";
-    const auto home_trash = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
-    this->trash_dirs_[home_id] = home_trash;
+
+    this->trash_dirs_[home_id] = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
 }
 
 u64
 vfs::trash_can::mount_id(const std::filesystem::path& path) noexcept
 {
-    const auto stat = *ztd::statx::create(path, ztd::statx::symlink::no_follow);
-    return stat.mount_id();
+    const auto stat = ztd::statx::create(path, ztd::statx::symlink::no_follow);
+    return stat->mount_id();
 }
 
 std::shared_ptr<vfs::trash_can>
@@ -68,19 +69,12 @@ vfs::trash_can::toplevel(const std::filesystem::path& path) noexcept
     std::filesystem::path mount_path = path;
     std::filesystem::path last_path;
 
-    // logger::info<logger::vfs>("id mount {}", device(mount_path));
-    // logger::info<logger::vfs>("id       {}", id);
-
     // walk up the path until it gets to the root of the device
     while (mount_id(mount_path) == id)
     {
         last_path = mount_path;
         mount_path = mount_path.parent_path();
     }
-
-    // logger::info<logger::vfs>("last path   {}", last_path);
-    // logger::info<logger::vfs>("mount point {}", mount_path);
-
     return last_path;
 }
 
@@ -95,12 +89,7 @@ vfs::trash_can::get_trash_dir(const std::filesystem::path& path) noexcept
     }
 
     // path on another device, cannot use $HOME trashcan
-    const std::filesystem::path top_dir = toplevel(path);
-    // BUGGED - only the std::format part of the path is used in creating 'trash_path',
-    // do not think this is my bug.
-    // const auto trash_path = top_dir / std::format("/.Trash-{}", getuid());
-    const std::filesystem::path trash_path =
-        std::format("{}/.Trash-{}", top_dir.string(), getuid());
+    const auto trash_path = toplevel(path) / std::format(".Trash-{}", getuid());
 
     auto trash_dir = std::make_shared<vfs::trash_can::trash_dir>(trash_path);
     this->trash_dirs_[id] = trash_dir;
@@ -141,7 +130,7 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
 
     trash_dir->create_trash_dir();
 
-    const auto target_name = trash_dir->unique_name(path);
+    const auto target_name = trash_dir->unique_filename(path);
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
 
@@ -159,30 +148,20 @@ vfs::trash_can::restore(const std::filesystem::path& path) noexcept
 }
 
 void
-vfs::trash_can::empty() noexcept
-{
-    // NOOP
-}
-
-void
 vfs::trash_can::empty(const std::filesystem::path& path) noexcept
 {
     (void)path;
     // NOOP
 }
 
-/////////////////////////////
-
-vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept : trash_path_(path)
+vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept
+    : trash_path_(path), files_path_(path / "files"), info_path_(path / "info")
 {
-    this->files_path_ = this->trash_path_ / "files";
-    this->info_path_ = this->trash_path_ / "info";
-
     create_trash_dir();
 }
 
 std::filesystem::path
-vfs::trash_can::trash_dir::unique_name(const std::filesystem::path& path) const noexcept
+vfs::trash_can::trash_dir::unique_filename(const std::filesystem::path& path) const noexcept
 {
     return vfs::utils::unique_path(this->files_path_, path.filename(), "_").filename();
 }
@@ -204,40 +183,46 @@ vfs::trash_can::trash_dir::create_trash_dir() const noexcept
     create_dir(this->info_path_);
 }
 
-std::string
-vfs::trash_can::trash_dir::trash_time() noexcept
-{
-    const auto time_point = std::chrono::system_clock::now();
-
-    const auto date = std::chrono::floor<std::chrono::days>(time_point);
-
-    const auto midnight = time_point - std::chrono::floor<std::chrono::days>(time_point);
-    const auto hours = std::chrono::duration_cast<std::chrono::hours>(midnight);
-    const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(midnight - hours);
-    const auto seconds =
-        std::chrono::duration_cast<std::chrono::seconds>(midnight - hours - minutes);
-
-    return std::format("{0:%Y-%m-%d}T{1:%H}:{2:%M}:{3:%S}Z", date, hours, minutes, seconds);
-}
-
 void
 vfs::trash_can::trash_dir::create_trash_info(
     const std::filesystem::path& path, const std::filesystem::path& target_filename) const noexcept
 {
-    [[maybe_unused]] auto ec = vfs::utils::write_file(
-        this->info_path_ / std::format("{}.trashinfo", target_filename.string()),
-        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), trash_time()));
+    const auto path_value = std::invoke(
+        [](const auto& path) -> std::string
+        {
+            const auto home = vfs::user::data() / "Trash";
+
+            const auto home_id = vfs::trash_can::mount_id(home);
+            const auto path_id = vfs::trash_can::mount_id(path);
+
+            if (path_id == home_id)
+            {
+                return path.string();
+            }
+            else
+            {
+                const auto toplevel = vfs::trash_can::toplevel(path);
+
+                return ztd::remove_prefix(path.string(), toplevel.string() += "/");
+            }
+        },
+        path);
+
+    auto ec = vfs::utils::write_file(
+        this->info_path_ / target_filename += ".trashinfo",
+        std::format("[Trash Info]\nPath={}\nDeletionDate={:%Y-%m-%dT%H:%M:%S}\n",
+                    path_value,
+                    std::chrono::system_clock::now()));
+
+    logger::error_if<logger::vfs>(ec, "Failed to write trash info file: {}", ec.message());
 }
 
 void
 vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
                                 const std::filesystem::path& target_filename) const noexcept
 {
-    const auto target_path = this->files_path_ / target_filename;
+    std::error_code ec;
+    std::filesystem::rename(path, this->files_path_ / target_filename, ec);
 
-    // logger::info<logger::vfs>("fp {}", this->files_path);
-    // logger::info<logger::vfs>("ip {}", this->info_path);
-    // logger::info<logger::vfs>("tp {}", target_path);
-
-    std::filesystem::rename(path, target_path);
+    logger::error_if<logger::vfs>(ec, "Failed to trash file: {}", ec.message());
 }

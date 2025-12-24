@@ -18,7 +18,6 @@
 #include <filesystem>
 #include <flat_map>
 #include <memory>
-#include <string>
 
 #include <ztd/ztd.hxx>
 
@@ -32,7 +31,7 @@ namespace vfs
 {
 // This class implements some of the XDG Trash specification:
 //
-// https://specifications.freedesktop.org/trash-spec/1.0/
+// https://specifications.freedesktop.org/trash/1.0/
 class trash_can final
 {
   public:
@@ -46,10 +45,6 @@ class trash_can final
     // Currently a NOOP
     [[nodiscard]] static bool restore(const std::filesystem::path& path) noexcept;
 
-    // Empty all trash cans
-    // Currently a NOOP
-    static void empty() noexcept;
-
     // Empty a trash can
     // Currently a NOOP
     static void empty(const std::filesystem::path& path) noexcept;
@@ -58,51 +53,28 @@ class trash_can final
     class trash_dir final
     {
       public:
-        // Create the trash directory and subdirectories if they do not exist.
-        trash_dir() = delete;
-        trash_dir(const std::filesystem::path& path) noexcept;
-        ~trash_dir() = default;
-        trash_dir(const trash_dir& other) = delete;
-        trash_dir(trash_dir&& other) = delete;
-        trash_dir& operator=(const trash_dir& other) = delete;
-        trash_dir& operator=(trash_dir&& other) = delete;
+        explicit trash_dir(const std::filesystem::path& path) noexcept;
 
-        // Get a unique name for use within the trash directory
         [[nodiscard]] std::filesystem::path
-        unique_name(const std::filesystem::path& path) const noexcept;
-
+        unique_filename(const std::filesystem::path& path) const noexcept;
         void create_trash_dir() const noexcept;
-
-        // Create a .trashinfo file for a file or directory 'path'
         void create_trash_info(const std::filesystem::path& path,
                                const std::filesystem::path& target_filename) const noexcept;
-
-        // Move a file or directory into the trash directory
         void move(const std::filesystem::path& path,
                   const std::filesystem::path& target_filename) const noexcept;
 
       private:
-        [[nodiscard]] static std::string trash_time() noexcept;
-
-        // the full path for this trash directory
         std::filesystem::path trash_path_;
-        // the path of the "files" subdirectory of this trash dir
         std::filesystem::path files_path_;
-        // the path of the "info" subdirectory of this trash dir
         std::filesystem::path info_path_;
     };
 
-    // return the mount point id for the file or directory
     [[nodiscard]] static u64 mount_id(const std::filesystem::path& path) noexcept;
-
-    // Find the toplevel directory (mount point) for the device that 'path' is on.
     [[nodiscard]] static std::filesystem::path toplevel(const std::filesystem::path& path) noexcept;
 
-    // Return the trash dir to use for 'path'.
     [[nodiscard]] std::shared_ptr<trash_dir>
     get_trash_dir(const std::filesystem::path& path) noexcept;
 
-    // Data Members
     std::flat_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
 };
 } // namespace vfs
