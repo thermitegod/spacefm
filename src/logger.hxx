@@ -20,6 +20,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <system_error>
 
 namespace logger
 {
@@ -69,7 +70,16 @@ trace_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
     if (cond)
     {
         trace<d>(fmt, std::forward<Args>(args)...);
-        // detail::trace(d, std::format(fmt, std::forward<Args>(args)...));
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
+trace_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
+    {
+        trace<d>(fmt, std::forward<Args>(args)...);
     }
 }
 
@@ -85,6 +95,16 @@ void
 debug_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     if (cond)
+    {
+        debug<d>(fmt, std::forward<Args>(args)...);
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
+debug_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
     {
         debug<d>(fmt, std::forward<Args>(args)...);
     }
@@ -109,6 +129,16 @@ info_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 
 template<domain d = basic, typename... Args>
 void
+info_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
+    {
+        info<d>(fmt, std::forward<Args>(args)...);
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
 warn(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     detail::logger(detail::warn, d, std::format(fmt, std::forward<Args>(args)...));
@@ -119,6 +149,16 @@ void
 warn_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     if (cond)
+    {
+        warn<d>(fmt, std::forward<Args>(args)...);
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
+warn_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
     {
         warn<d>(fmt, std::forward<Args>(args)...);
     }
@@ -143,6 +183,16 @@ error_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 
 template<domain d = basic, typename... Args>
 void
+error_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
+    {
+        error<d>(fmt, std::forward<Args>(args)...);
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
 critical(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     detail::logger(detail::critical, d, std::format(fmt, std::forward<Args>(args)...));
@@ -153,6 +203,16 @@ void
 critical_if(bool cond, std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     if (cond)
+    {
+        critical<d>(fmt, std::forward<Args>(args)...);
+    }
+}
+
+template<domain d = basic, typename... Args>
+void
+critical_if(std::error_code ec, std::format_string<Args...> fmt, Args&&... args) noexcept
+{
+    if (ec)
     {
         critical<d>(fmt, std::forward<Args>(args)...);
     }
