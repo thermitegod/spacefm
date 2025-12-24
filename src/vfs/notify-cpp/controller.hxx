@@ -24,11 +24,11 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <functional>
 #include <memory>
 #include <set>
 #include <stop_token>
-#include <unordered_map>
 
 #include "vfs/notify-cpp/notification.hxx"
 #include "vfs/notify-cpp/notify.hxx"
@@ -101,7 +101,7 @@ class controller
     [[nodiscard]] std::vector<std::pair<event, event_observer>>
     find_observer(event e) const noexcept;
 
-    std::unordered_map<event, event_observer> event_observer_;
+    std::flat_map<event, event_observer> event_observer_;
 
     event_observer unexpected_event_observer_ = [](const notification&) {};
 

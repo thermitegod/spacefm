@@ -16,10 +16,10 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <format>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 
 namespace logger
 {
@@ -52,7 +52,7 @@ void logger(const loglevel level, const domain d, const std::string_view msg) no
 
 void initialize() noexcept;
 
-void initialize(const std::unordered_map<std::string, std::string>& options,
+void initialize(const std::flat_map<std::string, std::string>& options,
                 const std::filesystem::path& logfile = "") noexcept;
 
 template<domain d = basic, typename... Args>

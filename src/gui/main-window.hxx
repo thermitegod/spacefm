@@ -16,7 +16,7 @@
 #pragma once
 
 #include <filesystem>
-#include <map>
+#include <flat_map>
 #include <string_view>
 
 #include <gtkmm.h>
@@ -48,11 +48,11 @@ struct MainWindow
     GtkWidget* dev_menu;
     GtkNotebook* notebook; // current panel
     // GType will cause segfaults if this is a std::unordered_map
-    std::map<panel_t, GtkNotebook*> panels;
-    std::map<panel_t, i32> panel_slide_x;
-    std::map<panel_t, i32> panel_slide_y;
-    std::map<panel_t, i32> panel_slide_s;
-    std::map<panel_t, xset::main_window_panel> panel_context;
+    std::flat_map<panel_t, GtkNotebook*> panels;
+    std::flat_map<panel_t, i32> panel_slide_x;
+    std::flat_map<panel_t, i32> panel_slide_y;
+    std::flat_map<panel_t, i32> panel_slide_s;
+    std::flat_map<panel_t, xset::main_window_panel> panel_context;
     bool panel_change;
 
     panel_t curpanel;

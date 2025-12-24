@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <flat_map>
 #include <format>
 #include <functional>
 #include <memory>
@@ -24,7 +25,6 @@
 #include <span>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <cassert>
@@ -194,7 +194,7 @@ struct column_data
 namespace global
 {
 // history of closed tabs
-static std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
+static std::flat_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
 // must match ipc-command.cxx run_ipc_command()
 static constexpr std::array<column_data, 12> columns{

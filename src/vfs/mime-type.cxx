@@ -16,12 +16,12 @@
  */
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <glibmm.h>
@@ -40,7 +40,7 @@
 
 namespace global
 {
-static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
+static std::flat_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 static std::mutex mime_map_lock;
 } // namespace global
 

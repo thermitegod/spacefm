@@ -18,13 +18,13 @@
 #include <chrono>
 #include <expected>
 #include <filesystem>
+#include <flat_map>
 #include <format>
 #include <optional>
 #include <ranges>
 #include <span>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <glibmm.h>
@@ -50,7 +50,7 @@ struct desktop_cache_data final
     std::chrono::system_clock::time_point mtime;
 };
 
-static std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
+static std::flat_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 
 std::expected<vfs::desktop, std::error_code>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept

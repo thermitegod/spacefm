@@ -16,8 +16,8 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <optional>
-#include <unordered_map>
 #include <vector>
 
 #include "vfs/user-dirs.hxx"
@@ -52,6 +52,6 @@ struct history
     std::filesystem::path current_{vfs::user::home()};
     std::vector<std::filesystem::path> forward_;
     std::vector<std::filesystem::path> back_;
-    std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>> selection_;
+    std::flat_map<std::filesystem::path, std::vector<std::filesystem::path>> selection_;
 };
 } // namespace gui::utils

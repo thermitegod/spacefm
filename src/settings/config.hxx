@@ -16,7 +16,7 @@
 #pragma once
 
 #include <filesystem>
-#include <map>
+#include <flat_map>
 #include <string>
 #include <string_view>
 
@@ -27,9 +27,9 @@
 namespace config
 {
 // map<var, value>
-using setvars_t = std::map<std::string_view, std::string>;
+using setvars_t = std::flat_map<std::string_view, std::string>;
 // map<xset_name, setvars_t>
-using xsetpak_t = std::map<std::string_view, setvars_t>;
+using xsetpak_t = std::flat_map<std::string_view, setvars_t>;
 
 struct config_file_data
 {

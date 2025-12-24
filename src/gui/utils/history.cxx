@@ -14,8 +14,8 @@
  */
 
 #include <filesystem>
+#include <flat_map>
 #include <optional>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 

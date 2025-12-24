@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <flat_map>
 #include <print>
 
 #include <magic_enum/magic_enum.hpp>
@@ -48,7 +49,7 @@ struct opts_data final
     std::filesystem::path config_dir;
 
     std::vector<std::string> raw_log_levels;
-    std::unordered_map<std::string, std::string> log_levels;
+    std::flat_map<std::string, std::string> log_levels;
     // std::filesystem::path logfile{"/tmp/test.log"};
     std::filesystem::path logfile;
 

@@ -24,10 +24,10 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <queue>
 #include <stop_token>
-#include <unordered_map>
 #include <vector>
 
 #include <cstdint>
@@ -101,7 +101,7 @@ class inotify
     void watch(const file_system_event& fse);
     void remove_watch(const std::int32_t wd) const;
 
-    std::unordered_map<std::int32_t, std::filesystem::path> directory_map_;
+    std::flat_map<std::int32_t, std::filesystem::path> directory_map_;
 
     std::int32_t inotify_fd_;
     std::int32_t event_fd_;

@@ -4,10 +4,10 @@
 
 #include <chrono>
 #include <filesystem>
+#include <flat_map>
 #include <stack>
 #include <string>
 #include <system_error>
-#include <unordered_map>
 #include <utility>
 
 #include <cstdint>
@@ -130,7 +130,7 @@ struct WeightedMime final
 };
 
 // Map of file extension to weighted mime type.
-using MimeTypeMap = std::unordered_map<std::string, WeightedMime>;
+using MimeTypeMap = std::flat_map<std::string, WeightedMime>;
 
 // Parses a file at `file_path` which should be in the same format as the
 // /usr/share/mime/mime.cache file on Linux.

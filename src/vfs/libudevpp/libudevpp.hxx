@@ -16,11 +16,11 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <libudev.h>
@@ -218,14 +218,14 @@ class device final
     [[nodiscard]] bool set_sysattr(const std::string_view named,
                                    const std::string_view value) const noexcept;
     [[nodiscard]] std::vector<std::string> get_sysattr_keys() const noexcept;
-    [[nodiscard]] std::unordered_map<std::string, std::string> get_sysattr_map() const noexcept;
+    [[nodiscard]] std::flat_map<std::string, std::string> get_sysattr_map() const noexcept;
 
     [[nodiscard]] std::vector<std::string> get_devlinks() const noexcept;
 
     [[nodiscard]] bool has_property(const std::string_view named) const noexcept;
     [[nodiscard]] std::optional<std::string>
     get_property(const std::string_view named) const noexcept;
-    [[nodiscard]] std::unordered_map<std::string, std::string> get_properties() const noexcept;
+    [[nodiscard]] std::flat_map<std::string, std::string> get_properties() const noexcept;
 
     [[nodiscard]] bool has_tag(const std::string_view named) const noexcept;
     [[nodiscard]] std::vector<std::string> get_tags() const noexcept;

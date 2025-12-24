@@ -16,9 +16,9 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 #include <ztd/ztd.hxx>
 
@@ -103,6 +103,6 @@ class trash_can final
     get_trash_dir(const std::filesystem::path& path) noexcept;
 
     // Data Members
-    std::unordered_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
+    std::flat_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
 };
 } // namespace vfs

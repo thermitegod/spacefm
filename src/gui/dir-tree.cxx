@@ -17,10 +17,10 @@
  */
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <ranges>
 #include <string_view>
-#include <unordered_map>
 
 #include <cassert>
 
@@ -81,7 +81,7 @@ static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-static std::unordered_map<gui::dir_tree::column, GType> column_types;
+static std::flat_map<gui::dir_tree::column, GType> column_types;
 }
 
 static GType

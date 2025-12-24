@@ -14,10 +14,10 @@
  */
 
 #include <algorithm>
+#include <flat_map>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <libudev.h>
@@ -220,10 +220,10 @@ libudev::device::get_sysattr_keys() const noexcept
     return keys;
 }
 
-std::unordered_map<std::string, std::string>
+std::flat_map<std::string, std::string>
 libudev::device::get_sysattr_map() const noexcept
 {
-    std::unordered_map<std::string, std::string> attr;
+    std::flat_map<std::string, std::string> attr;
 
     auto* sysattr_list = udev_device_get_sysattr_list_entry(this->handle.get());
     struct udev_list_entry* entry = nullptr;
@@ -272,10 +272,10 @@ libudev::device::get_property(const std::string_view named) const noexcept
     return std::nullopt;
 }
 
-std::unordered_map<std::string, std::string>
+std::flat_map<std::string, std::string>
 libudev::device::get_properties() const noexcept
 {
-    std::unordered_map<std::string, std::string> property_map;
+    std::flat_map<std::string, std::string> property_map;
 
     struct udev_list_entry* entry = nullptr;
     struct udev_list_entry* properties = udev_device_get_properties_list_entry(this->handle.get());

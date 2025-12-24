@@ -14,8 +14,8 @@
  */
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
-#include <unordered_map>
 
 #include <magic_enum/magic_enum.hpp>
 
@@ -34,7 +34,7 @@ logger::initialize() noexcept
 }
 
 void
-logger::initialize(const std::unordered_map<std::string, std::string>& options,
+logger::initialize(const std::flat_map<std::string, std::string>& options,
                    const std::filesystem::path& logfile) noexcept
 {
     struct default_logger_options_data
