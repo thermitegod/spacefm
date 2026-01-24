@@ -40,6 +40,15 @@ enum class error_code : std::int32_t
     // Find in path errors
     program_unknown,
     program_not_in_path,
+    // Task errors
+    task_root_preserve,
+    task_root_preserve_source,
+    task_root_preserve_destination,
+    task_empty_source,
+    task_empty_destination,
+    task_empty_path,
+    task_bad_construction,
+    task_bad_construction_programming_error,
     // Icon Load errors
     icon_load,
     icon_theme_load,

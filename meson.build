@@ -457,10 +457,8 @@ vfs_gtk4_sources = files(
     'src/vfs/error.cxx',
     'src/vfs/execute.cxx',
     'src/vfs/file.cxx',
-    # 'src/vfs/file-task.cxx', # TODO rewrite in vfs/task.cxx
     'src/vfs/mime-type.cxx',
     'src/vfs/mime-monitor.cxx',
-    'src/vfs/task.cxx',
     'src/vfs/terminals.cxx',
     'src/vfs/thumbnailer.cxx',
     'src/vfs/trash-can.cxx',
@@ -492,6 +490,17 @@ vfs_gtk4_sources = files(
     'src/vfs/notify-cpp/file_system_event.cxx',
     'src/vfs/notify-cpp/notification.cxx',
     'src/vfs/notify-cpp/notify.cxx',
+
+    'src/vfs/task/chmod.cxx',
+    'src/vfs/task/chown.cxx',
+    'src/vfs/task/copy.cxx',
+    'src/vfs/task/create-directory.cxx',
+    'src/vfs/task/create-file.cxx',
+    'src/vfs/task/create-hardlink.cxx',
+    'src/vfs/task/create-symlink.cxx',
+    'src/vfs/task/move.cxx',
+    'src/vfs/task/remove.cxx',
+    'src/vfs/task/task.cxx',
 )
 
 # VFS gtk4
