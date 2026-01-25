@@ -2567,7 +2567,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    this->signal_chdir_before_.emit(this);
+    this->signal_chdir_before().emit(this);
 
     this->update_selection_history();
 
@@ -2613,7 +2613,7 @@ gui::browser::chdir(const std::filesystem::path& new_path,
                                       .icon_size_tool = this->settings_->icon_size_tool,
                                   }));
 
-    this->signal_chdir_begin_.emit(this);
+    this->signal_chdir_begin().emit(this);
 
     this->signal_file_listed_ =
         this->dir_->signal_file_listed().connect([this]() { this->on_dir_file_listed(); });
@@ -2988,7 +2988,7 @@ gui::browser::refresh(const bool update_selected_files) noexcept
     this->update_model();
 
     // begin reload dir
-    this->signal_chdir_begin_.emit(this);
+    this->signal_chdir_begin().emit(this);
 
     this->dir_->refresh();
 }
@@ -3006,7 +3006,7 @@ gui::browser::show_hidden_files(bool show) noexcept
     {
         this->update_model();
 
-        this->signal_change_selection_.emit(this);
+        this->signal_change_selection().emit(this);
     }
 
     if (this->side_dir)
@@ -3023,11 +3023,11 @@ gui::browser::new_tab() noexcept
 
     if (!std::filesystem::is_directory(vfs::user::home()))
     {
-        this->signal_open_file_.emit(this, "/", gui::browser::open_action::new_tab);
+        this->signal_open_file().emit(this, "/", gui::browser::open_action::new_tab);
     }
     else
     {
-        this->signal_open_file_.emit(this, vfs::user::home(), gui::browser::open_action::new_tab);
+        this->signal_open_file().emit(this, vfs::user::home(), gui::browser::open_action::new_tab);
     }
 }
 
@@ -3043,11 +3043,11 @@ gui::browser::new_tab_here() noexcept
     }
     if (!std::filesystem::is_directory(dir_path))
     {
-        this->signal_open_file_.emit(this, "/", gui::browser::open_action::new_tab);
+        this->signal_open_file().emit(this, "/", gui::browser::open_action::new_tab);
     }
     else
     {
-        this->signal_open_file_.emit(this, dir_path, gui::browser::open_action::new_tab);
+        this->signal_open_file().emit(this, dir_path, gui::browser::open_action::new_tab);
     }
 }
 
@@ -4326,7 +4326,7 @@ gui::browser::focus(const gui::browser::focus_widget item) noexcept
 void
 gui::browser::focus_me() noexcept
 {
-    this->signal_change_pane_.emit(this);
+    this->signal_change_pane().emit(this);
 }
 
 void
@@ -5551,7 +5551,7 @@ gui::browser::focus_folder_view() noexcept
 {
     gtk_widget_grab_focus(GTK_WIDGET(this->folder_view_));
 
-    this->signal_change_pane_.emit(this);
+    this->signal_change_pane().emit(this);
 }
 
 bool
