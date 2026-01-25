@@ -344,7 +344,6 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
         }
     }
 
-    std::vector<std::shared_ptr<vfs::file>> new_hidden;
     {
         const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
         for (const auto& file : this->files_)
@@ -358,7 +357,7 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
             if (this->is_file_user_hidden(file->path()))
             {
                 // Use the delete signal to properly remove this file from the file list.
-                new_hidden.push_back(file);
+                this->on_file_deleted(file->name());
 
                 this->xhidden_count_ += 1;
                 continue;
@@ -377,10 +376,6 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
             }
         }
     }
-
-    // have to do this here because on_file_deleted() also uses files_lock_
-    std::ranges::for_each(new_hidden,
-                          [this](const auto& file) { this->on_file_deleted(file->name()); });
 
     this->load_running_ = false;
 
