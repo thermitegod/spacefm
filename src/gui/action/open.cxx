@@ -95,7 +95,7 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
 
 static bool
 open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
-                    const std::span<const std::filesystem::path> open_files,
+                    const std::span<const std::shared_ptr<vfs::file>> files,
                     const std::string_view app_desktop) noexcept
 {
     if (app_desktop.empty())
@@ -111,13 +111,13 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 
     logger::info<logger::gui>("EXEC({})={}", desktop->path().string(), desktop->exec());
 
-    const auto opened = desktop->open_files(parent->cwd, open_files);
+    const auto opened = desktop->open_files(parent->cwd, files);
     if (!opened)
     {
         std::string file_list;
-        for (const auto& file : open_files)
+        for (const auto& file : files)
         {
-            file_list.append(file.string());
+            file_list.append(file->path().string());
             file_list.append("\n");
         }
         gui::dialog::error(
@@ -143,21 +143,14 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
 
     if (!app_desktop.empty())
     {
-        std::vector<std::filesystem::path> files_to_open;
-        files_to_open.reserve(selected_files.size());
-        for (const auto& file : selected_files)
-        {
-            files_to_open.push_back(file->path());
-        }
-
-        open_files_with_app(parent, files_to_open, app_desktop);
+        open_files_with_app(parent, selected_files, app_desktop);
         return;
     }
 
     // No app specified - Use default app for each file
 
     std::vector<std::filesystem::path> dirs_to_open;
-    std::flat_map<std::string, std::vector<std::filesystem::path>> files_to_open;
+    std::flat_map<std::string, std::vector<std::shared_ptr<vfs::file>>> files_to_open;
     for (const auto& file : selected_files)
     {
         // Is a dir?  Open in browser
@@ -250,15 +243,7 @@ gui::action::open_files_with_app(const std::filesystem::path& cwd,
             continue;
         }
 
-        const auto desktop = alloc_desktop.value();
-        if (files_to_open.contains(desktop))
-        {
-            files_to_open[desktop].push_back(file->path());
-        }
-        else
-        {
-            files_to_open[desktop] = {file->path()};
-        }
+        files_to_open[*alloc_desktop].push_back(file);
     }
 
     for (const auto& [desktop, open_files] : files_to_open)

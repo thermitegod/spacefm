@@ -19,6 +19,7 @@
 
 #include <expected>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -30,6 +31,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/error.hxx"
+#include "vfs/file.hxx"
 
 namespace vfs
 {
@@ -53,9 +55,9 @@ class desktop final
 #endif
     [[nodiscard]] bool use_terminal() const noexcept;
     [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
-                                 const std::filesystem::path& file_path) const;
+                                 const std::shared_ptr<vfs::file>& file) const;
     [[nodiscard]] bool open_files(const std::filesystem::path& working_dir,
-                                  const std::span<const std::filesystem::path> file_paths) const;
+                                  const std::span<const std::shared_ptr<vfs::file>> files) const;
 
     [[nodiscard]] std::vector<std::string> supported_mime_types() const noexcept;
 
@@ -65,12 +67,12 @@ class desktop final
 
     [[nodiscard]] bool open_multiple_files() const noexcept;
     [[nodiscard]] std::optional<std::vector<std::vector<std::string>>>
-    app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
+    app_exec_generate_desktop_argv(const std::span<const std::shared_ptr<vfs::file>> files,
                                    bool quote_file_list) const noexcept;
     void exec_in_terminal(const std::filesystem::path& cwd,
                           const std::string_view command) const noexcept;
     void exec_desktop(const std::filesystem::path& working_dir,
-                      const std::span<const std::filesystem::path> file_paths) const noexcept;
+                      const std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
 
     std::string filename_;
     std::filesystem::path path_;

@@ -39,6 +39,7 @@
 #include "vfs/app-desktop.hxx"
 #include "vfs/error.hxx"
 #include "vfs/execute.hxx"
+#include "vfs/file.hxx"
 
 #include "vfs/utils/icon.hxx"
 
@@ -420,8 +421,8 @@ vfs::desktop::open_multiple_files() const noexcept
 }
 
 std::optional<std::vector<std::vector<std::string>>>
-vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
-                                             bool quote_file_list) const noexcept
+vfs::desktop::app_exec_generate_desktop_argv(
+    const std::span<const std::shared_ptr<vfs::file>> files, bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -442,15 +443,15 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         for (auto& argv : commands)
         {
             argv.pop_back(); // remove open_files_key
-            for (const auto& file : file_list)
+            for (const auto& file : files)
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(vfs::execute::quote(file.string()));
+                    argv.push_back(vfs::execute::quote(file->path().string()));
                 }
                 else
                 {
-                    argv.push_back(file.string());
+                    argv.push_back(file->path().string());
                 }
             }
         }
@@ -470,20 +471,20 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
 
         // desktop files with these keys can only open one file.
         // spawn multiple copies of the program for each selected file
-        commands.insert(commands.cbegin(), file_list.size() - 1, commands.front());
+        commands.insert(commands.cbegin(), files.size() - 1, commands.front());
 
         for (auto& argv : commands)
         {
             argv.pop_back(); // remove open_file_key
-            for (const auto& file : file_list)
+            for (const auto& file : files)
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(vfs::execute::quote(file.string()));
+                    argv.push_back(vfs::execute::quote(file->path().string()));
                 }
                 else
                 {
-                    argv.push_back(file);
+                    argv.push_back(file->path());
                 }
             }
         }
@@ -491,7 +492,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
     }
 
     logger::warn_if<logger::vfs>(
-        !add_files && !file_list.empty(),
+        !add_files && !files.empty(),
         "Malformed desktop file, trying to open a desktop file without file/url "
         "keys with a file list: {}",
         this->path_.string());
@@ -568,7 +569,7 @@ vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
 
 bool
 vfs::desktop::open_file(const std::filesystem::path& working_dir,
-                        const std::filesystem::path& file_path) const
+                        const std::shared_ptr<vfs::file>& file) const
 {
     if (this->desktop_entry_.exec.empty())
     {
@@ -576,15 +577,14 @@ vfs::desktop::open_file(const std::filesystem::path& working_dir,
         return false;
     }
 
-    const std::vector<std::filesystem::path> file_paths{file_path};
-    this->exec_desktop(working_dir, file_paths);
+    this->exec_desktop(working_dir, {file});
 
     return true;
 }
 
 bool
 vfs::desktop::open_files(const std::filesystem::path& working_dir,
-                         const std::span<const std::filesystem::path> file_paths) const
+                         const std::span<const std::shared_ptr<vfs::file>> files) const
 {
     if (this->desktop_entry_.exec.empty())
     {
@@ -594,15 +594,14 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
 
     if (this->open_multiple_files())
     {
-        this->exec_desktop(working_dir, file_paths);
+        this->exec_desktop(working_dir, files);
     }
     else
     {
         // app does not accept multiple files, so run multiple times
-        for (const auto& open_file : file_paths)
+        for (const auto& file : files)
         {
-            const std::vector<std::filesystem::path> open_files{open_file};
-            this->exec_desktop(working_dir, open_files);
+            this->exec_desktop(working_dir, {file});
         }
     }
 
@@ -611,10 +610,9 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
 
 void
 vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
-                           const std::span<const std::filesystem::path> file_paths) const noexcept
+                           const std::span<const std::shared_ptr<vfs::file>> files) const noexcept
 {
-    const auto desktop_commands =
-        this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());
+    const auto desktop_commands = this->app_exec_generate_desktop_argv(files, this->use_terminal());
     if (!desktop_commands)
     {
         return;

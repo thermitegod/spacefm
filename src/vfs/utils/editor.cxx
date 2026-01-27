@@ -56,9 +56,7 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
         return;
     }
 
-    const std::vector<std::filesystem::path> open_files{path};
-
-    const auto opened = desktop->open_files(path.parent_path(), open_files);
+    const auto opened = desktop->open_files(path.parent_path(), {vfs::file::create(path)});
     if (!opened)
     {
         gui::dialog::error(

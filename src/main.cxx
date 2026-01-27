@@ -91,7 +91,7 @@ open_file(const std::filesystem::path& path) noexcept
         return;
     }
 
-    const auto opened = desktop->open_file(Glib::get_current_dir(), path);
+    const auto opened = desktop->open_file(Glib::get_current_dir(), vfs::file::create(path));
     if (!opened)
     {
         gui::dialog::error(
