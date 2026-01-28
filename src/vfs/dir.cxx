@@ -405,10 +405,45 @@ vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 }
 
 bool
-vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
+vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    return vfs::utils::write_file(this->path_ / ".hidden", std::format("{}\n", file->name())) ==
-           vfs::error_code::none;
+    if (!this->user_hidden_files_)
+    {
+        this->user_hidden_files_ = {};
+    }
+
+    this->user_hidden_files_->push_back(file->path());
+
+    return this->write_hidden();
+}
+
+bool
+vfs::dir::add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) noexcept
+{
+    if (!this->user_hidden_files_)
+    {
+        this->user_hidden_files_ = {};
+    }
+
+    for (const auto& file : files)
+    {
+        this->user_hidden_files_->push_back(file->path());
+    }
+
+    return this->write_hidden();
+}
+
+bool
+vfs::dir::write_hidden() const noexcept
+{
+    std::string text;
+    for (const auto& path : *this->user_hidden_files_)
+    {
+        text += path.string();
+        text += '\n';
+    }
+
+    return vfs::utils::write_file(this->path_ / ".hidden", text) == vfs::error_code::none;
 }
 
 void

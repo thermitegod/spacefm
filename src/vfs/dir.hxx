@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <stop_token>
 #include <thread>
 #include <vector>
@@ -74,7 +75,8 @@ class dir final : public std::enable_shared_from_this<dir>
 
     [[nodiscard]] bool is_directory_empty() const noexcept;
 
-    [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept;
+    [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) noexcept;
+    [[nodiscard]] bool add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 
     void load_thumbnail(const std::shared_ptr<vfs::file>& file,
                         const vfs::file::thumbnail_size size) noexcept;
@@ -91,6 +93,7 @@ class dir final : public std::enable_shared_from_this<dir>
     void remove_file(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // dir .hidden file
+    [[nodiscard]] bool write_hidden() const noexcept;
     void load_user_hidden_files() noexcept;
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
