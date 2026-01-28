@@ -35,18 +35,17 @@ vfs::utils::has_read_permission(const std::filesystem::path& path) noexcept
 
     const auto uid = getuid();
     const auto gid = getgid();
+    const auto permissions = stat->perms();
 
     if (stat->uid() == uid)
     {
-        return stat->mode().data() & S_IRUSR;
+        return (permissions & std::filesystem::perms::owner_read) != std::filesystem::perms::none;
     }
-
     if (stat->gid() == gid)
     {
-        return stat->mode().data() & S_IRGRP;
+        return (permissions & std::filesystem::perms::group_read) != std::filesystem::perms::none;
     }
-
-    return stat->mode().data() & S_IROTH;
+    return (permissions & std::filesystem::perms::others_read) != std::filesystem::perms::none;
 }
 
 bool
@@ -65,18 +64,17 @@ vfs::utils::has_write_permission(const std::filesystem::path& path) noexcept
 
     const auto uid = getuid();
     const auto gid = getgid();
+    const auto permissions = stat->perms();
 
     if (stat->uid() == uid)
     {
-        return stat->mode().data() & S_IWUSR;
+        return (permissions & std::filesystem::perms::owner_write) != std::filesystem::perms::none;
     }
-
     if (stat->gid() == gid)
     {
-        return stat->mode().data() & S_IWGRP;
+        return (permissions & std::filesystem::perms::group_write) != std::filesystem::perms::none;
     }
-
-    return stat->mode().data() & S_IWOTH;
+    return (permissions & std::filesystem::perms::others_write) != std::filesystem::perms::none;
 }
 
 bool
@@ -95,18 +93,17 @@ vfs::utils::has_execute_permission(const std::filesystem::path& path) noexcept
 
     const auto uid = getuid();
     const auto gid = getgid();
+    const auto permissions = stat->perms();
 
     if (stat->uid() == uid)
     {
-        return stat->mode().data() & S_IXUSR;
+        return (permissions & std::filesystem::perms::owner_exec) != std::filesystem::perms::none;
     }
-
     if (stat->gid() == gid)
     {
-        return stat->mode().data() & S_IXGRP;
+        return (permissions & std::filesystem::perms::group_exec) != std::filesystem::perms::none;
     }
-
-    return stat->mode().data() & S_IXOTH;
+    return (permissions & std::filesystem::perms::others_exec) != std::filesystem::perms::none;
 }
 
 bool
