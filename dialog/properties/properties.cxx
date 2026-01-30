@@ -29,6 +29,7 @@
 
 #include "vfs/file.hxx"
 
+#include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "datatypes.hxx"
@@ -237,6 +238,11 @@ PropertiesDialog::calc_total_size_of_files(const std::filesystem::path& path) no
         return;
     }
 
+    if (!vfs::utils::check_directory_permissions(path))
+    {
+        return;
+    }
+
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
     {
         if (this->abort_)
@@ -334,14 +340,7 @@ PropertiesDialog::init_file_info_tab() noexcept
         }
     }
 
-    if (file->is_directory())
-    {
-        page.add_entry("Location:    ", this->cwd_.parent_path().string());
-    }
-    else
-    {
-        page.add_entry("Location:    ", this->cwd_.string());
-    }
+    page.add_entry("Location:    ", this->cwd_.string());
 
     if (file->is_symlink())
     {
