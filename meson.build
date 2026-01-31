@@ -451,7 +451,7 @@ vfs_gtk3_sources = files(
 vfs_gtk4_sources = files(
     'src/vfs/app-desktop.cxx',
     'src/vfs/bookmarks.cxx',
-    'src/vfs/clipboard.cxx',
+    # 'src/vfs/clipboard.cxx',
     'src/vfs/device.cxx',
     'src/vfs/dir.cxx',
     'src/vfs/error.cxx',

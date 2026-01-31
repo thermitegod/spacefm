@@ -31,7 +31,7 @@ test_sources_sfm += files(
     'src/gui/utils/test-history.cxx',
 
     # vfs
-    'src/vfs/test-clipboard.cxx',
+    # 'src/vfs/test-clipboard.cxx',
     'src/vfs/test-error.cxx',
     'src/vfs/test-execute.cxx',
 
