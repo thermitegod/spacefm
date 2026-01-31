@@ -34,6 +34,7 @@
 
 #include "vfs/thumbnails/thumbnails.hxx"
 #include "vfs/utils/icon.hxx"
+#include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
@@ -503,6 +504,12 @@ bool
 vfs::file::is_other() const noexcept
 {
     return (!this->is_directory() && !this->is_regular_file() && !this->is_symlink());
+}
+
+bool
+vfs::file::is_executable() const noexcept
+{
+    return this->mime_type()->is_executable() && vfs::utils::has_execute_permission(this->path());
 }
 
 bool
