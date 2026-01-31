@@ -453,6 +453,17 @@ vfs::dir::enable_thumbnails(const bool enabled) noexcept
 }
 
 void
+vfs::dir::load_thumbnails(const vfs::file::thumbnail_size size) noexcept
+{
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
+    for (const auto& file : this->files_)
+    {
+        this->load_thumbnail(file, size);
+    }
+}
+
+void
 vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
                          const vfs::file::thumbnail_size size) noexcept
 {

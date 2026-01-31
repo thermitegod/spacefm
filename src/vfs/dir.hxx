@@ -78,6 +78,7 @@ class dir final : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) noexcept;
     [[nodiscard]] bool add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 
+    void load_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     void load_thumbnail(const std::shared_ptr<vfs::file>& file,
                         const vfs::file::thumbnail_size size) noexcept;
     void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
