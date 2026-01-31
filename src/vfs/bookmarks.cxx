@@ -13,6 +13,144 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <gtkmm.h>
+
+#if (GTK_MAJOR_VERSION == 4)
+
+#include <chrono>
+#include <filesystem>
+#include <span>
+#include <string>
+#include <vector>
+
+#include <glaze/glaze.hpp>
+
+#include <ztd/extra/glaze.hxx>
+#include <ztd/ztd.hxx>
+
+#include "vfs/bookmarks.hxx"
+#include "vfs/user-dirs.hxx"
+
+namespace bookmark_disk_format
+{
+constexpr u64 version = 1_u64;
+const std::filesystem::path path = vfs::program::data() / "bookmarks.json";
+
+struct bookmark_data final
+{
+    u64 version;
+    std::vector<vfs::bookmarks::bookmark_data> bookmarks;
+};
+} // namespace bookmark_disk_format
+
+void
+vfs::bookmarks::save() noexcept
+{
+    if (!std::filesystem::exists(vfs::program::data()))
+    {
+        std::filesystem::create_directory(vfs::program::data());
+    }
+
+    const auto data =
+        bookmark_disk_format::bookmark_data{bookmark_disk_format::version, this->bookmarks_};
+
+    std::string buffer;
+    const auto ec =
+        glz::write_file_json<glz::opts{.prettify = true}>(data,
+                                                          bookmark_disk_format::path.c_str(),
+                                                          buffer);
+
+    if (ec)
+    {
+        // logger::error("Failed to write bookmark file: {}", glz::format_error(ec, buffer));
+
+        this->signal_save_error().emit(glz::format_error(ec, buffer));
+    }
+}
+
+void
+vfs::bookmarks::load() noexcept
+{
+    if (!std::filesystem::exists(bookmark_disk_format::path))
+    {
+        return;
+    }
+
+    const auto statx = ztd::stat::create(bookmark_disk_format::path);
+    if (statx->mtime() == this->bookmark_mtime_)
+    { // Bookmark file has not been modified since last read
+        return;
+    }
+    this->bookmark_mtime_ = statx->mtime();
+
+    bookmark_disk_format::bookmark_data config_data;
+    std::string buffer;
+    const auto ec = glz::read_file_json<glz::opts{.error_on_unknown_keys = false}>(
+        config_data,
+        bookmark_disk_format::path.c_str(),
+        buffer);
+
+    if (ec)
+    {
+        // logger::error("Failed to load bookmark file: {}", glz::format_error(ec, buffer));
+
+        this->signal_load_error().emit(glz::format_error(ec, buffer));
+        return;
+    }
+
+    this->bookmarks_ = config_data.bookmarks;
+}
+
+void
+vfs::bookmarks::add(const std::filesystem::path& path) noexcept
+{
+    this->load();
+
+    const auto now = std::chrono::system_clock::now();
+
+    for (auto& bookmark : this->bookmarks_)
+    {
+        if (bookmark.path == path)
+        {
+            bookmark.created = now;
+            this->save();
+            return;
+        }
+    }
+
+    this->bookmarks_.push_back({path.filename().string(), path, now});
+    this->save();
+}
+
+void
+vfs::bookmarks::remove(const std::filesystem::path& path) noexcept
+{
+    this->load();
+
+    std::erase_if(this->bookmarks_,
+                  [&path](const bookmark_data& bookmark) { return bookmark.path == path; });
+
+    this->save();
+}
+
+void
+vfs::bookmarks::remove_all() noexcept
+{
+    this->bookmarks_.clear();
+    this->save();
+}
+
+std::span<const vfs::bookmarks::bookmark_data>
+vfs::bookmarks::get_bookmarks() noexcept
+{
+    this->load();
+
+    return this->bookmarks_;
+}
+
+#else
+
+#include <chrono>
 #include <filesystem>
 #include <format>
 #include <span>
@@ -120,3 +258,4 @@ vfs::bookmarks::remove(const std::filesystem::path& path) noexcept
     }
     bookmarks_.bookmarks.erase(bookmarks_.bookmarks.cbegin() + idx);
 }
+#endif
