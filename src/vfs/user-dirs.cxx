@@ -163,6 +163,13 @@ vfs::program::config(const std::filesystem::path& path) noexcept
 }
 
 std::filesystem::path
+vfs::program::data() noexcept
+{
+    static auto path = vfs::user::data() / PACKAGE_NAME;
+    return path;
+}
+
+std::filesystem::path
 vfs::program::tmp() noexcept
 {
     return vfs::user::cache() / PACKAGE_NAME;
