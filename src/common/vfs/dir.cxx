@@ -328,6 +328,9 @@ vfs::dir::refresh() noexcept
 {
     if (!this->load_running_)
     {
+        this->loader_thread_.request_stop();
+        this->loader_thread_.join();
+
         this->loader_thread_ =
             std::jthread([this](const std::stop_token& stoken) { this->refresh_thread(stoken); });
         pthread_setname_np(this->loader_thread_.native_handle(), "loader");
