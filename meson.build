@@ -181,6 +181,8 @@ flags += cpp.get_supported_arguments([
 # Disabled GCC Warnings
 if cpp.get_id() == 'gcc'
     flags += cpp.get_supported_arguments([
+        '-Wno-changes-meaning', # TODO
+
         '-Wno-cast-function-type',
         '-Wno-cast-qual',
         '-Wno-maybe-uninitialized',
