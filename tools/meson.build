@@ -59,3 +59,24 @@ spacefm = build_target(
     ],
     # cpp_pch: '../pch/pch.hxx',
 )
+
+# Dev Dialog Template
+
+incdir = include_directories('template')
+sources = files(
+    'template/main.cxx',
+    'template/window.cxx',
+)
+
+spacefm = build_target(
+    'template-dialog',
+    sources,
+    target_type: 'executable',
+    include_directories: incdir,
+    install: false,
+    install_dir: bindir,
+    dependencies: [
+        gtk4_dependencies,
+    ],
+    cpp_pch: '../pch/pch.hxx',
+)
