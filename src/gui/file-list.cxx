@@ -169,7 +169,7 @@ static void
 gui_file_list_init(gui::file_list* list) noexcept
 {
     list->files_ = nullptr;
-    list->sort_order = (GtkSortType)-1;
+    list->sort_order = GtkSortType::GTK_SORT_ASCENDING;
     list->sort_col = gui::file_list::column::name;
     list->stamp = gui::utils::stamp().data();
 }
