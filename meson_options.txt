@@ -20,10 +20,10 @@ option(
 )
 
 option(
-    'exo',
+    'gtk3',
     type : 'boolean',
     value: true,
-    description : 'Build PtkFileBrowser to use gtk wrapper exo (EXPERIMENTAL)'
+    description : 'Build the Gtk3 version'
 )
 
 option(

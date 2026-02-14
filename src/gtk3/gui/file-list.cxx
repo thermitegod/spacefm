@@ -33,12 +33,12 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/file-list.hxx"
-#include "gui/natsort/strnatcmp.hxx"
 #include "gui/utils/utils.hxx"
 
 #include "vfs/file.hxx"
 
 #include "logger.hxx"
+#include "natsort/strnatcmp.hxx"
 
 struct PtkFileListClass
 {

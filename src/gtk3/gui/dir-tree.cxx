@@ -32,7 +32,6 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/dir-tree.hxx"
-#include "gui/natsort/strnatcmp.hxx"
 #include "gui/utils/utils.hxx"
 
 #include "vfs/file.hxx"
@@ -41,6 +40,7 @@
 #include "vfs/utils/icon.hxx"
 
 #include "logger.hxx"
+#include "natsort/strnatcmp.hxx"
 
 #define PTK_TYPE_DIR_TREE    (gui_dir_tree_get_type())
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))

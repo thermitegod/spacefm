@@ -28,9 +28,9 @@
 #include <cctype>
 #include <cstdint>
 
-#include "gui/natsort/strnatcmp.hxx"
+#include <ztd/ztd.hxx>
 
-#include "vfs/utils/utils.hxx"
+#include "strnatcmp.hxx"
 
 [[nodiscard]] static std::int32_t
 strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
@@ -102,11 +102,33 @@ strnatcmp0(const std::string_view lhs, const std::string_view rhs, const bool fo
     return 0;
 }
 
+[[nodiscard]] static std::array<std::string, 2>
+filename_stem_and_extension(const std::filesystem::path& filename) noexcept
+{
+    auto f = filename.string();
+
+    const auto pos = f.find_last_of('.');
+    if (pos != std::string::npos && pos != 0 && pos != f.length() - 1)
+    {
+        const auto [stem, _, extension] = ztd::rpartition(f, ".");
+        if (stem.ends_with(".tar"))
+        {
+            const auto [stem2, _, extension2] = ztd::rpartition(stem, ".");
+            return {stem2, std::format(".{}.{}", extension2, extension)};
+        }
+        else
+        {
+            return {stem, std::format(".{}", extension)};
+        }
+    }
+    return {f, ""};
+}
+
 [[nodiscard]] std::int32_t
 strnatcmp(const std::string_view lhs, const std::string_view rhs, const bool fold_case) noexcept
 {
-    const auto [stem_lhs, extension_lhs] = vfs::utils::filename_stem_and_extension(lhs);
-    const auto [stem_rhs, extension_rhs] = vfs::utils::filename_stem_and_extension(rhs);
+    const auto [stem_lhs, extension_lhs] = filename_stem_and_extension(lhs);
+    const auto [stem_rhs, extension_rhs] = filename_stem_and_extension(rhs);
 
     std::int32_t result{0};
     if (!stem_lhs.empty() && !stem_rhs.empty())

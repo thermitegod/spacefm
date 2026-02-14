@@ -2,7 +2,6 @@
 
 find \
     ./src \
-    ./dialog \
     ./tools \
     ./tests \
     -iname '*.cxx' -o -iname '*.hxx' | \

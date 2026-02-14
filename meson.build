@@ -12,7 +12,7 @@ project(
         'prefix=/usr',
         'sysconfdir=/etc',
     ],
-    meson_version: '>= 1.0.0',
+    meson_version: '>= 1.7.0',
 )
 
 bash = find_program('bash', required: true)
@@ -20,9 +20,6 @@ python = find_program('python3', required: true)
 
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
-
-incdir = []
-incdir += include_directories('src')
 
 package = meson.project_name()
 version = meson.project_version()
@@ -83,7 +80,7 @@ flags += cpp.get_supported_arguments([
 ])
 
 # Hardening
-if get_option('buildtype') != 'debug'
+if get_option('buildtype') != 'debug' and false
     flags += cpp.get_supported_arguments([
         '-Wformat=2',
         '-Wformat-overflow=2',
@@ -220,36 +217,7 @@ cli11_dep = dependency('CLI11', required: true)
 magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
 libudev_dep = dependency('libudev', required: true)
 botan_dep = dependency('botan-3', required: true)
-
-sigc_dep = dependency('sigc++-3.0', required: true)
 pugixml_dep = dependency('pugixml', required: true)
-
-# Gtk3 CPP
-gtkmm3_dep = dependency('gtkmm-3.0', required: true, version:  '>=3.24.0')
-glibmm3_dep = dependency('glibmm-2.4', required: true)
-giomm3_dep = dependency('giomm-2.4', required: true)
-
-# Gtk4 CPP
-gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
-glibmm4_dep = dependency('glibmm-2.68', required: true)
-giomm4_dep = dependency('giomm-2.68', required: true)
-
-gtk3_dependencies = [
-    gtkmm3_dep,
-    glibmm3_dep,
-    giomm3_dep,
-    # gtkmm4_dep,
-    # glibmm4_dep,
-    # giomm4_dep,
-    sigc_dep,
-]
-
-gtk4_dependencies = [
-    gtkmm4_dep,
-    glibmm4_dep,
-    giomm4_dep,
-    sigc_dep,
-]
 
 base_dependencies = [
     cli11_dep,
@@ -259,8 +227,35 @@ base_dependencies = [
     botan_dep,
 ]
 
-## Source files
-sources = files()
+sigc_dep = dependency('sigc++-3.0', required: true)
+
+# Gtk3
+if get_option('gtk3')
+gtkmm3_dep = dependency('gtkmm-3.0', required: true, version:  '>=3.24.0')
+glibmm3_dep = dependency('glibmm-2.4', required: true)
+giomm3_dep = dependency('giomm-2.4', required: true)
+exo_dep = dependency('exo-2', required: true)
+
+gtk3_dependencies = [
+    gtkmm3_dep,
+    glibmm3_dep,
+    giomm3_dep,
+    sigc_dep,
+    exo_dep,
+]
+endif
+
+# Gtk4
+gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
+glibmm4_dep = dependency('glibmm-2.68', required: true)
+giomm4_dep = dependency('giomm-2.68', required: true)
+
+gtk4_dependencies = [
+    gtkmm4_dep,
+    glibmm4_dep,
+    giomm4_dep,
+    sigc_dep,
+]
 
 ## preprocessor static
 
@@ -274,7 +269,7 @@ preprocessor = [
 
     # used to run dialogs if they are not installed in the system path
     '-DPACKAGE_BUILD_ROOT="@0@"'.format(build_root),
-    '-DDIALOG_BUILD_ROOT="@0@/dialog"'.format(build_root),
+    '-DDIALOG_BUILD_ROOT="@0@/src/gtk3-dialog"'.format(build_root),
 
     # data paths
     '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm'),
@@ -308,9 +303,7 @@ if get_option('dev')
     features += '-DDEV_MODE'
 endif
 
-if get_option('exo')
-    exo_dep = dependency('exo-2', required: true)
-    gtk3_dependencies += exo_dep
+if get_option('gtk3')
     features += '-DUSE_EXO'
 endif
 
@@ -318,7 +311,8 @@ if get_option('with-system-glaze')
     glaze_dep = dependency('glaze', required: true, version: '>=6.3.0')
     base_dependencies += glaze_dep
 else
-    incdir += include_directories('subprojects/glaze/include')
+    # TODO meson deprecated doing this
+    # incdir += include_directories('subprojects/glaze/include')
 endif
 
 if get_option('with-system-ztd')
@@ -330,7 +324,7 @@ else
     base_dependencies += ztd_dep
 endif
 
-if get_option('socket')
+if get_option('gtk3') and get_option('socket')
     cppzmq_dep = dependency('cppzmq', required: true)
 
     base_dependencies += [
@@ -339,18 +333,6 @@ if get_option('socket')
 
     features += '-DHAVE_SOCKET'
     features += '-DSOCKET_PORT="@0@"'.format(get_option('zmp_port'))
-
-    sources += files(
-        'src/commandline/socket.cxx',
-        'src/commandline/socket/get-task/subcommands.cxx',
-        'src/commandline/socket/get/subcommands.cxx',
-        'src/commandline/socket/run-task/subcommands.cxx',
-        'src/commandline/socket/set-task/subcommands.cxx',
-        'src/commandline/socket/set/subcommands.cxx',
-        'src/commandline/socket/subcommands.cxx',
-        'src/socket/commands.cxx',
-        'src/socket/server.cxx',
-    )
 endif
 
 media_dependencies = []
@@ -379,7 +361,6 @@ if get_option('media')
         gdkpixbuf_dep,
     ]
 
-    # base_dependencies += media_dependencies
     features += '-DHAVE_MEDIA'
 endif
 
@@ -387,276 +368,21 @@ foreach a: features
     add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
 
-# Logger Lib
+# Build
 
-spdlog_dep = dependency('spdlog', required: true)
-
-logger_lib = static_library(
-    'logger',
-    files('src/logger.cxx'),
-    include_directories : include_directories('src'),
-    dependencies : spdlog_dep,
-    install: false,
-)
-
-logger_dep = declare_dependency(
-    link_with : logger_lib,
-    include_directories : include_directories('src'),
-    dependencies : spdlog_dep,
-)
-
-# VFS Lib
-
-vfs_gtk3_sources = files(
-    'src/vfs/app-desktop.cxx',
-    'src/vfs/bookmarks.cxx',
-    'src/vfs/clipboard.cxx',
-    'src/vfs/device.cxx',
-    'src/vfs/dir.cxx',
-    'src/vfs/error.cxx',
-    'src/vfs/execute.cxx',
-    'src/vfs/file.cxx',
-    'src/vfs/file-task.cxx',
-    'src/vfs/mime-type.cxx',
-    'src/vfs/mime-monitor.cxx',
-    'src/vfs/terminals.cxx',
-    'src/vfs/thumbnailer.cxx',
-    'src/vfs/trash-can.cxx',
-    'src/vfs/user-dirs.cxx',
-    'src/vfs/volume.cxx',
-
-    'src/vfs/utils/editor.cxx',
-    'src/vfs/utils/icon.cxx',
-    'src/vfs/utils/permissions.cxx',
-    'src/vfs/utils/utils.cxx',
-
-    'src/vfs/thumbnails/thumbnails.cxx',
-
-    'src/vfs/libudevpp/udev.cxx',
-    'src/vfs/libudevpp/udev_device.cxx',
-    'src/vfs/libudevpp/udev_enumerate.cxx',
-    'src/vfs/libudevpp/udev_monitor.cxx',
-
-    'src/vfs/linux/procfs.cxx',
-    'src/vfs/linux/self.cxx',
-    'src/vfs/linux/sysfs.cxx',
-
-    'src/vfs/mime-type/mime-action.cxx',
-    'src/vfs/mime-type/mime-type.cxx',
-    'src/vfs/mime-type/chrome/mime-utils.cxx',
-
-    'src/vfs/notify-cpp/controller.cxx',
-    'src/vfs/notify-cpp/event.cxx',
-    'src/vfs/notify-cpp/file_system_event.cxx',
-    'src/vfs/notify-cpp/notification.cxx',
-    'src/vfs/notify-cpp/notify.cxx',
-)
-
-vfs_gtk4_sources = files(
-    'src/vfs/app-desktop.cxx',
-    'src/vfs/bookmarks.cxx',
-    # 'src/vfs/clipboard.cxx',
-    'src/vfs/device.cxx',
-    'src/vfs/dir.cxx',
-    'src/vfs/error.cxx',
-    'src/vfs/execute.cxx',
-    'src/vfs/file.cxx',
-    'src/vfs/mime-type.cxx',
-    'src/vfs/mime-monitor.cxx',
-    'src/vfs/terminals.cxx',
-    'src/vfs/thumbnailer.cxx',
-    'src/vfs/trash-can.cxx',
-    'src/vfs/user-dirs.cxx',
-    # 'src/vfs/volume.cxx', TODO
-
-    # 'src/vfs/utils/editor.cxx', # TODO move to gui/utils
-    'src/vfs/utils/icon.cxx',
-    'src/vfs/utils/permissions.cxx',
-    'src/vfs/utils/utils.cxx',
-
-    'src/vfs/thumbnails/thumbnails.cxx',
-
-    'src/vfs/libudevpp/udev.cxx',
-    'src/vfs/libudevpp/udev_device.cxx',
-    'src/vfs/libudevpp/udev_enumerate.cxx',
-    'src/vfs/libudevpp/udev_monitor.cxx',
-
-    'src/vfs/linux/procfs.cxx',
-    'src/vfs/linux/self.cxx',
-    'src/vfs/linux/sysfs.cxx',
-
-    'src/vfs/mime-type/mime-action.cxx',
-    'src/vfs/mime-type/mime-type.cxx',
-    'src/vfs/mime-type/chrome/mime-utils.cxx',
-
-    'src/vfs/notify-cpp/controller.cxx',
-    'src/vfs/notify-cpp/event.cxx',
-    'src/vfs/notify-cpp/file_system_event.cxx',
-    'src/vfs/notify-cpp/notification.cxx',
-    'src/vfs/notify-cpp/notify.cxx',
-
-    'src/vfs/task/chmod.cxx',
-    'src/vfs/task/chown.cxx',
-    'src/vfs/task/copy.cxx',
-    'src/vfs/task/create-directory.cxx',
-    'src/vfs/task/create-file.cxx',
-    'src/vfs/task/create-hardlink.cxx',
-    'src/vfs/task/create-symlink.cxx',
-    'src/vfs/task/move.cxx',
-    'src/vfs/task/remove.cxx',
-    'src/vfs/task/task.cxx',
-)
-
-# VFS gtk4
-vfs_gtk4_dependencies = [
-    gtk4_dependencies,
-
-    logger_dep,
-    libudev_dep,
-    pugixml_dep,
-    botan_dep,
-]
-
-vfs_gtk4_lib = static_library(
-    'vfs_gtk4',
-    vfs_gtk4_sources,
-    include_directories : include_directories('src'),
-    dependencies : vfs_gtk4_dependencies,
-    install: false,
-    cpp_pch: 'pch/pch.hxx',
-)
-
-vfs_gtk4_dep = declare_dependency(
-    link_with : vfs_gtk4_lib,
-    include_directories : include_directories('src'),
-    dependencies : vfs_gtk4_dependencies,
-)
-
-# VFS gtk3
-vfs_gtk3_dependencies = [
-    gtk3_dependencies,
-
-    logger_dep,
-    libudev_dep,
-    pugixml_dep,
-    botan_dep,
-]
-
-vfs_gtk3_lib = static_library(
-    'vfs_gtk3',
-    vfs_gtk3_sources,
-    include_directories : include_directories('src'),
-    dependencies : vfs_gtk3_dependencies,
-    install: false,
-    cpp_pch: 'pch/pch.hxx',
-)
-
-vfs_gtk3_dep = declare_dependency(
-    link_with : vfs_gtk3_lib,
-    include_directories : include_directories('src'),
-    dependencies : vfs_gtk3_dependencies,
-)
-
-## Required Base Source files
-
-sources += files(
-    'src/autosave.cxx',
-    'src/main.cxx',
-    'src/settings.cxx',
-    'src/single-instance.cxx',
-    'src/types.cxx',
-
-    'src/compat/gtk4-porting.cxx',
-
-    'src/commandline/commandline.cxx',
-
-    'src/xset/xset.cxx',
-    'src/xset/xset-context-menu.cxx',
-    'src/xset/xset-defaults.cxx',
-    'src/xset/xset-lookup.cxx',
-
-    'src/xset/utils/xset-utils.cxx',
-
-    'src/settings/config-load.cxx',
-    'src/settings/config-save.cxx',
-    'src/settings/settings.cxx',
-
-    'src/settings/upgrade/config-upgrade.cxx',
-
-    'src/utils/strdup.cxx',
-
-    'src/gui/archiver.cxx',
-    'src/gui/clipboard.cxx',
-    'src/gui/dir-tree.cxx',
-    'src/gui/file-browser.cxx',
-    'src/gui/file-list.cxx',
-    'src/gui/file-menu.cxx',
-    'src/gui/file-task.cxx',
-
-    'src/gui/main-window.cxx',
-    'src/gui/path-bar.cxx',
-    'src/gui/search-bar.cxx',
-
-    'src/gui/action/delete.cxx',
-    'src/gui/action/open.cxx',
-    'src/gui/action/paste.cxx',
-    'src/gui/action/trash.cxx',
-
-    'src/gui/dialog/about.cxx',
-    'src/gui/dialog/action-list.cxx',
-    'src/gui/dialog/app-chooser.cxx',
-    'src/gui/dialog/bookmarks.cxx',
-    'src/gui/dialog/create.cxx',
-    'src/gui/dialog/file-search.cxx',
-    'src/gui/dialog/keybindings.cxx',
-    'src/gui/dialog/preference.cxx',
-    'src/gui/dialog/properties.cxx',
-    'src/gui/dialog/rename.cxx',
-    'src/gui/dialog/rename-batch.cxx',
-    'src/gui/dialog/text.cxx',
-
-    'src/gui/view/bookmark.cxx',
-    'src/gui/view/dir-tree.cxx',
-    'src/gui/view/file-task.cxx',
-    'src/gui/view/location.cxx',
-
-    'src/gui/utils/utils.cxx',
-    'src/gui/utils/history.cxx',
-
-    'src/gui/natsort/strnatcmp.cxx',
-)
-
-spacefm = build_target(
-    'spacefm',
-    sources,
-    target_type: 'executable',
-    include_directories: incdir,
-    install: true,
-    install_dir: bindir,
-    dependencies: [
-        base_dependencies,
-        vfs_gtk3_dep,
-    ],
-    cpp_pch: 'pch/pch.hxx',
-)
-
-## Standalone Dialogs
-
-subdir('dialog')
-
-## Tests
+subdir('src')
 
 if get_option('tests')
     subdir('tests')
 endif
-
-## Tools
 
 if get_option('tools')
     subdir('tools')
 endif
 
 ## Install
-
 install_subdir('data/applications', install_dir: datadir)
 install_subdir('data/icons', install_dir: datadir)
+if get_option('rewrite')
+    install_subdir('data/images', install_dir: datadir / 'spacefm')
+endif

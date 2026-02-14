@@ -13,11 +13,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # App Chooser
-incdir_chooser = include_directories(['app-chooser', '../src', '../src/datatypes'])
+incdir_chooser = include_directories(['app-chooser', '../common', '../gtk3/datatypes'])
 sources_chooser = files(
     'app-chooser/main.cxx',
     'app-chooser/app-chooser.cxx',
@@ -31,11 +31,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: vfs_gtk4_dep,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Bookmarks
-incdir_action = include_directories(['bookmarks', '../src/datatypes'])
+incdir_action = include_directories(['bookmarks', '../gtk3/datatypes'])
 sources_action = files(
     'bookmarks/main.cxx',
     'bookmarks/bookmarks.cxx',
@@ -49,11 +49,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Error
-incdir_error = include_directories(['error', '../src/datatypes'])
+incdir_error = include_directories(['error', '../gtk3/datatypes'])
 sources_error = files(
     'error/main.cxx',
     'error/error.cxx',
@@ -69,11 +69,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # File Action
-incdir_action = include_directories(['file-action', '../src/datatypes'])
+incdir_action = include_directories(['file-action', '../gtk3/datatypes'])
 sources_action = files(
     'file-action/main.cxx',
     'file-action/action.cxx',
@@ -87,11 +87,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # File Chooser
-incdir_chooser = include_directories(['file-chooser', '../src/datatypes'])
+incdir_chooser = include_directories(['file-chooser', '../gtk3/datatypes'])
 sources_chooser = files(
     'file-chooser/main.cxx',
     'file-chooser/chooser.cxx',
@@ -105,11 +105,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # File Create
-incdir_create = include_directories(['file-create', '../src', '../src/datatypes'])
+incdir_create = include_directories(['file-create', '../common', '../gtk3/datatypes'])
 sources_create = files(
     'file-create/main.cxx',
     'file-create/create.cxx',
@@ -123,11 +123,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: vfs_gtk4_dep,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # File Rename
-incdir_rename = include_directories(['file-rename', '../src', '../src/datatypes'])
+incdir_rename = include_directories(['file-rename', '../common', '../gtk3/datatypes'])
 sources_rename = files(
     'file-rename/main.cxx',
     'file-rename/rename.cxx',
@@ -141,11 +141,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: vfs_gtk4_dep,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Keybinding
-incdir_keybinding = include_directories(['keybinding', '../src/datatypes'])
+incdir_keybinding = include_directories(['keybinding', '../gtk3/datatypes'])
 sources_keybinding = files(
     'keybinding/main.cxx',
     'keybinding/keybinding.cxx',
@@ -160,11 +160,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Keybinding Set Key
-incdir_keybinding_set = include_directories(['keybinding_set_key', '../src/datatypes'])
+incdir_keybinding_set = include_directories(['keybinding_set_key', '../gtk3/datatypes'])
 sources_keybinding_set = files(
     'keybinding_set_key/main.cxx',
     'keybinding_set_key/keybinding.cxx',
@@ -179,11 +179,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Message
-incdir_message = include_directories(['message', '../src/datatypes'])
+incdir_message = include_directories(['message', '../gtk3/datatypes'])
 sources_message = files(
     'message/main.cxx',
     'message/message.cxx',
@@ -197,11 +197,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Pattern
-incdir_pattern = include_directories(['pattern', '../src/datatypes'])
+incdir_pattern = include_directories(['pattern', '../gtk3/datatypes'])
 sources_pattern = files(
     'pattern/main.cxx',
     'pattern/pattern.cxx',
@@ -215,11 +215,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Preference
-incdir_preference = include_directories(['preference', '../src/datatypes'])
+incdir_preference = include_directories(['preference', '../gtk3/datatypes'])
 sources_preference = files(
     'preference/main.cxx',
     'preference/preference.cxx',
@@ -233,11 +233,11 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Properties
-incdir_properties = include_directories(['properties', '../src', '../src/datatypes'])
+incdir_properties = include_directories(['properties', '../common', '../gtk3/datatypes'])
 sources_properties = files(
     'properties/main.cxx',
     'properties/properties.cxx',
@@ -257,11 +257,11 @@ spacefm = build_target(
         vfs_gtk4_dep,
         media_dependencies,
     ],
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )
 
 # Text
-incdir_text = include_directories(['text', '../src/datatypes'])
+incdir_text = include_directories(['text', '../gtk3/datatypes'])
 sources_text = files(
     'text/main.cxx',
     'text/text.cxx',
@@ -275,5 +275,5 @@ spacefm = build_target(
     install: true,
     install_dir: bindir,
     dependencies: gtk4_dependencies,
-    cpp_pch: '../pch/pch.hxx',
+    cpp_pch: '../../pch/pch.hxx',
 )

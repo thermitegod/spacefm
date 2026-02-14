@@ -19,7 +19,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "gui/natsort/strnatcmp.hxx"
+#include "natsort/strnatcmp.hxx"
 
 namespace sorter
 {
