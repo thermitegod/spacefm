@@ -16,7 +16,9 @@
 // GTKMM
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#endif
 #include <gtkmm.h>
 #include <gdkmm.h>
 #include <giomm.h>
