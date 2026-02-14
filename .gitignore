@@ -1,5 +1,7 @@
 # meson
-build/
+build
+build-clang
+build-gcc
 
 # meson subprojects
 subprojects/packagecache/
