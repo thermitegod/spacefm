@@ -57,7 +57,11 @@ gui::files::files(const std::shared_ptr<config::settings>& settings) : settings_
     set_model(selection_model_);
     set_factory(factory_);
 
-    selection_model_->signal_selection_changed();
+    auto gesture = Gtk::GestureClick::create();
+    gesture->set_button(1);
+    gesture->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    gesture->signal_released().connect(sigc::mem_fun(*this, &files::on_background_click));
+    add_controller(gesture);
 }
 
 gui::files::~files()
@@ -174,6 +178,27 @@ gui::files::on_unbind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
         }
     }
     item->set_data("connections", nullptr);
+}
+
+void
+gui::files::on_background_click(std::int32_t n_press, double x, double y) noexcept
+{
+    if (n_press != 1)
+    {
+        return;
+    }
+
+    Gtk::Widget* target = pick(x, y);
+    if (target == this ||
+        (target && std::string_view(G_OBJECT_TYPE_NAME(target->gobj())) == "GtkGridView"))
+    {
+        const auto selection = selection_model_->get_selection();
+        if (!selection->is_empty())
+        {
+            selection_model_->unselect_all();
+            grab_focus();
+        }
+    }
 }
 
 std::shared_ptr<vfs::file>

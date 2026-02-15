@@ -111,6 +111,8 @@ class files final : public Gtk::GridView
     void on_bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
     void on_unbind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
 
+    void on_background_click(std::int32_t n_press, double x, double y) noexcept;
+
     std::int32_t model_sort(const Glib::RefPtr<const ModelColumns>& a,
                             const Glib::RefPtr<const ModelColumns>& b) const noexcept;
 
