@@ -303,10 +303,6 @@ if get_option('dev')
     features += '-DDEV_MODE'
 endif
 
-if get_option('gtk3')
-    features += '-DUSE_EXO'
-endif
-
 if get_option('with-system-glaze')
     glaze_dep = dependency('glaze', required: true, version: '>=6.3.0')
     base_dependencies += glaze_dep
