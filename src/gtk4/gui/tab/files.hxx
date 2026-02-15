@@ -63,6 +63,8 @@ class files final : public Gtk::GridView
     {
       public:
         std::shared_ptr<vfs::file> file;
+        // Only used if file is a directory
+        Glib::RefPtr<Gtk::DropTarget> drop_target;
 
         static Glib::RefPtr<ModelColumns>
         create(const std::shared_ptr<vfs::file>& file)
@@ -102,6 +104,9 @@ class files final : public Gtk::GridView
     Glib::RefPtr<Gtk::MultiSelection> selection_model_;
     Glib::RefPtr<Gtk::SignalListItemFactory> factory_;
 
+    Glib::RefPtr<Gtk::DragSource> drag_source_;
+    Glib::RefPtr<Gtk::DropTarget> drop_target_;
+
     std::string pattern_;
 
     vfs::file::thumbnail_size thumbnail_size_{vfs::file::thumbnail_size::big};
@@ -112,6 +117,10 @@ class files final : public Gtk::GridView
     void on_unbind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
 
     void on_background_click(std::int32_t n_press, double x, double y) noexcept;
+
+    Glib::RefPtr<Gdk::ContentProvider> on_drag_prepare(double x, double y) const noexcept;
+    bool on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept;
+    Gdk::DragAction on_drag_motion(double, double) noexcept;
 
     std::int32_t model_sort(const Glib::RefPtr<const ModelColumns>& a,
                             const Glib::RefPtr<const ModelColumns>& b) const noexcept;

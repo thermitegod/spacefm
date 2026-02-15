@@ -22,6 +22,7 @@
 
 #include <fnmatch.h>
 
+#include <gdkmm.h>
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
@@ -62,6 +63,17 @@ gui::files::files(const std::shared_ptr<config::settings>& settings) : settings_
     gesture->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
     gesture->signal_released().connect(sigc::mem_fun(*this, &files::on_background_click));
     add_controller(gesture);
+
+    drag_source_ = Gtk::DragSource::create();
+    drag_source_->set_actions(Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+    drag_source_->signal_prepare().connect(sigc::mem_fun(*this, &files::on_drag_prepare), false);
+    add_controller(drag_source_);
+
+    drop_target_ =
+        Gtk::DropTarget::create(GDK_TYPE_FILE_LIST, Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+    drop_target_->signal_drop().connect(sigc::mem_fun(*this, &files::on_drag_data_received), false);
+    drop_target_->signal_motion().connect(sigc::mem_fun(*this, &files::on_drag_motion), false);
+    add_controller(drop_target_);
 }
 
 gui::files::~files()
@@ -84,6 +96,8 @@ gui::files::on_setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     // resize. not the best way to do this.
     box->set_size_request(80, 80);
     // box->set_focusable(false);
+    box->set_can_target(true);
+    box->set_focusable(true);
 
     image->set_icon_size(Gtk::IconSize::LARGE);
     // box->set_focusable(true);
@@ -116,6 +130,36 @@ gui::files::on_bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
 
     auto connections = std::make_unique<std::vector<sigc::connection>>();
+
+    if (col->file->is_directory())
+    {
+        col->drop_target = Gtk::DropTarget::create(GDK_TYPE_FILE_LIST,
+                                                   Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+        col->drop_target->signal_drop().connect(
+            [this, col](const Glib::ValueBase& value, double, double)
+            {
+                (void)this;
+
+                Glib::Value<GSList*> gslist_value;
+                gslist_value.init(value.gobj());
+                auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
+                    gslist_value.get(),
+                    Glib::OwnershipType::OWNERSHIP_NONE);
+                for (const auto& file : files)
+                {
+                    Glib::RefPtr<Gio::File> destination =
+                        Gio::File::create_for_path(col->file->path() / file->get_basename());
+
+                    logger::debug<logger::gui>("Source: {}", file->get_path());
+                    logger::debug<logger::gui>("Target: {}", col->file->path().string());
+
+                    // TODO file actions
+                }
+                return true;
+            },
+            false);
+        box->add_controller(col->drop_target);
+    }
 
     item->set_selectable(true);
     label->set_text(col->file->name().data());
@@ -169,6 +213,21 @@ gui::files::on_bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 void
 gui::files::on_unbind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* box = dynamic_cast<Gtk::Box*>(item->get_child());
+    // auto* image = dynamic_cast<Gtk::Image*>(box->get_first_child());
+    // auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
+
+    if (col->drop_target)
+    {
+        box->remove_controller(col->drop_target);
+    }
+
     auto* connections = static_cast<std::vector<sigc::connection>*>(item->get_data("connections"));
     if (connections)
     {
@@ -199,6 +258,85 @@ gui::files::on_background_click(std::int32_t n_press, double x, double y) noexce
             grab_focus();
         }
     }
+}
+
+Glib::RefPtr<Gdk::ContentProvider>
+gui::files::on_drag_prepare(double x, double y) const noexcept
+{
+    (void)x;
+    (void)y;
+
+    auto selected = selected_files();
+    if (selected.empty())
+    {
+        return nullptr;
+    }
+
+    std::vector<GFile*> files;
+    files.reserve(selected.size());
+    for (const auto& file : selected)
+    {
+        files.push_back(g_file_new_for_path(file->path().c_str()));
+    }
+    GdkFileList* file_list = gdk_file_list_new_from_array(files.data(), files.size());
+    std::ranges::for_each(files, g_object_unref);
+
+    GdkContentProvider* provider = gdk_content_provider_new_typed(GDK_TYPE_FILE_LIST, file_list);
+    return Glib::wrap(provider);
+}
+
+bool
+gui::files::on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept
+{
+    Gtk::Widget* target = pick(x, y);
+    if (target && target != this &&
+        std::string_view(G_OBJECT_TYPE_NAME(target->gobj())) != "GtkGridView")
+    {
+        return false;
+    }
+
+    Glib::Value<GSList*> gslist_value;
+    gslist_value.init(value.gobj());
+    auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
+        gslist_value.get(),
+        Glib::OwnershipType::OWNERSHIP_NONE);
+    for (const auto& file : files)
+    {
+        Glib::RefPtr<Gio::File> destination =
+            Gio::File::create_for_path(dir_->path() / file->get_basename());
+
+        logger::debug<logger::gui>("Source: {}", file->get_path());
+        logger::debug<logger::gui>("Target: {}", dir_->path().string());
+
+        // TODO file actions
+    }
+
+    return true;
+}
+
+Gdk::DragAction
+gui::files::on_drag_motion(double x, double y) noexcept
+{
+    Gtk::Widget* target = pick(x, y);
+    Gtk::Widget* current = target;
+    while (current && current != this)
+    {
+        auto controllers = current->observe_controllers();
+        for (std::uint32_t i = 0; i < g_list_model_get_n_items(controllers->gobj()); ++i)
+        {
+            auto* controller = GTK_EVENT_CONTROLLER(g_list_model_get_item(controllers->gobj(), i));
+            if (GTK_IS_DROP_TARGET(controller))
+            {
+                g_object_unref(controller);
+                return Gdk::DragAction::NONE;
+            }
+            g_object_unref(controller);
+        }
+        current = current->get_parent();
+    }
+    // requires a unique preferred action
+    // return Gdk::DragAction::COPY | Gdk::DragAction::MOVE;
+    return Gdk::DragAction::MOVE;
 }
 
 std::shared_ptr<vfs::file>
