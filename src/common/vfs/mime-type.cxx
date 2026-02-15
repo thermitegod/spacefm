@@ -108,52 +108,20 @@ vfs::mime_type::~mime_type() noexcept
 #if (GTK_MAJOR_VERSION == 4)
 
 Glib::RefPtr<Gtk::IconPaintable>
-vfs::mime_type::icon(const bool big) noexcept
+vfs::mime_type::icon(const std::int32_t size) noexcept
 {
-    ztd::panic_if(this->settings_ == nullptr, "Function disabled");
-
-    i32 icon_size = 0;
-
-    if (big)
-    { // big icon
-        if (this->icon_size_big_ != this->settings_->icon_size_big)
-        { // big icon size has changed
-            this->icon_.big = nullptr;
-        }
-        if (this->icon_.big)
-        {
-            return this->icon_.big;
-        }
-        this->icon_size_big_ = this->settings_->icon_size_big;
-        icon_size = this->icon_size_big_;
-    }
-    else
-    { // small icon
-        if (this->icon_size_small_ != this->settings_->icon_size_small)
-        { // small icon size has changed
-            this->icon_.small = nullptr;
-        }
-        if (this->icon_.small)
-        {
-            return this->icon_.small;
-        }
-        this->icon_size_small_ = this->settings_->icon_size_small;
-        icon_size = this->icon_size_small_;
+    if (icons_.contains(size))
+    {
+        return icons_.at(size);
     }
 
     Glib::RefPtr<Gtk::IconPaintable> icon = nullptr;
 
     if (this->type_ == vfs::constants::mime_type::directory)
     {
-        icon = vfs::utils::load_icon("folder", icon_size);
-        if (big)
-        {
-            this->icon_.big = icon;
-        }
-        else
-        {
-            this->icon_.small = icon;
-        }
+        icon = vfs::utils::load_icon("folder", size);
+        icons_.insert({size, icon});
+
         return icon;
     }
 
@@ -163,7 +131,7 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (!mime_icon.empty())
     {
-        icon = vfs::utils::load_icon(mime_icon, icon_size);
+        icon = vfs::utils::load_icon(mime_icon, size);
     }
     if (!mime_desc.empty())
     {
@@ -192,13 +160,13 @@ vfs::mime_type::icon(const bool big) noexcept
             const std::string icon_name = ztd::replace(this->type_, "/", "-");
 
             // is there an icon named foo-bar?
-            icon = vfs::utils::load_icon(icon_name, icon_size);
+            icon = vfs::utils::load_icon(icon_name, size);
             // fallback try foo-x-generic
             if (!icon)
             {
                 const auto mime = ztd::partition(this->type_, "/")[0];
                 const std::string generic_icon_name = std::format("{}-x-generic", mime);
-                icon = vfs::utils::load_icon(generic_icon_name, icon_size);
+                icon = vfs::utils::load_icon(generic_icon_name, size);
             }
         }
     }
@@ -212,22 +180,19 @@ vfs::mime_type::icon(const bool big) noexcept
             const auto unknown =
                 vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown,
                                                  this->settings_);
-            icon = unknown->icon(big);
+            icon = unknown->icon(size);
         }
         else /* unknown */
         {
-            icon = vfs::utils::load_icon("unknown", icon_size);
+            icon = vfs::utils::load_icon("unknown", size);
         }
     }
 
-    if (big)
+    if (!icons_.contains(size))
     {
-        this->icon_.big = icon;
+        icons_.insert({size, icon});
     }
-    else
-    {
-        this->icon_.small = icon;
-    }
+
     return icon;
 }
 

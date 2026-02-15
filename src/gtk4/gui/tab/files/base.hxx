@@ -52,7 +52,7 @@ class files_base
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting = {},
                  const config::columns& columns = {}) noexcept;
     void set_pattern(const std::string_view pattern) noexcept;
-    void set_thumbnail_size(const vfs::file::thumbnail_size size) noexcept;
+    void set_thumbnail_size(const std::int32_t size) noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
     void set_columns(const config::columns& columns) noexcept;
@@ -116,7 +116,7 @@ class files_base
 
     std::string pattern_;
 
-    vfs::file::thumbnail_size thumbnail_size_{vfs::file::thumbnail_size::big};
+    std::int32_t thumbnail_size_ = 0;
     bool enable_thumbnail_{true};
 
     std::int32_t model_sort(const Glib::RefPtr<const ModelColumns>& a,

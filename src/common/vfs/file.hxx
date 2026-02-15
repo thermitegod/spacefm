@@ -28,7 +28,6 @@
 
 #include "vfs/mime-type.hxx"
 #include "vfs/settings.hxx"
-#include "vfs/user-dirs.hxx"
 
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 
@@ -79,21 +78,24 @@ class file final : public std::enable_shared_from_this<file>
     [[nodiscard]] std::chrono::system_clock::time_point ctime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point mtime() const noexcept;
 
+#if (GTK_MAJOR_VERSION == 4)
+    Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) const noexcept;
+    Glib::RefPtr<Gdk::Paintable> thumbnail(const std::int32_t size) const noexcept;
+    void load_thumbnail(const std::int32_t size, bool force_reload = false) noexcept;
+    // void unload_thumbnail(const std::int32_t size) noexcept;
+    [[nodiscard]] bool is_thumbnail_loaded(const std::int32_t size) const noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     enum class thumbnail_size : std::uint8_t
     {
         big,
         small,
     };
-#if (GTK_MAJOR_VERSION == 4)
-    Glib::RefPtr<Gtk::IconPaintable> icon(const thumbnail_size size) noexcept;
-    Glib::RefPtr<Gdk::Paintable> thumbnail(const thumbnail_size size) const noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
     GdkPixbuf* icon(const thumbnail_size size) noexcept;
     GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
-#endif
     void load_thumbnail(const thumbnail_size size) noexcept;
     void unload_thumbnail(const thumbnail_size size) noexcept;
     [[nodiscard]] bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
+#endif
 
     [[nodiscard]] bool is_directory() const noexcept;
     [[nodiscard]] bool is_regular_file() const noexcept;
@@ -151,8 +153,26 @@ class file final : public std::enable_shared_from_this<file>
     struct thumbnail_data final
     {
 #if (GTK_MAJOR_VERSION == 4)
-        Glib::RefPtr<Gdk::Paintable> big;
-        Glib::RefPtr<Gdk::Paintable> small;
+        enum class raw_size : std::int32_t
+        {
+            normal = 128,
+            large = 256,
+            x_large = 512,
+            xx_large = 1024,
+        };
+
+        [[nodiscard]] static raw_size get_raw_size(const std::int32_t size) noexcept;
+
+        void set(const raw_size size, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) noexcept;
+        [[nodiscard]] Glib::RefPtr<Gdk::Paintable> get(const std::int32_t size) const noexcept;
+        [[nodiscard]] bool is_loaded(const std::int32_t size) const noexcept;
+        void clear() noexcept;
+
+      private:
+        Glib::RefPtr<Gdk::Pixbuf> normal;
+        Glib::RefPtr<Gdk::Pixbuf> large;
+        Glib::RefPtr<Gdk::Pixbuf> x_large;
+        Glib::RefPtr<Gdk::Pixbuf> xx_large;
 #elif (GTK_MAJOR_VERSION == 3)
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};

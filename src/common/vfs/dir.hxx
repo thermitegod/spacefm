@@ -57,8 +57,12 @@ class dir final : public std::enable_shared_from_this<dir>
     create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
            const bool permanent = false) noexcept;
 
+#if (GTK_MAJOR_VERSION == 4)
+// TODO
+#elif (GTK_MAJOR_VERSION == 3)
     // unloads thumbnails in every vfs::dir
     static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
+#endif
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
@@ -78,10 +82,16 @@ class dir final : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) noexcept;
     [[nodiscard]] bool add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 
+#if (GTK_MAJOR_VERSION == 4)
+    void load_thumbnails(const std::int32_t size) noexcept;
+    void load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int32_t size) noexcept;
+    void unload_thumbnails(const std::int32_t size) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     void load_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     void load_thumbnail(const std::shared_ptr<vfs::file>& file,
                         const vfs::file::thumbnail_size size) noexcept;
     void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
+#endif
     void enable_thumbnails(const bool enabled) noexcept;
 
   private:

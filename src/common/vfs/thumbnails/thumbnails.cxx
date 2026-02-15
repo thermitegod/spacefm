@@ -39,6 +39,7 @@
 
 #include "vfs/thumbnails/thumbnails.hxx"
 
+#include "gdkmm/pixbuf.h"
 #include "logger.hxx"
 
 // Based on spec v0.9.0
@@ -130,7 +131,7 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
 }
 
 #if (GTK_MAJOR_VERSION == 4)
-static Glib::RefPtr<Gdk::Paintable>
+static Glib::RefPtr<Gdk::Pixbuf>
 #elif (GTK_MAJOR_VERSION == 3)
 static GdkPixbuf*
 #endif
@@ -154,9 +155,13 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             {
                 return {magic_enum::enum_integer(thumbnail_size::x_large), cache_dirs.x_large};
             }
-            else // if (size <= 1024)
+            else if (size <= 1024)
             {
                 return {magic_enum::enum_integer(thumbnail_size::xx_large), cache_dirs.xx_large};
+            }
+            else
+            {
+                std::unreachable();
             }
         },
         thumb_size);
@@ -364,16 +369,15 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 #endif
     }
 
-    // Scale thumbnail to requested size from cached thumbnail
 #if (GTK_MAJOR_VERSION == 4)
-    const i32 original_width = thumbnail->get_width();
-    const i32 original_height = thumbnail->get_height();
+    // return the raw thumbnail, it will get scaled to the requested size later
+    return thumbnail;
 #elif (GTK_MAJOR_VERSION == 3)
-    const i32 original_width = gdk_pixbuf_get_width(thumbnail);
-    const i32 original_height = gdk_pixbuf_get_height(thumbnail);
-#endif
-    i32 new_width = thumb_size;
-    i32 new_height = thumb_size;
+    // Scale thumbnail to requested size from cached thumbnail
+    const auto original_width = gdk_pixbuf_get_width(thumbnail);
+    const auto original_height = gdk_pixbuf_get_height(thumbnail);
+    auto new_width = thumb_size;
+    auto new_height = thumb_size;
     if (original_width > original_height)
     { // Scale by width
         new_height = (thumb_size * original_height) / original_width;
@@ -383,10 +387,6 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         new_width = (thumb_size * original_width) / original_height;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
-    return Gdk::Texture::create_for_pixbuf(
-        thumbnail->scale_simple(new_width.data(), new_height.data(), Gdk::InterpType::BILINEAR));
-#elif (GTK_MAJOR_VERSION == 3)
     GdkPixbuf* scaled = gdk_pixbuf_scale_simple(thumbnail,
                                                 new_width.data(),
                                                 new_height.data(),
@@ -397,21 +397,35 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 }
 
 #if (GTK_MAJOR_VERSION == 4)
-Glib::RefPtr<Gdk::Paintable>
-#elif (GTK_MAJOR_VERSION == 3)
-GdkPixbuf*
-#endif
-vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
+
+Glib::RefPtr<Gdk::Pixbuf>
+vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file,
+                              const std::int32_t thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::image);
 }
 
-#if (GTK_MAJOR_VERSION == 4)
-Glib::RefPtr<Gdk::Paintable>
-#elif (GTK_MAJOR_VERSION == 3)
-GdkPixbuf*
-#endif
-vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
+Glib::RefPtr<Gdk::Pixbuf>
+vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file,
+                              const std::int32_t thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::video);
 }
+
+#elif (GTK_MAJOR_VERSION == 3)
+
+GdkPixbuf*
+vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file,
+                              const std::int32_t thumb_size) noexcept
+{
+    return thumbnail_create(file, thumb_size, thumbnail_mode::image);
+}
+
+GdkPixbuf*
+vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file,
+                              const std::int32_t thumb_size) noexcept
+{
+    return thumbnail_create(file, thumb_size, thumbnail_mode::video);
+}
+
+#endif

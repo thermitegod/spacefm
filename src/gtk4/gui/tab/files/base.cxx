@@ -345,7 +345,7 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
 }
 
 void
-gui::files_base::set_thumbnail_size(const vfs::file::thumbnail_size size) noexcept
+gui::files_base::set_thumbnail_size(const std::int32_t size) noexcept
 {
     thumbnail_size_ = size;
 }

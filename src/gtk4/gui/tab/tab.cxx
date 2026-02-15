@@ -1812,7 +1812,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
     {
         // set file sorting settings
         view_grid_->set_pattern(pattern);
-        view_grid_->set_thumbnail_size(vfs::file::thumbnail_size::big);
+        view_grid_->set_thumbnail_size(settings_->general.icon_size_big); // TODO
         // this will update the model, must be last
         view_grid_->set_dir(dir_, sorting_);
     }
@@ -1820,7 +1820,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
     {
         // set file sorting settings
         view_list_->set_pattern(pattern);
-        view_list_->set_thumbnail_size(vfs::file::thumbnail_size::big);
+        view_list_->set_thumbnail_size(settings_->general.icon_size_small); // TOOD
         // this will update the model, must be last
         view_list_->set_dir(dir_, sorting_, columns_);
     }

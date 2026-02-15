@@ -98,7 +98,8 @@ main(int argc, char** argv)
     }
 
     std::ranges::for_each(files,
-                          [](auto& file) { file->load_thumbnail(vfs::file::thumbnail_size::big); });
+                          [settings](auto& file)
+                          { file->load_thumbnail(settings->icon_size_big); });
 
     return EXIT_SUCCESS;
 }

@@ -84,7 +84,7 @@ gui::grid::grid(const std::shared_ptr<config::settings>& settings) : files_base(
                         scroll_to(0);
                     }
 
-                    dir_->load_thumbnails(vfs::file::thumbnail_size::big);
+                    dir_->load_thumbnails(settings_->general.icon_size_big);
                 },
                 Glib::PRIORITY_DEFAULT);
         });
@@ -193,7 +193,7 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     item->set_selectable(true);
     label->set_text(col->file->name().data());
 
-    auto update_image = [image, col]()
+    auto update_image = [this, image, col]()
     {
         if (!image || !col)
         {
@@ -201,13 +201,13 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
         }
 
         Glib::RefPtr<Gdk::Paintable> icon;
-        if (col->file->is_thumbnail_loaded(vfs::file::thumbnail_size::big))
+        if (col->file->is_thumbnail_loaded(settings_->general.icon_size_big))
         {
-            icon = col->file->thumbnail(vfs::file::thumbnail_size::big);
+            icon = col->file->thumbnail(settings_->general.icon_size_big);
         }
         else
         {
-            icon = col->file->icon(vfs::file::thumbnail_size::big);
+            icon = col->file->icon(settings_->general.icon_size_big);
         }
 
         // DEV ignore thumbs

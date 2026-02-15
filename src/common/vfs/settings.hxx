@@ -15,16 +15,26 @@
 
 #pragma once
 
-#include <ztd/ztd.hxx>
+#include <cstdint>
 
-// VFS only settings
+#include <gtkmm.h>
+
+// VFS only settings, used to support both gtk3/gtk4 builds
+// should be replaced with the regular settings struct when the
+// gtk4 build is the only one left.
 
 namespace vfs
 {
 struct settings
 {
+#if (GTK_MAJOR_VERSION == 4)
+    std::int32_t icon_size_big;
+    std::int32_t icon_size_small;
+    std::int32_t icon_size_tool;
+#elif (GTK_MAJOR_VERSION == 3)
     i32 icon_size_big;
     i32 icon_size_small;
     i32 icon_size_tool;
+#endif
 };
 } // namespace vfs

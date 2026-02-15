@@ -81,8 +81,6 @@ gui::list::list(const config::columns columns, const std::shared_ptr<config::set
                         // otherwise will be at the bottom of the view
                         scroll_to(0);
                     }
-
-                    dir_->load_thumbnails(vfs::file::thumbnail_size::big);
                 },
                 Glib::PRIORITY_DEFAULT);
         });
@@ -301,7 +299,7 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
         box->add_controller(col->drop_target);
     }
 
-    auto update_image = [image, col]()
+    auto update_image = [this, image, col]()
     {
         if (!image || !col)
         {
@@ -310,7 +308,7 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
         // DEV ignore thumbs
         // image->set_from_icon_name(col->file->is_directory() ? "folder" : "text-x-generic");
-        image->set(col->file->icon(vfs::file::thumbnail_size::small));
+        image->set(col->file->icon(settings_->general.icon_size_small));
     };
 
     auto update_label = [label, col]()

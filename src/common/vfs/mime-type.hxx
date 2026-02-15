@@ -18,6 +18,7 @@
 #pragma once
 
 #include <filesystem>
+#include <flat_map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -63,7 +64,7 @@ class mime_type final
                      const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
 
 #if (GTK_MAJOR_VERSION == 4)
-    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const bool big) noexcept;
+    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] GdkPixbuf* icon(const bool big) noexcept;
 #endif
@@ -99,20 +100,20 @@ class mime_type final
 
     std::string type_;
     std::string description_;
+
+#if (GTK_MAJOR_VERSION == 4)
+    std::flat_map<std::int32_t, Glib::RefPtr<Gtk::IconPaintable>> icons_;
+#elif (GTK_MAJOR_VERSION == 3)
     i32 icon_size_big_{0};
     i32 icon_size_small_{0};
 
     struct icon_data final
     {
-#if (GTK_MAJOR_VERSION == 4)
-        Glib::RefPtr<Gtk::IconPaintable> big{nullptr};
-        Glib::RefPtr<Gtk::IconPaintable> small{nullptr};
-#elif (GTK_MAJOR_VERSION == 3)
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};
-#endif
     };
     icon_data icon_;
+#endif
 
     std::shared_ptr<vfs::settings> settings_;
 };

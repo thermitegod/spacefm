@@ -363,6 +363,7 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
                 continue;
             }
 
+#if (GTK_MAJOR_VERSION == 3)
             // reload thumbnails if already loaded
             if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::big))
             {
@@ -374,20 +375,27 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
                 file->unload_thumbnail(vfs::file::thumbnail_size::small);
                 file->load_thumbnail(vfs::file::thumbnail_size::small);
             }
+#endif
         }
     }
+
+#if (GTK_MAJOR_VERSION == 4)
+    load_thumbnails(settings_->icon_size_big);
+#endif
 
     this->load_running_ = false;
 
     this->signal_file_listed().emit();
 }
 
+#if (GTK_MAJOR_VERSION == 3)
 void
 vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
     std::ranges::for_each(global::dir_smart_cache.items(),
                           [size](const auto& dir) { dir->unload_thumbnails(size); });
 }
+#endif
 
 std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& filename) noexcept
@@ -452,10 +460,59 @@ vfs::dir::enable_thumbnails(const bool enabled) noexcept
     this->enable_thumbnails_ = enabled;
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+
+void
+vfs::dir::load_thumbnails(const std::int32_t size) noexcept
+{
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
+    if (!this->enable_thumbnails_)
+    {
+        return;
+    }
+
+    for (const auto& file : this->files_)
+    {
+        this->load_thumbnail(file, size);
+    }
+}
+
+void
+vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int32_t size) noexcept
+{
+    if (this->enable_thumbnails_)
+    {
+        // logger::debug<logger::vfs>("vfs::dir::load_thumbnail()  {}", file->name());
+        this->thumbnailer_.request({file, size});
+    }
+}
+
+void
+vfs::dir::unload_thumbnails(const std::int32_t size) noexcept
+{
+    (void)size;
+#if 0 // TODO
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
+    for (const auto& file : this->files_)
+    {
+        file->unload_thumbnail(size);
+    }
+#endif
+}
+
+#elif (GTK_MAJOR_VERSION == 3)
+
 void
 vfs::dir::load_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
     const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
+    if (!this->enable_thumbnails_)
+    {
+        return;
+    }
 
     for (const auto& file : this->files_)
     {
@@ -484,6 +541,8 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
         file->unload_thumbnail(size);
     }
 }
+
+#endif
 
 bool
 vfs::dir::is_loading() const noexcept

@@ -37,7 +37,11 @@ class thumbnailer
     struct request_data final
     {
         std::shared_ptr<vfs::file> file;
+#if (GTK_MAJOR_VERSION == 4)
+        std::int32_t size;
+#elif (GTK_MAJOR_VERSION == 3)
         vfs::file::thumbnail_size size;
+#endif
     };
 
     void request(const request_data& request) noexcept;
