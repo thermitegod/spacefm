@@ -59,7 +59,7 @@ gui::files::files(const std::shared_ptr<config::settings>& settings) : settings_
     set_factory(factory_);
 
     auto gesture = Gtk::GestureClick::create();
-    gesture->set_button(1);
+    gesture->set_button(GDK_BUTTON_PRIMARY);
     gesture->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
     gesture->signal_released().connect(sigc::mem_fun(*this, &files::on_background_click));
     add_controller(gesture);
@@ -160,6 +160,29 @@ gui::files::on_bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
             false);
         box->add_controller(col->drop_target);
     }
+
+    auto gesture = Gtk::GestureClick::create();
+    gesture->set_button(GDK_BUTTON_SECONDARY);
+    gesture->signal_pressed().connect(
+        [this, item](std::int32_t n_press, double x, double y)
+        {
+            (void)n_press;
+            (void)x;
+            (void)y;
+
+            const auto position = item->get_position();
+
+            if (!is_selected() || !selection_model_->is_selected(position))
+            {
+                // no items are currently selected, select this item.
+                // or
+                // right click is not over one of the currently selected
+                // items, unselect those and select this item.
+                selection_model_->select_item(position, true);
+            }
+        },
+        false);
+    box->add_controller(gesture);
 
     item->set_selectable(true);
     label->set_text(col->file->name().data());
@@ -491,6 +514,13 @@ void
 gui::files::sort() noexcept
 {
     dir_model_->sort(sigc::mem_fun(*this, &files::model_sort));
+}
+
+bool
+gui::files::is_selected() const noexcept
+{
+    auto selected = selection_model_->get_selection();
+    return !selected->is_empty();
 }
 
 void

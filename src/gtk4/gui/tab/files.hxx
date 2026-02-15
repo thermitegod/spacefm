@@ -49,6 +49,7 @@ class files final : public Gtk::GridView
     void set_thumbnail_size(const vfs::file::thumbnail_size size) noexcept;
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
 
+    [[nodiscard]] bool is_selected() const noexcept;
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_file(const std::filesystem::path& filename,
