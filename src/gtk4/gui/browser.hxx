@@ -37,8 +37,8 @@ class browser final : public Gtk::Notebook
             const std::shared_ptr<config::settings>& settings);
     ~browser();
 
-    void new_tab(const std::filesystem::path& path = vfs::user::home(),
-                 const config::sorting& sorting = {}) noexcept;
+    void new_tab(const std::filesystem::path& path) noexcept;
+    void new_tab(const std::filesystem::path& path, const config::sorting& sorting) noexcept;
     void new_tab_here() noexcept;
     void close_tab() noexcept;
     void restore_tab() noexcept;

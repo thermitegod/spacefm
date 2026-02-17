@@ -198,8 +198,7 @@ struct settings_on_disk
     };
     dialog dialog;
 
-    // TODO
-    // sorting default_sorting;
+    sorting default_sorting;
 
     // TODO multi window state support
     // std::flat_map<std::uint32_t, window_state> window;

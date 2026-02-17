@@ -40,7 +40,7 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     action_close_ = action_group_->add_action("close", [this]() { close_tab(); });
     action_restore_ = action_group_->add_action("restore", [this]() { restore_tab(); });
     action_restore_->set_enabled(false);
-    action_tab_ = action_group_->add_action("new_tab", [this]() { new_tab(); });
+    action_tab_ = action_group_->add_action("new_tab", [this]() { new_tab(vfs::user::home()); });
     action_tab_here_ = action_group_->add_action("new_tab_here", [this]() { new_tab_here(); });
     insert_action_group("browser", action_group_);
 
@@ -50,7 +50,7 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     // load saved tabs, do this before connecting to notebook signals
     if (settings_->window.state[panel].tabs.empty())
     {
-        new_tab(vfs::user::home(), config::sorting{});
+        new_tab(vfs::user::home());
     }
     else
     {
@@ -97,7 +97,7 @@ gui::browser::add_shortcuts() noexcept
                 }
                 else
                 {
-                    new_tab();
+                    new_tab(vfs::user::home());
                 }
                 set_current_page(get_n_pages() - 1);
                 return true;
@@ -236,6 +236,12 @@ gui::browser::display_filename(const std::filesystem::path& path) noexcept
     {
         return path.filename().string();
     }
+}
+
+void
+gui::browser::new_tab(const std::filesystem::path& path) noexcept
+{
+    new_tab(path, settings_->default_sorting);
 }
 
 void
