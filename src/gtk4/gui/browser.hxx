@@ -67,7 +67,7 @@ class browser final : public Gtk::Notebook
     Glib::RefPtr<Gio::SimpleAction> action_tab_;
     Glib::RefPtr<Gio::SimpleAction> action_tab_here_;
 
-    std::queue<std::filesystem::path> restore_tabs_;
+    std::queue<config::tab_state> restore_tabs_;
 
     bool state_frozen_ = false;
 

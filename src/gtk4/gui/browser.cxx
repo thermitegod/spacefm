@@ -336,7 +336,8 @@ gui::browser::new_tab_here() noexcept
 void
 gui::browser::close_tab() noexcept
 {
-    restore_tabs_.push(current_tab()->cwd());
+    const auto* tab = current_tab();
+    restore_tabs_.push({tab->get_sorting_settings(), tab->cwd()});
 
     if (get_n_pages() == 1)
     {
@@ -353,10 +354,10 @@ gui::browser::restore_tab() noexcept
 {
     if (!restore_tabs_.empty())
     {
-        const auto path = restore_tabs_.back();
+        const auto state = restore_tabs_.back();
         restore_tabs_.pop();
 
-        new_tab(path);
+        new_tab(state.path, state.sorting);
     }
 }
 
