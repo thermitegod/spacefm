@@ -46,13 +46,15 @@ class browser final : public Gtk::Notebook
 
     [[nodiscard]] bool set_active_tab(std::int32_t tab) noexcept;
 
+    void freeze_state() noexcept;
+    void unfreeze_state() noexcept;
+
   private:
     void add_shortcuts() noexcept;
     gui::tab* current_tab() noexcept;
     [[nodiscard]] std::string display_filename(const std::filesystem::path& path) noexcept;
 
     void save_tab_state() noexcept;
-    void save_tab_current() noexcept;
 
     Gtk::ApplicationWindow& parent_;
     config::panel_id panel_; // which panel the browser is in
@@ -67,9 +69,11 @@ class browser final : public Gtk::Notebook
 
     std::queue<std::filesystem::path> restore_tabs_;
 
+    bool state_frozen_ = false;
+
     // Signals we connect to
-    // sigc::connection signal_page_added_;
-    // sigc::connection signal_page_removed_;
+    sigc::connection signal_page_added_;
+    sigc::connection signal_page_removed_;
     sigc::connection signal_page_reordered_;
     sigc::connection signal_switch_page_;
 };

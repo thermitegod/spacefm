@@ -91,6 +91,8 @@ gui::layout::create_browser(config::panel_id id) noexcept
 void
 gui::layout::destroy_browser(config::panel_id id) noexcept
 {
+    freeze_browsers();
+
     switch (id)
     {
         case config::panel_id::panel_1:
@@ -107,6 +109,8 @@ gui::layout::destroy_browser(config::panel_id id) noexcept
             break;
     }
     browsers_.at(id) = nullptr;
+
+    unfreeze_browsers();
 }
 
 gui::browser*
@@ -127,4 +131,28 @@ gui::layout::update_container_visibility() noexcept
 
     top_.set_visible(top_visible);
     bottom_.set_visible(bot_visible);
+}
+
+void
+gui::layout::freeze_browsers() noexcept
+{
+    for (const auto [_, browser] : browsers_)
+    {
+        if (browser)
+        {
+            browser->freeze_state();
+        }
+    }
+}
+
+void
+gui::layout::unfreeze_browsers() noexcept
+{
+    for (const auto [_, browser] : browsers_)
+    {
+        if (browser)
+        {
+            browser->unfreeze_state();
+        }
+    }
 }

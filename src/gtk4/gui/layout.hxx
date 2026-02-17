@@ -40,6 +40,11 @@ class layout : public Gtk::Paned
     void destroy_browser(config::panel_id id) noexcept;
     void update_container_visibility() noexcept;
 
+    // Disable updating browsers saved tabs
+    void freeze_browsers() noexcept;
+    // Enable updating browsers saved tabs
+    void unfreeze_browsers() noexcept;
+
     Gtk::ApplicationWindow& parent_;
     std::shared_ptr<config::settings> settings_;
 

@@ -59,53 +59,24 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
             if (std::filesystem::exists(tab.path))
             {
                 new_tab(tab.path, tab.sorting);
-                // Glib::signal_idle().connect_once([this, tab]() { new_tab(tab.path, tab.sorting); }, Glib::PRIORITY_DEFAULT);
+                set_current_page(settings_->window.state[panel].active_tab);
             }
         }
     }
 
-    Glib::signal_idle().connect_once(
-        [this, panel]()
-        {
-            const auto tab = settings_->window.state[panel].active_tab;
-            const auto switched = set_active_tab(tab);
-            if (!switched)
-            {
-                auto alert = Gtk::AlertDialog::create("Tab Switch Failed");
-                alert->set_detail(std::format("Failed to change to tab {}", tab));
-                alert->set_modal(true);
-                alert->show(parent_);
-            }
-        },
-        Glib::PRIORITY_LOW);
-
-    Glib::signal_idle().connect_once(
-        [this]()
-        {
-            // signal_page_added_ = signal_page_added().connect([this](auto, auto) { save_tab_state(); });
-            // signal_page_removed_ = signal_page_removed().connect([this](auto, auto) { save_tab_state(); });
-            signal_page_reordered_ = signal_page_reordered().connect(
-                [this](auto, auto)
-                {
-                    save_tab_state();
-                    save_tab_current();
-                });
-            signal_switch_page_ = signal_switch_page().connect(
-                [this](auto, auto)
-                {
-                    save_tab_state();
-                    save_tab_current();
-                });
-        },
-        Glib::PRIORITY_LOW);
+    signal_page_added_ = signal_page_added().connect([this](auto, auto) { save_tab_state(); });
+    signal_page_removed_ = signal_page_removed().connect([this](auto, auto) { save_tab_state(); });
+    signal_page_reordered_ =
+        signal_page_reordered().connect([this](auto, auto) { save_tab_state(); });
+    signal_switch_page_ = signal_switch_page().connect([this](auto, auto) { save_tab_state(); });
 }
 
 gui::browser::~browser()
 {
     logger::debug("gui::browser::~browser({})", std::to_underlying(panel_));
 
-    // signal_page_added_.disconnect();
-    // signal_page_removed_.disconnect();
+    signal_page_added_.disconnect();
+    signal_page_removed_.disconnect();
     signal_page_reordered_.disconnect();
     signal_switch_page_.disconnect();
 }
@@ -128,6 +99,7 @@ gui::browser::add_shortcuts() noexcept
                 {
                     new_tab();
                 }
+                set_current_page(get_n_pages() - 1);
                 return true;
             });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
@@ -142,6 +114,7 @@ gui::browser::add_shortcuts() noexcept
             [this](Gtk::Widget&, const Glib::VariantBase&)
             {
                 restore_tab();
+                set_current_page(get_n_pages() - 1);
                 return true;
             });
 
@@ -346,7 +319,6 @@ gui::browser::new_tab(const std::filesystem::path& path, const config::sorting& 
 
     append_page(*tab, *label);
     set_tab_reorderable(*tab, true);
-    set_current_page(get_n_pages() - 1);
 }
 
 void
@@ -393,16 +365,31 @@ gui::browser::open_in_tab(const std::filesystem::path& path, std::int32_t tab) n
 }
 
 void
+gui::browser::freeze_state() noexcept
+{
+    state_frozen_ = true;
+}
+
+void
+gui::browser::unfreeze_state() noexcept
+{
+    state_frozen_ = false;
+}
+
+void
 gui::browser::save_tab_state() noexcept
 {
-    const auto n_tabs = get_n_pages();
-    if (n_tabs == 0)
+    if (state_frozen_)
     {
-        // No tabs exist in notebook, this is getting run in the destructor so do no save state.
         return;
     }
 
+    const auto n_tabs = get_n_pages();
+    const auto current_page = get_current_page();
+
     std::vector<config::tab_state> tabs;
+    tabs.reserve(static_cast<std::size_t>(n_tabs));
+
     for (std::int32_t i = 0; i < n_tabs; ++i)
     {
         auto* tab = dynamic_cast<gui::tab*>(get_nth_page(i));
@@ -410,12 +397,6 @@ gui::browser::save_tab_state() noexcept
     }
 
     settings_->window.state[panel_].tabs = tabs;
-    settings_->signal_autosave_request().emit();
-}
-
-void
-gui::browser::save_tab_current() noexcept
-{
-    settings_->window.state[panel_].active_tab = get_current_page();
+    settings_->window.state[panel_].active_tab = current_page;
     settings_->signal_autosave_request().emit();
 }
