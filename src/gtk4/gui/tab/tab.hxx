@@ -30,7 +30,8 @@
 #include "settings/settings.hxx"
 
 #include "gui/lib/history.hxx"
-#include "gui/tab/files.hxx"
+#include "gui/tab/files/grid.hxx"
+#include "gui/tab/files/list.hxx"
 #include "gui/tab/statusbar.hxx"
 #include "gui/tab/toolbar.hxx"
 
@@ -168,8 +169,8 @@ class tab final : public Gtk::Box
     gui::toolbar toolbar_ = gui::toolbar(settings_);
     gui::statusbar statusbar_ = gui::statusbar(settings_);
 
-    Gtk::GridView file_list_grid_view_;
-    gui::files file_list_ = gui::files(settings_);
+    gui::grid file_list_ = gui::grid(settings_);
+    // gui::list file_list_ = gui::list(settings_);
 
     struct
     {

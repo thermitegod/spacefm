@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <flat_map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ enum class panel_id : std::uint8_t
 
 enum class view_mode : std::uint8_t
 {
-    icon,
+    grid,
     list,
     compact,
 };
@@ -78,6 +79,22 @@ enum class sort_hidden : std::uint8_t
     last,
 };
 
+struct columns final
+{
+    bool name = true;
+    bool size = true;
+    bool bytes = true;
+    bool type = true;
+    bool mime = true;
+    bool perm = true;
+    bool owner = true;
+    bool group = true;
+    bool atime = true;
+    bool btime = true;
+    bool ctime = true;
+    bool mtime = true;
+};
+
 struct sorting final
 {
     bool show_hidden = true;
@@ -94,6 +111,8 @@ struct tab_state final
     // std::filesystem::path path = vfs::user::home();
     std::string path = vfs::user::home();
     sorting sorting{};
+    view_mode view = view_mode::grid;
+    std::optional<columns> columns = std::nullopt; // only used for view_mode::list
 };
 
 struct panel_state final
@@ -199,6 +218,7 @@ struct settings_on_disk
     };
     dialog dialog;
 
+    columns default_columns;
     sorting default_sorting;
 
     // TODO multi window state support

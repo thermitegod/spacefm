@@ -10,7 +10,6 @@ sources = files(
     'gui/menubar.cxx',
     'gui/task.cxx',
 
-    'gui/tab/files.cxx',
     'gui/tab/path.cxx',
     'gui/tab/search.cxx',
     'gui/tab/side_default.cxx',
@@ -19,6 +18,10 @@ sources = files(
     'gui/tab/statusbar.cxx',
     'gui/tab/tab.cxx',
     'gui/tab/toolbar.cxx',
+
+    'gui/tab/files/base.cxx',
+    'gui/tab/files/grid.cxx',
+    'gui/tab/files/list.cxx',
 
     'gui/action/delete.cxx',
     'gui/action/open.cxx',

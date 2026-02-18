@@ -30,11 +30,16 @@
 
 namespace gui
 {
-class files final : public Gtk::GridView
+class files_base
 {
   public:
-    files(const std::shared_ptr<config::settings>& settings);
-    ~files();
+    files_base(const std::shared_ptr<config::settings>& settings);
+    ~files_base();
+
+    files_base(const files_base&) = delete;
+    files_base& operator=(const files_base&) = delete;
+    files_base(files_base&&) = delete;
+    files_base& operator=(files_base&&) = delete;
 
     [[nodiscard]] std::shared_ptr<vfs::file> get_item(u32 position) const noexcept;
     [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
@@ -44,10 +49,13 @@ class files final : public Gtk::GridView
     void enable_thumbnails() noexcept;
     void disable_thumbnails() noexcept;
 
-    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting) noexcept;
+    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting = {},
+                 const config::columns& columns = {}) noexcept;
     void set_pattern(const std::string_view pattern) noexcept;
     void set_thumbnail_size(const vfs::file::thumbnail_size size) noexcept;
+
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
+    void set_columns(const config::columns& columns) noexcept;
 
     [[nodiscard]] bool is_selected() const noexcept;
     void select_all() const noexcept;
@@ -59,7 +67,7 @@ class files final : public Gtk::GridView
     void select_pattern(const std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
-  private:
+  protected:
     class ModelColumns : public Glib::Object
     {
       public:
@@ -96,14 +104,12 @@ class files final : public Gtk::GridView
 
     std::shared_ptr<config::settings> settings_;
     config::sorting sorting_;
+    config::columns columns_;
 
     std::shared_ptr<vfs::dir> dir_;
 
-    Pango::AttrList attrs_;
-
     Glib::RefPtr<Gio::ListStore<ModelColumns>> dir_model_;
     Glib::RefPtr<Gtk::MultiSelection> selection_model_;
-    Glib::RefPtr<Gtk::SignalListItemFactory> factory_;
 
     Glib::RefPtr<Gtk::DragSource> drag_source_;
     Glib::RefPtr<Gtk::DropTarget> drop_target_;
@@ -112,16 +118,6 @@ class files final : public Gtk::GridView
 
     vfs::file::thumbnail_size thumbnail_size_{vfs::file::thumbnail_size::big};
     bool enable_thumbnail_{true};
-
-    void on_setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
-    void on_bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
-    void on_unbind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
-
-    void on_background_click(std::int32_t n_press, double x, double y) noexcept;
-
-    Glib::RefPtr<Gdk::ContentProvider> on_drag_prepare(double x, double y) const noexcept;
-    bool on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept;
-    Gdk::DragAction on_drag_motion(double, double) noexcept;
 
     std::int32_t model_sort(const Glib::RefPtr<const ModelColumns>& a,
                             const Glib::RefPtr<const ModelColumns>& b) const noexcept;
@@ -144,7 +140,15 @@ class files final : public Gtk::GridView
         return selection_model_->signal_selection_changed();
     }
 
-  private:
+  protected:
+    [[nodiscard]] auto
+    signal_dir_loaded() noexcept
+    {
+        return signal_dir_loaded_;
+    }
+
+    sigc::signal<void()> signal_dir_loaded_;
+
     // Signals we connect to
     sigc::connection signal_files_created;
     sigc::connection signal_files_deleted;

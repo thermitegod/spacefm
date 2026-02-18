@@ -1,0 +1,822 @@
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <algorithm>
+#include <filesystem>
+#include <memory>
+
+#include <fnmatch.h>
+
+#include <gdkmm.h>
+#include <gtkmm.h>
+#include <sigc++/sigc++.h>
+
+#include "settings/settings.hxx"
+
+#include "gui/tab/files/list.hxx"
+
+#include "logger.hxx"
+#include "natsort/strnatcmp.hxx"
+
+gui::list::list(const std::shared_ptr<config::settings>& settings) : files_base(settings)
+{
+    set_enable_rubberband(true);
+    set_single_click_activate(settings_->general.single_click_activate);
+    // set_expand(true);
+
+    set_model(selection_model_);
+
+    add_columns();
+
+    auto gesture = Gtk::GestureClick::create();
+    gesture->set_button(GDK_BUTTON_PRIMARY);
+    gesture->set_propagation_phase(Gtk::PropagationPhase::BUBBLE);
+    gesture->signal_released().connect(sigc::mem_fun(*this, &list::on_background_click));
+    add_controller(gesture);
+
+    drag_source_ = Gtk::DragSource::create();
+    drag_source_->set_actions(Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+    drag_source_->signal_prepare().connect(sigc::mem_fun(*this, &list::on_drag_prepare), false);
+    add_controller(drag_source_);
+
+    drop_target_ =
+        Gtk::DropTarget::create(GDK_TYPE_FILE_LIST, Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+    drop_target_->signal_drop().connect(sigc::mem_fun(*this, &list::on_drag_data_received), false);
+    drop_target_->signal_motion().connect(sigc::mem_fun(*this, &list::on_drag_motion), false);
+    add_controller(drop_target_);
+
+    signal_dir_loaded().connect(
+        [this]()
+        {
+            Glib::signal_idle().connect_once(
+                [this]()
+                {
+                    update();
+
+                    if (dir_model_->get_n_items() > 0)
+                    {
+                        // Start at the top of the view,
+                        // otherwise will be at the bottom of the view
+                        scroll_to(0);
+                    }
+
+                    dir_->load_thumbnails(vfs::file::thumbnail_size::big);
+                },
+                Glib::PRIORITY_DEFAULT);
+        });
+}
+
+void
+gui::list::add_columns() noexcept
+{
+    if (columns_.name)
+    { // name
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_name), Gtk::Align::START));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_name));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_name));
+        auto column = Gtk::ColumnViewColumn::create("Name", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.size)
+    { // size
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_size));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Size", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.bytes)
+    { // bytes
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_bytes));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Bytes", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.type)
+    { // type
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_type));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Type", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.mime)
+    { // mime
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mime));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Mime", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.perm)
+    { // perm
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_perm));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Permissions", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.owner)
+    { // owner
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_owner));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Owner", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.group)
+    { // group
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_group));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Group", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.atime)
+    { // atime
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_atime));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Atime", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.btime)
+    { // btime
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_btime));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Btime", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.ctime)
+    { // ctime
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_ctime));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Ctime", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+
+    if (columns_.mtime)
+    { // mtime
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(
+            sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mtime));
+        factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
+        auto column = Gtk::ColumnViewColumn::create("Mtime", factory);
+        column->set_expand(true);
+        append_column(column);
+    }
+}
+
+void
+gui::list::on_setup_name(const Glib::RefPtr<Gtk::ListItem>& item, Gtk::Align halign) noexcept
+{
+    auto* box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
+    auto* image = Gtk::make_managed<Gtk::Image>();
+    auto* label = Gtk::make_managed<Gtk::Label>();
+
+    box->set_expand(true);
+    box->set_can_target(true);
+    box->set_focusable(true);
+
+    image->set_icon_size(Gtk::IconSize::NORMAL);
+
+    label->set_wrap(false);
+    label->set_halign(halign);
+    label->set_margin_start(5);
+
+    box->append(*image);
+    box->append(*label);
+    item->set_child(*box);
+}
+
+void
+gui::list::on_setup_label(const Glib::RefPtr<Gtk::ListItem>& item, Gtk::Align halign) noexcept
+{
+    item->set_child(*Gtk::make_managed<Gtk::Label>("", halign));
+}
+
+void
+gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* box = dynamic_cast<Gtk::Box*>(item->get_child());
+    auto* image = dynamic_cast<Gtk::Image*>(box->get_first_child());
+    auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
+
+    auto connections = std::make_unique<std::vector<sigc::connection>>();
+
+    if (col->file->is_directory())
+    {
+        col->drop_target = Gtk::DropTarget::create(GDK_TYPE_FILE_LIST,
+                                                   Gdk::DragAction::COPY | Gdk::DragAction::MOVE);
+        col->drop_target->signal_drop().connect(
+            [this, col](const Glib::ValueBase& value, double, double)
+            {
+                (void)this;
+
+                Glib::Value<GSList*> gslist_value;
+                gslist_value.init(value.gobj());
+                auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
+                    gslist_value.get(),
+                    Glib::OwnershipType::OWNERSHIP_NONE);
+                for (const auto& file : files)
+                {
+                    Glib::RefPtr<Gio::File> destination =
+                        Gio::File::create_for_path(col->file->path() / file->get_basename());
+
+                    logger::debug<logger::gui>("Source: {}", file->get_path());
+                    logger::debug<logger::gui>("Target: {}", col->file->path().string());
+
+                    // TODO file actions
+                }
+                return true;
+            },
+            false);
+        box->add_controller(col->drop_target);
+    }
+
+    auto update_image = [image, col]()
+    {
+        if (!image || !col)
+        {
+            return;
+        }
+
+        // DEV ignore thumbs
+        // image->set_from_icon_name(col->file->is_directory() ? "folder" : "text-x-generic");
+        image->set(col->file->icon(vfs::file::thumbnail_size::small));
+    };
+
+    auto update_label = [label, col]()
+    {
+        // TODO figure out what needs to be updated on a file change event.
+        // this is more needed for detailed/compact view mode
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->name().data());
+    };
+
+    update_image();
+    update_label();
+
+    connections->push_back(col->signal_thumbnail_loaded().connect(update_image));
+    connections->push_back(col->signal_changed().connect(update_label));
+
+    item->set_data("connections",
+                   connections.release(),
+                   [](void* data) { delete static_cast<std::vector<sigc::connection>*>(data); });
+}
+
+void
+gui::list::on_bind_size(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_size().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_bytes(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_size_in_bytes().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_type(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->mime_type()->description().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_mime(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->mime_type()->type().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_perm(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_permissions().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_owner(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_owner().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_group(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_group().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_atime(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_atime().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_btime(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_btime().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_ctime(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_ctime().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_bind_mtime(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+
+    auto update_label = [label, col]()
+    {
+        if (!label || !col)
+        {
+            return;
+        }
+
+        label->set_text(col->file->display_mtime().data());
+    };
+
+    update_label();
+
+    auto connection = std::make_unique<sigc::connection>();
+    col->signal_changed().connect(update_label);
+
+    item->set_data("connection",
+                   connection.release(),
+                   [](void* data) { delete static_cast<sigc::connection*>(data); });
+}
+
+void
+gui::list::on_unbind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* box = dynamic_cast<Gtk::Box*>(item->get_child());
+    // auto* image = dynamic_cast<Gtk::Image*>(box->get_first_child());
+    // auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
+
+    if (col->drop_target)
+    {
+        box->remove_controller(col->drop_target);
+    }
+
+    auto* connections = static_cast<std::vector<sigc::connection>*>(item->get_data("connections"));
+    if (connections)
+    {
+        for (auto& connection : *connections)
+        {
+            connection.disconnect();
+        }
+    }
+    item->set_data("connections", nullptr);
+}
+
+void
+gui::list::on_unbind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+{
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
+    if (!col)
+    {
+        return;
+    }
+
+    auto* connection = static_cast<sigc::connection*>(item->get_data("connection"));
+    if (connection)
+    {
+        connection->disconnect();
+    }
+    item->set_data("connection", nullptr);
+}
+
+void
+gui::list::on_background_click(std::int32_t n_press, double x, double y) noexcept
+{
+    if (n_press != 1)
+    {
+        return;
+    }
+
+    Gtk::Widget* target = pick(x, y);
+    if (target == this ||
+        (target && std::string_view(G_OBJECT_TYPE_NAME(target->gobj())) == "GtkColumnView"))
+    {
+        const auto selection = selection_model_->get_selection();
+        if (!selection->is_empty())
+        {
+            selection_model_->unselect_all();
+            grab_focus();
+        }
+    }
+}
+
+Glib::RefPtr<Gdk::ContentProvider>
+gui::list::on_drag_prepare(double x, double y) const noexcept
+{
+    (void)x;
+    (void)y;
+
+    auto selected = selected_files();
+    if (selected.empty())
+    {
+        return nullptr;
+    }
+
+    std::vector<GFile*> files;
+    files.reserve(selected.size());
+    for (const auto& file : selected)
+    {
+        files.push_back(g_file_new_for_path(file->path().c_str()));
+    }
+    GdkFileList* file_list = gdk_file_list_new_from_array(files.data(), files.size());
+    std::ranges::for_each(files, g_object_unref);
+
+    GdkContentProvider* provider = gdk_content_provider_new_typed(GDK_TYPE_FILE_LIST, file_list);
+    return Glib::wrap(provider);
+}
+
+bool
+gui::list::on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept
+{
+    Gtk::Widget* target = pick(x, y);
+    if (target && target != this &&
+        std::string_view(G_OBJECT_TYPE_NAME(target->gobj())) != "GtkColumnView")
+    {
+        return false;
+    }
+
+    Glib::Value<GSList*> gslist_value;
+    gslist_value.init(value.gobj());
+    auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
+        gslist_value.get(),
+        Glib::OwnershipType::OWNERSHIP_NONE);
+    for (const auto& file : files)
+    {
+        Glib::RefPtr<Gio::File> destination =
+            Gio::File::create_for_path(dir_->path() / file->get_basename());
+
+        logger::debug<logger::gui>("Source: {}", file->get_path());
+        logger::debug<logger::gui>("Target: {}", dir_->path().string());
+
+        // TODO file actions
+    }
+
+    return true;
+}
+
+Gdk::DragAction
+gui::list::on_drag_motion(double x, double y) noexcept
+{
+    Gtk::Widget* target = pick(x, y);
+    Gtk::Widget* current = target;
+    while (current && current != this)
+    {
+        auto controllers = current->observe_controllers();
+        for (std::uint32_t i = 0; i < g_list_model_get_n_items(controllers->gobj()); ++i)
+        {
+            auto* controller = GTK_EVENT_CONTROLLER(g_list_model_get_item(controllers->gobj(), i));
+            if (GTK_IS_DROP_TARGET(controller))
+            {
+                g_object_unref(controller);
+                return Gdk::DragAction::NONE;
+            }
+            g_object_unref(controller);
+        }
+        current = current->get_parent();
+    }
+    // requires a unique preferred action
+    // return Gdk::DragAction::COPY | Gdk::DragAction::MOVE;
+    return Gdk::DragAction::MOVE;
+}
