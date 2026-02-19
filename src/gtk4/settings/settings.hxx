@@ -218,6 +218,7 @@ struct settings_on_disk
     };
     dialog dialog;
 
+    view_mode default_view = view_mode::grid;
     columns default_columns;
     sorting default_sorting;
 

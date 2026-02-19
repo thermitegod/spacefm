@@ -63,8 +63,8 @@ class tab final : public Gtk::Box
         device,
     };
 
-    tab(Gtk::ApplicationWindow& parent, const std::filesystem::path& init_path,
-        const config::sorting& sorting, const std::shared_ptr<config::settings>& settings) noexcept;
+    tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
+        const std::shared_ptr<config::settings>& settings) noexcept;
     ~tab();
 
     config::tab_state get_tab_state() const noexcept;
@@ -113,6 +113,14 @@ class tab final : public Gtk::Box
 
     void on_hide_files() const noexcept;
 
+    void set_files_view() noexcept;
+    void files_grab_focus() const noexcept;
+
+    void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
+    void set_columns(const config::columns& columns) noexcept;
+
+    [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
+
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_last() const noexcept;
@@ -152,7 +160,9 @@ class tab final : public Gtk::Box
     void show_app_chooser_dialog() noexcept;
 
     Gtk::ApplicationWindow& parent_;
+    config::view_mode view_mode_;
     config::sorting sorting_;
+    std::optional<config::columns> columns_;
     std::shared_ptr<config::settings> settings_;
     gui::lib::history history_;
 
@@ -169,8 +179,12 @@ class tab final : public Gtk::Box
     gui::toolbar toolbar_ = gui::toolbar(settings_);
     gui::statusbar statusbar_ = gui::statusbar(settings_);
 
-    gui::grid file_list_ = gui::grid(settings_);
+    // gui::grid file_list_ = gui::grid(settings_);
     // gui::list file_list_ = gui::list(settings_);
+    // Gtk::Widget* file_list_;
+
+    gui::grid* view_grid_;
+    gui::list* view_list_;
 
     struct
     {
@@ -239,20 +253,6 @@ class tab final : public Gtk::Box
 
     bool show_hidden_files_{true};
     bool large_icons_{true};
-    bool pending_drag_status_{true};
-    dev_t drag_source_dev_{0};
-    ino_t drag_source_inode_{0};
-    i32 drag_x_{0};
-    i32 drag_y_{0};
-    bool pending_drag_status_tree_{true};
-    dev_t drag_source_dev_tree_{0};
-    bool is_drag_{true};
-    bool menu_shown_{true};
-
-    u64 n_selected_files_{0};
-    u64 sel_size_{0};
-    u64 sel_disk_size_{0};
-    u32 sel_change_idle_{0};
 
   public:
     [[nodiscard]] auto

@@ -56,11 +56,11 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     }
     else
     {
-        for (const auto& tab : settings_->window.state[panel].tabs)
+        for (const auto& state : settings_->window.state[panel].tabs)
         {
-            if (std::filesystem::exists(tab.path))
+            if (std::filesystem::exists(state.path))
             {
-                new_tab(tab.path, tab.sorting);
+                new_tab(state);
                 set_current_page(settings_->window.state[panel].active_tab);
             }
         }
@@ -259,16 +259,21 @@ gui::browser::display_filename(const std::filesystem::path& path) noexcept
 void
 gui::browser::new_tab(const std::filesystem::path& path) noexcept
 {
-    new_tab(path, settings_->default_sorting);
+    new_tab({
+        .path = path,
+        .sorting = settings_->default_sorting,
+        .view = settings_->default_view,
+        .columns = settings_->default_columns,
+    });
 }
 
 void
-gui::browser::new_tab(const std::filesystem::path& path, const config::sorting& sorting) noexcept
+gui::browser::new_tab(const config::tab_state& state) noexcept
 {
     auto* label = Gtk::make_managed<Gtk::Label>();
-    label->set_label(display_filename(path));
+    label->set_label(display_filename(state.path));
 
-    auto* tab = Gtk::make_managed<gui::tab>(parent_, path, sorting, settings_);
+    auto* tab = Gtk::make_managed<gui::tab>(parent_, state, settings_);
     tab->signal_sorting_changed().connect([this]() { save_tab_state(); });
     tab->signal_chdir_after().connect(
         [this, tab, label]()
@@ -377,7 +382,7 @@ gui::browser::restore_tab() noexcept
         const auto state = restore_tabs_.back();
         restore_tabs_.pop();
 
-        new_tab(state.path, state.sorting);
+        new_tab(state);
     }
 }
 

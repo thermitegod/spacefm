@@ -53,12 +53,13 @@
 
 #include "vfs/utils/permissions.hxx"
 
+#include "gtkmm/object.h"
 #include "logger.hxx"
 
-gui::tab::tab(Gtk::ApplicationWindow& parent, const std::filesystem::path& init_path,
-              const config::sorting& sorting,
+gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<config::settings>& settings) noexcept
-    : parent_(parent), sorting_(sorting), settings_(settings), history_(init_path)
+    : parent_(parent), view_mode_(state.view), sorting_(state.sorting), columns_(state.columns),
+      settings_(settings), history_(state.path)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
 
@@ -90,18 +91,14 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const std::filesystem::path& init_
     pane_.set_shrink_start_child(true);
 
     file_view_.set_expand();
-    file_view_.set_child(file_list_);
     append(pane_);
+
+    set_files_view();
 
     chdir(cwd());
 
-    file_list_.signal_activate().connect(sigc::mem_fun(*this, &tab::on_file_list_item_activated));
-    file_list_.signal_selection_changed().connect([this](auto, auto) { on_update_statusbar(); });
-
     append(statusbar_);
     on_update_statusbar();
-
-    file_list_.grab_focus();
 }
 
 gui::tab::~tab()
@@ -279,7 +276,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             sorting_.show_hidden = !sorting_.show_hidden;
-            file_list_.set_sorting(sorting_, true);
+            set_sorting(sorting_, true);
 
             auto action = action_group_->lookup_action("show_hidden");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -297,7 +294,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             sorting_.sort_natural = !sorting_.sort_natural;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             auto action = action_group_->lookup_action("sort_natural");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -314,7 +311,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             sorting_.sort_case = !sorting_.sort_case;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             auto action = action_group_->lookup_action("sort_case");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -347,7 +344,7 @@ gui::tab::add_actions() noexcept
             actions_.sort_by->set_state(parameter);
 
             sorting_.sort_by = value;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             signal_sorting_changed().emit();
         });
@@ -373,7 +370,7 @@ gui::tab::add_actions() noexcept
             actions_.sort_type->set_state(parameter);
 
             sorting_.sort_type = value;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             signal_sorting_changed().emit();
         });
@@ -399,7 +396,7 @@ gui::tab::add_actions() noexcept
             actions_.sort_dir->set_state(parameter);
 
             sorting_.sort_dir = value;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             signal_sorting_changed().emit();
         });
@@ -425,7 +422,7 @@ gui::tab::add_actions() noexcept
             actions_.sort_hidden->set_state(parameter);
 
             sorting_.sort_hidden = value;
-            file_list_.set_sorting(sorting_);
+            set_sorting(sorting_);
 
             signal_sorting_changed().emit();
         });
@@ -496,17 +493,17 @@ Glib::RefPtr<Gio::Menu>
 gui::tab::create_context_menu_model() noexcept
 {
     std::shared_ptr<vfs::file> file = nullptr;
-    const auto selected_files = file_list_.selected_files();
-    if (!selected_files.empty())
+    const auto selected = selected_files();
+    if (!selected.empty())
     {
-        file = selected_files.front();
+        file = selected.front();
     }
 
     const bool is_dir = file && file->is_directory();
     // const bool is_text = file && file->mime_type()->is_text();
 
     const bool is_clip = gui::clipboard::is_valid();
-    const bool is_selected = !selected_files.empty();
+    const bool is_selected = !selected.empty();
 
     // Note: network filesystems may become unresponsive here
     // const auto read_access = vfs::utils::has_read_permission(cwd());
@@ -532,7 +529,7 @@ gui::tab::create_context_menu_model() noexcept
 
         auto is_executable = [](const auto& file)
         { return !file->is_directory() && (file->is_desktop_entry() || file->is_executable()); };
-        if (is_selected && std::ranges::all_of(selected_files, is_executable))
+        if (is_selected && std::ranges::all_of(selected, is_executable))
         {
             auto section = Gio::Menu::create();
             section->append("Execute", "files.execute");
@@ -567,7 +564,7 @@ gui::tab::create_context_menu_model() noexcept
         }
 
         auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
-        if (is_selected && std::ranges::all_of(selected_files, is_archive))
+        if (is_selected && std::ranges::all_of(selected, is_archive))
         {
             auto section = Gio::Menu::create();
             section->append("Archive Extract", "files.archive_extract");
@@ -576,7 +573,7 @@ gui::tab::create_context_menu_model() noexcept
             smenu->append_section(section);
         }
 
-        if (selected_files.size() == 1 && is_dir)
+        if (selected.size() == 1 && is_dir)
         {
             auto section = Gio::Menu::create();
 
@@ -1417,7 +1414,7 @@ gui::tab::on_path_bar_activate(const std::string_view text) noexcept
         return;
     }
 
-    file_list_.grab_focus();
+    files_grab_focus();
 }
 
 void
@@ -1480,9 +1477,20 @@ gui::tab::on_button_refresh(const bool update_selected_files)
 void
 gui::tab::on_file_list_item_activated(std::uint32_t position) noexcept
 {
-    // logger::debug<logger::gui>("gui::tab::on_file_list_item_activated({})", position);
+    std::shared_ptr<vfs::file> file;
+    if (view_mode_ == config::view_mode::grid)
+    {
+        file = view_grid_->get_item(position);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        file = view_list_->get_item(position);
+    }
+    else
+    {
+        std::unreachable();
+    }
 
-    auto file = file_list_.get_item(position);
     if (!file)
     {
         return;
@@ -1501,14 +1509,12 @@ gui::tab::on_file_list_item_activated(std::uint32_t position) noexcept
 void
 gui::tab::on_update_statusbar() noexcept
 {
-    statusbar_.update(dir_, file_list_.selected_files(), show_hidden_files_);
+    statusbar_.update(dir_, selected_files(), show_hidden_files_);
 }
 
 void
 gui::tab::on_dir_file_listed() noexcept
 {
-    n_selected_files_ = 0;
-
     signal_file_created_.disconnect();
     signal_file_changed_.disconnect();
     signal_file_deleted_.disconnect();
@@ -1534,11 +1540,26 @@ gui::tab::on_dir_file_listed() noexcept
 void
 gui::tab::update_model(const std::string_view pattern) noexcept
 {
-    // set file sorting settings
-    file_list_.set_pattern(pattern);
-    file_list_.set_thumbnail_size(vfs::file::thumbnail_size::big);
-    // this will update the model, must be last
-    file_list_.set_dir(dir_, sorting_);
+    if (view_mode_ == config::view_mode::grid)
+    {
+        // set file sorting settings
+        view_grid_->set_pattern(pattern);
+        view_grid_->set_thumbnail_size(vfs::file::thumbnail_size::big);
+        // this will update the model, must be last
+        view_grid_->set_dir(dir_, sorting_);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        // set file sorting settings
+        view_list_->set_pattern(pattern);
+        view_list_->set_thumbnail_size(vfs::file::thumbnail_size::big);
+        // this will update the model, must be last
+        view_list_->set_dir(dir_, sorting_, *columns_);
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 std::filesystem::path
@@ -1646,7 +1667,8 @@ gui::tab::canon(const std::filesystem::path& path) noexcept
     {
         // open dir
         chdir(canon);
-        file_list_.grab_focus();
+
+        files_grab_focus();
     }
     else if (std::filesystem::exists(canon))
     {
@@ -1660,7 +1682,8 @@ gui::tab::canon(const std::filesystem::path& path) noexcept
         {
             select_file(canon);
         }
-        file_list_.grab_focus();
+
+        files_grab_focus();
     }
 }
 
@@ -1680,15 +1703,15 @@ gui::tab::show_hidden_files(bool show) noexcept
 void
 gui::tab::open_selected_files() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
     std::vector<std::shared_ptr<vfs::file>> dirs;
     std::vector<std::shared_ptr<vfs::file>> files;
-    for (const auto& file : selected_files)
+    for (const auto& file : selected)
     {
         if (file->is_directory())
         {
@@ -1702,7 +1725,7 @@ gui::tab::open_selected_files() noexcept
 
     if (!files.empty())
     {
-        gui::action::open_files_auto(parent_, cwd(), selected_files, false, false, settings_);
+        gui::action::open_files_auto(parent_, cwd(), selected, false, false, settings_);
     }
 
     if (!dirs.empty())
@@ -1716,13 +1739,13 @@ gui::tab::open_selected_files() noexcept
 void
 gui::tab::open_selected_files_with_app(const std::string_view app_desktop) noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::action::open_files_with_app(parent_, cwd(), selected_files, app_desktop, settings_);
+    gui::action::open_files_with_app(parent_, cwd(), selected, app_desktop, settings_);
 }
 
 void
@@ -1730,29 +1753,27 @@ gui::tab::open_selected_files_execute(const bool in_terminal) noexcept
 {
     (void)in_terminal; // TODO
 
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::action::open_files_execute(parent_, cwd(), selected_files, settings_);
+    gui::action::open_files_execute(parent_, cwd(), selected, settings_);
 }
 
 void
 gui::tab::show_rename_dialog() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    file_list_.grab_focus();
-
     // TODO - figure out how to spawn one dialog at a time,
     // or pass all files and update rename dialog
-    for (const auto& file : selected_files)
+    for (const auto& file : selected)
     {
         auto* dialog =
             Gtk::make_managed<gui::dialog::rename>(parent_, settings_, cwd(), file, "", false);
@@ -1771,8 +1792,8 @@ gui::tab::show_rename_dialog() noexcept
 void
 gui::tab::show_rename_batch_dialog() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
@@ -1788,15 +1809,15 @@ gui::tab::update_selection_history() noexcept
 {
     // logger::debug<logger::gui>("selection history: {}", cwd.string());
 
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
     std::vector<std::filesystem::path> selected_filenames;
-    selected_filenames.reserve(selected_files.size());
-    for (const auto& file : selected_files)
+    selected_filenames.reserve(selected.size());
+    for (const auto& file : selected)
     {
         selected_filenames.emplace_back(file->name());
     }
@@ -1804,24 +1825,152 @@ gui::tab::update_selection_history() noexcept
 }
 
 void
+gui::tab::set_files_view() noexcept
+{
+    file_view_.unset_child();
+
+    view_grid_ = nullptr;
+    view_list_ = nullptr;
+
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_ = Gtk::make_managed<gui::grid>(settings_);
+
+        view_grid_->signal_activate().connect(
+            sigc::mem_fun(*this, &tab::on_file_list_item_activated));
+        view_grid_->signal_selection_changed().connect([this](auto, auto)
+                                                       { on_update_statusbar(); });
+
+        file_view_.set_child(*view_grid_);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_ = Gtk::make_managed<gui::list>(settings_);
+
+        view_list_->signal_activate().connect(
+            sigc::mem_fun(*this, &tab::on_file_list_item_activated));
+        view_list_->signal_selection_changed().connect([this](auto, auto)
+                                                       { on_update_statusbar(); });
+
+        file_view_.set_child(*view_list_);
+    }
+    else
+    {
+        std::unreachable();
+    }
+
+    files_grab_focus();
+}
+
+void
+gui::tab::files_grab_focus() const noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->grab_focus();
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->grab_focus();
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+void
+gui::tab::set_sorting(const config::sorting& sorting, bool full_update) noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->set_sorting(sorting, full_update);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->set_sorting(sorting, full_update);
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+void
+gui::tab::set_columns(const config::columns& columns) noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->set_columns(columns);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->set_columns(columns);
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+std::vector<std::shared_ptr<vfs::file>>
+gui::tab::selected_files() const noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        return view_grid_->selected_files();
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        return view_list_->selected_files();
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+void
 gui::tab::select_all() const noexcept
 {
-    file_list_.select_all();
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->select_all();
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->select_all();
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::unselect_all() const noexcept
 {
-    file_list_.unselect_all();
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->unselect_all();
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->unselect_all();
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::select_last() const noexcept
 {
-    const auto selected_files = history_.get_selection(cwd());
-    if (selected_files && !selected_files->empty())
+    const auto selected = history_.get_selection(cwd());
+    if (selected && !selected->empty())
     {
-        select_files(*selected_files);
+        select_files(*selected);
     }
 }
 
@@ -1829,26 +1978,57 @@ void
 gui::tab::select_file(const std::filesystem::path& filename,
                       const bool unselect_others) const noexcept
 {
-    file_list_.select_file(filename, unselect_others);
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->select_file(filename, unselect_others);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->select_file(filename, unselect_others);
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept
 {
-    file_list_.select_files(select_filenames);
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->select_files(select_filenames);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->select_files(select_filenames);
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::unselect_file(const std::filesystem::path& filename) const noexcept
 {
-    file_list_.unselect_file(filename);
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->unselect_file(filename);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->unselect_file(filename);
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::show_pattern_dialog() noexcept
 {
-    file_list_.grab_focus();
-
     auto* dialog = Gtk::make_managed<gui::dialog::pattern>(parent_, "");
     dialog->signal_confirm().connect([this](const dialog::pattern_response& response)
                                      { select_pattern(response.pattern); });
@@ -1857,37 +2037,59 @@ gui::tab::show_pattern_dialog() noexcept
 void
 gui::tab::select_pattern(const std::string_view search_key) noexcept
 {
-    file_list_.select_pattern(search_key);
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->select_pattern(search_key);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->select_pattern(search_key);
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::invert_selection() noexcept
 {
-    file_list_.invert_selection();
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->invert_selection();
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->invert_selection();
+    }
+    else
+    {
+        std::unreachable();
+    }
 }
 
 void
 gui::tab::on_copy() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::clipboard::copy_files(selected_files);
+    gui::clipboard::copy_files(selected);
 }
 
 void
 gui::tab::on_cut() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::clipboard::cut_files(selected_files);
+    gui::clipboard::cut_files(selected);
 }
 
 void
@@ -1920,38 +2122,38 @@ gui::tab::on_paste() const noexcept
 void
 gui::tab::on_trash() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::action::trash_files(parent_, selected_files, settings_);
+    gui::action::trash_files(parent_, selected, settings_);
 }
 
 void
 gui::tab::on_delete() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::action::delete_files(parent_, selected_files, settings_);
+    gui::action::delete_files(parent_, selected, settings_);
 }
 
 void
 gui::tab::on_copy_name() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
     std::string text;
-    for (const auto& file : selected_files)
+    for (const auto& file : selected)
     {
         text += vfs::execute::quote(file->name());
     }
@@ -1962,26 +2164,26 @@ gui::tab::on_copy_name() const noexcept
 void
 gui::tab::on_copy_parent() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::clipboard::set_text(selected_files.front()->path().parent_path().string());
+    gui::clipboard::set_text(selected.front()->path().parent_path().string());
 }
 
 void
 gui::tab::on_copy_path() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
     std::string text;
-    for (const auto& file : selected_files)
+    for (const auto& file : selected)
     {
         text += vfs::execute::quote(file->path().string());
     }
@@ -2010,14 +2212,14 @@ gui::tab::on_paste_as() const noexcept
 void
 gui::tab::on_hide_files() const noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
     // TODO show error?
-    auto _ = dir_->add_hidden(selected_files);
+    auto _ = dir_->add_hidden(selected);
 }
 
 void
@@ -2117,8 +2319,8 @@ gui::tab::on_move_to_select_path() noexcept
 void
 gui::tab::on_copy_to_last_path() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
@@ -2134,8 +2336,8 @@ gui::tab::on_copy_to_last_path() noexcept
 void
 gui::tab::on_move_to_last_path() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
@@ -2151,61 +2353,61 @@ gui::tab::on_move_to_last_path() noexcept
 void
 gui::tab::archive_create() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::archiver::create(parent_, selected_files);
+    gui::archiver::create(parent_, selected);
 }
 
 void
 gui::tab::archive_extract() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::archiver::extract(parent_, selected_files);
+    gui::archiver::extract(parent_, selected);
 }
 
 void
 gui::tab::archive_extract_to() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::archiver::extract_to(parent_, selected_files, cwd());
+    gui::archiver::extract_to(parent_, selected, cwd());
 }
 
 void
 gui::tab::archive_open() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    gui::archiver::open(parent_, selected_files);
+    gui::archiver::open(parent_, selected);
 }
 
 void
 gui::tab::show_properites_dialog(std::int32_t page) noexcept
 {
-    auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    auto selected = selected_files();
+    if (selected.empty())
     {
-        selected_files = {vfs::file::create(cwd())};
+        selected = {vfs::file::create(cwd())};
     }
 
-    Gtk::make_managed<gui::dialog::properties>(parent_, page, cwd(), selected_files);
+    Gtk::make_managed<gui::dialog::properties>(parent_, page, cwd(), selected);
 }
 
 void
@@ -2226,17 +2428,14 @@ gui::tab::show_create_dialog(dialog::create_mode mode) noexcept
 void
 gui::tab::show_app_chooser_dialog() noexcept
 {
-    const auto selected_files = file_list_.selected_files();
-    if (selected_files.empty())
+    const auto selected = selected_files();
+    if (selected.empty())
     {
         return;
     }
 
-    auto* dialog = Gtk::make_managed<gui::dialog::app_chooser>(parent_,
-                                                               selected_files.front(),
-                                                               true,
-                                                               true,
-                                                               true);
+    auto* dialog =
+        Gtk::make_managed<gui::dialog::app_chooser>(parent_, selected.front(), true, true, true);
     dialog->signal_confirm().connect(
         [this](const gui::dialog::chooser_response& response)
         {

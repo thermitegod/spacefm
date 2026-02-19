@@ -26,8 +26,6 @@
 
 #include "gui/tab/tab.hxx"
 
-#include "vfs/user-dirs.hxx"
-
 namespace gui
 {
 class browser final : public Gtk::Notebook
@@ -38,7 +36,7 @@ class browser final : public Gtk::Notebook
     ~browser();
 
     void new_tab(const std::filesystem::path& path) noexcept;
-    void new_tab(const std::filesystem::path& path, const config::sorting& sorting) noexcept;
+    void new_tab(const config::tab_state& state) noexcept;
     void new_tab_here() noexcept;
     void close_tab() noexcept;
     void restore_tab() noexcept;
