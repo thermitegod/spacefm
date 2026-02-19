@@ -274,7 +274,7 @@ gui::main_window::on_close() noexcept
 {
     // TODO only close current window if multiple windows are open, otherwise quit.
 
-    config_manager_->save();
+    // config_manager_->save();
 
     close();
 }
@@ -282,7 +282,7 @@ gui::main_window::on_close() noexcept
 void
 gui::main_window::on_quit() noexcept
 {
-    config_manager_->save();
+    // config_manager_->save();
 
     close();
 }
