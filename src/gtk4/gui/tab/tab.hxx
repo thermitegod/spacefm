@@ -66,7 +66,7 @@ class tab final : public Gtk::Box
         const config::sorting& sorting, const std::shared_ptr<config::settings>& settings) noexcept;
     ~tab();
 
-    config::sorting get_sorting_settings() const noexcept;
+    config::tab_state get_tab_state() const noexcept;
 
     bool chdir(const std::filesystem::path& path,
                const gui::lib::history::mode mode = gui::lib::history::mode::normal) noexcept;

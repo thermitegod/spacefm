@@ -337,7 +337,7 @@ void
 gui::browser::close_tab() noexcept
 {
     const auto* tab = current_tab();
-    restore_tabs_.push({tab->get_sorting_settings(), tab->cwd()});
+    restore_tabs_.push(tab->get_tab_state());
 
     if (get_n_pages() == 1)
     {
@@ -400,7 +400,7 @@ gui::browser::save_tab_state() noexcept
     for (std::int32_t i = 0; i < n_tabs; ++i)
     {
         auto* tab = dynamic_cast<gui::tab*>(get_nth_page(i));
-        tabs.push_back({tab->get_sorting_settings(), tab->cwd()});
+        tabs.push_back(tab->get_tab_state());
     }
 
     settings_->window.state[panel_].tabs = tabs;

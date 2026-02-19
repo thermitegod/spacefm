@@ -111,10 +111,10 @@ gui::tab::~tab()
     popover_.unparent();
 }
 
-config::sorting
-gui::tab::get_sorting_settings() const noexcept
+config::tab_state
+gui::tab::get_tab_state() const noexcept
 {
-    return sorting_;
+    return config::tab_state{.path = cwd(), .sorting = sorting_};
 }
 
 void

@@ -91,8 +91,8 @@ struct sorting final
 
 struct tab_state final
 {
-    sorting sorting{};
     std::filesystem::path path = vfs::user::home();
+    sorting sorting{};
 };
 
 struct panel_state final
