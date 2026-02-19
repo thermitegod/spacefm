@@ -22,6 +22,8 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
+#include <ztd/ztd.hxx>
+
 #include "settings/settings.hxx"
 
 #include "gui/browser.hxx"
@@ -226,15 +228,31 @@ gui::browser::set_active_tab(std::int32_t tab) noexcept
 std::string
 gui::browser::display_filename(const std::filesystem::path& path) noexcept
 {
-    if (path.string() == "/")
+    // (gdb) f 8
+    // #8  0x000055555562b46c in gui::browser::display_filename (this=0x555555bfff80, path=filesystem::path "/home")
+    //     at ../../../../../home/brandon/projects/spacefm/src/gtk4/gui/browser.cxx:237
+    // 237             return path.filename().string();
+    // (gdb) p path
+    // $5 = filesystem::path "/home"
+    // (gdb) p path.filename()
+    // /tmp/portage/sys-devel/gcc-15.2.1_p20260214/work/gcc-15-20260214/libstdc++-v3/src/c++17/fs_path.cc:386: const std::filesystem::__cxx11::path::_List::value_type* std::filesystem::__cxx11::path::_List::end() const: Assertion '!empty()' failed.
+
+    const auto str = path.string();
+    if (ztd::count(str, "/") == 1)
     {
         // special case, using std::filesystem::path::filename() on the root
         // directory returns an empty string.
-        return "/";
+        // also there is some kind of weird bug with getting
+        // the filename from a directory in root.
+        return str.size() == 1 ? "/" : ztd::remove_prefix(str, "/");
     }
     else
     {
-        return path.filename().string();
+        if (path.has_filename())
+        {
+            return path.filename().string();
+        }
+        return path.string();
     }
 }
 
@@ -247,7 +265,9 @@ gui::browser::new_tab(const std::filesystem::path& path) noexcept
 void
 gui::browser::new_tab(const std::filesystem::path& path, const config::sorting& sorting) noexcept
 {
-    auto* label = Gtk::make_managed<Gtk::Label>(display_filename(path));
+    auto* label = Gtk::make_managed<Gtk::Label>();
+    label->set_label(display_filename(path));
+
     auto* tab = Gtk::make_managed<gui::tab>(parent_, path, sorting, settings_);
     tab->signal_sorting_changed().connect([this]() { save_tab_state(); });
     tab->signal_chdir_after().connect(

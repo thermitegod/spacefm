@@ -91,7 +91,8 @@ struct sorting final
 
 struct tab_state final
 {
-    std::filesystem::path path = vfs::user::home();
+    // std::filesystem::path path = vfs::user::home();
+    std::string path = vfs::user::home();
     sorting sorting{};
 };
 
