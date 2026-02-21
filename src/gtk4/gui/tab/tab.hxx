@@ -113,7 +113,7 @@ class tab final : public Gtk::Box
 
     void on_hide_files() const noexcept;
 
-    void set_files_view() noexcept;
+    void set_files_view(const config::view_mode view_mode) noexcept;
     void files_grab_focus() const noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
@@ -239,6 +239,7 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> attributes;
         Glib::RefPtr<Gio::SimpleAction> permissions;
         // View
+        Glib::RefPtr<Gio::SimpleAction> view_mode;
         Glib::RefPtr<Gio::SimpleAction> show_hidden;
         // View > Sort
         Glib::RefPtr<Gio::SimpleAction> sort_natural;

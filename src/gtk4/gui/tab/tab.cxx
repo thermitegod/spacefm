@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <format>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -49,7 +50,6 @@
 
 #include "vfs/app-desktop.hxx"
 #include "vfs/execute.hxx"
-#include "vfs/user-dirs.hxx"
 
 #include "vfs/utils/permissions.hxx"
 
@@ -93,9 +93,7 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
     file_view_.set_expand();
     append(pane_);
 
-    set_files_view();
-
-    chdir(cwd());
+    set_files_view(view_mode_);
 
     append(statusbar_);
     on_update_statusbar();
@@ -111,7 +109,12 @@ gui::tab::~tab()
 config::tab_state
 gui::tab::get_tab_state() const noexcept
 {
-    return config::tab_state{.path = cwd(), .sorting = sorting_};
+    return config::tab_state{
+        .path = cwd(),
+        .sorting = sorting_,
+        .view = view_mode_,
+        .columns = view_mode_ == config::view_mode::list ? columns_ : std::nullopt,
+    };
 }
 
 void
@@ -271,6 +274,28 @@ gui::tab::add_actions() noexcept
     actions_.trash = action_group_->add_action("trash", [this]() { on_trash(); });
     actions_.remove = action_group_->add_action("remove", [this]() { on_delete(); });
     // View
+    actions_.view_mode =
+        Gio::SimpleAction::create("view_mode",
+                                  Glib::VariantType("y"),
+                                  Glib::Variant<std::underlying_type_t<config::view_mode>>::create(
+                                      std::to_underlying(view_mode_)));
+    actions_.view_mode->signal_activate().connect(
+        [this](const Glib::VariantBase& parameter)
+        {
+            if (!parameter.is_of_type(Glib::VariantType("y")))
+            {
+                return;
+            }
+
+            auto value = static_cast<config::view_mode>(
+                Glib::VariantBase::cast_dynamic<
+                    Glib::Variant<std::underlying_type_t<config::view_mode>>>(parameter)
+                    .get());
+            actions_.view_mode->set_state(parameter);
+
+            set_files_view(value);
+        });
+    action_group_->add_action(actions_.view_mode);
     actions_.show_hidden = action_group_->add_action_bool(
         "show_hidden",
         [this]()
@@ -848,6 +873,24 @@ gui::tab::create_context_menu_model() noexcept
     { // View
         auto smenu = Gio::Menu::create();
 
+        { // Style
+            auto section = Gio::Menu::create();
+
+            auto add_menu_item = [section](const Glib::ustring& label, config::view_mode v)
+            {
+                auto item = Gio::MenuItem::create(label, "files.view_mode");
+                item->set_action_and_target(
+                    "files.view_mode",
+                    Glib::Variant<std::underlying_type_t<config::view_mode>>::create(
+                        std::to_underlying(v)));
+                section->append_item(item);
+            };
+            add_menu_item("Grid", config::view_mode::grid);
+            add_menu_item("List", config::view_mode::list);
+
+            smenu->append_section(section);
+        }
+
         {
             auto section = Gio::Menu::create();
             Glib::RefPtr<Gio::MenuItem> item;
@@ -861,22 +904,6 @@ gui::tab::create_context_menu_model() noexcept
 
         {
             auto section = Gio::Menu::create();
-
-            { // Style
-                auto section_sort = Gio::Menu::create();
-
-                {
-                    auto smenu_style = Gio::Menu::create();
-
-                    smenu_style->append("TODO", "app.todo");
-                    smenu_style->append("TODO", "app.todo");
-                    smenu_style->append("TODO", "app.todo");
-
-                    section_sort->append_section(smenu_style);
-                }
-
-                section->append_submenu("Style", section_sort);
-            }
 
             { // Sort
                 auto section_sort = Gio::Menu::create();
@@ -977,6 +1004,23 @@ gui::tab::create_context_menu_model() noexcept
                 }
 
                 section->append_submenu("Sort", section_sort);
+            }
+
+            if (view_mode_ == config::view_mode::list)
+            { // Columns
+                auto section_columns = Gio::Menu::create();
+
+                {
+                    auto smenu_style = Gio::Menu::create();
+
+                    smenu_style->append("TODO", "app.todo");
+                    smenu_style->append("TODO", "app.todo");
+                    smenu_style->append("TODO", "app.todo");
+
+                    section_columns->append_section(smenu_style);
+                }
+
+                section->append_submenu("Columns", section_columns);
             }
 
             smenu->append_section(section);
@@ -1554,7 +1598,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
         view_list_->set_pattern(pattern);
         view_list_->set_thumbnail_size(vfs::file::thumbnail_size::big);
         // this will update the model, must be last
-        view_list_->set_dir(dir_, sorting_, *columns_);
+        view_list_->set_dir(dir_, sorting_, columns_.value_or(settings_->default_columns));
     }
     else
     {
@@ -1650,6 +1694,8 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     }
 
     toolbar_.update(cwd(), history_.has_back(), history_.has_forward(), cwd() != "/");
+
+    files_grab_focus();
 
     return true;
 }
@@ -1825,8 +1871,10 @@ gui::tab::update_selection_history() noexcept
 }
 
 void
-gui::tab::set_files_view() noexcept
+gui::tab::set_files_view(const config::view_mode view_mode) noexcept
 {
+    view_mode_ = view_mode;
+
     file_view_.unset_child();
 
     view_grid_ = nullptr;
@@ -1859,7 +1907,7 @@ gui::tab::set_files_view() noexcept
         std::unreachable();
     }
 
-    files_grab_focus();
+    chdir(cwd());
 }
 
 void
