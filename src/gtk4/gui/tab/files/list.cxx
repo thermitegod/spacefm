@@ -111,7 +111,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_size));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_size_ = Gtk::ColumnViewColumn::create("Size", factory);
-        column_size_->set_expand(true);
+        column_size_->set_expand(false);
         append_column(column_size_);
     }
 
@@ -122,7 +122,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_bytes));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_bytes_ = Gtk::ColumnViewColumn::create("Bytes", factory);
-        column_bytes_->set_expand(true);
+        column_bytes_->set_expand(false);
         append_column(column_bytes_);
     }
 
@@ -133,7 +133,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_type));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_type_ = Gtk::ColumnViewColumn::create("Type", factory);
-        column_type_->set_expand(true);
+        column_type_->set_expand(false);
         append_column(column_type_);
     }
 
@@ -144,7 +144,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_mime_ = Gtk::ColumnViewColumn::create("Mime", factory);
-        column_mime_->set_expand(true);
+        column_mime_->set_expand(false);
         append_column(column_mime_);
     }
 
@@ -155,7 +155,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_perm));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_perm_ = Gtk::ColumnViewColumn::create("Permissions", factory);
-        column_perm_->set_expand(true);
+        column_perm_->set_expand(false);
         append_column(column_perm_);
     }
 
@@ -166,7 +166,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_owner));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_owner_ = Gtk::ColumnViewColumn::create("Owner", factory);
-        column_owner_->set_expand(true);
+        column_owner_->set_expand(false);
         append_column(column_owner_);
     }
 
@@ -177,7 +177,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_group));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_group_ = Gtk::ColumnViewColumn::create("Group", factory);
-        column_group_->set_expand(true);
+        column_group_->set_expand(false);
         append_column(column_group_);
     }
 
@@ -188,7 +188,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_atime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_atime_ = Gtk::ColumnViewColumn::create("Atime", factory);
-        column_atime_->set_expand(true);
+        column_atime_->set_expand(false);
         append_column(column_atime_);
     }
 
@@ -199,7 +199,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_btime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_btime_ = Gtk::ColumnViewColumn::create("Btime", factory);
-        column_btime_->set_expand(true);
+        column_btime_->set_expand(false);
         append_column(column_btime_);
     }
 
@@ -210,7 +210,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_ctime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_ctime_ = Gtk::ColumnViewColumn::create("Ctime", factory);
-        column_ctime_->set_expand(true);
+        column_ctime_->set_expand(false);
         append_column(column_ctime_);
     }
 
@@ -221,7 +221,7 @@ gui::list::add_columns() noexcept
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mtime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
         column_mtime_ = Gtk::ColumnViewColumn::create("Mtime", factory);
-        column_mtime_->set_expand(true);
+        column_mtime_->set_expand(false);
         append_column(column_mtime_);
     }
 
