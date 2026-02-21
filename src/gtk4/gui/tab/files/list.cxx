@@ -187,7 +187,7 @@ gui::list::add_columns() noexcept
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_atime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        column_atime_ = Gtk::ColumnViewColumn::create("Atime", factory);
+        column_atime_ = Gtk::ColumnViewColumn::create("Date Accessed", factory);
         column_atime_->set_expand(false);
         append_column(column_atime_);
     }
@@ -198,7 +198,7 @@ gui::list::add_columns() noexcept
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_btime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        column_btime_ = Gtk::ColumnViewColumn::create("Btime", factory);
+        column_btime_ = Gtk::ColumnViewColumn::create("Date Created", factory);
         column_btime_->set_expand(false);
         append_column(column_btime_);
     }
@@ -209,7 +209,7 @@ gui::list::add_columns() noexcept
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_ctime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        column_ctime_ = Gtk::ColumnViewColumn::create("Ctime", factory);
+        column_ctime_ = Gtk::ColumnViewColumn::create("Date Metadata", factory);
         column_ctime_->set_expand(false);
         append_column(column_ctime_);
     }
@@ -220,7 +220,7 @@ gui::list::add_columns() noexcept
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mtime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        column_mtime_ = Gtk::ColumnViewColumn::create("Mtime", factory);
+        column_mtime_ = Gtk::ColumnViewColumn::create("Date Modified", factory);
         column_mtime_->set_expand(false);
         append_column(column_mtime_);
     }

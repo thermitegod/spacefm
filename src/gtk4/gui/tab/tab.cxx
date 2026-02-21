@@ -1227,10 +1227,10 @@ gui::tab::create_context_menu_model() noexcept
                     smenu_style->append("Perm", "files.column_perm");
                     smenu_style->append("Owner", "files.column_owner");
                     smenu_style->append("Group", "files.column_group");
-                    smenu_style->append("Atime", "files.column_atime");
-                    smenu_style->append("Btime", "files.column_btime");
-                    smenu_style->append("Ctime", "files.column_ctime");
-                    smenu_style->append("Mtime", "files.column_mtime");
+                    smenu_style->append("Date Accessed", "files.column_atime");
+                    smenu_style->append("Date Created", "files.column_btime");
+                    smenu_style->append("Date Metadata", "files.column_ctime");
+                    smenu_style->append("Date Modified", "files.column_mtime");
 
                     section_columns->append_section(smenu_style);
                 }
