@@ -83,15 +83,15 @@ struct columns final
 {
     bool name = true;
     bool size = true;
-    bool bytes = true;
-    bool type = true;
-    bool mime = true;
-    bool perm = true;
-    bool owner = true;
-    bool group = true;
-    bool atime = true;
-    bool btime = true;
-    bool ctime = true;
+    bool bytes = false;
+    bool type = false;
+    bool mime = false;
+    bool perm = false;
+    bool owner = false;
+    bool group = false;
+    bool atime = false;
+    bool btime = false;
+    bool ctime = false;
     bool mtime = true;
 };
 
