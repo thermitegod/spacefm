@@ -185,6 +185,8 @@ struct settings_on_disk
         bool show_toolbar_refresh{true};
         bool show_toolbar_search{true};
 
+        bool list_compact{false};
+
         std::string window_title{"%d"};
     };
     interface interface;

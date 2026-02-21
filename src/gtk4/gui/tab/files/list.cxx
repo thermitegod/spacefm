@@ -41,6 +41,11 @@ gui::list::list(const config::columns columns, const std::shared_ptr<config::set
 
     set_reorderable(false);
 
+    if (settings_->interface.list_compact)
+    {
+        add_css_class("data-table");
+    }
+
     set_model(selection_model_);
 
     add_columns();
