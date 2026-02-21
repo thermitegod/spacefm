@@ -369,6 +369,8 @@ gui::files_base::set_sorting(const config::sorting& sorting, bool full_update) n
     {
         sort();
     }
+
+    signal_update_sorting().emit();
 }
 
 void
@@ -377,6 +379,8 @@ gui::files_base::set_columns(const config::columns& columns) noexcept
     columns_ = columns;
 
     update();
+
+    signal_update_columns().emit();
 }
 
 bool

@@ -160,10 +160,10 @@ class tab final : public Gtk::Box
     void show_app_chooser_dialog() noexcept;
 
     Gtk::ApplicationWindow& parent_;
+    std::shared_ptr<config::settings> settings_;
     config::view_mode view_mode_;
     config::sorting sorting_;
-    std::optional<config::columns> columns_;
-    std::shared_ptr<config::settings> settings_;
+    config::columns columns_;
     gui::lib::history history_;
 
     std::shared_ptr<vfs::dir> dir_;
@@ -248,6 +248,19 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> sort_type;
         Glib::RefPtr<Gio::SimpleAction> sort_dir;
         Glib::RefPtr<Gio::SimpleAction> sort_hidden;
+        // View > Columns
+        Glib::RefPtr<Gio::SimpleAction> column_name;
+        Glib::RefPtr<Gio::SimpleAction> column_size;
+        Glib::RefPtr<Gio::SimpleAction> column_bytes;
+        Glib::RefPtr<Gio::SimpleAction> column_type;
+        Glib::RefPtr<Gio::SimpleAction> column_mime;
+        Glib::RefPtr<Gio::SimpleAction> column_perm;
+        Glib::RefPtr<Gio::SimpleAction> column_owner;
+        Glib::RefPtr<Gio::SimpleAction> column_group;
+        Glib::RefPtr<Gio::SimpleAction> column_atime;
+        Glib::RefPtr<Gio::SimpleAction> column_btime;
+        Glib::RefPtr<Gio::SimpleAction> column_ctime;
+        Glib::RefPtr<Gio::SimpleAction> column_mtime;
     } actions_;
 
     std::optional<std::filesystem::path> last_path_;
@@ -323,9 +336,9 @@ class tab final : public Gtk::Box
     }
 
     [[nodiscard]] auto
-    signal_sorting_changed() noexcept
+    signal_state_changed() noexcept
     {
-        return signal_sorting_changed_;
+        return signal_state_changed_;
     }
 
   private:
@@ -337,7 +350,7 @@ class tab final : public Gtk::Box
     sigc::signal<void()> signal_change_selection_;
     sigc::signal<void()> signal_change_pane_;
 
-    sigc::signal<void()> signal_sorting_changed_;
+    sigc::signal<void()> signal_state_changed_;
 
     sigc::signal<void()> signal_close_tab_;
     sigc::signal<void(const std::filesystem::path&)> signal_new_tab_;

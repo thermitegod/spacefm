@@ -30,11 +30,16 @@
 #include "logger.hxx"
 #include "natsort/strnatcmp.hxx"
 
-gui::list::list(const std::shared_ptr<config::settings>& settings) : files_base(settings)
+gui::list::list(const config::columns columns, const std::shared_ptr<config::settings>& settings)
+    : files_base(settings)
 {
+    columns_ = columns;
+
     set_enable_rubberband(true);
     set_single_click_activate(settings_->general.single_click_activate);
     // set_expand(true);
+
+    set_reorderable(false);
 
     set_model(selection_model_);
 
@@ -76,154 +81,146 @@ gui::list::list(const std::shared_ptr<config::settings>& settings) : files_base(
                 },
                 Glib::PRIORITY_DEFAULT);
         });
+
+    signal_update_columns().connect([this]() { update_column_visibility(); });
 }
 
 void
 gui::list::add_columns() noexcept
 {
-    if (columns_.name)
     { // name
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_name), Gtk::Align::START));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_name));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_name));
-        auto column = Gtk::ColumnViewColumn::create("Name", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_name_ = Gtk::ColumnViewColumn::create("Name", factory);
+        column_name_->set_expand(true);
+        append_column(column_name_);
     }
 
-    if (columns_.size)
     { // size
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_size));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Size", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_size_ = Gtk::ColumnViewColumn::create("Size", factory);
+        column_size_->set_expand(true);
+        append_column(column_size_);
     }
 
-    if (columns_.bytes)
     { // bytes
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_bytes));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Bytes", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_bytes_ = Gtk::ColumnViewColumn::create("Bytes", factory);
+        column_bytes_->set_expand(true);
+        append_column(column_bytes_);
     }
 
-    if (columns_.type)
     { // type
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_type));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Type", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_type_ = Gtk::ColumnViewColumn::create("Type", factory);
+        column_type_->set_expand(true);
+        append_column(column_type_);
     }
 
-    if (columns_.mime)
     { // mime
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Mime", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_mime_ = Gtk::ColumnViewColumn::create("Mime", factory);
+        column_mime_->set_expand(true);
+        append_column(column_mime_);
     }
 
-    if (columns_.perm)
     { // perm
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_perm));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Permissions", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_perm_ = Gtk::ColumnViewColumn::create("Permissions", factory);
+        column_perm_->set_expand(true);
+        append_column(column_perm_);
     }
 
-    if (columns_.owner)
     { // owner
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_owner));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Owner", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_owner_ = Gtk::ColumnViewColumn::create("Owner", factory);
+        column_owner_->set_expand(true);
+        append_column(column_owner_);
     }
 
-    if (columns_.group)
     { // group
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_group));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Group", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_group_ = Gtk::ColumnViewColumn::create("Group", factory);
+        column_group_->set_expand(true);
+        append_column(column_group_);
     }
 
-    if (columns_.atime)
     { // atime
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_atime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Atime", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_atime_ = Gtk::ColumnViewColumn::create("Atime", factory);
+        column_atime_->set_expand(true);
+        append_column(column_atime_);
     }
 
-    if (columns_.btime)
     { // btime
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_btime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Btime", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_btime_ = Gtk::ColumnViewColumn::create("Btime", factory);
+        column_btime_->set_expand(true);
+        append_column(column_btime_);
     }
 
-    if (columns_.ctime)
     { // ctime
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_ctime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Ctime", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_ctime_ = Gtk::ColumnViewColumn::create("Ctime", factory);
+        column_ctime_->set_expand(true);
+        append_column(column_ctime_);
     }
 
-    if (columns_.mtime)
     { // mtime
         auto factory = Gtk::SignalListItemFactory::create();
         factory->signal_setup().connect(
             sigc::bind(sigc::mem_fun(*this, &list::on_setup_label), Gtk::Align::END));
         factory->signal_bind().connect(sigc::mem_fun(*this, &list::on_bind_mtime));
         factory->signal_unbind().connect(sigc::mem_fun(*this, &list::on_unbind_item));
-        auto column = Gtk::ColumnViewColumn::create("Mtime", factory);
-        column->set_expand(true);
-        append_column(column);
+        column_mtime_ = Gtk::ColumnViewColumn::create("Mtime", factory);
+        column_mtime_->set_expand(true);
+        append_column(column_mtime_);
     }
+
+    update_column_visibility();
 }
 
 void
@@ -819,4 +816,21 @@ gui::list::on_drag_motion(double x, double y) noexcept
     // requires a unique preferred action
     // return Gdk::DragAction::COPY | Gdk::DragAction::MOVE;
     return Gdk::DragAction::MOVE;
+}
+
+void
+gui::list::update_column_visibility() noexcept
+{
+    column_name_->set_visible(columns_.name);
+    column_size_->set_visible(columns_.size);
+    column_bytes_->set_visible(columns_.bytes);
+    column_type_->set_visible(columns_.type);
+    column_mime_->set_visible(columns_.mime);
+    column_perm_->set_visible(columns_.perm);
+    column_owner_->set_visible(columns_.owner);
+    column_group_->set_visible(columns_.group);
+    column_atime_->set_visible(columns_.atime);
+    column_btime_->set_visible(columns_.btime);
+    column_ctime_->set_visible(columns_.ctime);
+    column_mtime_->set_visible(columns_.mtime);
 }

@@ -58,8 +58,8 @@
 
 gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<config::settings>& settings) noexcept
-    : parent_(parent), view_mode_(state.view), sorting_(state.sorting), columns_(state.columns),
-      settings_(settings), history_(state.path)
+    : parent_(parent), settings_(settings), view_mode_(state.view), sorting_(state.sorting),
+      columns_(state.columns ? *state.columns : settings_->default_columns), history_(state.path)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
 
@@ -113,7 +113,8 @@ gui::tab::get_tab_state() const noexcept
         .path = cwd(),
         .sorting = sorting_,
         .view = view_mode_,
-        .columns = view_mode_ == config::view_mode::list ? columns_ : std::nullopt,
+        .columns = view_mode_ == config::view_mode::list ? std::optional<config::columns>(columns_)
+                                                         : std::nullopt,
     };
 }
 
@@ -310,7 +311,7 @@ gui::tab::add_actions() noexcept
                 simple_action->set_state(Glib::Variant<bool>::create(sorting_.show_hidden));
             }
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         },
         sorting_.show_hidden);
     // View > Sort
@@ -328,7 +329,7 @@ gui::tab::add_actions() noexcept
                 simple_action->set_state(Glib::Variant<bool>::create(sorting_.sort_natural));
             }
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         },
         sorting_.sort_natural);
     actions_.sort_case = action_group_->add_action_bool(
@@ -345,7 +346,7 @@ gui::tab::add_actions() noexcept
                 simple_action->set_state(Glib::Variant<bool>::create(sorting_.sort_case));
             }
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         },
         sorting_.sort_case);
     // View > Sort > By
@@ -371,7 +372,7 @@ gui::tab::add_actions() noexcept
             sorting_.sort_by = value;
             set_sorting(sorting_);
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         });
     action_group_->add_action(actions_.sort_by);
     // View > Sort > Type
@@ -397,7 +398,7 @@ gui::tab::add_actions() noexcept
             sorting_.sort_type = value;
             set_sorting(sorting_);
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         });
     action_group_->add_action(actions_.sort_type);
     // View > Sort > Directories
@@ -423,7 +424,7 @@ gui::tab::add_actions() noexcept
             sorting_.sort_dir = value;
             set_sorting(sorting_);
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         });
     action_group_->add_action(actions_.sort_dir);
     // View > Sort > Hidden
@@ -449,9 +450,214 @@ gui::tab::add_actions() noexcept
             sorting_.sort_hidden = value;
             set_sorting(sorting_);
 
-            signal_sorting_changed().emit();
+            signal_state_changed().emit();
         });
     action_group_->add_action(actions_.sort_hidden);
+    // View > Columns
+    actions_.column_name = action_group_->add_action_bool(
+        "column_name",
+        [this]()
+        {
+            columns_.name = !columns_.name;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_name");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.name));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.name);
+    actions_.column_size = action_group_->add_action_bool(
+        "column_size",
+        [this]()
+        {
+            columns_.size = !columns_.size;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_size");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.size));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.size);
+    actions_.column_bytes = action_group_->add_action_bool(
+        "column_bytes",
+        [this]()
+        {
+            columns_.bytes = !columns_.bytes;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_bytes");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.bytes));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.bytes);
+    actions_.column_type = action_group_->add_action_bool(
+        "column_type",
+        [this]()
+        {
+            columns_.type = !columns_.type;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_type");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.type));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.type);
+    actions_.column_mime = action_group_->add_action_bool(
+        "column_mime",
+        [this]()
+        {
+            columns_.mime = !columns_.mime;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_mime");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.mime));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.mime);
+    actions_.column_perm = action_group_->add_action_bool(
+        "column_perm",
+        [this]()
+        {
+            columns_.perm = !columns_.perm;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_perm");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.perm));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.perm);
+    actions_.column_owner = action_group_->add_action_bool(
+        "column_owner",
+        [this]()
+        {
+            columns_.owner = !columns_.owner;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_owner");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.owner));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.owner);
+    actions_.column_group = action_group_->add_action_bool(
+        "column_group",
+        [this]()
+        {
+            columns_.group = !columns_.group;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_group");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.group));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.group);
+    actions_.column_atime = action_group_->add_action_bool(
+        "column_atime",
+        [this]()
+        {
+            columns_.atime = !columns_.atime;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_atime");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.atime));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.atime);
+    actions_.column_btime = action_group_->add_action_bool(
+        "column_btime",
+        [this]()
+        {
+            columns_.btime = !columns_.btime;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_btime");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.btime));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.btime);
+    actions_.column_ctime = action_group_->add_action_bool(
+        "column_ctime",
+        [this]()
+        {
+            columns_.ctime = !columns_.ctime;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_ctime");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.ctime));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.ctime);
+    actions_.column_mtime = action_group_->add_action_bool(
+        "column_mtime",
+        [this]()
+        {
+            columns_.mtime = !columns_.mtime;
+            set_columns(columns_);
+
+            auto action = action_group_->lookup_action("column_mtime");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(columns_.mtime));
+            }
+
+            signal_state_changed().emit();
+        },
+        columns_.mtime);
     // Properties
     actions_.info = action_group_->add_action("info", [this]() { show_properites_dialog(0); });
     actions_.attributes =
@@ -1013,9 +1219,18 @@ gui::tab::create_context_menu_model() noexcept
                 {
                     auto smenu_style = Gio::Menu::create();
 
-                    smenu_style->append("TODO", "app.todo");
-                    smenu_style->append("TODO", "app.todo");
-                    smenu_style->append("TODO", "app.todo");
+                    smenu_style->append("Name", "files.column_name");
+                    smenu_style->append("Size", "files.column_size");
+                    smenu_style->append("Bytes", "files.column_bytes");
+                    smenu_style->append("Type", "files.column_type");
+                    smenu_style->append("Mime", "files.column_mime");
+                    smenu_style->append("Perm", "files.column_perm");
+                    smenu_style->append("Owner", "files.column_owner");
+                    smenu_style->append("Group", "files.column_group");
+                    smenu_style->append("Atime", "files.column_atime");
+                    smenu_style->append("Btime", "files.column_btime");
+                    smenu_style->append("Ctime", "files.column_ctime");
+                    smenu_style->append("Mtime", "files.column_mtime");
 
                     section_columns->append_section(smenu_style);
                 }
@@ -1598,7 +1813,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
         view_list_->set_pattern(pattern);
         view_list_->set_thumbnail_size(vfs::file::thumbnail_size::big);
         // this will update the model, must be last
-        view_list_->set_dir(dir_, sorting_, columns_.value_or(settings_->default_columns));
+        view_list_->set_dir(dir_, sorting_, columns_);
     }
     else
     {
@@ -1893,7 +2108,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_ = Gtk::make_managed<gui::list>(settings_);
+        view_list_ = Gtk::make_managed<gui::list>(columns_, settings_);
 
         view_list_->signal_activate().connect(
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));

@@ -147,7 +147,21 @@ class files_base
         return signal_dir_loaded_;
     }
 
+    [[nodiscard]] auto
+    signal_update_sorting() const noexcept
+    {
+        return signal_update_sorting_;
+    }
+
+    [[nodiscard]] auto
+    signal_update_columns() const noexcept
+    {
+        return signal_update_columns_;
+    }
+
     sigc::signal<void()> signal_dir_loaded_;
+    sigc::signal<void()> signal_update_sorting_;
+    sigc::signal<void()> signal_update_columns_;
 
     // Signals we connect to
     sigc::connection signal_files_created;

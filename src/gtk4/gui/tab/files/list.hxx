@@ -29,7 +29,7 @@ namespace gui
 class list final : public Gtk::ColumnView, public files_base
 {
   public:
-    list(const std::shared_ptr<config::settings>& settings);
+    list(const config::columns columns, const std::shared_ptr<config::settings>& settings);
     ~list() = default;
 
     list(const list&) = delete;
@@ -64,5 +64,20 @@ class list final : public Gtk::ColumnView, public files_base
     Glib::RefPtr<Gdk::ContentProvider> on_drag_prepare(double x, double y) const noexcept;
     bool on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept;
     Gdk::DragAction on_drag_motion(double, double) noexcept;
+
+    void update_column_visibility() noexcept;
+
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_name_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_size_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_bytes_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_type_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_mime_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_perm_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_owner_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_group_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_atime_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_btime_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_ctime_;
+    Glib::RefPtr<Gtk::ColumnViewColumn> column_mtime_;
 };
 } // namespace gui

@@ -274,7 +274,7 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
     label->set_label(display_filename(state.path));
 
     auto* tab = Gtk::make_managed<gui::tab>(parent_, state, settings_);
-    tab->signal_sorting_changed().connect([this]() { save_tab_state(); });
+    tab->signal_state_changed().connect([this]() { save_tab_state(); });
     tab->signal_chdir_after().connect(
         [this, tab, label]()
         {
