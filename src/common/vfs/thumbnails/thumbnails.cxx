@@ -39,7 +39,6 @@
 
 #include "vfs/thumbnails/thumbnails.hxx"
 
-#include "gdkmm/pixbuf.h"
 #include "logger.hxx"
 
 // Based on spec v0.9.0
@@ -131,7 +130,7 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
 }
 
 #if (GTK_MAJOR_VERSION == 4)
-static Glib::RefPtr<Gdk::Pixbuf>
+static Glib::RefPtr<Gdk::Texture>
 #elif (GTK_MAJOR_VERSION == 3)
 static GdkPixbuf*
 #endif
@@ -371,7 +370,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
 #if (GTK_MAJOR_VERSION == 4)
     // return the raw thumbnail, it will get scaled to the requested size later
-    return thumbnail;
+    return Gdk::Texture::create_for_pixbuf(thumbnail);
 #elif (GTK_MAJOR_VERSION == 3)
     // Scale thumbnail to requested size from cached thumbnail
     const auto original_width = gdk_pixbuf_get_width(thumbnail);
@@ -398,14 +397,14 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
 #if (GTK_MAJOR_VERSION == 4)
 
-Glib::RefPtr<Gdk::Pixbuf>
+Glib::RefPtr<Gdk::Texture>
 vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file,
                               const std::int32_t thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::image);
 }
 
-Glib::RefPtr<Gdk::Pixbuf>
+Glib::RefPtr<Gdk::Texture>
 vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file,
                               const std::int32_t thumb_size) noexcept
 {

@@ -163,16 +163,16 @@ class file final : public std::enable_shared_from_this<file>
 
         [[nodiscard]] static raw_size get_raw_size(const std::int32_t size) noexcept;
 
-        void set(const raw_size size, const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) noexcept;
+        void set(const raw_size size, const Glib::RefPtr<Gdk::Texture>& texture) noexcept;
         [[nodiscard]] Glib::RefPtr<Gdk::Paintable> get(const std::int32_t size) const noexcept;
         [[nodiscard]] bool is_loaded(const std::int32_t size) const noexcept;
         void clear() noexcept;
 
       private:
-        Glib::RefPtr<Gdk::Pixbuf> normal;
-        Glib::RefPtr<Gdk::Pixbuf> large;
-        Glib::RefPtr<Gdk::Pixbuf> x_large;
-        Glib::RefPtr<Gdk::Pixbuf> xx_large;
+        Glib::RefPtr<Gdk::Texture> normal;
+        Glib::RefPtr<Gdk::Texture> large;
+        Glib::RefPtr<Gdk::Texture> x_large;
+        Glib::RefPtr<Gdk::Texture> xx_large;
 #elif (GTK_MAJOR_VERSION == 3)
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};

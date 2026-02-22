@@ -488,7 +488,7 @@ vfs::file::load_thumbnail(const std::int32_t size, bool force_reload) noexcept
 
     const auto raw = thumbnail_data::get_raw_size(size);
 
-    Glib::RefPtr<Gdk::Pixbuf> thumbnail;
+    Glib::RefPtr<Gdk::Texture> thumbnail;
     if (this->mime_type_->is_image())
     {
         thumbnail =
@@ -514,23 +514,23 @@ vfs::file::is_thumbnail_loaded(const std::int32_t size) const noexcept
 
 void
 vfs::file::thumbnail_data::set(const raw_size size,
-                               const Glib::RefPtr<Gdk::Pixbuf>& pixbuf) noexcept
+                               const Glib::RefPtr<Gdk::Texture>& texture) noexcept
 {
     if (size == raw_size::normal)
     {
-        normal = pixbuf;
+        normal = texture;
     }
     else if (size == raw_size::large)
     {
-        large = pixbuf;
+        large = texture;
     }
     else if (size == raw_size::x_large)
     {
-        x_large = pixbuf;
+        x_large = texture;
     }
     else if (size == raw_size::xx_large)
     {
-        xx_large = pixbuf;
+        xx_large = texture;
     }
     else
     {
@@ -541,9 +541,7 @@ vfs::file::thumbnail_data::set(const raw_size size,
 Glib::RefPtr<Gdk::Paintable>
 vfs::file::thumbnail_data::get(const std::int32_t size) const noexcept
 {
-    auto raw_thumb_size = std::to_underlying(get_raw_size(size));
-
-    Glib::RefPtr<Gdk::Pixbuf> thumbnail;
+    Glib::RefPtr<Gdk::Texture> thumbnail;
     if (size <= 128)
     {
         thumbnail = normal;
@@ -570,28 +568,23 @@ vfs::file::thumbnail_data::get(const std::int32_t size) const noexcept
         return nullptr;
     }
 
-    if (size == raw_thumb_size)
-    {
-        // can just use raw thumbnail without needing to scale
-        return Gdk::Texture::create_for_pixbuf(thumbnail);
-    }
+    const auto src_width = static_cast<std::float_t>(thumbnail->get_width());
+    const auto src_height = static_cast<std::float_t>(thumbnail->get_height());
 
-    // Scale the thumbnail to the requested size
-    const auto original_width = thumbnail->get_width();
-    const auto original_height = thumbnail->get_height();
-    auto new_width = size;
-    auto new_height = size;
-    if (original_width > original_height)
-    { // Scale by width
-        new_height = (size * original_height) / original_width;
-    }
-    else
-    { // Scale by height
-        new_width = (size * original_width) / original_height;
-    }
+    const auto scale = std::min(static_cast<std::float_t>(size) / src_width,
+                                static_cast<std::float_t>(size) / src_height);
 
-    return Gdk::Texture::create_for_pixbuf(
-        thumbnail->scale_simple(new_width, new_height, Gdk::InterpType::BILINEAR));
+    const auto scaled_width = src_width * scale;
+    const auto scaled_height = src_height * scale;
+
+    const auto final_width = scaled_width;
+    const auto final_height = scaled_height;
+
+    auto snapshot = Gtk::Snapshot::create();
+    snapshot->scale(scale, scale);
+    snapshot->append_texture(thumbnail, Gdk::Graphene::Rect(0.0f, 0.0f, src_width, src_height));
+
+    return snapshot->to_paintable(Gdk::Graphene::Size(final_width, final_height));
 }
 
 bool
