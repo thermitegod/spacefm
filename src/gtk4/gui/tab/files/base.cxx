@@ -392,7 +392,7 @@ gui::files_base::set_list_state(const config::list_state& state) noexcept
 
     update();
 
-    signal_update_columns().emit();
+    signal_update_view_list().emit();
 }
 
 bool

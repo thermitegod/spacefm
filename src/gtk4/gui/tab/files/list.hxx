@@ -65,7 +65,7 @@ class list final : public Gtk::ColumnView, public files_base
     bool on_drag_data_received(const Glib::ValueBase& value, double x, double y) noexcept;
     Gdk::DragAction on_drag_motion(double, double) noexcept;
 
-    void update_column_visibility() noexcept;
+    void update_list_visibility() noexcept;
 
     Glib::RefPtr<Gtk::ColumnViewColumn> column_name_;
     Glib::RefPtr<Gtk::ColumnViewColumn> column_size_;

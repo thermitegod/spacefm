@@ -41,7 +41,7 @@ gui::list::list(const config::list_state& state, const std::shared_ptr<config::s
 
     set_reorderable(false);
 
-    if (settings_->interface.list_compact)
+    if (list_state_.compact)
     {
         add_css_class("data-table");
     }
@@ -85,7 +85,7 @@ gui::list::list(const config::list_state& state, const std::shared_ptr<config::s
                 Glib::PRIORITY_DEFAULT);
         });
 
-    signal_update_columns().connect([this]() { update_column_visibility(); });
+    signal_update_view_list().connect([this]() { update_list_visibility(); });
 }
 
 void
@@ -223,7 +223,7 @@ gui::list::add_columns() noexcept
         append_column(column_mtime_);
     }
 
-    update_column_visibility();
+    update_list_visibility();
 }
 
 void
@@ -822,8 +822,17 @@ gui::list::on_drag_motion(double x, double y) noexcept
 }
 
 void
-gui::list::update_column_visibility() noexcept
+gui::list::update_list_visibility() noexcept
 {
+    if (list_state_.compact)
+    {
+        add_css_class("data-table");
+    }
+    else
+    {
+        remove_css_class("data-table");
+    }
+
     column_name_->set_visible(list_state_.name);
     column_size_->set_visible(list_state_.size);
     column_bytes_->set_visible(list_state_.bytes);

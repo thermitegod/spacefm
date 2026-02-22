@@ -319,6 +319,23 @@ gui::tab::add_actions() noexcept
             signal_state_changed().emit();
         },
         sorting_.show_hidden);
+    actions_.list_compact = action_group_->add_action_bool(
+        "list_compact",
+        [this]()
+        {
+            list_state_.compact = !list_state_.compact;
+            set_list_state(list_state_);
+
+            auto action = action_group_->lookup_action("list_compact");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.compact));
+            }
+
+            signal_state_changed().emit();
+        },
+        list_state_.compact);
     // View > Sort
     actions_.sort_natural = action_group_->add_action_bool(
         "sort_natural",
@@ -1109,6 +1126,11 @@ gui::tab::create_context_menu_model() noexcept
             item = Gio::MenuItem::create("Hidden Files", "files.show_hidden");
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Control>H"));
             section->append_item(item);
+
+            if (view_mode_ == config::view_mode::list)
+            {
+                section->append("Compact List", "files.list_compact");
+            }
 
             smenu->append_section(section);
         }

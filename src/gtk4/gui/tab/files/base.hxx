@@ -157,14 +157,22 @@ class files_base
     }
 
     [[nodiscard]] auto
-    signal_update_columns() const noexcept
+    signal_update_view_grid() const noexcept
     {
-        return signal_update_columns_;
+        return signal_update_grid_;
+    }
+
+    [[nodiscard]] auto
+    signal_update_view_list() const noexcept
+    {
+        return signal_update_list_;
     }
 
     sigc::signal<void()> signal_dir_loaded_;
     sigc::signal<void()> signal_update_sorting_;
-    sigc::signal<void()> signal_update_columns_;
+
+    sigc::signal<void()> signal_update_grid_;
+    sigc::signal<void()> signal_update_list_;
 
     // Signals we connect to
     sigc::connection signal_files_created;

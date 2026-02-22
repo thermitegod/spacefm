@@ -243,6 +243,7 @@ class tab final : public Gtk::Box
         // View
         Glib::RefPtr<Gio::SimpleAction> view_mode;
         Glib::RefPtr<Gio::SimpleAction> show_hidden;
+        Glib::RefPtr<Gio::SimpleAction> list_compact;
         // View > Sort
         Glib::RefPtr<Gio::SimpleAction> sort_natural;
         Glib::RefPtr<Gio::SimpleAction> sort_case;
