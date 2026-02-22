@@ -30,6 +30,8 @@
 #include "logger.hxx"
 #include "natsort/strnatcmp.hxx"
 
+#define LAYOUT_TESTING
+
 gui::grid::grid(const std::shared_ptr<config::settings>& settings) : files_base(settings)
 {
     set_enable_rubberband(true);
@@ -94,30 +96,40 @@ void
 gui::grid::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
     auto* box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL);
-    auto* image = Gtk::make_managed<Gtk::Image>();
+#if defined(LAYOUT_TESTING)
+    auto* picture_box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL);
+#endif
+    auto* picture = Gtk::make_managed<Gtk::Picture>();
     auto* label = Gtk::make_managed<Gtk::Label>();
 
+    auto size = settings_->general.icon_size_big;
+
+    box->set_size_request(size, size);
     box->set_expand(true);
-    // TODO this fixes the item resizing with a window
-    // resize. not the best way to do this.
-    box->set_size_request(80, 80);
-    // box->set_focusable(false);
     box->set_can_target(true);
     box->set_focusable(true);
 
-    image->set_icon_size(Gtk::IconSize::LARGE);
-    // box->set_focusable(true);
+    picture->set_size_request(size, size);
+    picture->set_content_fit(Gtk::ContentFit::SCALE_DOWN);
+    picture->set_can_shrink(false);
+    picture->set_halign(Gtk::Align::CENTER);
+    picture->set_valign(Gtk::Align::CENTER);
+    picture->set_hexpand(false);
+    picture->set_vexpand(false);
 
-    // label->set_expand(false);
     label->set_attributes(attrs_);
     label->set_wrap(true);
     label->set_wrap_mode(Pango::WrapMode::WORD_CHAR);
     label->set_justify(Gtk::Justification::CENTER);
-    label->set_xalign(0.5f);
-    label->set_yalign(0.0f);
-    // box->set_focusable(true);
+    label->set_halign(Gtk::Align::CENTER);
+    label->set_valign(Gtk::Align::START);
 
-    box->append(*image);
+#if defined(LAYOUT_TESTING)
+    box->append(*picture_box);
+    picture_box->append(*picture);
+#else
+    box->append(*picture);
+#endif
     box->append(*label);
     item->set_child(*box);
 }
@@ -132,8 +144,14 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     }
 
     auto* box = dynamic_cast<Gtk::Box*>(item->get_child());
-    auto* image = dynamic_cast<Gtk::Image*>(box->get_first_child());
-    auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
+#if defined(LAYOUT_TESTING)
+    auto* picture_box = dynamic_cast<Gtk::Box*>(box->get_first_child());
+    auto* picture = dynamic_cast<Gtk::Picture*>(picture_box->get_first_child());
+    auto* label = dynamic_cast<Gtk::Label*>(picture_box->get_next_sibling());
+#else
+    auto* picture = dynamic_cast<Gtk::Picture*>(box->get_first_child());
+    auto* label = dynamic_cast<Gtk::Label*>(picture->get_next_sibling());
+#endif
 
     auto connections = std::make_unique<std::vector<sigc::connection>>();
 
@@ -193,9 +211,9 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     item->set_selectable(true);
     label->set_text(col->file->name().data());
 
-    auto update_image = [this, image, col]()
+    auto update_image = [this, picture, col]()
     {
-        if (!image || !col)
+        if (!picture || !col)
         {
             return;
         }
@@ -210,10 +228,7 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
             icon = col->file->icon(settings_->general.icon_size_big);
         }
 
-        // DEV ignore thumbs
-        // image->set_from_icon_name(col->file->is_directory() ? "folder" : "text-x-generic");
-
-        image->set(icon);
+        picture->set_paintable(icon);
     };
 
     auto update_label = [label, col]()
@@ -249,8 +264,14 @@ gui::grid::on_unbind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     }
 
     auto* box = dynamic_cast<Gtk::Box*>(item->get_child());
-    // auto* image = dynamic_cast<Gtk::Image*>(box->get_first_child());
-    // auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling());
+#if defined(LAYOUT_TESTING)
+    // auto* picture_box = dynamic_cast<Gtk::Box*>(box->get_first_child());
+    // auto* picture = dynamic_cast<Gtk::Picture*>(picture_box->get_first_child());
+    // auto* label = dynamic_cast<Gtk::Label*>(picture_box->get_next_sibling());
+#else
+    // auto* picture = dynamic_cast<Gtk::Picture*>(box->get_first_child());
+    // auto* label = dynamic_cast<Gtk::Label*>(picture->get_next_sibling());
+#endif
 
     if (col->drop_target)
     {
