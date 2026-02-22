@@ -1378,6 +1378,15 @@ gui::tab::add_shortcuts() noexcept
 {
     auto controller = Gtk::ShortcutController::create();
 
+    { // Unselect All Files
+        auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_Escape);
+        auto action =
+            Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
+                                        { return activate_action("files.unselect_all"); });
+        auto shortcut = Gtk::Shortcut::create(trigger, action);
+        controller->add_shortcut(shortcut);
+    }
+
     { // Navigation Up
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_Up, Gdk::ModifierType::ALT_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
