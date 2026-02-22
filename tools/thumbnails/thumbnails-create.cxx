@@ -66,7 +66,7 @@ main(int argc, char** argv)
     }
 
     auto settings = std::make_shared<vfs::settings>(vfs::settings{
-        .icon_size_big =
+        .icon_size_grid =
             [size]()
         {
             if (size == "normal")
@@ -87,8 +87,7 @@ main(int argc, char** argv)
             }
             std::unreachable();
         }(),
-        .icon_size_small = 0, // unused here
-        .icon_size_tool = 0,  // unused here
+        .icon_size_list = 0, // unused here
     });
 
     std::vector<std::shared_ptr<vfs::file>> files;
@@ -99,7 +98,7 @@ main(int argc, char** argv)
 
     std::ranges::for_each(files,
                           [settings](auto& file)
-                          { file->load_thumbnail(settings->icon_size_big); });
+                          { file->load_thumbnail(settings->icon_size_grid); });
 
     return EXIT_SUCCESS;
 }

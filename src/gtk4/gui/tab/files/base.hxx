@@ -50,12 +50,14 @@ class files_base
     void disable_thumbnails() noexcept;
 
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting = {},
-                 const config::columns& columns = {}) noexcept;
+                 const config::grid_state& grid_state = {},
+                 const config::list_state& list_state = {}) noexcept;
     void set_pattern(const std::string_view pattern) noexcept;
     void set_thumbnail_size(const std::int32_t size) noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
-    void set_columns(const config::columns& columns) noexcept;
+    void set_grid_state(const config::grid_state& state) noexcept;
+    void set_list_state(const config::list_state& state) noexcept;
 
     [[nodiscard]] bool is_selected() const noexcept;
     void select_all() const noexcept;
@@ -104,7 +106,8 @@ class files_base
 
     std::shared_ptr<config::settings> settings_;
     config::sorting sorting_;
-    config::columns columns_;
+    config::grid_state grid_state_;
+    config::list_state list_state_;
 
     std::shared_ptr<vfs::dir> dir_;
 

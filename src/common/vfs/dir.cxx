@@ -380,7 +380,7 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
     }
 
 #if (GTK_MAJOR_VERSION == 4)
-    load_thumbnails(settings_->icon_size_big);
+    load_thumbnails(settings_->icon_size_grid);
 #endif
 
     this->load_running_ = false;

@@ -30,10 +30,10 @@
 #include "logger.hxx"
 #include "natsort/strnatcmp.hxx"
 
-gui::list::list(const config::columns columns, const std::shared_ptr<config::settings>& settings)
+gui::list::list(const config::list_state& state, const std::shared_ptr<config::settings>& settings)
     : files_base(settings)
 {
-    columns_ = columns;
+    list_state_ = state;
 
     set_enable_rubberband(true);
     set_single_click_activate(settings_->general.single_click_activate);
@@ -308,7 +308,7 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
         // DEV ignore thumbs
         // image->set_from_icon_name(col->file->is_directory() ? "folder" : "text-x-generic");
-        image->set(col->file->icon(settings_->general.icon_size_small));
+        image->set(col->file->icon(list_state_.icon_size));
     };
 
     auto update_label = [label, col]()
@@ -824,16 +824,16 @@ gui::list::on_drag_motion(double x, double y) noexcept
 void
 gui::list::update_column_visibility() noexcept
 {
-    column_name_->set_visible(columns_.name);
-    column_size_->set_visible(columns_.size);
-    column_bytes_->set_visible(columns_.bytes);
-    column_type_->set_visible(columns_.type);
-    column_mime_->set_visible(columns_.mime);
-    column_perm_->set_visible(columns_.perm);
-    column_owner_->set_visible(columns_.owner);
-    column_group_->set_visible(columns_.group);
-    column_atime_->set_visible(columns_.atime);
-    column_btime_->set_visible(columns_.btime);
-    column_ctime_->set_visible(columns_.ctime);
-    column_mtime_->set_visible(columns_.mtime);
+    column_name_->set_visible(list_state_.name);
+    column_size_->set_visible(list_state_.size);
+    column_bytes_->set_visible(list_state_.bytes);
+    column_type_->set_visible(list_state_.type);
+    column_mime_->set_visible(list_state_.mime);
+    column_perm_->set_visible(list_state_.perm);
+    column_owner_->set_visible(list_state_.owner);
+    column_group_->set_visible(list_state_.group);
+    column_atime_->set_visible(list_state_.atime);
+    column_btime_->set_visible(list_state_.btime);
+    column_ctime_->set_visible(list_state_.ctime);
+    column_mtime_->set_visible(list_state_.mtime);
 }

@@ -32,8 +32,11 @@
 
 #define LAYOUT_TESTING
 
-gui::grid::grid(const std::shared_ptr<config::settings>& settings) : files_base(settings)
+gui::grid::grid(const config::grid_state& state, const std::shared_ptr<config::settings>& settings)
+    : files_base(settings)
 {
+    grid_state_ = state;
+
     set_enable_rubberband(true);
     set_single_click_activate(settings_->general.single_click_activate);
     // set_expand(true);
@@ -86,7 +89,7 @@ gui::grid::grid(const std::shared_ptr<config::settings>& settings) : files_base(
                         scroll_to(0);
                     }
 
-                    dir_->load_thumbnails(settings_->general.icon_size_big);
+                    dir_->load_thumbnails(grid_state_.icon_size);
                 },
                 Glib::PRIORITY_DEFAULT);
         });
@@ -102,7 +105,7 @@ gui::grid::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     auto* picture = Gtk::make_managed<Gtk::Picture>();
     auto* label = Gtk::make_managed<Gtk::Label>();
 
-    auto size = settings_->general.icon_size_big;
+    auto size = grid_state_.icon_size;
 
     box->set_size_request(size, size);
     box->set_expand(true);
@@ -219,13 +222,13 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
         }
 
         Glib::RefPtr<Gdk::Paintable> icon;
-        if (col->file->is_thumbnail_loaded(settings_->general.icon_size_big))
+        if (col->file->is_thumbnail_loaded(grid_state_.icon_size))
         {
-            icon = col->file->thumbnail(settings_->general.icon_size_big);
+            icon = col->file->thumbnail(grid_state_.icon_size);
         }
         else
         {
-            icon = col->file->icon(settings_->general.icon_size_big);
+            icon = col->file->icon(grid_state_.icon_size);
         }
 
         picture->set_paintable(icon);

@@ -59,7 +59,8 @@
 gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<config::settings>& settings) noexcept
     : parent_(parent), settings_(settings), view_mode_(state.view), sorting_(state.sorting),
-      columns_(state.columns ? *state.columns : settings_->default_columns), history_(state.path)
+      grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
+      list_state_(state.list ? *state.list : settings_->defaults.list), history_(state.path)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
 
@@ -113,8 +114,12 @@ gui::tab::get_tab_state() const noexcept
         .path = cwd(),
         .sorting = sorting_,
         .view = view_mode_,
-        .columns = view_mode_ == config::view_mode::list ? std::optional<config::columns>(columns_)
-                                                         : std::nullopt,
+        .grid = view_mode_ == config::view_mode::grid
+                    ? std::optional<config::grid_state>(grid_state_)
+                    : std::nullopt,
+        .list = view_mode_ == config::view_mode::list
+                    ? std::optional<config::list_state>(list_state_)
+                    : std::nullopt,
     };
 }
 
@@ -458,206 +463,206 @@ gui::tab::add_actions() noexcept
         "column_name",
         [this]()
         {
-            columns_.name = !columns_.name;
-            set_columns(columns_);
+            list_state_.name = !list_state_.name;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_name");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.name));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.name));
             }
 
             signal_state_changed().emit();
         },
-        columns_.name);
+        list_state_.name);
     actions_.column_size = action_group_->add_action_bool(
         "column_size",
         [this]()
         {
-            columns_.size = !columns_.size;
-            set_columns(columns_);
+            list_state_.size = !list_state_.size;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_size");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.size));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.size));
             }
 
             signal_state_changed().emit();
         },
-        columns_.size);
+        list_state_.size);
     actions_.column_bytes = action_group_->add_action_bool(
         "column_bytes",
         [this]()
         {
-            columns_.bytes = !columns_.bytes;
-            set_columns(columns_);
+            list_state_.bytes = !list_state_.bytes;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_bytes");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.bytes));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.bytes));
             }
 
             signal_state_changed().emit();
         },
-        columns_.bytes);
+        list_state_.bytes);
     actions_.column_type = action_group_->add_action_bool(
         "column_type",
         [this]()
         {
-            columns_.type = !columns_.type;
-            set_columns(columns_);
+            list_state_.type = !list_state_.type;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_type");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.type));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.type));
             }
 
             signal_state_changed().emit();
         },
-        columns_.type);
+        list_state_.type);
     actions_.column_mime = action_group_->add_action_bool(
         "column_mime",
         [this]()
         {
-            columns_.mime = !columns_.mime;
-            set_columns(columns_);
+            list_state_.mime = !list_state_.mime;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_mime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.mime));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.mime));
             }
 
             signal_state_changed().emit();
         },
-        columns_.mime);
+        list_state_.mime);
     actions_.column_perm = action_group_->add_action_bool(
         "column_perm",
         [this]()
         {
-            columns_.perm = !columns_.perm;
-            set_columns(columns_);
+            list_state_.perm = !list_state_.perm;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_perm");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.perm));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.perm));
             }
 
             signal_state_changed().emit();
         },
-        columns_.perm);
+        list_state_.perm);
     actions_.column_owner = action_group_->add_action_bool(
         "column_owner",
         [this]()
         {
-            columns_.owner = !columns_.owner;
-            set_columns(columns_);
+            list_state_.owner = !list_state_.owner;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_owner");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.owner));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.owner));
             }
 
             signal_state_changed().emit();
         },
-        columns_.owner);
+        list_state_.owner);
     actions_.column_group = action_group_->add_action_bool(
         "column_group",
         [this]()
         {
-            columns_.group = !columns_.group;
-            set_columns(columns_);
+            list_state_.group = !list_state_.group;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_group");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.group));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.group));
             }
 
             signal_state_changed().emit();
         },
-        columns_.group);
+        list_state_.group);
     actions_.column_atime = action_group_->add_action_bool(
         "column_atime",
         [this]()
         {
-            columns_.atime = !columns_.atime;
-            set_columns(columns_);
+            list_state_.atime = !list_state_.atime;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_atime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.atime));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.atime));
             }
 
             signal_state_changed().emit();
         },
-        columns_.atime);
+        list_state_.atime);
     actions_.column_btime = action_group_->add_action_bool(
         "column_btime",
         [this]()
         {
-            columns_.btime = !columns_.btime;
-            set_columns(columns_);
+            list_state_.btime = !list_state_.btime;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_btime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.btime));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.btime));
             }
 
             signal_state_changed().emit();
         },
-        columns_.btime);
+        list_state_.btime);
     actions_.column_ctime = action_group_->add_action_bool(
         "column_ctime",
         [this]()
         {
-            columns_.ctime = !columns_.ctime;
-            set_columns(columns_);
+            list_state_.ctime = !list_state_.ctime;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_ctime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.ctime));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.ctime));
             }
 
             signal_state_changed().emit();
         },
-        columns_.ctime);
+        list_state_.ctime);
     actions_.column_mtime = action_group_->add_action_bool(
         "column_mtime",
         [this]()
         {
-            columns_.mtime = !columns_.mtime;
-            set_columns(columns_);
+            list_state_.mtime = !list_state_.mtime;
+            set_list_state(list_state_);
 
             auto action = action_group_->lookup_action("column_mtime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
             if (simple_action)
             {
-                simple_action->set_state(Glib::Variant<bool>::create(columns_.mtime));
+                simple_action->set_state(Glib::Variant<bool>::create(list_state_.mtime));
             }
 
             signal_state_changed().emit();
         },
-        columns_.mtime);
+        list_state_.mtime);
     // Properties
     actions_.info = action_group_->add_action("info", [this]() { show_properites_dialog(0); });
     actions_.attributes =
@@ -1812,17 +1817,17 @@ gui::tab::update_model(const std::string_view pattern) noexcept
     {
         // set file sorting settings
         view_grid_->set_pattern(pattern);
-        view_grid_->set_thumbnail_size(settings_->general.icon_size_big); // TODO
+        view_grid_->set_thumbnail_size(grid_state_.icon_size);
         // this will update the model, must be last
-        view_grid_->set_dir(dir_, sorting_);
+        view_grid_->set_dir(dir_, sorting_, grid_state_, list_state_);
     }
     else if (view_mode_ == config::view_mode::list)
     {
         // set file sorting settings
         view_list_->set_pattern(pattern);
-        view_list_->set_thumbnail_size(settings_->general.icon_size_small); // TOOD
+        view_list_->set_thumbnail_size(list_state_.icon_size);
         // this will update the model, must be last
-        view_list_->set_dir(dir_, sorting_, columns_);
+        view_list_->set_dir(dir_, sorting_, grid_state_, list_state_);
     }
     else
     {
@@ -1902,9 +1907,8 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     // dir_ = vfs::dir::create(path, settings_);
     dir_ = vfs::dir::create(path,
                             std::make_shared<vfs::settings>(vfs::settings{
-                                .icon_size_big = settings_->general.icon_size_big,
-                                .icon_size_small = settings_->general.icon_size_small,
-                                .icon_size_tool = settings_->general.icon_size_small, // deprecated
+                                .icon_size_grid = grid_state_.icon_size,
+                                .icon_size_list = list_state_.icon_size,
                             }));
 
     signal_chdir_begin().emit();
@@ -2106,7 +2110,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
 
     if (view_mode_ == config::view_mode::grid)
     {
-        view_grid_ = Gtk::make_managed<gui::grid>(settings_);
+        view_grid_ = Gtk::make_managed<gui::grid>(grid_state_, settings_);
 
         view_grid_->signal_activate().connect(
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
@@ -2117,7 +2121,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_ = Gtk::make_managed<gui::list>(columns_, settings_);
+        view_list_ = Gtk::make_managed<gui::list>(list_state_, settings_);
 
         view_list_->signal_activate().connect(
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
@@ -2169,15 +2173,32 @@ gui::tab::set_sorting(const config::sorting& sorting, bool full_update) noexcept
 }
 
 void
-gui::tab::set_columns(const config::columns& columns) noexcept
+gui::tab::set_grid_state(const config::grid_state& state) noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {
-        view_grid_->set_columns(columns);
+        view_grid_->set_grid_state(state);
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_->set_columns(columns);
+        view_list_->set_grid_state(state);
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+void
+gui::tab::set_list_state(const config::list_state& state) noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        view_grid_->set_list_state(state);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        view_list_->set_list_state(state);
     }
     else
     {

@@ -29,7 +29,7 @@ namespace gui
 class list final : public Gtk::ColumnView, public files_base
 {
   public:
-    list(const config::columns columns, const std::shared_ptr<config::settings>& settings);
+    list(const config::list_state& state, const std::shared_ptr<config::settings>& settings);
     ~list() = default;
 
     list(const list&) = delete;

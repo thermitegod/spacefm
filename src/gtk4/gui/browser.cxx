@@ -261,9 +261,10 @@ gui::browser::new_tab(const std::filesystem::path& path) noexcept
 {
     new_tab({
         .path = path,
-        .sorting = settings_->default_sorting,
-        .view = settings_->default_view,
-        .columns = settings_->default_columns,
+        .sorting = settings_->defaults.sorting,
+        .view = settings_->defaults.view,
+        .grid = settings_->defaults.grid,
+        .list = settings_->defaults.list,
     });
 }
 

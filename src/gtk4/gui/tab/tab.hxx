@@ -117,7 +117,8 @@ class tab final : public Gtk::Box
     void files_grab_focus() const noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
-    void set_columns(const config::columns& columns) noexcept;
+    void set_grid_state(const config::grid_state& state) noexcept;
+    void set_list_state(const config::list_state& state) noexcept;
 
     [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
 
@@ -163,7 +164,8 @@ class tab final : public Gtk::Box
     std::shared_ptr<config::settings> settings_;
     config::view_mode view_mode_;
     config::sorting sorting_;
-    config::columns columns_;
+    config::grid_state grid_state_;
+    config::list_state list_state_;
     gui::lib::history history_;
 
     std::shared_ptr<vfs::dir> dir_;

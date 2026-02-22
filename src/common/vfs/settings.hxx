@@ -28,9 +28,8 @@ namespace vfs
 struct settings
 {
 #if (GTK_MAJOR_VERSION == 4)
-    std::int32_t icon_size_big;
-    std::int32_t icon_size_small;
-    std::int32_t icon_size_tool;
+    std::int32_t icon_size_grid;
+    std::int32_t icon_size_list;
 #elif (GTK_MAJOR_VERSION == 3)
     i32 icon_size_big;
     i32 icon_size_small;

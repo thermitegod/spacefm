@@ -79,8 +79,27 @@ enum class sort_hidden : std::uint8_t
     last,
 };
 
-struct columns final
+struct sorting final
 {
+    bool show_hidden = true;
+    bool sort_natural = true;
+    bool sort_case = false;
+    sort_by sort_by = sort_by::name;
+    sort_dir sort_dir = sort_dir::first;
+    sort_type sort_type = sort_type::ascending;
+    sort_hidden sort_hidden = sort_hidden::first;
+};
+
+struct grid_state final
+{
+    std::int32_t icon_size = 48;
+};
+
+struct list_state final
+{
+    std::int32_t icon_size = 22;
+    bool compact = false;
+    // Visible Columns
     bool name = true;
     bool size = true;
     bool bytes = false;
@@ -95,24 +114,14 @@ struct columns final
     bool mtime = true;
 };
 
-struct sorting final
-{
-    bool show_hidden = true;
-    bool sort_natural = true;
-    bool sort_case = false;
-    sort_by sort_by = sort_by::name;
-    sort_dir sort_dir = sort_dir::first;
-    sort_type sort_type = sort_type::ascending;
-    sort_hidden sort_hidden = sort_hidden::first;
-};
-
 struct tab_state final
 {
     // std::filesystem::path path = vfs::user::home();
     std::string path = vfs::user::home();
     sorting sorting{};
     view_mode view = view_mode::grid;
-    std::optional<columns> columns = std::nullopt; // only used for view_mode::list
+    std::optional<grid_state> grid = std::nullopt; // only used for view_mode::grid
+    std::optional<list_state> list = std::nullopt; // only used for view_mode::list
 };
 
 struct panel_state final
@@ -157,9 +166,6 @@ struct settings_on_disk
     struct general final
     {
         bool show_thumbnails{true};
-
-        std::int32_t icon_size_big{48};
-        std::int32_t icon_size_small{22};
 
         bool click_executes{false};
         bool single_click_executes{false};
@@ -220,9 +226,14 @@ struct settings_on_disk
     };
     dialog dialog;
 
-    view_mode default_view = view_mode::grid;
-    columns default_columns;
-    sorting default_sorting;
+    struct defaults
+    {
+        sorting sorting;
+        view_mode view = view_mode::grid;
+        grid_state grid;
+        list_state list;
+    };
+    defaults defaults;
 
     // TODO multi window state support
     // std::flat_map<std::uint32_t, window_state> window;

@@ -29,7 +29,7 @@ namespace gui
 class grid final : public Gtk::GridView, public files_base
 {
   public:
-    grid(const std::shared_ptr<config::settings>& settings);
+    grid(const config::grid_state& state, const std::shared_ptr<config::settings>& settings);
     ~grid() = default;
 
     grid(const grid&) = delete;
