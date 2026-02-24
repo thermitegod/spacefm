@@ -126,3 +126,12 @@ gui::lib::history::set_selection(const std::filesystem::path& path,
     }
     selection_.insert({path, files});
 }
+
+void
+gui::lib::history::clear_selection(const std::filesystem::path& path) noexcept
+{
+    if (selection_.contains(path))
+    {
+        selection_.erase(path);
+    }
+}

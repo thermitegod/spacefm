@@ -47,6 +47,7 @@ struct history
     get_selection(const std::filesystem::path& path) const noexcept;
     void set_selection(const std::filesystem::path& path,
                        const std::vector<std::filesystem::path>& files) noexcept;
+    void clear_selection(const std::filesystem::path& path) noexcept;
 
   private:
     std::filesystem::path current_{vfs::user::home()};
