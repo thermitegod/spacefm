@@ -53,11 +53,11 @@ class files_base
                  const config::grid_state& grid_state = {},
                  const config::list_state& list_state = {}) noexcept;
     void set_pattern(const std::string_view pattern) noexcept;
-    void set_thumbnail_size(const std::int32_t size) noexcept;
+    void set_thumbnail_size(const config::icon_size size) noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
-    void set_grid_state(const config::grid_state& state) noexcept;
-    void set_list_state(const config::list_state& state) noexcept;
+    void set_grid_state(const config::grid_state& state, const bool update_model = false) noexcept;
+    void set_list_state(const config::list_state& state, const bool update_model = false) noexcept;
 
     [[nodiscard]] bool is_selected() const noexcept;
     void select_all() const noexcept;
@@ -88,9 +88,9 @@ class files_base
 
       public:
         [[nodiscard]] auto
-        signal_thumbnail_loaded() const noexcept
+        signal_update_thumbnail() const noexcept
         {
-            return signal_thumbnail_loaded_;
+            return signal_update_thumbnail_;
         }
 
         [[nodiscard]] auto
@@ -100,7 +100,7 @@ class files_base
         }
 
       private:
-        sigc::signal<void()> signal_thumbnail_loaded_;
+        sigc::signal<void()> signal_update_thumbnail_;
         sigc::signal<void()> signal_changed_;
     }; // ModelColumns
 
@@ -119,7 +119,7 @@ class files_base
 
     std::string pattern_;
 
-    std::int32_t thumbnail_size_ = 0;
+    config::icon_size thumbnail_size_ = config::icon_size::normal;
     bool enable_thumbnail_{true};
 
     std::int32_t model_sort(const Glib::RefPtr<const ModelColumns>& a,
@@ -179,5 +179,6 @@ class files_base
     sigc::connection signal_files_deleted;
     sigc::connection signal_files_changed;
     sigc::connection signal_thumbnail_loaded;
+    sigc::connection signal_icon_size_changed;
 };
 } // namespace gui

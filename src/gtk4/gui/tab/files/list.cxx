@@ -306,9 +306,9 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
             return;
         }
 
-        // DEV ignore thumbs
-        // image->set_from_icon_name(col->file->is_directory() ? "folder" : "text-x-generic");
-        image->set(col->file->icon(list_state_.icon_size));
+        const auto size = std::to_underlying(list_state_.icon_size);
+
+        image->set(col->file->icon(size));
     };
 
     auto update_label = [label, col]()
@@ -326,7 +326,7 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     update_image();
     update_label();
 
-    connections->push_back(col->signal_thumbnail_loaded().connect(update_image));
+    connections->push_back(col->signal_update_thumbnail().connect(update_image));
     connections->push_back(col->signal_changed().connect(update_label));
 
     item->set_data("connections",

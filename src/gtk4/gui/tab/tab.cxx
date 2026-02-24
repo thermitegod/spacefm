@@ -53,7 +53,6 @@
 
 #include "vfs/utils/permissions.hxx"
 
-#include "gtkmm/object.h"
 #include "logger.hxx"
 
 gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
@@ -336,6 +335,31 @@ gui::tab::add_actions() noexcept
             signal_state_changed().emit();
         },
         list_state_.compact);
+    actions_.icon_size =
+        Gio::SimpleAction::create("icon_size",
+                                  Glib::VariantType("y"),
+                                  Glib::Variant<std::underlying_type_t<config::icon_size>>::create(
+                                      std::to_underlying(grid_state_.icon_size)));
+    actions_.icon_size->signal_activate().connect(
+        [this](const Glib::VariantBase& parameter)
+        {
+            if (!parameter.is_of_type(Glib::VariantType("y")))
+            {
+                return;
+            }
+
+            auto value = static_cast<config::icon_size>(
+                Glib::VariantBase::cast_dynamic<
+                    Glib::Variant<std::underlying_type_t<config::icon_size>>>(parameter)
+                    .get());
+            actions_.icon_size->set_state(parameter);
+
+            grid_state_.icon_size = value;
+            set_grid_state(grid_state_, true);
+
+            signal_state_changed().emit();
+        });
+    action_group_->add_action(actions_.icon_size);
     // View > Sort
     actions_.sort_natural = action_group_->add_action_bool(
         "sort_natural",
@@ -1135,6 +1159,28 @@ gui::tab::create_context_menu_model() noexcept
             smenu->append_section(section);
         }
 
+        if (view_mode_ == config::view_mode::grid)
+        {
+            auto smenu_sort = Gio::Menu::create();
+
+            auto add_menu_item = [smenu_sort](const Glib::ustring& label, config::icon_size v)
+            {
+                auto item = Gio::MenuItem::create(label, "files.icon_size");
+                item->set_action_and_target(
+                    "files.icon_size",
+                    Glib::Variant<std::underlying_type_t<config::icon_size>>::create(
+                        std::to_underlying(v)));
+                smenu_sort->append_item(item);
+            };
+            add_menu_item("Small Icons", config::icon_size::small);
+            add_menu_item("Normal Icons", config::icon_size::normal);
+            add_menu_item("Large Icons", config::icon_size::large);
+            add_menu_item("X Large Icons", config::icon_size::x_large);
+            add_menu_item("XX Large Icons", config::icon_size::xx_large);
+
+            smenu->append_section(smenu_sort);
+        }
+
         {
             auto section = Gio::Menu::create();
 
@@ -1929,8 +1975,8 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     // dir_ = vfs::dir::create(path, settings_);
     dir_ = vfs::dir::create(path,
                             std::make_shared<vfs::settings>(vfs::settings{
-                                .icon_size_grid = grid_state_.icon_size,
-                                .icon_size_list = list_state_.icon_size,
+                                .icon_size_grid = std::to_underlying(grid_state_.icon_size),
+                                .icon_size_list = std::to_underlying(list_state_.icon_size),
                             }));
 
     signal_chdir_begin().emit();
@@ -2195,15 +2241,15 @@ gui::tab::set_sorting(const config::sorting& sorting, bool full_update) noexcept
 }
 
 void
-gui::tab::set_grid_state(const config::grid_state& state) noexcept
+gui::tab::set_grid_state(const config::grid_state& state, const bool update_model) noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {
-        view_grid_->set_grid_state(state);
+        view_grid_->set_grid_state(state, update_model);
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_->set_grid_state(state);
+        view_list_->set_grid_state(state, update_model);
     }
     else
     {
@@ -2212,15 +2258,15 @@ gui::tab::set_grid_state(const config::grid_state& state) noexcept
 }
 
 void
-gui::tab::set_list_state(const config::list_state& state) noexcept
+gui::tab::set_list_state(const config::list_state& state, const bool update_model) noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {
-        view_grid_->set_list_state(state);
+        view_grid_->set_list_state(state, update_model);
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_->set_list_state(state);
+        view_list_->set_list_state(state, update_model);
     }
     else
     {

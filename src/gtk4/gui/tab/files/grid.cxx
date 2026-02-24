@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <memory>
+#include <utility>
 
 #include <fnmatch.h>
 
@@ -89,7 +90,7 @@ gui::grid::grid(const config::grid_state& state, const std::shared_ptr<config::s
                         scroll_to(0);
                     }
 
-                    dir_->load_thumbnails(grid_state_.icon_size);
+                    dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
                 },
                 Glib::PRIORITY_DEFAULT);
         });
@@ -105,7 +106,7 @@ gui::grid::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     auto* picture = Gtk::make_managed<Gtk::Picture>();
     auto* label = Gtk::make_managed<Gtk::Label>();
 
-    auto size = grid_state_.icon_size;
+    const auto size = std::to_underlying(grid_state_.icon_size);
 
     box->set_size_request(size, size);
     box->set_expand(true);
@@ -214,21 +215,26 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     item->set_selectable(true);
     label->set_text(col->file->name().data());
 
-    auto update_image = [this, picture, col]()
+    auto update_image = [this, box, picture, col]()
     {
         if (!picture || !col)
         {
             return;
         }
 
+        const auto size = std::to_underlying(grid_state_.icon_size);
+
+        box->set_size_request(size, size);
+        picture->set_size_request(size, size);
+
         Glib::RefPtr<Gdk::Paintable> icon;
-        if (col->file->is_thumbnail_loaded(grid_state_.icon_size))
+        if (col->file->is_thumbnail_loaded(size))
         {
-            icon = col->file->thumbnail(grid_state_.icon_size);
+            icon = col->file->thumbnail(size);
         }
         else
         {
-            icon = col->file->icon(grid_state_.icon_size);
+            icon = col->file->icon(size);
         }
 
         picture->set_paintable(icon);
@@ -249,7 +255,7 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     update_image();
     update_label();
 
-    connections->push_back(col->signal_thumbnail_loaded().connect(update_image));
+    connections->push_back(col->signal_update_thumbnail().connect(update_image));
     connections->push_back(col->signal_changed().connect(update_label));
 
     item->set_data("connections",

@@ -347,7 +347,7 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
 }
 
 void
-gui::files_base::set_thumbnail_size(const std::int32_t size) noexcept
+gui::files_base::set_thumbnail_size(const config::icon_size size) noexcept
 {
     thumbnail_size_ = size;
 }
@@ -376,21 +376,27 @@ gui::files_base::set_sorting(const config::sorting& sorting, bool full_update) n
 }
 
 void
-gui::files_base::set_grid_state(const config::grid_state& state) noexcept
+gui::files_base::set_grid_state(const config::grid_state& state, const bool update_model) noexcept
 {
     grid_state_ = state;
 
-    // TODO, icon size changes need to do more than just update()
+    if (update_model)
+    {
+        update();
+    }
 
-    update();
+    signal_update_view_grid().emit();
 }
 
 void
-gui::files_base::set_list_state(const config::list_state& state) noexcept
+gui::files_base::set_list_state(const config::list_state& state, const bool update_model) noexcept
 {
     list_state_ = state;
 
-    update();
+    if (update_model)
+    {
+        update();
+    }
 
     signal_update_view_list().emit();
 }
@@ -455,9 +461,11 @@ gui::files_base::on_files_created(const std::span<const std::shared_ptr<vfs::fil
 
         if (enable_thumbnail_ && (file->mime_type()->is_video() || file->mime_type()->is_image()))
         {
-            if (!file->is_thumbnail_loaded(thumbnail_size_))
+            const auto size = std::to_underlying(thumbnail_size_);
+
+            if (!file->is_thumbnail_loaded(size))
             {
-                dir_->load_thumbnail(file, thumbnail_size_);
+                dir_->load_thumbnail(file, size);
             }
         }
     }
@@ -530,9 +538,11 @@ gui::files_base::on_files_changed(const std::span<const std::shared_ptr<vfs::fil
         if (enable_thumbnail_ && (now - file->mtime() > std::chrono::seconds(5)) &&
             (file->mime_type()->is_video() || file->mime_type()->is_image()))
         {
-            if (!file->is_thumbnail_loaded(thumbnail_size_))
+            const auto size = std::to_underlying(thumbnail_size_);
+
+            if (!file->is_thumbnail_loaded(size))
             {
-                dir_->load_thumbnail(file, thumbnail_size_);
+                dir_->load_thumbnail(file, size);
             }
         }
     }
@@ -554,7 +564,7 @@ gui::files_base::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noe
             [this, file, position]()
             {
                 auto item = dir_model_->get_item(position);
-                item->signal_thumbnail_loaded().emit();
+                item->signal_update_thumbnail().emit();
             },
             Glib::PRIORITY_DEFAULT);
 #endif
@@ -567,7 +577,7 @@ gui::files_base::enable_thumbnails() noexcept
     if (dir_)
     {
         dir_->enable_thumbnails(true);
-        dir_->load_thumbnails(thumbnail_size_);
+        dir_->load_thumbnails(std::to_underlying(thumbnail_size_));
     }
 
     // just regen the whole model
@@ -580,7 +590,7 @@ gui::files_base::disable_thumbnails() noexcept
     if (dir_)
     {
         dir_->enable_thumbnails(false);
-        dir_->unload_thumbnails(thumbnail_size_);
+        dir_->unload_thumbnails(std::to_underlying(thumbnail_size_));
     }
 
     // just regen the whole model

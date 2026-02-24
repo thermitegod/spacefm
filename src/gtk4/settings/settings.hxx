@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <filesystem>
 #include <flat_map>
 #include <optional>
 #include <string>
@@ -79,6 +78,26 @@ enum class sort_hidden : std::uint8_t
     last,
 };
 
+enum class icon_size : std::uint8_t // std::int32_t
+{
+    small = 22,
+    normal = 48,
+    large = 64,
+    x_large = 96,
+    xx_large = 128,
+};
+
+#if 0 // TODO? configurable default icon sizes
+struct icon_size_state final
+{ // grid only
+    std::int32_t small = 22;
+    std::int32_t normal = 48;
+    std::int32_t large = 64;
+    std::int32_t x_large = 96;
+    std::int32_t xx_large = 128;
+};
+#endif
+
 struct sorting final
 {
     bool show_hidden = true;
@@ -92,12 +111,12 @@ struct sorting final
 
 struct grid_state final
 {
-    std::int32_t icon_size = 48;
+    icon_size icon_size = icon_size::normal;
 };
 
 struct list_state final
 {
-    std::int32_t icon_size = 22;
+    icon_size icon_size = icon_size::small;
     bool compact = false;
     // Visible Columns
     bool name = true;
