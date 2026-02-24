@@ -198,6 +198,8 @@ gui::files_base::update() noexcept
     dir_model_->splice(0, 0, items);
 
     sort();
+
+    signal_model_loaded().emit();
 }
 
 void

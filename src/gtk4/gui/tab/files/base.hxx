@@ -152,6 +152,12 @@ class files_base
         return selection_model_->signal_selection_changed();
     }
 
+    [[nodiscard]] auto
+    signal_model_loaded() noexcept
+    {
+        return signal_model_loaded_;
+    }
+
   protected:
     [[nodiscard]] auto
     signal_dir_loaded() noexcept
@@ -170,6 +176,8 @@ class files_base
     {
         return signal_update_view_state_;
     }
+
+    sigc::signal<void()> signal_model_loaded_;
 
     sigc::signal<void()> signal_dir_loaded_;
     sigc::signal<void()> signal_update_sorting_;

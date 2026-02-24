@@ -2204,6 +2204,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
         view_grid_->signal_selection_changed().connect([this](auto, auto)
                                                        { on_update_statusbar(); });
+        view_grid_->signal_model_loaded().connect([this]() { select_last(); });
 
         file_view_.set_child(*view_grid_);
     }
@@ -2215,6 +2216,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
         view_list_->signal_selection_changed().connect([this](auto, auto)
                                                        { on_update_statusbar(); });
+        view_list_->signal_model_loaded().connect([this]() { select_last(); });
 
         file_view_.set_child(*view_list_);
     }
