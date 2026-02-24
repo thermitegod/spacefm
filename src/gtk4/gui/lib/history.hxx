@@ -18,22 +18,20 @@
 #include <filesystem>
 #include <flat_map>
 #include <optional>
-#include <span>
 #include <vector>
+
+#include "vfs/user-dirs.hxx"
 
 namespace gui::lib
 {
-class history
+struct history
 {
-  public:
     enum class mode : std::uint8_t
     {
         normal,
         back,
         forward,
     };
-
-    history(const std::filesystem::path& path) noexcept;
 
     void go_back() noexcept;
     [[nodiscard]] bool has_back() const noexcept;
@@ -43,15 +41,15 @@ class history
 
     void new_forward(const std::filesystem::path& path) noexcept;
 
-    [[nodiscard]] const std::filesystem::path& path(const mode mode = mode::normal) const noexcept;
+    [[nodiscard]] std::filesystem::path path(const mode mode = mode::normal) const noexcept;
 
     [[nodiscard]] std::optional<std::vector<std::filesystem::path>>
     get_selection(const std::filesystem::path& path) const noexcept;
     void set_selection(const std::filesystem::path& path,
-                       const std::span<const std::filesystem::path>& files) noexcept;
+                       const std::vector<std::filesystem::path>& files) noexcept;
 
   private:
-    std::filesystem::path current_;
+    std::filesystem::path current_{vfs::user::home()};
     std::vector<std::filesystem::path> forward_;
     std::vector<std::filesystem::path> back_;
     std::flat_map<std::filesystem::path, std::vector<std::filesystem::path>> selection_;

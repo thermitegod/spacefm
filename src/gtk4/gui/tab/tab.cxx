@@ -59,7 +59,7 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<config::settings>& settings) noexcept
     : parent_(parent), settings_(settings), view_mode_(state.view), sorting_(state.sorting),
       grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
-      list_state_(state.list ? *state.list : settings_->defaults.list), history_(state.path)
+      list_state_(state.list ? *state.list : settings_->defaults.list)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
 
@@ -92,6 +92,8 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
 
     file_view_.set_expand();
     append(pane_);
+
+    history_.new_forward(state.path);
 
     set_files_view(view_mode_);
 
@@ -2340,7 +2342,7 @@ gui::tab::unselect_all() const noexcept
 void
 gui::tab::select_last() const noexcept
 {
-    const auto selected = history_.get_selection(cwd());
+    auto selected = history_.get_selection(cwd());
     if (selected && !selected->empty())
     {
         select_files(*selected);

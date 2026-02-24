@@ -52,7 +52,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
     {
         // Simulate navigating directory structure
 
-        gui::lib::history history(p1);
+        gui::lib::history history;
 
         history.new_forward(p1);
         history.set_selection(p1, {p1});
@@ -238,7 +238,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
     {
         // Simulate selecting files, then navigating to the previous directory
 
-        gui::lib::history history(p1);
+        gui::lib::history history;
 
         history.new_forward(p4);
         history.set_selection(p4, p4_files);
@@ -317,7 +317,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
 
     TEST_CASE("duplicate new_forward()")
     {
-        gui::lib::history history(p1);
+        gui::lib::history history;
 
         history.new_forward(p1);
         CHECK_EQ(history.path(), p1);

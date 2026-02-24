@@ -21,8 +21,6 @@
 
 #include "gui/lib/history.hxx"
 
-gui::lib::history::history(const std::filesystem::path& path) noexcept : current_(path) {}
-
 void
 gui::lib::history::go_back() noexcept
 {
@@ -38,6 +36,14 @@ gui::lib::history::go_back() noexcept
 bool
 gui::lib::history::has_back() const noexcept
 {
+    if (back_.size() == 1)
+    {
+        // Special Case:
+        // ignore the initial value of current_ which
+        // has to have a path because of how the browser uses
+        // this class
+        return false;
+    }
     return !back_.empty();
 }
 
@@ -71,7 +77,7 @@ gui::lib::history::new_forward(const std::filesystem::path& path) noexcept
     forward_.clear();
 }
 
-const std::filesystem::path&
+std::filesystem::path
 gui::lib::history::path(const mode mode) const noexcept
 {
     switch (mode)
@@ -112,11 +118,11 @@ gui::lib::history::get_selection(const std::filesystem::path& path) const noexce
 
 void
 gui::lib::history::set_selection(const std::filesystem::path& path,
-                                 const std::span<const std::filesystem::path>& files) noexcept
+                                 const std::vector<std::filesystem::path>& files) noexcept
 {
     if (selection_.contains(path))
     {
         selection_.erase(path);
     }
-    selection_.insert({path, {files.begin(), files.end()}});
+    selection_.insert({path, files});
 }
