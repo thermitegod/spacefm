@@ -189,6 +189,11 @@ gui::tab::add_actions() noexcept
         action_group_->add_action("open_choose", [this]() { show_app_chooser_dialog(); });
     actions_.open_default =
         action_group_->add_action("open_default", [this]() { open_selected_files(); });
+    // Go
+    actions_.back = action_group_->add_action("back", [this]() { on_button_back(); });
+    actions_.forward = action_group_->add_action("forward", [this]() { on_button_forward(); });
+    actions_.up = action_group_->add_action("up", [this]() { on_button_up(); });
+    actions_.home = action_group_->add_action("home", [this]() { chdir(vfs::user::home()); });
     // New
     actions_.new_file =
         action_group_->add_action("new_file",
@@ -730,6 +735,10 @@ gui::tab::enable_all_actions() noexcept
     actions_.archive_open->set_enabled(true);
     actions_.open_choose->set_enabled(true);
     actions_.open_default->set_enabled(true);
+    actions_.back->set_enabled(true);
+    actions_.forward->set_enabled(true);
+    actions_.up->set_enabled(true);
+    actions_.home->set_enabled(true);
     actions_.new_file->set_enabled(true);
     actions_.new_directory->set_enabled(true);
     actions_.new_symlink->set_enabled(true);
@@ -1361,6 +1370,9 @@ gui::tab::create_context_menu_model() noexcept
         actions_.archive_open->set_enabled(is_selected);
         actions_.open_choose->set_enabled(is_selected);
         actions_.open_default->set_enabled(is_selected);
+        actions_.back->set_enabled(history_.has_back());
+        actions_.forward->set_enabled(history_.has_forward());
+        actions_.up->set_enabled(cwd() != "/");
         actions_.new_archive->set_enabled(is_selected);
         actions_.copy_name->set_enabled(is_selected);
         actions_.copy_parent->set_enabled(is_selected);

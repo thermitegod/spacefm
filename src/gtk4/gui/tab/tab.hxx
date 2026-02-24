@@ -201,6 +201,11 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> archive_open;
         Glib::RefPtr<Gio::SimpleAction> open_choose;
         Glib::RefPtr<Gio::SimpleAction> open_default;
+        // Go
+        Glib::RefPtr<Gio::SimpleAction> back;
+        Glib::RefPtr<Gio::SimpleAction> forward;
+        Glib::RefPtr<Gio::SimpleAction> up;
+        Glib::RefPtr<Gio::SimpleAction> home;
         // New
         Glib::RefPtr<Gio::SimpleAction> new_file;
         Glib::RefPtr<Gio::SimpleAction> new_directory;
