@@ -15,9 +15,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <vector>
+
 #include <doctest/doctest.h>
 
-#include "gui/utils/history.hxx"
+#include "gui/lib/history.hxx"
+
+#include "vfs/user-dirs.hxx"
 
 TEST_SUITE("navigation/selection history" * doctest::description(""))
 {
@@ -47,7 +52,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
     {
         // Simulate navigating directory structure
 
-        gui::utils::history history;
+        gui::lib::history history(p1);
 
         history.new_forward(p1);
         history.set_selection(p1, {p1});
@@ -209,23 +214,23 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
         SUBCASE("path(), modes")
         {
             CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_back), p3);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_forward), p4); // NOP
+            CHECK_EQ(history.path(gui::lib::history::mode::back), p3);
+            CHECK_EQ(history.path(gui::lib::history::mode::forward), p4); // NOP
 
             history.go_back();
             CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_back), p2);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_forward), p4);
+            CHECK_EQ(history.path(gui::lib::history::mode::back), p2);
+            CHECK_EQ(history.path(gui::lib::history::mode::forward), p4);
 
             history.go_back();
             CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_back), p1);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_forward), p3);
+            CHECK_EQ(history.path(gui::lib::history::mode::back), p1);
+            CHECK_EQ(history.path(gui::lib::history::mode::forward), p3);
 
             history.go_back();
             CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.path(gui::utils::history::mode::history_back), p1); // NOP
-            CHECK_EQ(history.path(gui::utils::history::mode::history_forward), p2);
+            CHECK_EQ(history.path(gui::lib::history::mode::back), p1); // NOP
+            CHECK_EQ(history.path(gui::lib::history::mode::forward), p2);
         }
     }
 
@@ -233,7 +238,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
     {
         // Simulate selecting files, then navigating to the previous directory
 
-        gui::utils::history history;
+        gui::lib::history history(p1);
 
         history.new_forward(p4);
         history.set_selection(p4, p4_files);
@@ -312,7 +317,7 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
 
     TEST_CASE("duplicate new_forward()")
     {
-        gui::utils::history history;
+        gui::lib::history history(p1);
 
         history.new_forward(p1);
         CHECK_EQ(history.path(), p1);

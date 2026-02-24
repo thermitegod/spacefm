@@ -23,7 +23,28 @@
 
 #include <ztd/ztd.hxx>
 
-#include "gui/utils/sorter.hxx"
+#include "natsort/strnatcmp.hxx"
+
+namespace sorter
+{
+struct natural
+{
+    bool
+    operator()(const std::string_view& lhs, const std::string_view& rhs) const
+    {
+        return strnatcmp(lhs, rhs, false) < 0;
+    }
+};
+
+struct natural_fold
+{
+    bool
+    operator()(const std::string_view& lhs, const std::string_view& rhs) const
+    {
+        return strnatcmp(lhs, rhs, true) < 0;
+    }
+};
+} // namespace sorter
 
 TEST_SUITE("natsort" * doctest::description(""))
 {

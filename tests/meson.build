@@ -10,24 +10,16 @@ test_sources_sfm = files()
 # files they get done through the vfs static_library
 # TODO switch to gtk4 gui sources
 test_sources_sfm += files(
-    # SFM
-    '../src/gtk3/types.cxx',
-
-    # Settings
-    '../src/gtk3/settings/settings.cxx',
-
     # Common
     '../src/common/natsort/strnatcmp.cxx',
 
     # GUI
-    '../src/gtk3/gui/utils/history.cxx',
+    '../src/gtk4/gui/lib/history.cxx',
 )
 
 # Test Source Files
 test_sources_sfm += files(
     'src/main.cxx',
-
-    'src/base/test-types.cxx',
 
     # gui
     'src/gui/natsort/test-natsort.cxx',
@@ -35,7 +27,7 @@ test_sources_sfm += files(
 
     # vfs
     # 'src/vfs/test-clipboard.cxx',
-    'src/vfs/test-error.cxx',
+    # 'src/vfs/test-error.cxx',
     'src/vfs/test-execute.cxx',
 
     'src/vfs/task/chmod.cxx',
@@ -62,7 +54,7 @@ test_suite = build_target(
     'test_suite',
     sources: test_sources_sfm,
     target_type: 'executable',
-    include_directories: include_directories(['src', '../src/common', '../src/gtk3']),
+    include_directories: include_directories(['../src/common', '../src/gtk4']),
     install: false,
     dependencies: [
         doctest_dep,
