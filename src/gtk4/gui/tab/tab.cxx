@@ -320,6 +320,23 @@ gui::tab::add_actions() noexcept
             signal_state_changed().emit();
         },
         sorting_.show_hidden);
+    actions_.show_thumbnails = action_group_->add_action_bool(
+        "show_thumbnails",
+        [this]()
+        {
+            grid_state_.thumbnails = !grid_state_.thumbnails;
+            set_state(grid_state_, true);
+
+            auto action = action_group_->lookup_action("show_thumbnails");
+            auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
+            if (simple_action)
+            {
+                simple_action->set_state(Glib::Variant<bool>::create(grid_state_.thumbnails));
+            }
+
+            signal_state_changed().emit();
+        },
+        grid_state_.thumbnails);
     actions_.list_compact = action_group_->add_action_bool(
         "list_compact",
         [this]()
@@ -1131,6 +1148,11 @@ gui::tab::create_context_menu_model() noexcept
             item = Gio::MenuItem::create("Hidden Files", "files.show_hidden");
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Control>H"));
             section->append_item(item);
+
+            if (view_mode_ == config::view_mode::grid)
+            {
+                section->append("Thumbnails", "files.show_thumbnails");
+            }
 
             if (view_mode_ == config::view_mode::list)
             {

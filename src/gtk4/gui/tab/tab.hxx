@@ -248,6 +248,7 @@ class tab final : public Gtk::Box
         // View
         Glib::RefPtr<Gio::SimpleAction> view_mode;
         Glib::RefPtr<Gio::SimpleAction> show_hidden;
+        Glib::RefPtr<Gio::SimpleAction> show_thumbnails;
         Glib::RefPtr<Gio::SimpleAction> list_compact;
         Glib::RefPtr<Gio::SimpleAction> icon_size;
         // View > Sort

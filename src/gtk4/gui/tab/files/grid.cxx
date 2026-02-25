@@ -90,9 +90,21 @@ gui::grid::grid(const config::grid_state& state, const std::shared_ptr<config::s
                         scroll_to(0);
                     }
 
-                    dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+                    if (grid_state_.thumbnails)
+                    {
+                        dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+                    }
                 },
                 Glib::PRIORITY_DEFAULT);
+        });
+
+    signal_update_view_state().connect(
+        [this]()
+        {
+            if (grid_state_.thumbnails)
+            {
+                dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+            }
         });
 }
 
@@ -228,7 +240,7 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
         picture->set_size_request(size, size);
 
         Glib::RefPtr<Gdk::Paintable> icon;
-        if (col->file->is_thumbnail_loaded(size))
+        if (col->file->is_thumbnail_loaded(size) && grid_state_.thumbnails)
         {
             icon = col->file->thumbnail(size);
         }

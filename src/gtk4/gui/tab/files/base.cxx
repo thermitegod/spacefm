@@ -585,29 +585,3 @@ gui::files_base::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noe
 #endif
     }
 }
-
-void
-gui::files_base::enable_thumbnails() noexcept
-{
-    if (dir_)
-    {
-        dir_->enable_thumbnails(true);
-        dir_->load_thumbnails(std::to_underlying(thumbnail_size_));
-    }
-
-    // just regen the whole model
-    update();
-}
-
-void
-gui::files_base::disable_thumbnails() noexcept
-{
-    if (dir_)
-    {
-        dir_->enable_thumbnails(false);
-        dir_->unload_thumbnails(std::to_underlying(thumbnail_size_));
-    }
-
-    // just regen the whole model
-    update();
-}

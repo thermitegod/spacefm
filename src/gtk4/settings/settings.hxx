@@ -112,6 +112,7 @@ struct sorting final
 struct grid_state final
 {
     icon_size icon_size = icon_size::normal;
+    bool thumbnails = true;
 };
 
 struct list_state final
@@ -184,8 +185,6 @@ struct settings_on_disk
 {
     struct general final
     {
-        bool show_thumbnails{true};
-
         bool click_executes{false};
         bool single_click_executes{false};
         bool single_click_activate{false};

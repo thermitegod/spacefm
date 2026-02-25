@@ -47,9 +47,6 @@ class files_base
 
     void update() noexcept;
 
-    void enable_thumbnails() noexcept;
-    void disable_thumbnails() noexcept;
-
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
                  const config::grid_state& state) noexcept;
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
