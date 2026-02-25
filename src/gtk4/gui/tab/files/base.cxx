@@ -385,7 +385,7 @@ gui::files_base::set_grid_state(const config::grid_state& state, const bool upda
         update();
     }
 
-    signal_update_view_grid().emit();
+    signal_update_view_state().emit();
 }
 
 void
@@ -398,7 +398,7 @@ gui::files_base::set_list_state(const config::list_state& state, const bool upda
         update();
     }
 
-    signal_update_view_list().emit();
+    signal_update_view_state().emit();
 }
 
 bool

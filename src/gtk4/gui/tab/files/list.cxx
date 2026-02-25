@@ -80,7 +80,7 @@ gui::list::list(const config::list_state& state, const std::shared_ptr<config::s
                 Glib::PRIORITY_DEFAULT);
         });
 
-    signal_update_view_list().connect([this]() { update_list_visibility(); });
+    signal_update_view_state().connect([this]() { update_list_visibility(); });
 }
 
 void
