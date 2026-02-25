@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 
@@ -49,15 +50,18 @@ class files_base
     void enable_thumbnails() noexcept;
     void disable_thumbnails() noexcept;
 
-    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting = {},
-                 const config::grid_state& grid_state = {},
-                 const config::list_state& list_state = {}) noexcept;
+    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
+                 const config::grid_state& state) noexcept;
+    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
+                 const config::list_state& state) noexcept;
+
     void set_pattern(const std::string_view pattern) noexcept;
     void set_thumbnail_size(const config::icon_size size) noexcept;
 
-    void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
-    void set_grid_state(const config::grid_state& state, const bool update_model = false) noexcept;
-    void set_list_state(const config::list_state& state, const bool update_model = false) noexcept;
+    void set_sorting(const config::sorting& sorting, const bool update_model = false) noexcept;
+
+    void set_state(const config::grid_state& state, const bool update_model = false) noexcept;
+    void set_state(const config::list_state& state, const bool update_model = false) noexcept;
 
     [[nodiscard]] bool is_selected() const noexcept;
     void select_all() const noexcept;
@@ -68,6 +72,11 @@ class files_base
     void unselect_file(const std::filesystem::path& filename) const noexcept;
     void select_pattern(const std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
+
+  private:
+    void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
+                 const std::optional<config::grid_state>& grid_state,
+                 const std::optional<config::list_state>& list_state) noexcept;
 
   protected:
     class ModelColumns : public Glib::Object

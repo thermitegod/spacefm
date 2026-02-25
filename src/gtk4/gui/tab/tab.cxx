@@ -325,7 +325,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.compact = !list_state_.compact;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("list_compact");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -352,7 +352,7 @@ gui::tab::add_actions() noexcept
             actions_.icon_size->set_state(parameter);
 
             grid_state_.icon_size = value;
-            set_grid_state(grid_state_, true);
+            set_state(grid_state_, true);
 
             signal_state_changed().emit();
         });
@@ -482,7 +482,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.name = !list_state_.name;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_name");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -499,7 +499,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.size = !list_state_.size;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_size");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -516,7 +516,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.bytes = !list_state_.bytes;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_bytes");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -533,7 +533,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.type = !list_state_.type;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_type");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -550,7 +550,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.mime = !list_state_.mime;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_mime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -567,7 +567,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.perm = !list_state_.perm;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_perm");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -584,7 +584,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.owner = !list_state_.owner;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_owner");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -601,7 +601,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.group = !list_state_.group;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_group");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -618,7 +618,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.atime = !list_state_.atime;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_atime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -635,7 +635,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.btime = !list_state_.btime;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_btime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -652,7 +652,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.ctime = !list_state_.ctime;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_ctime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -669,7 +669,7 @@ gui::tab::add_actions() noexcept
         [this]()
         {
             list_state_.mtime = !list_state_.mtime;
-            set_list_state(list_state_);
+            set_state(list_state_);
 
             auto action = action_group_->lookup_action("column_mtime");
             auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -1871,7 +1871,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
         view_grid_->set_pattern(pattern);
         view_grid_->set_thumbnail_size(grid_state_.icon_size);
         // this will update the model, must be last
-        view_grid_->set_dir(dir_, sorting_, grid_state_, list_state_);
+        view_grid_->set_dir(dir_, sorting_, grid_state_);
     }
     else if (view_mode_ == config::view_mode::list)
     {
@@ -1879,7 +1879,7 @@ gui::tab::update_model(const std::string_view pattern) noexcept
         view_list_->set_pattern(pattern);
         view_list_->set_thumbnail_size(list_state_.icon_size);
         // this will update the model, must be last
-        view_list_->set_dir(dir_, sorting_, grid_state_, list_state_);
+        view_list_->set_dir(dir_, sorting_, list_state_);
     }
     else
     {
@@ -2225,37 +2225,21 @@ gui::tab::set_sorting(const config::sorting& sorting, bool full_update) noexcept
 }
 
 void
-gui::tab::set_grid_state(const config::grid_state& state, const bool update_model) noexcept
+gui::tab::set_state(const config::grid_state& state, const bool update_model) noexcept
 {
-    if (view_mode_ == config::view_mode::grid)
-    {
-        view_grid_->set_grid_state(state, update_model);
-    }
-    else if (view_mode_ == config::view_mode::list)
-    {
-        view_list_->set_grid_state(state, update_model);
-    }
-    else
-    {
-        std::unreachable();
-    }
+    ztd::panic_if(view_mode_ != config::view_mode::grid,
+                  "Setting wrong state for current view mode");
+
+    view_grid_->set_state(state, update_model);
 }
 
 void
-gui::tab::set_list_state(const config::list_state& state, const bool update_model) noexcept
+gui::tab::set_state(const config::list_state& state, const bool update_model) noexcept
 {
-    if (view_mode_ == config::view_mode::grid)
-    {
-        view_grid_->set_list_state(state, update_model);
-    }
-    else if (view_mode_ == config::view_mode::list)
-    {
-        view_list_->set_list_state(state, update_model);
-    }
-    else
-    {
-        std::unreachable();
-    }
+    ztd::panic_if(view_mode_ != config::view_mode::list,
+                  "Setting wrong state for current view mode");
+
+    view_list_->set_state(state, update_model);
 }
 
 std::vector<std::shared_ptr<vfs::file>>

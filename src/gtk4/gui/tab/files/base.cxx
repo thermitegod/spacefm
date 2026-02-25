@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 
@@ -315,8 +316,22 @@ gui::files_base::invert_selection() noexcept
 
 void
 gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
-                         const config::grid_state& grid_state,
-                         const config::list_state& list_state) noexcept
+                         const config::grid_state& state) noexcept
+{
+    set_dir(dir, sorting, state, std::nullopt);
+}
+
+void
+gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
+                         const config::list_state& state) noexcept
+{
+    set_dir(dir, sorting, std::nullopt, state);
+}
+
+void
+gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
+                         const std::optional<config::grid_state>& grid_state,
+                         const std::optional<config::list_state>& list_state) noexcept
 {
     if (!dir || dir_ == dir)
     {
@@ -330,8 +345,8 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
 
     dir_ = dir;
     sorting_ = sorting;
-    grid_state_ = grid_state;
-    list_state_ = list_state;
+    grid_state_ = grid_state.value_or({});
+    list_state_ = list_state.value_or({});
 
     signal_files_changed = dir_->signal_files_changed().connect([this](const auto& files)
                                                                 { on_files_changed(files); });
@@ -359,11 +374,11 @@ gui::files_base::set_pattern(const std::string_view pattern) noexcept
 }
 
 void
-gui::files_base::set_sorting(const config::sorting& sorting, bool full_update) noexcept
+gui::files_base::set_sorting(const config::sorting& sorting, const bool update_model) noexcept
 {
     sorting_ = sorting;
 
-    if (full_update)
+    if (update_model)
     {
         update();
     }
@@ -376,7 +391,7 @@ gui::files_base::set_sorting(const config::sorting& sorting, bool full_update) n
 }
 
 void
-gui::files_base::set_grid_state(const config::grid_state& state, const bool update_model) noexcept
+gui::files_base::set_state(const config::grid_state& state, const bool update_model) noexcept
 {
     grid_state_ = state;
 
@@ -389,7 +404,7 @@ gui::files_base::set_grid_state(const config::grid_state& state, const bool upda
 }
 
 void
-gui::files_base::set_list_state(const config::list_state& state, const bool update_model) noexcept
+gui::files_base::set_state(const config::list_state& state, const bool update_model) noexcept
 {
     list_state_ = state;
 
