@@ -294,11 +294,6 @@ gui::tab::add_actions() noexcept
     actions_.view_mode->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::view_mode>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::view_mode>>>(parameter)
@@ -350,11 +345,6 @@ gui::tab::add_actions() noexcept
     actions_.icon_size->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::icon_size>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::icon_size>>>(parameter)
@@ -411,11 +401,6 @@ gui::tab::add_actions() noexcept
     actions_.sort_by->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::sort_by>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::sort_by>>>(parameter)
@@ -437,11 +422,6 @@ gui::tab::add_actions() noexcept
     actions_.sort_type->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::sort_type>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::sort_type>>>(parameter)
@@ -463,11 +443,6 @@ gui::tab::add_actions() noexcept
     actions_.sort_dir->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::sort_dir>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::sort_dir>>>(parameter)
@@ -489,11 +464,6 @@ gui::tab::add_actions() noexcept
     actions_.sort_hidden->signal_activate().connect(
         [this](const Glib::VariantBase& parameter)
         {
-            if (!parameter.is_of_type(Glib::VariantType("y")))
-            {
-                return;
-            }
-
             auto value = static_cast<config::sort_hidden>(
                 Glib::VariantBase::cast_dynamic<
                     Glib::Variant<std::underlying_type_t<config::sort_hidden>>>(parameter)
