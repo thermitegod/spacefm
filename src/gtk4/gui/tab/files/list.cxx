@@ -41,11 +41,6 @@ gui::list::list(const config::list_state& state, const std::shared_ptr<config::s
 
     set_reorderable(false);
 
-    if (list_state_.compact)
-    {
-        add_css_class("data-table");
-    }
-
     set_model(selection_model_);
 
     add_columns();
