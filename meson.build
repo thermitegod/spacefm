@@ -192,6 +192,7 @@ endif
 # Disabled Clang Warnings
 if cpp.get_id() == 'clang'
     flags += cpp.get_supported_arguments([
+        '-Wno-c2y-extensions', # doctest.h
         '-Wno-cast-qual',
     ])
 endif
