@@ -27,7 +27,9 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/mime-type.hxx"
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 
@@ -37,17 +39,26 @@ class file final : public std::enable_shared_from_this<file>
 {
   public:
     file() = delete;
+#if (GTK_MAJOR_VERSION == 4)
+    explicit file(const std::filesystem::path& file_path) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     explicit file(const std::filesystem::path& file_path,
                   const std::shared_ptr<vfs::settings>& settings) noexcept;
+#endif
     ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
     file& operator=(const file& other) = delete;
     file& operator=(file&& other) = delete;
 
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] static std::shared_ptr<vfs::file>
+    create(const std::filesystem::path& path) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] static std::shared_ptr<vfs::file>
     create(const std::filesystem::path& path,
            const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
+#endif
 
     [[nodiscard]] std::string_view name() const noexcept;
 
@@ -180,7 +191,9 @@ class file final : public std::enable_shared_from_this<file>
     };
     thumbnail_data thumbnail_;
 
+#if (GTK_MAJOR_VERSION == 3)
     std::shared_ptr<vfs::settings> settings_;
+#endif
 
     [[nodiscard]] std::string create_file_perm_string() const noexcept;
 

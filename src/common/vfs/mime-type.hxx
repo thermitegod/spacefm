@@ -30,7 +30,9 @@
 
 #include <ztd/ztd.hxx>
 
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 
 namespace vfs
 {
@@ -47,14 +49,25 @@ class mime_type final
 {
   public:
     mime_type() = delete;
+#if (GTK_MAJOR_VERSION == 4)
+    explicit mime_type(const std::string_view type) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     explicit mime_type(const std::string_view type,
                        const std::shared_ptr<vfs::settings>& settings) noexcept;
+#endif
     ~mime_type() noexcept;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
     mime_type& operator=(const mime_type& other) = delete;
     mime_type& operator=(mime_type&& other) = delete;
 
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
+    create_from_file(const std::filesystem::path& path) noexcept;
+
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
+    create_from_type(const std::string_view type) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_file(const std::filesystem::path& path,
                      const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
@@ -62,6 +75,7 @@ class mime_type final
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_type(const std::string_view type,
                      const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
+#endif
 
 #if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) noexcept;
@@ -95,8 +109,13 @@ class mime_type final
     [[nodiscard]] bool is_audio() const noexcept;
 
   private:
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
+    create(const std::string_view type) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create(const std::string_view type, const std::shared_ptr<vfs::settings>& settings) noexcept;
+#endif
 
     std::string type_;
     std::string description_;
@@ -113,9 +132,9 @@ class mime_type final
         GdkPixbuf* small{nullptr};
     };
     icon_data icon_;
-#endif
 
     std::shared_ptr<vfs::settings> settings_;
+#endif
 };
 
 [[nodiscard]] std::optional<std::filesystem::path>

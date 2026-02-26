@@ -36,7 +36,9 @@
 
 #include "vfs/file.hxx"
 #include "vfs/notify-cpp/controller.hxx"
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 #include "vfs/thumbnailer.hxx"
 
 namespace vfs
@@ -45,17 +47,26 @@ class dir final : public std::enable_shared_from_this<dir>
 {
   public:
     dir() = delete;
+#if (GTK_MAJOR_VERSION == 4)
+    explicit dir(const std::filesystem::path& path) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     explicit dir(const std::filesystem::path& path,
                  const std::shared_ptr<vfs::settings>& settings) noexcept;
+#endif
     ~dir() noexcept;
     dir(const dir& other) = delete;
     dir(dir&& other) = delete;
     dir& operator=(const dir& other) = delete;
     dir& operator=(dir&& other) = delete;
 
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
+                                                          const bool permanent = false) noexcept;
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] static std::shared_ptr<vfs::dir>
     create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
            const bool permanent = false) noexcept;
+#endif
 
 #if (GTK_MAJOR_VERSION == 4)
 // TODO
@@ -156,7 +167,9 @@ class dir final : public std::enable_shared_from_this<dir>
     };
     file_events events_;
 
+#if (GTK_MAJOR_VERSION == 3)
     std::shared_ptr<vfs::settings> settings_;
+#endif
 
   public:
     // Signals

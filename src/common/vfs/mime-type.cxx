@@ -30,7 +30,9 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/mime-type.hxx"
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 
 #include "vfs/mime-type/mime-action.hxx"
 #include "vfs/mime-type/mime-type.hxx"
@@ -44,9 +46,14 @@ static std::flat_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 static std::mutex mime_map_lock;
 } // namespace global
 
+#if (GTK_MAJOR_VERSION == 4)
+std::shared_ptr<vfs::mime_type>
+vfs::mime_type::create(const std::string_view type) noexcept
+#elif (GTK_MAJOR_VERSION == 3)
 std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create(const std::string_view type,
                        const std::shared_ptr<vfs::settings>& settings) noexcept
+#endif
 {
     const std::unique_lock<std::mutex> lock(global::mime_map_lock);
     if (global::mime_map.contains(type.data()))
@@ -54,10 +61,30 @@ vfs::mime_type::create(const std::string_view type,
         return global::mime_map.at(type.data());
     }
 
+#if (GTK_MAJOR_VERSION == 4)
+    const auto mime_type = std::make_shared<vfs::mime_type>(type);
+#elif (GTK_MAJOR_VERSION == 3)
     const auto mime_type = std::make_shared<vfs::mime_type>(type, settings);
+#endif
     global::mime_map.insert({type.data(), mime_type});
     return mime_type;
 }
+
+#if (GTK_MAJOR_VERSION == 4)
+
+std::shared_ptr<vfs::mime_type>
+vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
+{
+    return vfs::mime_type::create(vfs::detail::mime_type::get_by_file(path));
+}
+
+std::shared_ptr<vfs::mime_type>
+vfs::mime_type::create_from_type(const std::string_view type) noexcept
+{
+    return vfs::mime_type::create(type);
+}
+
+#elif (GTK_MAJOR_VERSION == 3)
 
 std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create_from_file(const std::filesystem::path& path,
@@ -73,17 +100,29 @@ vfs::mime_type::create_from_type(const std::string_view type,
     return vfs::mime_type::create(type, settings);
 }
 
+#endif
+
+#if (GTK_MAJOR_VERSION == 4)
+vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
+#elif (GTK_MAJOR_VERSION == 3)
 vfs::mime_type::mime_type(const std::string_view type,
                           const std::shared_ptr<vfs::settings>& settings) noexcept
     : type_(type), settings_(settings)
+#endif
 {
     const auto icon_data = vfs::detail::mime_type::get_desc_icon(this->type_);
     this->description_ = icon_data[1];
     if (this->description_.empty() && this->type_ != vfs::constants::mime_type::unknown)
     {
         logger::warn<logger::vfs>("mime-type {} has no description (comment)", this->type_);
+
+#if (GTK_MAJOR_VERSION == 4)
+        const auto mime_unknown =
+            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+#elif (GTK_MAJOR_VERSION == 3)
         const auto mime_unknown =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, settings);
+#endif
         if (mime_unknown)
         {
             this->description_ = mime_unknown->description();
@@ -143,8 +182,12 @@ vfs::mime_type::icon(const std::int32_t size) noexcept
     if (this->description_.empty())
     {
         logger::warn<logger::vfs>("mime-type {} has no description (comment)", this->type_);
+#if (GTK_MAJOR_VERSION == 4)
+        const auto vfs_mime = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+#elif (GTK_MAJOR_VERSION == 3)
         const auto vfs_mime =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
+#endif
         if (vfs_mime)
         {
             this->description_ = vfs_mime->description();
@@ -177,9 +220,14 @@ vfs::mime_type::icon(const std::int32_t size) noexcept
         if (this->type_ != vfs::constants::mime_type::unknown)
         {
             /* FIXME: fallback to icon of parent mime-type */
+#if (GTK_MAJOR_VERSION == 4)
+            const auto unknown =
+                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+#elif (GTK_MAJOR_VERSION == 3)
             const auto unknown =
                 vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown,
                                                  this->settings_);
+#endif
             icon = unknown->icon(size);
         }
         else /* unknown */

@@ -1978,12 +1978,8 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     // load new dir
 
     signal_file_listed_.disconnect();
-    // dir_ = vfs::dir::create(path, settings_);
-    dir_ = vfs::dir::create(path,
-                            std::make_shared<vfs::settings>(vfs::settings{
-                                .icon_size_grid = std::to_underlying(grid_state_.icon_size),
-                                .icon_size_list = std::to_underlying(list_state_.icon_size),
-                            }));
+
+    dir_ = vfs::dir::create(path);
 
     signal_chdir_begin().emit();
 

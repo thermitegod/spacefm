@@ -65,9 +65,8 @@ main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    auto settings = std::make_shared<vfs::settings>(vfs::settings{
-        .icon_size_grid =
-            [size]()
+    auto thumbnail_size = std::invoke(
+        [](std::string_view size) noexcept
         {
             if (size == "normal")
             {
@@ -86,19 +85,17 @@ main(int argc, char** argv)
                 return 1024;
             }
             std::unreachable();
-        }(),
-        .icon_size_list = 0, // unused here
-    });
+        },
+        size);
 
     std::vector<std::shared_ptr<vfs::file>> files;
     for (const auto& dfile : std::filesystem::directory_iterator(path))
     {
-        files.push_back(vfs::file::create(dfile.path(), settings));
+        files.push_back(vfs::file::create(dfile.path()));
     }
 
     std::ranges::for_each(files,
-                          [settings](auto& file)
-                          { file->load_thumbnail(settings->icon_size_grid); });
+                          [thumbnail_size](auto& file) { file->load_thumbnail(thumbnail_size); });
 
     return EXIT_SUCCESS;
 }

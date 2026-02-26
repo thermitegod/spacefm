@@ -30,7 +30,9 @@
 
 #include "vfs/file.hxx"
 #include "vfs/mime-type.hxx"
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/thumbnails/thumbnails.hxx"
@@ -40,16 +42,28 @@
 
 #include "logger.hxx"
 
+#if (GTK_MAJOR_VERSION == 4)
+std::shared_ptr<vfs::file>
+vfs::file::create(const std::filesystem::path& path) noexcept
+{
+    return std::make_shared<vfs::file>(path);
+}
+#elif (GTK_MAJOR_VERSION == 3)
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path,
                   const std::shared_ptr<vfs::settings>& settings) noexcept
 {
     return std::make_shared<vfs::file>(path, settings);
 }
+#endif
 
+#if (GTK_MAJOR_VERSION == 4)
+vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
+#elif (GTK_MAJOR_VERSION == 3)
 vfs::file::file(const std::filesystem::path& path,
                 const std::shared_ptr<vfs::settings>& settings) noexcept
     : path_(path), settings_(settings)
+#endif
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
@@ -95,15 +109,23 @@ vfs::file::update() noexcept
     const auto stat = ztd::statx::create(this->path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        this->mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+#elif (GTK_MAJOR_VERSION == 3)
         this->mime_type_ =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
+#endif
         return false;
     }
     this->stat_ = stat.value();
 
     // logger::debug<logger::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
 
+#if (GTK_MAJOR_VERSION == 4)
+    this->mime_type_ = vfs::mime_type::create_from_file(this->path_);
+#elif (GTK_MAJOR_VERSION == 3)
     this->mime_type_ = vfs::mime_type::create_from_file(this->path_, this->settings_);
+#endif
 
     // file size formated
     this->display_size_ = vfs::utils::format_file_size(this->size());

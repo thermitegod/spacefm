@@ -33,7 +33,9 @@
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
 #include "vfs/notify-cpp/controller.hxx"
+#if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
+#endif
 #include "vfs/thumbnailer.hxx"
 #include "vfs/volume.hxx"
 
@@ -46,9 +48,13 @@ namespace global
 static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)
+#elif (GTK_MAJOR_VERSION == 3)
 vfs::dir::dir(const std::filesystem::path& path,
               const std::shared_ptr<vfs::settings>& settings) noexcept
     : path_(path), settings_(settings)
+#endif
 {
     // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
 
@@ -156,9 +162,14 @@ vfs::dir::~dir() noexcept
     this->loader_thread_.join();
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+std::shared_ptr<vfs::dir>
+vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexcept
+#elif (GTK_MAJOR_VERSION == 3)
 std::shared_ptr<vfs::dir>
 vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
                  const bool permanent) noexcept
+#endif
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
     if (global::dir_smart_cache.contains(path))
@@ -168,10 +179,17 @@ vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::s
     }
     else
     {
+#if (GTK_MAJOR_VERSION == 4)
+        dir = global::dir_smart_cache.create(
+            path,
+            [&path]() { return std::make_shared<vfs::dir>(path); },
+            permanent);
+#elif (GTK_MAJOR_VERSION == 3)
         dir = global::dir_smart_cache.create(
             path,
             [&path, &settings]() { return std::make_shared<vfs::dir>(path, settings); },
             permanent);
+#endif
         // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());
     }
     // logger::debug<logger::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path.string());
@@ -292,7 +310,11 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
 
         {
             const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+#if (GTK_MAJOR_VERSION == 4)
+            this->files_.push_back(vfs::file::create(dfile.path()));
+#elif (GTK_MAJOR_VERSION == 3)
             this->files_.push_back(vfs::file::create(dfile.path(), this->settings_));
+#endif
         }
     }
 
@@ -378,10 +400,6 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
 #endif
         }
     }
-
-#if (GTK_MAJOR_VERSION == 4)
-    load_thumbnails(settings_->icon_size_grid);
-#endif
 
     this->load_running_ = false;
 
@@ -682,7 +700,11 @@ vfs::dir::update_created_files() noexcept
 
                 const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
+#if (GTK_MAJOR_VERSION == 4)
+                const auto new_file = vfs::file::create(file_path);
+#elif (GTK_MAJOR_VERSION == 3)
                 const auto new_file = vfs::file::create(file_path, this->settings_);
+#endif
                 this->files_.push_back(new_file);
 
                 created_files.push_back(new_file);
