@@ -23,9 +23,7 @@ sources = files(
     'gui/tab/files/grid.cxx',
     'gui/tab/files/list.cxx',
 
-    'gui/action/delete.cxx',
     'gui/action/open.cxx',
-    'gui/action/trash.cxx',
 
     'gui/dialog/about.cxx',
     'gui/dialog/action.cxx',

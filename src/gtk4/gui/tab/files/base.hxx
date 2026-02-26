@@ -28,13 +28,15 @@
 
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
+#include "vfs/task-manager.hxx"
 
 namespace gui
 {
 class files_base
 {
   public:
-    files_base(const std::shared_ptr<config::settings>& settings);
+    files_base(const std::shared_ptr<vfs::task_manager>& task_manager,
+               const std::shared_ptr<config::settings>& settings);
     ~files_base();
 
     files_base(const files_base&) = delete;
@@ -110,6 +112,7 @@ class files_base
         sigc::signal<void()> signal_changed_;
     }; // ModelColumns
 
+    std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;
     config::sorting sorting_;
     config::grid_state grid_state_;

@@ -101,6 +101,7 @@ vfs_gtk4_sources = files(
     'vfs/mime-type.cxx',
     'vfs/mime-monitor.cxx',
     'vfs/terminals.cxx',
+    'vfs/task-manager.cxx',
     'vfs/thumbnailer.cxx',
     'vfs/trash-can.cxx',
     'vfs/user-dirs.cxx',

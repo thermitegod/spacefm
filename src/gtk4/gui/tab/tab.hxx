@@ -38,6 +38,7 @@
 #include "gui/dialog/create.hxx"
 
 #include "vfs/dir.hxx"
+#include "vfs/task-manager.hxx"
 
 namespace gui
 {
@@ -64,6 +65,7 @@ class tab final : public Gtk::Box
     };
 
     tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
+        const std::shared_ptr<vfs::task_manager>& task_manager,
         const std::shared_ptr<config::settings>& settings) noexcept;
     ~tab();
 
@@ -161,6 +163,7 @@ class tab final : public Gtk::Box
     void show_app_chooser_dialog() noexcept;
 
     Gtk::ApplicationWindow& parent_;
+    std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;
     config::view_mode view_mode_;
     config::sorting sorting_;

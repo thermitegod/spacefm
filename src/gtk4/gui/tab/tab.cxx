@@ -38,10 +38,9 @@
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/tab.hxx"
 
-#include "gui/action/delete.hxx"
 #include "gui/action/open.hxx"
-#include "gui/action/trash.hxx"
 
+#include "gui/dialog/action.hxx"
 #include "gui/dialog/app-chooser.hxx"
 #include "gui/dialog/create.hxx"
 #include "gui/dialog/pattern.hxx"
@@ -50,15 +49,17 @@
 
 #include "vfs/app-desktop.hxx"
 #include "vfs/execute.hxx"
+#include "vfs/task-manager.hxx"
 
 #include "vfs/utils/permissions.hxx"
 
 #include "logger.hxx"
 
 gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
+              const std::shared_ptr<vfs::task_manager>& task_manager,
               const std::shared_ptr<config::settings>& settings) noexcept
-    : parent_(parent), settings_(settings), view_mode_(state.view), sorting_(state.sorting),
-      grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
+    : parent_(parent), task_manager_(task_manager), settings_(settings), view_mode_(state.view),
+      sorting_(state.sorting), grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
       list_state_(state.list ? *state.list : settings_->defaults.list)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
@@ -2133,11 +2134,22 @@ gui::tab::show_rename_dialog() noexcept
         dialog->signal_confirm().connect(
             [this](const dialog::rename_response& response)
             {
-                (void)response;
-                auto alert = Gtk::AlertDialog::create("Not Implemented");
-                alert->set_detail("File Tasks are not implemented");
-                alert->set_modal(true);
-                alert->show(parent_);
+                if (response.mode == dialog::rename_mode::rename)
+                {
+                    auto task = vfs::move_task{
+                        .options = {},
+                        .source = response.source,
+                        .destination = response.destination,
+                    };
+                    task_manager_->add(task);
+                }
+                else
+                {
+                    auto alert = Gtk::AlertDialog::create("Not Implemented");
+                    alert->set_detail("This file task is not yet implemented");
+                    alert->set_modal(true);
+                    alert->show(parent_);
+                }
             });
     }
 }
@@ -2189,7 +2201,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
 
     if (view_mode_ == config::view_mode::grid)
     {
-        view_grid_ = Gtk::make_managed<gui::grid>(grid_state_, settings_);
+        view_grid_ = Gtk::make_managed<gui::grid>(grid_state_, task_manager_, settings_);
 
         view_grid_->signal_activate().connect(
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
@@ -2200,7 +2212,7 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
     }
     else if (view_mode_ == config::view_mode::list)
     {
-        view_list_ = Gtk::make_managed<gui::list>(list_state_, settings_);
+        view_list_ = Gtk::make_managed<gui::list>(list_state_, task_manager_, settings_);
 
         view_list_->signal_activate().connect(
             sigc::mem_fun(*this, &tab::on_file_list_item_activated));
@@ -2453,23 +2465,30 @@ gui::tab::on_paste() const noexcept
 {
     auto callback = [this](const std::vector<std::string>& uris, bool is_cut)
     {
-#if 0
-        (void)is_cut;
-        logger::info("is_cut: {}", is_cut);
+        // logger::trace("is_cut: {}", is_cut);
         for (const auto& uri : uris)
         {
-            (void)uri;
-            logger::info("uri: {}", uri);
-            // TODO do paste
+            // logger::trace("uri: {}", uri);
+            const auto file = Glib::filename_from_uri(uri);
+            if (is_cut)
+            {
+                auto task = vfs::move_task{
+                    .options = {},
+                    .source = file,
+                    .destination = cwd(),
+                };
+                task_manager_->add(task);
+            }
+            else
+            {
+                auto task = vfs::copy_task{
+                    .options = {},
+                    .source = file,
+                    .destination = cwd(),
+                };
+                task_manager_->add(task);
+            }
         }
-#else
-        (void)uris;
-        (void)is_cut;
-        auto alert = Gtk::AlertDialog::create("Not Implemented");
-        alert->set_detail("File Tasks are not implemented");
-        alert->set_modal(true);
-        alert->show(parent_);
-#endif
     };
 
     gui::clipboard::paste_files(callback);
@@ -2484,7 +2503,27 @@ gui::tab::on_trash() const noexcept
         return;
     }
 
-    gui::action::trash_files(parent_, selected, settings_);
+    const auto submit_task = [this, selected]()
+    {
+        for (const auto& file : selected)
+        {
+            auto task = vfs::trash_task{
+                .path = file->path(),
+            };
+            task_manager_->add(task);
+        }
+    };
+
+    if (settings_->general.confirm_trash)
+    {
+        auto* dialog =
+            Gtk::make_managed<gui::dialog::action>(parent_, "Trash selected files?", selected);
+        dialog->signal_confirm().connect(submit_task);
+    }
+    else
+    {
+        submit_task();
+    }
 }
 
 void
@@ -2496,7 +2535,28 @@ gui::tab::on_delete() const noexcept
         return;
     }
 
-    gui::action::delete_files(parent_, selected, settings_);
+    const auto submit_task = [this, selected]()
+    {
+        for (const auto& file : selected)
+        {
+            auto task = vfs::remove_task{
+                .options = {vfs::remove_task::options::force, vfs::remove_task::options::recursive},
+                .path = file->path(),
+            };
+            task_manager_->add(task);
+        }
+    };
+
+    if (settings_->general.confirm_delete)
+    {
+        auto* dialog =
+            Gtk::make_managed<gui::dialog::action>(parent_, "Delete selected files?", selected);
+        dialog->signal_confirm().connect(submit_task);
+    }
+    else
+    {
+        submit_task();
+    }
 }
 
 void
@@ -2681,12 +2741,20 @@ gui::tab::on_copy_to_last_path() noexcept
         return;
     }
 
-    (void)last_path_;
+    if (!last_path_)
+    {
+        return;
+    }
 
-    auto alert = Gtk::AlertDialog::create("Not Implemented");
-    alert->set_detail("File Tasks are not implemented");
-    alert->set_modal(true);
-    alert->show(parent_);
+    for (const auto& file : selected)
+    {
+        auto task = vfs::copy_task{
+            .options = {},
+            .source = file->path(),
+            .destination = *last_path_,
+        };
+        task_manager_->add(task);
+    }
 }
 
 void
@@ -2698,12 +2766,20 @@ gui::tab::on_move_to_last_path() noexcept
         return;
     }
 
-    (void)last_path_;
+    if (!last_path_)
+    {
+        return;
+    }
 
-    auto alert = Gtk::AlertDialog::create("Not Implemented");
-    alert->set_detail("File Tasks are not implemented");
-    alert->set_modal(true);
-    alert->show(parent_);
+    for (const auto& file : selected)
+    {
+        auto task = vfs::move_task{
+            .options = {},
+            .source = file->path(),
+            .destination = *last_path_,
+        };
+        task_manager_->add(task);
+    }
 }
 
 void
@@ -2773,11 +2849,33 @@ gui::tab::show_create_dialog(dialog::create_mode mode) noexcept
     dialog->signal_confirm().connect(
         [this](const gui::dialog::create_response& response)
         {
-            (void)response;
-            auto alert = Gtk::AlertDialog::create("Not Implemented");
-            alert->set_detail("File Tasks are not implemented");
-            alert->set_modal(true);
-            alert->show(parent_);
+            if (response.mode == dialog::create_mode::file)
+            {
+                auto task = vfs::create_file_task{
+                    .path = response.destination,
+                };
+                task_manager_->add(task);
+            }
+            else if (response.mode == dialog::create_mode::dir)
+            {
+                auto task = vfs::create_directory_task{
+                    .path = response.destination,
+                };
+                task_manager_->add(task);
+            }
+            else if (response.mode == dialog::create_mode::link)
+            {
+                auto task = vfs::create_symlink_task{
+                    .options = {vfs::create_symlink_task::options::force},
+                    .target = response.target,
+                    .name = response.destination,
+                };
+                task_manager_->add(task);
+            }
+            else
+            {
+                std::unreachable();
+            }
         });
 }
 

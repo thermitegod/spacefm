@@ -15,20 +15,22 @@
 
 #pragma once
 
-#include <filesystem>
 #include <memory>
-#include <span>
 
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include "vfs/task/task.hxx"
+#include "vfs/task-manager.hxx"
 
 namespace gui
 {
 class task : public Gtk::Box
 {
   public:
-    task();
+    task(Gtk::ApplicationWindow& parent, const std::shared_ptr<vfs::task_manager>& task_manager);
+
+  private:
+    Gtk::ApplicationWindow& parent_;
+    std::shared_ptr<vfs::task_manager> task_manager_;
 };
 } // namespace gui

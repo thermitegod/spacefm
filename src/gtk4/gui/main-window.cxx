@@ -92,8 +92,8 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
 
     box_.append(menubar_);
     box_.append(layout_);
-    box_.append(task_manager_);
-    task_manager_.set_visible(false);
+    box_.append(tasks_);
+    tasks_.set_visible(false);
 
     app->add_action("open", [this]() { on_open(); });
     app->add_action("search", [this]() { on_open_search(); });

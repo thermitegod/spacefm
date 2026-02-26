@@ -28,13 +28,15 @@
 
 #include "gui/browser.hxx"
 
+#include "vfs/task-manager.hxx"
 #include "vfs/user-dirs.hxx"
 
 #include "logger.hxx"
 
 gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
+                      const std::shared_ptr<vfs::task_manager>& task_manager,
                       const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), panel_(panel), settings_(settings)
+    : parent_(parent), panel_(panel), task_manager_(task_manager), settings_(settings)
 {
     logger::debug("gui::browser::browser({})", std::to_underlying(panel_));
 
@@ -274,7 +276,7 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
     auto* label = Gtk::make_managed<Gtk::Label>();
     label->set_label(display_filename(state.path));
 
-    auto* tab = Gtk::make_managed<gui::tab>(parent_, state, settings_);
+    auto* tab = Gtk::make_managed<gui::tab>(parent_, state, task_manager_, settings_);
     tab->signal_state_changed().connect([this]() { save_tab_state(); });
     tab->signal_chdir_before().connect([]() { /* TODO */ });
     tab->signal_chdir_begin().connect(

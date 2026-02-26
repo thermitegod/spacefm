@@ -26,12 +26,15 @@
 
 #include "gui/tab/tab.hxx"
 
+#include "vfs/task-manager.hxx"
+
 namespace gui
 {
 class browser final : public Gtk::Notebook
 {
   public:
     browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
+            const std::shared_ptr<vfs::task_manager>& task_manager,
             const std::shared_ptr<config::settings>& settings);
     ~browser();
 
@@ -56,6 +59,7 @@ class browser final : public Gtk::Notebook
 
     Gtk::ApplicationWindow& parent_;
     config::panel_id panel_; // which panel the browser is in
+    std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;
 
     Glib::RefPtr<Gio::SimpleActionGroup> action_group_;
