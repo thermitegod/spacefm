@@ -478,7 +478,7 @@ gui::dialog::create::on_button_ok_clicked()
 
         signal_confirm().emit(create_response{
             .target = entry_text,
-            .dest = full_path,
+            .destination = full_path,
             .mode = create_mode::link,
             .overwrite = overwrite_,
             .auto_open = auto_open_,
@@ -488,7 +488,7 @@ gui::dialog::create::on_button_ok_clicked()
     { // new file task
         signal_confirm().emit(create_response{
             .target = "", // unused in this mode
-            .dest = full_path,
+            .destination = full_path,
             .mode = create_mode::file,
             .overwrite = overwrite_,
             .auto_open = auto_open_,
@@ -498,7 +498,7 @@ gui::dialog::create::on_button_ok_clicked()
     { // new directory task
         signal_confirm().emit(create_response{
             .target = "", // unused in this mode
-            .dest = full_path,
+            .destination = full_path,
             .mode = create_mode::dir,
             .overwrite = overwrite_,
             .auto_open = auto_open_,

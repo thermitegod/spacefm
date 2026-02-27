@@ -39,7 +39,7 @@ enum class create_mode : std::uint8_t
 struct create_response final
 {
     std::filesystem::path target; // only used when creating a symlink
-    std::filesystem::path dest;
+    std::filesystem::path destination;
     create_mode mode;
     bool overwrite;
     bool auto_open; // open file / chdir into dest

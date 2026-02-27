@@ -42,7 +42,7 @@ enum class rename_mode : std::uint8_t
 struct rename_response final
 {
     std::filesystem::path source;
-    std::filesystem::path dest;
+    std::filesystem::path destination;
     rename_mode mode;
     bool overwrite;
 };
@@ -52,7 +52,7 @@ class rename : public Gtk::ApplicationWindow
   public:
     rename(Gtk::ApplicationWindow& parent, const std::shared_ptr<config::settings>& settings,
            const std::filesystem::path& cwd, const std::shared_ptr<vfs::file>& file,
-           const std::filesystem::path& dest_dir, const bool clip_copy);
+           const std::filesystem::path& destination, const bool clip_copy);
     ~rename();
 
   private:

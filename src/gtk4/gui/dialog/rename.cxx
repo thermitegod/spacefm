@@ -33,7 +33,7 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
                             const std::shared_ptr<config::settings>& settings,
                             const std::filesystem::path& cwd,
                             const std::shared_ptr<vfs::file>& file,
-                            const std::filesystem::path& dest_dir, const bool clip_copy)
+                            const std::filesystem::path& destination, const bool clip_copy)
     : settings_(settings), file_(file)
 {
     set_transient_for(parent);
@@ -58,9 +58,9 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     is_link_ = file_->is_symlink();
     clip_copy_ = clip_copy;
     full_path_ = cwd / original_filename;
-    if (!dest_dir.empty())
+    if (!destination.empty())
     {
-        new_path_ = std::filesystem::path() / dest_dir / original_filename;
+        new_path_ = std::filesystem::path() / destination / original_filename;
     }
     else
     {
@@ -517,7 +517,7 @@ gui::dialog::rename::on_button_ok_clicked()
         // not changed, proceed to next file
         signal_confirm().emit(rename_response{
             .source = "",
-            .dest = "",
+            .destination = "",
             .mode = rename_mode::skip,
             .overwrite = false,
         });
@@ -619,7 +619,7 @@ gui::dialog::rename::on_button_ok_clicked()
     if (copy || copy_target)
     { // copy task
         std::string source;
-        std::string dest = full_path.string();
+        std::string destination = full_path.string();
         if (copy || !is_link_)
         {
             source = full_path_.string();
@@ -641,7 +641,7 @@ gui::dialog::rename::on_button_ok_clicked()
 
         signal_confirm().emit(rename_response{
             .source = source,
-            .dest = dest,
+            .destination = destination,
             .mode = rename_mode::copy,
             .overwrite = overwrite_,
         });
@@ -649,7 +649,7 @@ gui::dialog::rename::on_button_ok_clicked()
     else if (link || link_target)
     { // link task
         std::string source;
-        std::string dest;
+        std::string destination;
         if (link || !is_link_)
         {
             source = full_path_.string();
@@ -668,11 +668,11 @@ gui::dialog::rename::on_button_ok_clicked()
             }
             source = real_path.string();
         }
-        dest = full_path.string();
+        destination = full_path.string();
 
         signal_confirm().emit(rename_response{
             .source = source,
-            .dest = dest,
+            .destination = destination,
             .mode = rename_mode::link,
             .overwrite = overwrite_,
         });
@@ -680,11 +680,11 @@ gui::dialog::rename::on_button_ok_clicked()
     else if (old_path != path)
     { // need move?
         std::string source = full_path_.string();
-        std::string dest = full_path.string();
+        std::string destination = full_path.string();
 
         signal_confirm().emit(rename_response{
             .source = source,
-            .dest = dest,
+            .destination = destination,
             .mode = rename_mode::move,
             .overwrite = overwrite_,
         });
@@ -693,11 +693,11 @@ gui::dialog::rename::on_button_ok_clicked()
     { // rename (does overwrite)
 
         std::string source = full_path_.string();
-        std::string dest = full_path.string();
+        std::string destination = full_path.string();
 
         signal_confirm().emit(rename_response{
             .source = source,
-            .dest = dest,
+            .destination = destination,
             .mode = rename_mode::rename,
             .overwrite = overwrite_,
         });
@@ -711,7 +711,7 @@ gui::dialog::rename::on_button_cancel_clicked()
 {
     signal_confirm().emit(rename_response{
         .source = "",
-        .dest = "",
+        .destination = "",
         .mode = rename_mode::cancel,
         .overwrite = false,
     });
