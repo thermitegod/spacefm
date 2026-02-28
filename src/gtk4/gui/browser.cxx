@@ -276,14 +276,14 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
 
     auto* tab = Gtk::make_managed<gui::tab>(parent_, state, settings_);
     tab->signal_state_changed().connect([this]() { save_tab_state(); });
-    tab->signal_chdir_after().connect(
+    tab->signal_chdir_before().connect([]() { /* TODO */ });
+    tab->signal_chdir_begin().connect(
         [this, tab, label]()
         {
             label->set_label(display_filename(tab->cwd()));
             label->set_tooltip_text(tab->cwd().string());
-
-            save_tab_state();
         });
+    tab->signal_chdir_after().connect([this]() { save_tab_state(); });
     tab->signal_close_tab().connect([this]() { close_tab(); });
     tab->signal_new_tab().connect([this](const std::filesystem::path& path) { new_tab(path); });
     tab->signal_switch_tab_with_paste().connect(
