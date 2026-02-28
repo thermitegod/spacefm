@@ -460,10 +460,9 @@ gui::files_base::on_files_created(const std::span<const std::shared_ptr<vfs::fil
             continue;
         }
 
-#if 0
-        // this seems to work without needing to use the idle handler
+#if 1
         dir_model_->insert_sorted(ModelColumns::create(file),
-                                  sigc::mem_fun(*this, &grid::model_sort));
+                                  sigc::mem_fun(*this, &files_base::model_sort));
 #else
         Glib::signal_idle().connect_once(
             [this, file]()
@@ -504,8 +503,7 @@ gui::files_base::on_files_deleted(const std::span<const std::shared_ptr<vfs::fil
         const auto [found, position] = find_file(file);
         if (found)
         {
-#if 0
-            // this seems to work without needing to use the idle handler
+#if 1
             dir_model_->remove(position);
 #else
             Glib::signal_idle().connect_once([this, position]() { dir_model_->remove(position); },
