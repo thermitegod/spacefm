@@ -131,17 +131,6 @@ vfs_gtk4_sources = files(
     'vfs/notify-cpp/file_system_event.cxx',
     'vfs/notify-cpp/notification.cxx',
     'vfs/notify-cpp/notify.cxx',
-
-    'vfs/task/chmod.cxx',
-    'vfs/task/chown.cxx',
-    'vfs/task/copy.cxx',
-    'vfs/task/create-directory.cxx',
-    'vfs/task/create-file.cxx',
-    'vfs/task/create-hardlink.cxx',
-    'vfs/task/create-symlink.cxx',
-    'vfs/task/move.cxx',
-    'vfs/task/remove.cxx',
-    'vfs/task/task.cxx',
 )
 
 vfs_gtk4_dependencies = [

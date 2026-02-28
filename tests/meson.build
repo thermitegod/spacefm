@@ -30,16 +30,6 @@ test_sources_sfm += files(
     # 'src/vfs/test-error.cxx',
     'src/vfs/test-execute.cxx',
 
-    'src/vfs/task/chmod.cxx',
-    'src/vfs/task/chown.cxx',
-    'src/vfs/task/copy.cxx',
-    'src/vfs/task/create-directory.cxx',
-    'src/vfs/task/create-file.cxx',
-    'src/vfs/task/create-hardlink.cxx',
-    'src/vfs/task/create-symlink.cxx',
-    'src/vfs/task/move.cxx',
-    'src/vfs/task/remove.cxx',
-
     'src/vfs/utils/test-utils.cxx',
     'src/vfs/utils/test-file-ops.cxx',
     'src/vfs/utils/test-permissions.cxx',
