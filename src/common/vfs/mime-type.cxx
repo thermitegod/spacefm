@@ -55,7 +55,7 @@ vfs::mime_type::create(const std::string_view type,
                        const std::shared_ptr<vfs::settings>& settings) noexcept
 #endif
 {
-    const std::unique_lock<std::mutex> lock(global::mime_map_lock);
+    std::scoped_lock lock(global::mime_map_lock);
     if (global::mime_map.contains(type.data()))
     {
         return global::mime_map.at(type.data());

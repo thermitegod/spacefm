@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <mutex>
 #include <stop_token>
 
 #include <glibmm.h>
@@ -28,7 +29,7 @@ void
 vfs::thumbnailer::request(const request_data& request) noexcept
 {
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::scoped_lock lock(this->mutex_);
         this->queue_.push(request);
     }
     this->cv_.notify_one();
@@ -48,7 +49,7 @@ vfs::thumbnailer::run_once(const std::stop_token& stoken) noexcept
 {
     request_data request;
     {
-        std::unique_lock<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
         this->cv_.wait(lock, stoken, [this] { return !queue_.empty(); });
 
         if (stoken.stop_requested()) // && this->queue_.empty())

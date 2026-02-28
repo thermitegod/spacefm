@@ -14,6 +14,7 @@
  */
 
 #include <filesystem>
+#include <mutex>
 #include <string>
 
 #include <glaze/glaze.hpp>
@@ -120,7 +121,7 @@ void
 config::manager::run_once(const std::stop_token& stoken) noexcept
 {
     {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::unique_lock lock(mutex_);
         cv_.wait_for(lock, stoken, thread_sleep_, [this]() { return pending_; });
 
         if (stoken.stop_requested())
@@ -132,7 +133,7 @@ config::manager::run_once(const std::stop_token& stoken) noexcept
     logger::trace<logger::autosave>("checking for pending autosave requests");
     if (pending_)
     {
-        const std::scoped_lock<std::mutex> lock(mutex_);
+        std::scoped_lock lock(mutex_);
 
         logger::trace<logger::autosave>("autosave request, saving settings");
 
@@ -145,7 +146,7 @@ config::manager::run_once(const std::stop_token& stoken) noexcept
 void
 config::manager::request_add() noexcept
 {
-    const std::scoped_lock<std::mutex> lock(mutex_);
+    std::scoped_lock lock(mutex_);
 
     logger::trace<logger::autosave>("adding request");
     pending_ = true;
@@ -154,7 +155,7 @@ config::manager::request_add() noexcept
 void
 config::manager::request_cancel() noexcept
 {
-    const std::scoped_lock<std::mutex> lock(mutex_);
+    std::scoped_lock lock(mutex_);
 
     logger::trace<logger::autosave>("canceling request");
     pending_ = false;

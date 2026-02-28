@@ -5,6 +5,7 @@
 #include <chrono>
 #include <filesystem>
 #include <flat_map>
+#include <mutex>
 #include <stack>
 #include <string>
 #include <system_error>
@@ -422,7 +423,7 @@ vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& fil
     // Lock is required since this may be called on any thread.
     static std::mutex lock;
     {
-        const std::scoped_lock<std::mutex> scoped_lock(lock);
+        std::scoped_lock scoped_lock(lock);
 
         const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         if (last_check + std::chrono::seconds(5) < now)

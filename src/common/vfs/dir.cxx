@@ -287,7 +287,7 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), this->path_.string());
 
-    std::unique_lock<std::mutex> lock(this->loader_mutex_);
+    std::scoped_lock lock(this->loader_mutex_);
 
     this->load_running_ = true;
     this->xhidden_count_ = 0;
@@ -309,7 +309,7 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
         }
 
         {
-            const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+            std::scoped_lock files_lock(this->files_lock_);
 #if (GTK_MAJOR_VERSION == 4)
             this->files_.push_back(vfs::file::create(dfile.path()));
 #elif (GTK_MAJOR_VERSION == 3)
@@ -337,7 +337,7 @@ vfs::dir::refresh() noexcept
 void
 vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
 {
-    std::unique_lock<std::mutex> lock(this->loader_mutex_);
+    std::scoped_lock lock(this->loader_mutex_);
 
     this->load_running_ = true;
     this->xhidden_count_ = 0;
@@ -367,7 +367,7 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
     }
 
     {
-        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+        std::scoped_lock files_lock(this->files_lock_);
         for (const auto& file : this->files_)
         {
             if (stoken.stop_requested())
@@ -418,7 +418,7 @@ vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcep
 std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     const auto it = std::ranges::find_if(this->files_,
                                          [&filename](const auto& file)
@@ -483,7 +483,7 @@ vfs::dir::enable_thumbnails(const bool enabled) noexcept
 void
 vfs::dir::load_thumbnails(const std::int32_t size) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     if (!this->enable_thumbnails_)
     {
@@ -511,7 +511,7 @@ vfs::dir::unload_thumbnails(const std::int32_t size) noexcept
 {
     (void)size;
 #if 0 // TODO
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     for (const auto& file : this->files_)
     {
@@ -525,7 +525,7 @@ vfs::dir::unload_thumbnails(const std::int32_t size) noexcept
 void
 vfs::dir::load_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     if (!this->enable_thumbnails_)
     {
@@ -552,7 +552,7 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
 void
 vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     for (const auto& file : this->files_)
     {
@@ -599,7 +599,7 @@ vfs::dir::update_file(const std::shared_ptr<vfs::file>& file) noexcept
 void
 vfs::dir::remove_file(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     this->files_.erase(std::ranges::remove(this->files_, file).begin(), this->files_.end());
 }
@@ -615,19 +615,19 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
             [this]()
             {
                 {
-                    const std::scoped_lock<std::mutex> lock(this->events_.deleted_lock);
+                    std::scoped_lock lock(this->events_.deleted_lock);
                     this->update_deleted_files();
                     this->events_.deleted.clear();
                 }
 
                 {
-                    const std::scoped_lock<std::mutex> lock(this->events_.changed_lock);
+                    std::scoped_lock lock(this->events_.changed_lock);
                     this->update_changed_files();
                     this->events_.changed.clear();
                 }
 
                 {
-                    const std::scoped_lock<std::mutex> lock(this->events_.created_lock);
+                    std::scoped_lock lock(this->events_.created_lock);
                     this->update_created_files();
                     this->events_.created.clear();
                 }
@@ -698,7 +698,7 @@ vfs::dir::update_created_files() noexcept
                     continue;
                 }
 
-                const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+                std::scoped_lock files_lock(this->files_lock_);
 
 #if (GTK_MAJOR_VERSION == 4)
                 const auto new_file = vfs::file::create(file_path);
@@ -732,7 +732,7 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
     }
 
     {
-        const std::scoped_lock<std::mutex> lock(this->events_.created_lock);
+        std::scoped_lock lock(this->events_.created_lock);
         this->events_.created.push_back(path.filename());
     }
 
@@ -750,7 +750,7 @@ vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
     const auto file = this->find_file(path.filename());
     if (file)
     {
-        const std::scoped_lock<std::mutex> lock(this->events_.deleted_lock);
+        std::scoped_lock lock(this->events_.deleted_lock);
         if (!std::ranges::contains(this->events_.deleted, file))
         {
             this->events_.deleted.push_back(file);
@@ -776,7 +776,7 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
     const auto file = this->find_file(path.filename());
     if (file)
     {
-        const std::scoped_lock<std::mutex> lock(this->events_.changed_lock);
+        std::scoped_lock lock(this->events_.changed_lock);
         if (!std::ranges::contains(this->events_.changed, file))
         {
             if (this->update_file(file)) // update file info the first time
@@ -792,7 +792,7 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
 void
 vfs::dir::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+    std::scoped_lock files_lock(this->files_lock_);
 
     if (std::ranges::contains(this->files_, file))
     {

@@ -64,7 +64,7 @@ void
 autosave_backend::run_once(const std::stop_token& stoken) noexcept
 {
     {
-        std::unique_lock<std::mutex> lock(this->mutex_);
+        std::unique_lock lock(this->mutex_);
         this->cv_.wait_for(lock, stoken, this->thread_sleep_, [this]() { return this->pending_; });
 
         if (stoken.stop_requested())
@@ -76,7 +76,7 @@ autosave_backend::run_once(const std::stop_token& stoken) noexcept
     logger::trace<logger::autosave>("checking for pending autosave requests");
     if (this->pending_)
     {
-        const std::scoped_lock<std::mutex> lock(this->mutex_);
+        std::scoped_lock lock(this->mutex_);
 
         logger::trace<logger::autosave>(
             "found autosave requests, saving settings, total request for this period {}",
@@ -92,7 +92,7 @@ autosave_backend::run_once(const std::stop_token& stoken) noexcept
 void
 autosave_backend::add() noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->mutex_);
+    std::scoped_lock lock(this->mutex_);
 
     this->total_ += 1;
     logger::trace<logger::autosave>("adding request, total {}", this->total_);
@@ -102,7 +102,7 @@ autosave_backend::add() noexcept
 void
 autosave_backend::cancel() noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->mutex_);
+    std::scoped_lock lock(this->mutex_);
 
     logger::trace<logger::autosave>("canceling '{}' requests", this->total_);
     this->total_ = 0;

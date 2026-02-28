@@ -15,6 +15,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <mutex>
 #include <print>
 #include <string_view>
 #include <vector>
@@ -201,7 +202,7 @@ void
 PropertiesDialog::on_button_close_clicked()
 {
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
+        std::scoped_lock lock(this->mutex_);
         this->abort_ = true;
     }
 
@@ -270,7 +271,7 @@ PropertiesDialog::calc_size() noexcept
 {
     for (const auto& file : this->file_list_)
     {
-        std::unique_lock<std::mutex> lock(this->mutex_);
+        std::scoped_lock lock(this->mutex_);
 
         if (this->abort_)
         {
