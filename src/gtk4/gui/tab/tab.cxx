@@ -1865,6 +1865,7 @@ gui::tab::on_dir_file_listed() noexcept
     signal_file_created_.disconnect();
     signal_file_changed_.disconnect();
     signal_file_deleted_.disconnect();
+    signal_self_deleted_.disconnect();
 
     signal_file_created_ = dir_->signal_files_created().connect(
         [this](const auto&)
@@ -1880,7 +1881,7 @@ gui::tab::on_dir_file_listed() noexcept
             signal_change_content().emit();
             on_update_statusbar();
         });
-    signal_file_deleted_ =
+    signal_self_deleted_ =
         dir_->signal_directory_deleted().connect([this]() { signal_close_tab().emit(); });
 
     update_model();
