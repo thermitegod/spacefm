@@ -22,20 +22,20 @@ test_sources_sfm += files(
     'src/main.cxx',
 
     # gui
-    'src/gui/natsort/test-natsort.cxx',
-    'src/gui/utils/test-history.cxx',
+    'src/gui/natsort/natsort.cxx',
+    'src/gui/utils/history.cxx',
 
     # vfs
-    # 'src/vfs/test-clipboard.cxx',
-    # 'src/vfs/test-error.cxx',
-    'src/vfs/test-execute.cxx',
+    # 'src/vfs/clipboard.cxx',
+    # 'src/vfs/error.cxx',
+    'src/vfs/execute.cxx',
 
-    'src/vfs/utils/test-utils.cxx',
-    'src/vfs/utils/test-file-ops.cxx',
-    'src/vfs/utils/test-permissions.cxx',
+    'src/vfs/utils/utils.cxx',
+    'src/vfs/utils/file-ops.cxx',
+    'src/vfs/utils/permissions.cxx',
 
     # vfs - chrome
-    'src/vfs/mime-type/chrome/test-mime-utils.cxx',
+    'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
 
 ## Build
