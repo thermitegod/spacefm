@@ -102,14 +102,10 @@ struct create_file_task final
 
 struct create_symlink_task final
 {
-    enum class options
-    {
-        force,
-    };
-
-    std::set<options> options;
     std::filesystem::path target;
     std::filesystem::path name;
+    // options
+    bool force = false;
 };
 
 enum class collision_resolve

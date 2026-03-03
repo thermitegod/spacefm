@@ -2866,9 +2866,10 @@ gui::tab::show_create_dialog(dialog::create_mode mode) noexcept
             else if (response.mode == dialog::create_mode::link)
             {
                 auto task = vfs::create_symlink_task{
-                    .options = {vfs::create_symlink_task::options::force},
                     .target = response.target,
                     .name = response.destination,
+                    .force = true,
+
                 };
                 task_manager_->add(task);
             }

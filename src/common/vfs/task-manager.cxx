@@ -533,11 +533,21 @@ vfs::task_manager::add(const vfs::create_symlink_task& task) noexcept
         (void)stoken;
         (void)item;
 
-        if (t.options.contains(vfs::create_symlink_task::options::force) &&
-            std::filesystem::exists(t.name))
+        if (std::filesystem::exists(t.name))
         {
-            std::filesystem::remove(t.name);
+            if (t.force)
+            {
+                std::filesystem::remove(t.name);
+            }
+            else
+            {
+                throw std::filesystem::filesystem_error(
+                    "Path already exists",
+                    t.name,
+                    std::make_error_code(std::errc::file_exists));
+            }
         }
+
         std::filesystem::create_symlink(t.target, t.name);
     };
     queue_task(slot);
