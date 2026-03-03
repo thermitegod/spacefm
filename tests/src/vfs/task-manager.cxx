@@ -75,6 +75,27 @@ struct test_sync
     }
 };
 
+static std::size_t
+count_files(const std::filesystem::path& path, bool recursive = false) noexcept
+{
+    size_t count = 0;
+    if (recursive)
+    {
+        for (const auto& _ : std::filesystem::recursive_directory_iterator(path))
+        {
+            count += 1;
+        }
+    }
+    else
+    {
+        for (const auto& _ : std::filesystem::directory_iterator(path))
+        {
+            count += 1;
+        }
+    }
+    return count;
+}
+
 TEST_SUITE("vfs::task_manager" * doctest::description(""))
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "task-manager";
@@ -112,8 +133,6 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             CHECK(std::filesystem::exists(path));
             CHECK(std::filesystem::is_regular_file(path));
-
-            std::filesystem::remove(path);
         }
 
         SUBCASE("create_file_task loop")
@@ -129,6 +148,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             CHECK(manager->empty());
 
+            CHECK_EQ(count_files(test_path), loop);
             CHECK_EQ(sync.error, 0);
             CHECK_EQ(sync.completed, loop);
         }
@@ -176,16 +196,17 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         SUBCASE("create_directory_task loop")
         {
             std::size_t loop = 1000;
-
+            const auto nested_path = test_path / "nested/directory/loop";
             for (const auto i : std::views::iota(0uz, loop))
             {
-                const auto path = test_path / "nested/directory/loop" / std::format("{}", i);
+                const auto path = nested_path / std::format("{}", i);
                 manager->add(vfs::create_directory_task{.path = path});
             }
             sync.wait_for(loop);
 
             CHECK(manager->empty());
 
+            CHECK_EQ(count_files(nested_path), loop);
             CHECK_EQ(sync.error, 0);
             CHECK_EQ(sync.completed, loop);
         }
