@@ -151,10 +151,10 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
             throw std::runtime_error("Invalid user or group name");
         }
 
-        uid_t uid = pw->uid();
-        gid_t gid = gr->gid();
+        const uid_t uid = pw->uid();
+        const gid_t gid = gr->gid();
 
-        auto change_ownership = [&](const std::filesystem::path& p)
+        auto do_chown = [uid, gid](const std::filesystem::path& p)
         {
             if (::lchown(p.c_str(), uid, gid) != 0)
             {
@@ -168,7 +168,7 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
         if (t.options.contains(vfs::chown_task::options::recursive) &&
             std::filesystem::is_directory(t.path))
         {
-            change_ownership(t.path);
+            do_chown(t.path);
 
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
@@ -177,12 +177,12 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
                     return;
                 }
 
-                change_ownership(entry.path());
+                do_chown(entry.path());
             }
         }
         else
         {
-            change_ownership(t.path);
+            do_chown(t.path);
         }
     };
     queue_task(task, slot);
@@ -196,6 +196,15 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
     auto slot = [this](const std::stop_token& stoken, task_item& item, const vfs::copy_task& t)
     {
         auto collision_action = collision_resolve::pending;
+
+        auto do_copy = [](const std::filesystem::path& source,
+                          const std::filesystem::path& destination,
+                          const std::filesystem::copy_options options)
+        {
+            std::filesystem::copy_file(source,
+                                       destination,
+                                       options | std::filesystem::copy_options::overwrite_existing);
+        };
 
         if (std::filesystem::is_directory(t.source))
         {
@@ -244,10 +253,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
                         return;
                     }
 
-                    std::filesystem::copy_file(
-                        entry.path(),
-                        result.destination,
-                        t.options | std::filesystem::copy_options::overwrite_existing);
+                    do_copy(entry.path(), result.destination, t.options);
                 }
             }
         }
@@ -266,10 +272,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
                 return;
             }
 
-            std::filesystem::copy_file(t.source,
-                                       result.destination,
-                                       t.options |
-                                           std::filesystem::copy_options::overwrite_existing);
+            do_copy(t.source, result.destination, t.options);
         }
     };
     queue_task(task, slot);
@@ -288,6 +291,30 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 
         bool has_skipped = false;
         auto collision_action = collision_resolve::pending;
+
+        auto do_move = [same_device](const std::filesystem::path& source,
+                                     const std::filesystem::path& destination,
+                                     const std::filesystem::copy_options options)
+        {
+            std::filesystem::create_directories(destination.parent_path());
+
+            if (same_device)
+            {
+                if (std::filesystem::exists(destination))
+                {
+                    std::filesystem::remove(destination);
+                }
+                std::filesystem::rename(source, destination);
+            }
+            else
+            {
+                std::filesystem::copy_file(source,
+                                           destination,
+                                           options |
+                                               std::filesystem::copy_options::overwrite_existing);
+                std::filesystem::remove(source);
+            }
+        };
 
         if (std::filesystem::is_directory(t.source))
         {
@@ -335,24 +362,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
                         return;
                     }
 
-                    std::filesystem::create_directories(result.destination.parent_path());
-
-                    if (same_device)
-                    {
-                        if (std::filesystem::exists(result.destination))
-                        {
-                            std::filesystem::remove(result.destination);
-                        }
-                        std::filesystem::rename(entry.path(), result.destination);
-                    }
-                    else
-                    {
-                        std::filesystem::copy_file(
-                            entry.path(),
-                            result.destination,
-                            t.options | std::filesystem::copy_options::overwrite_existing);
-                        std::filesystem::remove(entry.path());
-                    }
+                    do_move(entry.path(), result.destination, t.options);
                 }
             }
 
@@ -376,24 +386,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
                 return;
             }
 
-            std::filesystem::create_directories(result.destination.parent_path());
-
-            if (same_device)
-            {
-                if (std::filesystem::exists(result.destination))
-                {
-                    std::filesystem::remove(result.destination);
-                }
-                std::filesystem::rename(t.source, result.destination);
-            }
-            else
-            {
-                std::filesystem::copy_file(t.source,
-                                           result.destination,
-                                           t.options |
-                                               std::filesystem::copy_options::overwrite_existing);
-                std::filesystem::remove(t.source);
-            }
+            do_move(t.source, result.destination, t.options);
         }
     };
     queue_task(task, slot);
