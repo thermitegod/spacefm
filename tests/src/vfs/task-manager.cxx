@@ -18,6 +18,7 @@
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <mutex>
 
 #include <doctest/doctest.h>
@@ -133,6 +134,19 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             CHECK(std::filesystem::exists(path));
             CHECK(std::filesystem::is_regular_file(path));
+        }
+
+        SUBCASE("create_file_task error")
+        {
+            const auto path = test_path / "test.txt";
+
+            std::ofstream(path).close();
+
+            manager->add(vfs::create_file_task{.path = path});
+            sync.wait();
+
+            CHECK_EQ(sync.error, 1);
+            CHECK_EQ(sync.completed, 0);
         }
 
         SUBCASE("create_file_task loop")

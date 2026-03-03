@@ -506,7 +506,14 @@ vfs::task_manager::add(const vfs::create_file_task& task) noexcept
         (void)stoken;
         (void)item;
 
-        std::ofstream(t.path).close();
+        if (std::filesystem::exists(t.path))
+        {
+            throw std::filesystem::filesystem_error("Path already exists",
+                                                    t.path,
+                                                    std::make_error_code(std::errc::file_exists));
+        }
+
+        std::ofstream(t.path);
     };
     queue_task(slot);
 }
