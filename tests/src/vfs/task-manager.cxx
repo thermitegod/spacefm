@@ -31,6 +31,7 @@ struct test_sync
     std::mutex mutex;
     std::condition_variable cv;
     std::size_t completed = 0;
+    std::size_t error = 0;
     std::vector<std::uint64_t> finished;
 
     void
@@ -38,6 +39,7 @@ struct test_sync
     {
         std::scoped_lock lock(mutex);
         completed = 0;
+        error = 0;
         finished.clear();
     }
 
@@ -51,7 +53,7 @@ struct test_sync
     wait_for(std::size_t expected) noexcept
     {
         std::unique_lock lock(mutex);
-        cv.wait(lock, [this, expected] { return completed >= expected; });
+        cv.wait(lock, [this, expected] { return completed >= expected || error != 0; });
     }
 
     void
@@ -64,10 +66,11 @@ struct test_sync
     }
 
     void
-    notify_error(const vfs::task_error& error) noexcept
+    notify_error(const vfs::task_error& e) noexcept
     {
-        (void)error;
+        (void)e;
         std::scoped_lock lock(mutex);
+        error++;
         cv.notify_all();
     }
 };
