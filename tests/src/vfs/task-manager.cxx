@@ -228,7 +228,19 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("create_directory_task")
         {
-            const auto path = test_path / "nested/directory";
+            const auto path = test_path / "test";
+            manager->add(vfs::create_directory_task{.path = path});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK(std::filesystem::exists(path));
+            CHECK(std::filesystem::is_directory(path));
+        }
+
+        SUBCASE("create_directory_task nested")
+        {
+            const auto path = test_path / "nested/test";
             manager->add(vfs::create_directory_task{.path = path});
             sync.wait();
 
@@ -241,7 +253,26 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         SUBCASE("create_directory_task loop")
         {
             std::size_t loop = 1000;
-            const auto nested_path = test_path / "nested/directory/loop";
+
+            for (const auto i : std::views::iota(0uz, loop))
+            {
+                const auto path = test_path / std::format("{}", i);
+                manager->add(vfs::create_directory_task{.path = path});
+            }
+            sync.wait_for(loop);
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(count_files(test_path), loop);
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, loop);
+        }
+
+        SUBCASE("create_directory_task nested loop")
+        {
+            std::size_t loop = 1000;
+
+            const auto nested_path = test_path / "nested/loop";
             for (const auto i : std::views::iota(0uz, loop))
             {
                 const auto path = nested_path / std::format("{}", i);
