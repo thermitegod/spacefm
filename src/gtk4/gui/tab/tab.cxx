@@ -2540,8 +2540,9 @@ gui::tab::on_delete() const noexcept
         for (const auto& file : selected)
         {
             auto task = vfs::remove_task{
-                .options = {vfs::remove_task::options::force, vfs::remove_task::options::recursive},
                 .path = file->path(),
+                .recursive = true,
+                .force = true,
             };
             task_manager_->add(task);
         }

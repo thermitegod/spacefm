@@ -22,7 +22,6 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <thread>
 
 #include <cstdint>
@@ -156,8 +155,7 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
     {
         const auto& t = task;
 
-        if (t.options.contains(vfs::chmod_task::options::recursive) &&
-            std::filesystem::is_directory(t.path))
+        if (t.recursive && std::filesystem::is_directory(t.path))
         {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
@@ -206,8 +204,7 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
             }
         };
 
-        if (t.options.contains(vfs::chown_task::options::recursive) &&
-            std::filesystem::is_directory(t.path))
+        if (t.recursive && std::filesystem::is_directory(t.path))
         {
             do_chown(t.path);
 
@@ -460,7 +457,7 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
     {
         const auto& t = task;
 
-        if (t.options.contains(vfs::remove_task::options::recursive))
+        if (t.recursive)
         {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {

@@ -18,12 +18,10 @@
 #include <atomic>
 #include <condition_variable>
 #include <deque>
-#include <exception>
 #include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -36,27 +34,19 @@ namespace vfs
 {
 struct chmod_task final
 {
-    enum class options
-    {
-        recursive,
-    };
-
-    std::set<options> options;
     std::filesystem::perms mode;
     std::filesystem::path path;
+    // options
+    bool recursive = false;
 };
 
 struct chown_task final
 {
-    enum class options
-    {
-        recursive,
-    };
-
-    std::set<options> options;
     std::string user;
     std::string group;
     std::filesystem::path path;
+    // options
+    bool recursive = false;
 };
 
 struct copy_task final
@@ -80,14 +70,10 @@ struct trash_task final
 
 struct remove_task final
 {
-    enum class options
-    {
-        recursive,
-        force,
-    };
-
-    std::set<options> options;
     std::filesystem::path path;
+    // options
+    bool recursive = false;
+    bool force = false;
 };
 
 struct create_directory_task final
