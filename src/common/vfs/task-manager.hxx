@@ -20,6 +20,7 @@
 #include <deque>
 #include <exception>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -254,44 +255,7 @@ class task_manager final
         return next_task_id_;
     }
 
-    template<typename T, typename Func>
-    void
-    queue_task(const T& task, Func&& slot) noexcept
-    {
-        auto item = std::make_shared<task_item>(create_task_id());
-        item->action =
-            [this, item, task, slot = std::forward<Func>(slot)](const std::stop_token& stoken,
-                                                                task_item& self) noexcept
-        {
-            if (stoken.stop_requested())
-            {
-                return;
-            }
-
-            try
-            {
-                slot(stoken, self, task);
-
-                if (!stoken.stop_requested())
-                {
-                    signal_task_finished_.emit(self.id);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                signal_task_error_.emit({self.id, e.what()});
-            }
-        };
-
-        {
-            std::scoped_lock lock(mutex_);
-            tasks_[item->id] = item;
-            queue_.push_back(item->id);
-        }
-        cv_.notify_one();
-
-        signal_task_added_.emit(item->id);
-    }
+    void queue_task(std::function<void(const std::stop_token&, task_item&)> slot) noexcept;
 
     struct collision_result final
     {
