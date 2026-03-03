@@ -136,6 +136,18 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::is_regular_file(path));
         }
 
+        SUBCASE("create_file_task nested")
+        {
+            const auto nested_path = test_path / "nested/test.txt";
+            manager->add(vfs::create_file_task{.path = nested_path});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK(std::filesystem::exists(nested_path));
+            CHECK(std::filesystem::is_regular_file(nested_path));
+        }
+
         SUBCASE("create_file_task error")
         {
             const auto path = test_path / "test.txt";
@@ -163,6 +175,25 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(manager->empty());
 
             CHECK_EQ(count_files(test_path), loop);
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, loop);
+        }
+
+        SUBCASE("create_file_task nested loop")
+        {
+            std::size_t loop = 1000;
+
+            const auto nested_path = test_path / "nested";
+            for (const auto i : std::views::iota(0uz, loop))
+            {
+                const auto path = nested_path / std::format("{}.txt", i);
+                manager->add(vfs::create_file_task{.path = path});
+            }
+            sync.wait_for(loop);
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(count_files(nested_path), loop);
             CHECK_EQ(sync.error, 0);
             CHECK_EQ(sync.completed, loop);
         }

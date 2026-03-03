@@ -513,6 +513,11 @@ vfs::task_manager::add(const vfs::create_file_task& task) noexcept
                                                     std::make_error_code(std::errc::file_exists));
         }
 
+        if (!std::filesystem::exists(t.path.parent_path()))
+        {
+            std::filesystem::create_directories(t.path.parent_path());
+        }
+
         std::ofstream(t.path);
     };
     queue_task(slot);
