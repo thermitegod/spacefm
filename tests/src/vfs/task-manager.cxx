@@ -104,7 +104,6 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("create_file_task")
         {
-            sync.reset();
             const auto path = test_path / "test.txt";
             manager->add(vfs::create_file_task{.path = path});
             sync.wait();
@@ -119,8 +118,6 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("create_file_task loop")
         {
-            sync.reset();
-
             std::size_t loop = 1000;
 
             for (const auto i : std::views::iota(0uz, loop))
@@ -166,7 +163,6 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("create_directory_task")
         {
-            sync.reset();
             const auto path = test_path / "nested/directory";
             manager->add(vfs::create_directory_task{.path = path});
             sync.wait();
@@ -179,8 +175,6 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("create_directory_task loop")
         {
-            sync.reset();
-
             std::size_t loop = 1000;
 
             for (const auto i : std::views::iota(0uz, loop))
