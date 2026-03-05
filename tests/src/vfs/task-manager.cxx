@@ -292,4 +292,118 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             std::filesystem::remove_all(test_path);
         }
     }
+
+    TEST_CASE("vfs::create_symlink_task")
+    {
+        const auto test_path = root / "create_symlink_task";
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+
+        test_sync sync;
+
+        auto manager = vfs::task_manager::create();
+        manager->signal_task_finished().connect([&](std::uint64_t task_id)
+                                                { sync.notify_success(task_id); });
+        manager->signal_task_error().connect([&](const vfs::task_error& error)
+                                             { sync.notify_error(error); });
+        manager->signal_task_collision().connect(
+            [](const vfs::task_collision& c)
+            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+
+        /////////////////////////////////////////////////////
+
+        auto target = test_path / "target.txt";
+        auto link = test_path / "link.txt";
+
+        std::ofstream(target).close();
+        CHECK(std::filesystem::exists(target));
+        CHECK(std::filesystem::is_regular_file(target));
+
+        SUBCASE("create")
+        {
+            manager->add(vfs::create_symlink_task{.target = target, .name = link, .force = false});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::is_symlink(link));
+            CHECK(std::filesystem::read_symlink(link) == target);
+        }
+
+        SUBCASE("create fail on existing")
+        {
+            std::ofstream(link).close();
+            CHECK(std::filesystem::exists(link));
+            CHECK(std::filesystem::is_regular_file(link));
+
+            manager->add(vfs::create_symlink_task{.target = target, .name = link, .force = false});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 1);
+            CHECK_EQ(sync.completed, 0);
+        }
+
+        SUBCASE("create loop")
+        {
+            std::size_t loop = 1000;
+
+            for (const auto i : std::views::iota(0uz, loop))
+            {
+                const auto path = test_path / std::format("{}", i);
+                manager->add(
+                    vfs::create_symlink_task{.target = target, .name = path, .force = false});
+            }
+            sync.wait_for(loop);
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, loop);
+        }
+
+        SUBCASE("create force")
+        {
+            manager->add(vfs::create_symlink_task{.target = target, .name = link, .force = true});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::is_symlink(link));
+            CHECK(std::filesystem::read_symlink(link) == target);
+        }
+
+        SUBCASE("create force on existing")
+        {
+            std::ofstream(link).close();
+            CHECK(std::filesystem::exists(link));
+            CHECK(std::filesystem::is_regular_file(link));
+
+            manager->add(vfs::create_symlink_task{.target = target, .name = link, .force = true});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::is_symlink(link));
+            CHECK(std::filesystem::read_symlink(link) == target);
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+    }
 }
