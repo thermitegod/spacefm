@@ -37,6 +37,12 @@
 
 #include "logger.hxx"
 
+// Notes:
+// - Only a single task is run at a time, event if they are on different devices
+// - There is no opportunistic task scheduling, ie if a
+//      copy from device A to device B is running another
+//      task will not get run on device C
+
 vfs::task_manager::task_manager() noexcept
 {
     thread_ = std::jthread([this](const std::stop_token& stoken) { run(stoken); });
