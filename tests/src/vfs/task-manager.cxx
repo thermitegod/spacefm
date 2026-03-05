@@ -124,7 +124,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         /////////////////////////////////////////////////////
 
-        SUBCASE("create_file_task")
+        SUBCASE("create")
         {
             const auto path = test_path / "test.txt";
             manager->add(vfs::create_file_task{.path = path});
@@ -136,7 +136,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::is_regular_file(path));
         }
 
-        SUBCASE("create_file_task nested")
+        SUBCASE("create nested")
         {
             const auto nested_path = test_path / "nested/test.txt";
             manager->add(vfs::create_file_task{.path = nested_path});
@@ -148,7 +148,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::is_regular_file(nested_path));
         }
 
-        SUBCASE("create_file_task error")
+        SUBCASE("create fail on existing error")
         {
             const auto path = test_path / "test.txt";
 
@@ -161,7 +161,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK_EQ(sync.completed, 0);
         }
 
-        SUBCASE("create_file_task loop")
+        SUBCASE("create loop")
         {
             std::size_t loop = 1000;
 
@@ -179,7 +179,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK_EQ(sync.completed, loop);
         }
 
-        SUBCASE("create_file_task nested loop")
+        SUBCASE("create nested loop")
         {
             std::size_t loop = 1000;
 
@@ -226,7 +226,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         /////////////////////////////////////////////////////
 
-        SUBCASE("create_directory_task")
+        SUBCASE("create")
         {
             const auto path = test_path / "test";
             manager->add(vfs::create_directory_task{.path = path});
@@ -238,7 +238,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::is_directory(path));
         }
 
-        SUBCASE("create_directory_task nested")
+        SUBCASE("create nested")
         {
             const auto path = test_path / "nested/test";
             manager->add(vfs::create_directory_task{.path = path});
@@ -250,7 +250,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::is_directory(path));
         }
 
-        SUBCASE("create_directory_task loop")
+        SUBCASE("create loop")
         {
             std::size_t loop = 1000;
 
@@ -268,7 +268,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK_EQ(sync.completed, loop);
         }
 
-        SUBCASE("create_directory_task nested loop")
+        SUBCASE("create nested loop")
         {
             std::size_t loop = 1000;
 
