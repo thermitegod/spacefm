@@ -457,7 +457,15 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
     {
         const auto& t = task;
 
-        if (t.recursive)
+        if (!std::filesystem::exists(t.path))
+        {
+            throw std::filesystem::filesystem_error(
+                "Trying to remove nonexistent path ",
+                t.path,
+                std::make_error_code(std::errc::invalid_argument));
+        }
+
+        if (std::filesystem::is_directory(t.path))
         {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
@@ -466,9 +474,14 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
                     return;
                 }
 
+                if (entry.is_directory())
+                {
+                    continue;
+                }
+
                 std::filesystem::remove(entry.path());
             }
-            std::filesystem::remove(t.path);
+            std::filesystem::remove_all(t.path);
         }
         else
         {

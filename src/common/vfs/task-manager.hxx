@@ -71,9 +71,6 @@ struct trash_task final
 struct remove_task final
 {
     std::filesystem::path path;
-    // options
-    bool recursive = false;
-    bool force = false;
 };
 
 struct create_directory_task final

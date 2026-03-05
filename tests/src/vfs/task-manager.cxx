@@ -20,6 +20,7 @@
 #include <fstream>
 #include <functional>
 #include <mutex>
+#include <print>
 
 #include <doctest/doctest.h>
 
@@ -72,6 +73,7 @@ struct test_sync
         (void)e;
         std::scoped_lock lock(mutex);
         error++;
+        // std::println("{}", e.message);
         cv.notify_all();
     }
 };
@@ -399,6 +401,108 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             CHECK(std::filesystem::is_symlink(link));
             CHECK(std::filesystem::read_symlink(link) == target);
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+    }
+
+    TEST_CASE("vfs::remove_task")
+    {
+        const auto test_path = root / "remove_task";
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+
+        test_sync sync;
+
+        auto manager = vfs::task_manager::create();
+        manager->signal_task_finished().connect([&](std::uint64_t task_id)
+                                                { sync.notify_success(task_id); });
+        manager->signal_task_error().connect([&](const vfs::task_error& error)
+                                             { sync.notify_error(error); });
+        manager->signal_task_collision().connect(
+            [](const vfs::task_collision& c)
+            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+
+        /////////////////////////////////////////////////////
+
+        SUBCASE("remove file")
+        {
+            const auto path = test_path / "file.txt";
+            std::ofstream(path).close();
+            CHECK(std::filesystem::exists(path));
+            CHECK(std::filesystem::is_regular_file(path));
+
+            manager->add(vfs::remove_task{.path = path});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_FALSE(std::filesystem::exists(path));
+        }
+
+        SUBCASE("remove empty directory")
+        {
+            const auto path = test_path / "directory";
+            std::filesystem::create_directories(path);
+            CHECK(std::filesystem::exists(path));
+            CHECK(std::filesystem::is_directory(path));
+
+            manager->add(vfs::remove_task{.path = path});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_FALSE(std::filesystem::exists(path));
+        }
+
+        SUBCASE("remove recursive")
+        {
+            const auto path = test_path / "directory";
+            std::filesystem::create_directories(path);
+            CHECK(std::filesystem::exists(path));
+            CHECK(std::filesystem::is_directory(path));
+            for (const auto i : std::views::iota(0uz, 100uz))
+            {
+                const auto file = path / std::format("{}.txt", i);
+                std::ofstream(file).close();
+                CHECK(std::filesystem::exists(file));
+                CHECK(std::filesystem::is_regular_file(file));
+            }
+
+            ///////////////////////////
+
+            manager->add(vfs::remove_task{.path = path});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_FALSE(std::filesystem::exists(path));
+        }
+
+        SUBCASE("remove error does not exist")
+        {
+            manager->add(vfs::remove_task{.path = "bad.txt"});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 1);
+            CHECK_EQ(sync.completed, 0);
         }
 
         if (std::filesystem::exists(test_path))

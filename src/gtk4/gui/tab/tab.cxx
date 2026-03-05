@@ -2541,8 +2541,6 @@ gui::tab::on_delete() const noexcept
         {
             auto task = vfs::remove_task{
                 .path = file->path(),
-                .recursive = true,
-                .force = true,
             };
             task_manager_->add(task);
         }
