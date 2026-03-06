@@ -28,6 +28,8 @@
 
 #include "vfs/task-manager.hxx"
 
+#include "vfs/utils/file-ops.hxx"
+
 struct test_sync
 {
     std::mutex mutex;
@@ -77,6 +79,23 @@ struct test_sync
         cv.notify_all();
     }
 };
+
+static void
+create_file(const std::filesystem::path& path, std::string_view content = "data") noexcept
+{
+    std::filesystem::create_directories(path.parent_path());
+
+    auto result = vfs::utils::write_file(path, content);
+    ztd::panic_if(bool(result), "Test Suite bad write");
+}
+
+static std::string
+read_file(const std::filesystem::path& path) noexcept
+{
+    auto data = vfs::utils::read_file(path);
+    ztd::panic_if(!data, "Test Suite bad read");
+    return *data;
+}
 
 static std::size_t
 count_files(const std::filesystem::path& path, bool recursive = false) noexcept
@@ -503,6 +522,168 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             CHECK_EQ(sync.error, 1);
             CHECK_EQ(sync.completed, 0);
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+    }
+
+    TEST_CASE("vfs::copy_task")
+    {
+        const auto test_path = root / "copy_task";
+        const auto source = test_path / "src";
+        const auto destination = test_path / "dest";
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+
+        std::filesystem::create_directories(source);
+        std::filesystem::create_directories(destination);
+
+        test_sync sync;
+
+        auto manager = vfs::task_manager::create();
+        manager->signal_task_finished().connect([&](std::uint64_t task_id)
+                                                { sync.notify_success(task_id); });
+        manager->signal_task_error().connect([&](const vfs::task_error& error)
+                                             { sync.notify_error(error); });
+        manager->signal_task_collision().connect(
+            [](const vfs::task_collision& c)
+            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+
+        SUBCASE("copy file")
+        {
+            const auto file = source / "test.txt";
+            create_file(file, "data");
+
+            manager->add(vfs::copy_task{.source = file, .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            const auto expected = destination / "test.txt";
+            CHECK(std::filesystem::exists(expected));
+            CHECK(std::filesystem::is_regular_file(expected));
+            CHECK_EQ(read_file(expected), "data");
+        }
+
+        SUBCASE("copy directory empty")
+        {
+            const auto directory = source / "directory";
+            std::filesystem::create_directories(directory);
+
+            manager->add(vfs::copy_task{.source = directory, .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::exists(destination / "directory"));
+            CHECK(std::filesystem::is_directory(destination / "directory"));
+            CHECK_EQ(count_files(destination / "directory", true), 0);
+        }
+
+        SUBCASE("copy directory with files")
+        {
+            const auto directory = source / "directory";
+
+            std::filesystem::create_directories(directory);
+            std::size_t loop = 100;
+            for (const auto i : std::views::iota(0uz, loop))
+            {
+                const auto path = directory / std::format("{}.txt", i);
+                create_file(path, std::format("{}", i));
+            }
+
+            manager->add(vfs::copy_task{.source = directory, .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_EQ(count_files(destination / "directory", true), loop);
+
+            std::size_t i = 0;
+            for (const auto& entry : std::filesystem::directory_iterator(destination / "directory"))
+            {
+                CHECK(std::filesystem::exists(entry.path()));
+                CHECK(std::filesystem::is_regular_file(entry.path()));
+                CHECK_EQ(read_file(entry.path()), std::format("{}", i++));
+            }
+        }
+
+        SUBCASE("copy nested directory")
+        {
+            create_file(source / "directory/a.txt");
+            create_file(source / "directory/b.txt");
+            create_file(source / "directory/nested/c.txt");
+            create_file(source / "directory/nested/d.txt");
+
+            manager->add(
+                vfs::copy_task{.source = source / "directory", .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::exists(destination / "directory/a.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/b.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/nested/c.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/nested/d.txt"));
+            CHECK_EQ(count_files(destination / "directory", true), 5);
+        }
+
+        SUBCASE("copy directory merge")
+        {
+            create_file(source / "directory/a.txt");
+            create_file(destination / "directory/b.txt");
+
+            manager->add(
+                vfs::copy_task{.source = source / "directory", .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::exists(destination / "directory/a.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/b.txt"));
+        }
+
+        SUBCASE("copy directory merge nested")
+        {
+            create_file(source / "directory/a.txt");
+            create_file(source / "directory/nested/a.txt");
+            create_file(destination / "directory/b.txt");
+            create_file(destination / "directory/nested/b.txt");
+
+            manager->add(
+                vfs::copy_task{.source = source / "directory", .destination = destination});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK(std::filesystem::exists(destination / "directory/a.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/nested/a.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/b.txt"));
+            CHECK(std::filesystem::exists(destination / "directory/nested/b.txt"));
         }
 
         if (std::filesystem::exists(test_path))
