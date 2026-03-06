@@ -256,7 +256,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 
         if (std::filesystem::is_directory(t.source))
         {
-            std::filesystem::create_directories(t.destination);
+            std::filesystem::create_directories(t.destination / t.source.filename());
 
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.source))
             {
@@ -376,6 +376,8 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 
         if (std::filesystem::is_directory(t.source))
         {
+            std::filesystem::create_directories(t.destination / t.source.filename());
+
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.source))
             {
                 if (!item.check_pause(stoken) || stoken.stop_requested())
