@@ -235,6 +235,14 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
     {
         const auto& t = task;
 
+        if (!std::filesystem::exists(t.source))
+        {
+            throw std::filesystem::filesystem_error(
+                "Source path does not exist",
+                t.source,
+                std::make_error_code(std::errc::invalid_argument));
+        }
+
         auto collision_action = collision_resolve::pending;
 
         auto do_copy = [](const std::filesystem::path& source,
@@ -326,6 +334,14 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
     auto slot = [this, task](const std::stop_token& stoken, task_item& item)
     {
         const auto& t = task;
+
+        if (!std::filesystem::exists(t.source))
+        {
+            throw std::filesystem::filesystem_error(
+                "Source path does not exist",
+                t.source,
+                std::make_error_code(std::errc::invalid_argument));
+        }
 
         const auto src_stat = ztd::lstat::create(t.source);
         const auto dest_stat = ztd::stat::create(t.destination);
