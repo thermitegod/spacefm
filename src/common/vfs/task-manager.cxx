@@ -344,7 +344,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
         }
 
         const auto src_stat = ztd::lstat::create(t.source);
-        const auto dest_stat = ztd::stat::create(t.destination);
+        const auto dest_stat = ztd::stat::create(t.destination.parent_path());
         const bool same_device = src_stat && dest_stat && (src_stat->dev() == dest_stat->dev());
 
         bool has_skipped = false;
