@@ -2137,7 +2137,6 @@ gui::tab::show_rename_dialog() noexcept
                 if (response.mode == dialog::rename_mode::rename)
                 {
                     auto task = vfs::move_task{
-                        .options = {},
                         .source = response.source,
                         .destination = response.destination,
                     };
@@ -2473,7 +2472,6 @@ gui::tab::on_paste() const noexcept
             if (is_cut)
             {
                 auto task = vfs::move_task{
-                    .options = {},
                     .source = file,
                     .destination = cwd(),
                 };
@@ -2482,7 +2480,6 @@ gui::tab::on_paste() const noexcept
             else
             {
                 auto task = vfs::copy_task{
-                    .options = {},
                     .source = file,
                     .destination = cwd(),
                 };
@@ -2748,7 +2745,6 @@ gui::tab::on_copy_to_last_path() noexcept
     for (const auto& file : selected)
     {
         auto task = vfs::copy_task{
-            .options = {},
             .source = file->path(),
             .destination = *last_path_,
         };
@@ -2773,7 +2769,6 @@ gui::tab::on_move_to_last_path() noexcept
     for (const auto& file : selected)
     {
         auto task = vfs::move_task{
-            .options = {},
             .source = file->path(),
             .destination = *last_path_,
         };

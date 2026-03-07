@@ -233,95 +233,69 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 
     auto slot = [this, task](const std::stop_token& stoken, task_item& item)
     {
-        const auto& t = task;
-
-        if (!std::filesystem::exists(t.source))
+        if (!std::filesystem::exists(task.source))
         {
             throw std::filesystem::filesystem_error(
                 "Source path does not exist",
-                t.source,
+                task.source,
                 std::make_error_code(std::errc::invalid_argument));
         }
 
         auto collision_action = collision_resolve::pending;
 
-        auto do_copy = [](const std::filesystem::path& source,
-                          const std::filesystem::path& destination,
-                          const std::filesystem::copy_options options)
+        std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_copy =
+            [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
-            std::filesystem::copy_file(source,
-                                       destination,
-                                       options | std::filesystem::copy_options::overwrite_existing);
-        };
-
-        if (std::filesystem::is_directory(t.source))
-        {
-            std::filesystem::create_directories(t.destination / t.source.filename());
-
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(t.source))
+            if (!item.check_pause(stoken) || stoken.stop_requested())
             {
-                if (!item.check_pause(stoken) || stoken.stop_requested())
-                {
-                    return;
-                }
-
-                const auto relative = std::filesystem::relative(entry.path(), t.source);
-                const auto root = t.destination / t.source.filename();
-                // const auto destination = root / relative;
-
-                // logger::trace("relative   : {}", relative.string());
-                // logger::trace("root       : {}", root.string());
-                // logger::trace("destination: {}", (root / relative).string());
-
-                if (std::filesystem::is_directory(entry.path()))
-                {
-                    std::filesystem::create_directories(root / relative);
-                }
-                else
-                {
-                    auto result = handle_collision(stoken,
-                                                   tasks_.at(item.id),
-                                                   entry.path(),
-                                                   root / relative,
-                                                   collision_action);
-
-                    if (result.action == collision_resolve::overwrite_all ||
-                        result.action == collision_resolve::skip_all)
-                    {
-                        collision_action = result.action;
-                    }
-
-                    if (result.action == collision_resolve::skip ||
-                        result.action == collision_resolve::skip_all)
-                    {
-                        continue;
-                    }
-                    else if (result.action == collision_resolve::cancel)
-                    {
-                        return;
-                    }
-
-                    do_copy(entry.path(), result.destination, t.options);
-                }
+                return;
             }
-        }
-        else
-        {
-            auto result = handle_collision(stoken,
-                                           tasks_.at(item.id),
-                                           t.source,
-                                           t.destination / t.source.filename(),
-                                           collision_action);
+
+            auto src_stat = ztd::lstat::create(source);
+            if (!src_stat)
+            {
+                return;
+            }
+
+            const auto result =
+                handle_collision(stoken, tasks_.at(item.id), source, destination, collision_action);
+
+            if (result.action == collision_resolve::skip_all ||
+                result.action == collision_resolve::overwrite_all)
+            {
+                collision_action = result.action;
+            }
 
             if (result.action == collision_resolve::skip ||
-                result.action == collision_resolve::skip_all ||
+                // result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::cancel)
             {
                 return;
             }
 
-            do_copy(t.source, result.destination, t.options);
-        }
+            const auto actual_destination =
+                (result.action == collision_resolve::rename) ? result.destination : destination;
+
+            if (std::filesystem::is_directory(source))
+            {
+                std::filesystem::create_directories(actual_destination);
+                for (const auto& entry : std::filesystem::directory_iterator(source))
+                {
+                    if (!item.check_pause(stoken) || stoken.stop_requested())
+                    {
+                        return;
+                    }
+
+                    do_copy(entry.path(), actual_destination / entry.path().filename());
+                }
+            }
+            else
+            {
+                std::filesystem::copy_file(source, actual_destination);
+            }
+        };
+
+        do_copy(task.source, task.destination / task.source.filename());
     };
     queue_task(slot);
 }
@@ -333,121 +307,114 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 
     auto slot = [this, task](const std::stop_token& stoken, task_item& item)
     {
-        const auto& t = task;
-
-        if (!std::filesystem::exists(t.source))
+        if (!std::filesystem::exists(task.source))
         {
             throw std::filesystem::filesystem_error(
                 "Source path does not exist",
-                t.source,
+                task.source,
                 std::make_error_code(std::errc::invalid_argument));
         }
 
-        const auto src_stat = ztd::lstat::create(t.source);
-        const auto dest_stat = ztd::stat::create(t.destination.parent_path());
-        const bool same_device = src_stat && dest_stat && (src_stat->dev() == dest_stat->dev());
-
-        bool has_skipped = false;
         auto collision_action = collision_resolve::pending;
 
-        auto do_move = [same_device](const std::filesystem::path& source,
-                                     const std::filesystem::path& destination,
-                                     const std::filesystem::copy_options options)
+        std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_move =
+            [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
-            std::filesystem::create_directories(destination.parent_path());
-
-            if (same_device)
+            if (!item.check_pause(stoken) || stoken.stop_requested())
             {
-                if (std::filesystem::exists(destination))
-                {
-                    std::filesystem::remove(destination);
-                }
-                std::filesystem::rename(source, destination);
-            }
-            else
-            {
-                std::filesystem::copy_file(source,
-                                           destination,
-                                           options |
-                                               std::filesystem::copy_options::overwrite_existing);
-                std::filesystem::remove(source);
-            }
-        };
-
-        if (std::filesystem::is_directory(t.source))
-        {
-            std::filesystem::create_directories(t.destination / t.source.filename());
-
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(t.source))
-            {
-                if (!item.check_pause(stoken) || stoken.stop_requested())
-                {
-                    return;
-                }
-
-                const auto relative = std::filesystem::relative(entry.path(), t.source);
-                const auto root = t.destination / t.source.filename();
-                // const auto destination = root / relative;
-
-                // logger::trace("relative   : {}", relative.string());
-                // logger::trace("root       : {}", root.string());
-                // logger::trace("destination: {}", (root / relative).string());
-
-                if (std::filesystem::is_directory(entry.path()))
-                {
-                    std::filesystem::create_directories(root / relative);
-                }
-                else
-                {
-                    auto result = handle_collision(stoken,
-                                                   tasks_.at(item.id),
-                                                   entry.path(),
-                                                   root / relative,
-                                                   collision_action);
-
-                    if (result.action == collision_resolve::overwrite_all ||
-                        result.action == collision_resolve::skip_all)
-                    {
-                        collision_action = result.action;
-                    }
-
-                    if (result.action == collision_resolve::skip ||
-                        result.action == collision_resolve::skip_all)
-                    {
-                        has_skipped = true;
-                        continue;
-                    }
-                    else if (result.action == collision_resolve::cancel)
-                    {
-                        return;
-                    }
-
-                    do_move(entry.path(), result.destination, t.options);
-                }
+                return;
             }
 
-            if (!has_skipped)
+            const auto result = handle_collision(stoken,
+                                                 tasks_.at(item.id),
+                                                 source,
+                                                 destination,
+                                                 collision_action);
+
+            if (result.action == collision_resolve::skip_all ||
+                result.action == collision_resolve::overwrite_all)
             {
-                std::filesystem::remove_all(t.source);
+                collision_action = result.action;
             }
-        }
-        else
-        {
-            auto result = handle_collision(stoken,
-                                           tasks_.at(item.id),
-                                           t.source,
-                                           t.destination / t.source.filename(),
-                                           collision_action);
 
             if (result.action == collision_resolve::skip ||
-                result.action == collision_resolve::skip_all ||
+                // result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::cancel)
             {
                 return;
             }
 
-            do_move(t.source, result.destination, t.options);
-        }
+            const auto actual_destination =
+                (result.action == collision_resolve::rename) ? result.destination : destination;
+
+            if ((source.filename() == destination.filename()) &&
+                std::filesystem::is_directory(source) &&
+                std::filesystem::is_directory(actual_destination))
+            { // directory merge
+                for (const auto& entry : std::filesystem::directory_iterator(source))
+                {
+                    if (!item->check_pause(stoken) || stoken.stop_requested())
+                    {
+                        return;
+                    }
+
+                    do_move(entry.path(), actual_destination / entry.path().filename());
+                }
+
+                if (std::filesystem::is_empty(source))
+                {
+                    std::filesystem::remove(source);
+                }
+
+                return;
+            }
+
+            const auto src_stat = ztd::lstat::create(source);
+            const auto dest_parent_stat = ztd::stat::create(actual_destination.parent_path());
+
+            if (src_stat && dest_parent_stat && src_stat->dev() == dest_parent_stat->dev())
+            { // same device, can just use rename
+                if (std::filesystem::exists(actual_destination))
+                {
+                    std::filesystem::remove_all(actual_destination);
+                }
+                std::filesystem::rename(source, actual_destination);
+            }
+            else
+            {
+                if (std::filesystem::is_directory(source))
+                {
+                    std::filesystem::create_directories(actual_destination);
+                    for (const auto& entry : std::filesystem::directory_iterator(source))
+                    {
+                        if (!item.check_pause(stoken) || stoken.stop_requested())
+                        {
+                            return;
+                        }
+
+                        do_move(entry.path(), actual_destination / entry.path().filename());
+                    }
+
+                    if (std::filesystem::is_empty(source))
+                    {
+                        std::filesystem::remove_all(source);
+                    }
+                }
+                else
+                {
+                    const auto ok = std::filesystem::copy_file(
+                        source,
+                        actual_destination,
+                        std::filesystem::copy_options::overwrite_existing);
+                    if (ok)
+                    {
+                        std::filesystem::remove(source);
+                    }
+                }
+            }
+        };
+
+        do_move(task.source, task.destination / task.source.filename());
     };
     queue_task(slot);
 }

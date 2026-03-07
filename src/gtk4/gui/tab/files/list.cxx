@@ -292,7 +292,6 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
                     // TODO smart, move if on same fs, copy otherwise
                     auto task = vfs::move_task{
-                        .options = {},
                         .source = file->get_path(),
                         .destination = col->file->path(),
                     };
@@ -797,7 +796,6 @@ gui::list::on_drag_data_received(const Glib::ValueBase& value, double x, double 
 
         // TODO smart, move if on same fs, copy otherwise
         auto task = vfs::move_task{
-            .options = {},
             .source = file->get_path(),
             .destination = dir_->path(),
         };

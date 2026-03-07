@@ -51,14 +51,12 @@ struct chown_task final
 
 struct copy_task final
 {
-    std::filesystem::copy_options options = std::filesystem::copy_options::none;
     std::filesystem::path source;
     std::filesystem::path destination;
 };
 
 struct move_task final
 {
-    std::filesystem::copy_options options = std::filesystem::copy_options::none;
     std::filesystem::path source;
     std::filesystem::path destination;
 };
