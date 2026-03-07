@@ -96,7 +96,7 @@ vfs::task_manager::run_once(const std::stop_token& stoken) noexcept
         if (!current->stop_source.stop_requested())
         {
             current->state = task_item::status::running;
-            current->action(stoken, *current);
+            current->action(stoken, current);
         }
 
         std::scoped_lock lock(mutex_);
@@ -113,10 +113,13 @@ vfs::task_manager::run_once(const std::stop_token& stoken) noexcept
 }
 
 void
-vfs::task_manager::queue_task(std::function<void(const std::stop_token&, task_item&)> slot) noexcept
+vfs::task_manager::queue_task(
+    const std::function<void(const std::stop_token&, const std::shared_ptr<task_item>&)>&
+        slot) noexcept
 {
     auto item = std::make_shared<task_item>(create_task_id());
-    item->action = [this, item, slot](const std::stop_token& stoken, task_item& self) noexcept
+    item->action = [this, item, slot](const std::stop_token& stoken,
+                                      const std::shared_ptr<task_item>& self) noexcept
     {
         if (stoken.stop_requested())
         {
@@ -129,12 +132,12 @@ vfs::task_manager::queue_task(std::function<void(const std::stop_token&, task_it
 
             if (!stoken.stop_requested())
             {
-                signal_task_finished_.emit(self.id);
+                signal_task_finished_.emit(self->id);
             }
         }
         catch (const std::exception& e)
         {
-            signal_task_error_.emit({self.id, e.what()});
+            signal_task_error_.emit({self->id, e.what()});
         }
     };
 
@@ -151,7 +154,7 @@ vfs::task_manager::queue_task(std::function<void(const std::stop_token&, task_it
 void
 vfs::task_manager::add(const vfs::chmod_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -159,7 +162,7 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
         {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
-                if (!item.check_pause(stoken) || stoken.stop_requested())
+                if (!item->check_pause(stoken) || stoken.stop_requested())
                 {
                     return;
                 }
@@ -178,7 +181,7 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::chown_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -210,7 +213,7 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
 
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
-                if (!item.check_pause(stoken) || stoken.stop_requested())
+                if (!item->check_pause(stoken) || stoken.stop_requested())
                 {
                     return;
                 }
@@ -231,7 +234,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 {
     // logger::trace("copy: {} -> {}", task.source.string(), task.destination.string());
 
-    auto slot = [this, task](const std::stop_token& stoken, task_item& item)
+    auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         if (!std::filesystem::exists(task.source))
         {
@@ -246,7 +249,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
         std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_copy =
             [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
-            if (!item.check_pause(stoken) || stoken.stop_requested())
+            if (!item->check_pause(stoken) || stoken.stop_requested())
             {
                 return;
             }
@@ -258,7 +261,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
             }
 
             const auto result =
-                handle_collision(stoken, tasks_.at(item.id), source, destination, collision_action);
+                handle_collision(stoken, item, source, destination, collision_action);
 
             if (result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::overwrite_all)
@@ -281,7 +284,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
                 std::filesystem::create_directories(actual_destination);
                 for (const auto& entry : std::filesystem::directory_iterator(source))
                 {
-                    if (!item.check_pause(stoken) || stoken.stop_requested())
+                    if (!item->check_pause(stoken) || stoken.stop_requested())
                     {
                         return;
                     }
@@ -305,7 +308,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 {
     // logger::trace("move: {} -> {}", task.source.string(), task.destination.string());
 
-    auto slot = [this, task](const std::stop_token& stoken, task_item& item)
+    auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         if (!std::filesystem::exists(task.source))
         {
@@ -320,16 +323,13 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
         std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_move =
             [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
-            if (!item.check_pause(stoken) || stoken.stop_requested())
+            if (!item->check_pause(stoken) || stoken.stop_requested())
             {
                 return;
             }
 
-            const auto result = handle_collision(stoken,
-                                                 tasks_.at(item.id),
-                                                 source,
-                                                 destination,
-                                                 collision_action);
+            const auto result =
+                handle_collision(stoken, item, source, destination, collision_action);
 
             if (result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::overwrite_all)
@@ -387,7 +387,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
                     std::filesystem::create_directories(actual_destination);
                     for (const auto& entry : std::filesystem::directory_iterator(source))
                     {
-                        if (!item.check_pause(stoken) || stoken.stop_requested())
+                        if (!item->check_pause(stoken) || stoken.stop_requested())
                         {
                             return;
                         }
@@ -422,7 +422,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::trash_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -438,7 +438,7 @@ vfs::task_manager::add(const vfs::trash_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::remove_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -454,7 +454,7 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
         {
             for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
             {
-                if (!item.check_pause(stoken) || stoken.stop_requested())
+                if (!item->check_pause(stoken) || stoken.stop_requested())
                 {
                     return;
                 }
@@ -479,7 +479,7 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::create_directory_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -494,7 +494,7 @@ vfs::task_manager::add(const vfs::create_directory_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::create_file_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 
@@ -521,7 +521,7 @@ vfs::task_manager::add(const vfs::create_file_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::create_symlink_task& task) noexcept
 {
-    auto slot = [task](const std::stop_token& stoken, task_item& item)
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
         const auto& t = task;
 

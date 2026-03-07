@@ -164,7 +164,7 @@ class task_manager final
         std::uint64_t id;
         std::stop_source stop_source;
         std::atomic<status> state{status::pending};
-        std::function<void(const std::stop_token&, task_item&)> action;
+        std::function<void(const std::stop_token&, std::shared_ptr<task_item>&)> action;
 
         // pause/stop handling
         std::mutex pause_mutex;
@@ -232,7 +232,8 @@ class task_manager final
         return next_task_id_;
     }
 
-    void queue_task(std::function<void(const std::stop_token&, task_item&)> slot) noexcept;
+    void queue_task(const std::function<void(const std::stop_token&,
+                                             const std::shared_ptr<task_item>&)>& slot) noexcept;
 
     struct collision_result final
     {
