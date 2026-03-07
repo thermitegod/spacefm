@@ -241,7 +241,15 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
             throw std::filesystem::filesystem_error(
                 "Source path does not exist",
                 task.source,
-                std::make_error_code(std::errc::invalid_argument));
+                std::make_error_code(std::errc::no_such_file_or_directory));
+        }
+
+        if (!std::filesystem::exists(task.destination))
+        {
+            throw std::filesystem::filesystem_error(
+                "Destination path does not exist",
+                task.destination,
+                std::make_error_code(std::errc::no_such_file_or_directory));
         }
 
         auto collision_action = collision_resolve::pending;
@@ -315,7 +323,15 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
             throw std::filesystem::filesystem_error(
                 "Source path does not exist",
                 task.source,
-                std::make_error_code(std::errc::invalid_argument));
+                std::make_error_code(std::errc::no_such_file_or_directory));
+        }
+
+        if (!std::filesystem::exists(task.destination))
+        {
+            throw std::filesystem::filesystem_error(
+                "Destination path does not exist",
+                task.destination,
+                std::make_error_code(std::errc::no_such_file_or_directory));
         }
 
         auto collision_action = collision_resolve::pending;
