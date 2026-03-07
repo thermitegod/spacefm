@@ -100,6 +100,10 @@ read_file(const std::filesystem::path& path) noexcept
 static std::size_t
 count_files(const std::filesystem::path& path, bool recursive = false) noexcept
 {
+    ztd::panic_if(!std::filesystem::exists(path),
+                  "Test Suite missing required path: {}",
+                  path.string());
+
     size_t count = 0;
     if (recursive)
     {
@@ -848,6 +852,109 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::exists(destination / "directory/nested/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/b.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/b.txt"));
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+    }
+
+    TEST_CASE("vfs::rename_task")
+    {
+        const auto test_path = root / "rename_task";
+        const auto source = test_path / "src";
+        const auto destination = test_path / "dest";
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
+        }
+
+        std::filesystem::create_directories(source);
+        std::filesystem::create_directories(destination);
+
+        test_sync sync;
+
+        auto manager = vfs::task_manager::create();
+        manager->signal_task_finished().connect([&](std::uint64_t task_id)
+                                                { sync.notify_success(task_id); });
+        manager->signal_task_error().connect([&](const vfs::task_error& error)
+                                             { sync.notify_error(error); });
+        manager->signal_task_collision().connect(
+            [](const vfs::task_collision& c)
+            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+
+        SUBCASE("rename file")
+        {
+            const auto file = source / "test.txt";
+            create_file(file, "data");
+
+            manager->add(
+                vfs::rename_task{.source = file, .destination = destination / "renamed.txt"});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            const auto expected = destination / "renamed.txt";
+            CHECK_FALSE(std::filesystem::exists(file));
+            CHECK(std::filesystem::exists(expected));
+            CHECK(std::filesystem::is_regular_file(expected));
+            CHECK_EQ(read_file(expected), "data");
+        }
+
+        SUBCASE("rename directory empty")
+        {
+            const auto directory = source / "directory";
+            std::filesystem::create_directories(directory);
+
+            manager->add(
+                vfs::rename_task{.source = directory, .destination = destination / "renamed"});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_FALSE(std::filesystem::exists(directory));
+            CHECK(std::filesystem::exists(destination / "renamed"));
+            CHECK(std::filesystem::is_directory(destination / "renamed"));
+            CHECK_EQ(count_files(destination / "renamed", true), 0);
+        }
+
+        SUBCASE("rename directory with files")
+        {
+            const auto directory = source / "directory";
+
+            std::filesystem::create_directories(directory);
+            std::size_t loop = 100;
+            for (const auto i : std::views::iota(0uz, loop))
+            {
+                const auto path = directory / std::format("{}", i);
+                create_file(path, std::format("{}", i));
+            }
+
+            manager->add(
+                vfs::rename_task{.source = directory, .destination = destination / "renamed"});
+            sync.wait();
+
+            CHECK(manager->empty());
+
+            CHECK_EQ(sync.error, 0);
+            CHECK_EQ(sync.completed, 1);
+
+            CHECK_EQ(count_files(destination / "renamed", true), loop);
+
+            for (const auto& entry : std::filesystem::directory_iterator(destination / "renamed"))
+            {
+                CHECK(std::filesystem::exists(entry.path()));
+                CHECK(std::filesystem::is_regular_file(entry.path()));
+                CHECK_EQ(read_file(entry.path()), entry.path().filename());
+            }
         }
 
         if (std::filesystem::exists(test_path))

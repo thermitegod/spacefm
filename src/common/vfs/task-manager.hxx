@@ -61,6 +61,12 @@ struct move_task final
     std::filesystem::path destination;
 };
 
+struct rename_task final
+{
+    std::filesystem::path source;
+    std::filesystem::path destination;
+};
+
 struct trash_task final
 {
     std::filesystem::path path;
@@ -129,6 +135,7 @@ class task_manager final
     void add(const vfs::chown_task& task) noexcept;
     void add(const vfs::copy_task& task) noexcept;
     void add(const vfs::move_task& task) noexcept;
+    void add(const vfs::rename_task& task) noexcept;
     void add(const vfs::trash_task& task) noexcept;
     void add(const vfs::remove_task& task) noexcept;
     void add(const vfs::create_directory_task& task) noexcept;

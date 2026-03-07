@@ -436,6 +436,87 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 }
 
 void
+vfs::task_manager::add(const vfs::rename_task& task) noexcept
+{
+    // logger::trace("rename: {} -> {}", task.source.string(), task.destination.string());
+
+    auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
+    {
+        if (!std::filesystem::exists(task.source))
+        {
+            throw std::filesystem::filesystem_error(
+                "Source path does not exist",
+                task.source,
+                std::make_error_code(std::errc::no_such_file_or_directory));
+        }
+
+        if (std::filesystem::exists(task.destination) &&
+            ztd::statx::create(task.source)->mode() != ztd::statx::create(task.destination)->mode())
+        {
+            throw std::filesystem::filesystem_error("Cannot change type with rename",
+                                                    task.source,
+                                                    task.destination,
+                                                    std::make_error_code(std::errc::not_supported));
+        }
+
+        auto do_rename =
+            [&](const std::filesystem::path& source, const std::filesystem::path& destination)
+        {
+            if (!item->check_pause(stoken) || stoken.stop_requested())
+            {
+                return;
+            }
+
+            const auto result =
+                handle_collision(stoken, item, source, destination, collision_resolve::pending);
+
+            if (result.action == collision_resolve::skip ||
+                result.action == collision_resolve::skip_all ||
+                result.action == collision_resolve::cancel ||
+                result.action == collision_resolve::overwrite_all)
+            {
+                return;
+            }
+
+            const auto actual_destination =
+                (result.action == collision_resolve::rename) ? result.destination : destination;
+
+            if (result.action == collision_resolve::merge)
+            {
+                throw std::filesystem::filesystem_error(
+                    "Cannot merge directories with rename",
+                    task.source,
+                    actual_destination,
+                    std::make_error_code(std::errc::not_supported));
+            }
+
+            const auto src_stat = ztd::lstat::create(source);
+            const auto dest_parent_stat = ztd::stat::create(actual_destination.parent_path());
+
+            if (src_stat && dest_parent_stat && src_stat->dev() == dest_parent_stat->dev())
+            {
+                if (std::filesystem::exists(actual_destination))
+                {
+                    std::filesystem::remove_all(actual_destination);
+                }
+                std::filesystem::rename(source, actual_destination);
+            }
+            else
+            {
+                throw std::filesystem::filesystem_error(
+                    "Cannot rename a file to a different device",
+                    task.source,
+                    actual_destination,
+                    std::make_error_code(std::errc::cross_device_link));
+            }
+        };
+
+        do_rename(task.source, task.destination);
+    };
+    queue_task(slot);
+}
+
+void
 vfs::task_manager::add(const vfs::trash_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)

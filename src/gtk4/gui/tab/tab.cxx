@@ -2136,11 +2136,15 @@ gui::tab::show_rename_dialog() noexcept
             {
                 if (response.mode == dialog::rename_mode::rename)
                 {
-                    auto task = vfs::move_task{
+                    auto task = vfs::rename_task{
                         .source = response.source,
                         .destination = response.destination,
                     };
                     task_manager_->add(task);
+                }
+                else if (response.mode == dialog::rename_mode::cancel)
+                {
+                    return;
                 }
                 else
                 {
