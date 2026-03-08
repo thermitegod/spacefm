@@ -17,6 +17,8 @@
 
 #include <filesystem>
 #include <memory>
+#include <queue>
+#include <span>
 #include <vector>
 
 #include <glibmm.h>
@@ -35,8 +37,6 @@ enum class rename_mode : std::uint8_t
     link,
     move,
     rename,
-    skip,   // rename button clicked with no change
-    cancel, // cancel any future renames
 };
 
 struct rename_response final
@@ -51,13 +51,16 @@ class rename : public Gtk::ApplicationWindow
 {
   public:
     rename(Gtk::ApplicationWindow& parent, const std::shared_ptr<config::settings>& settings,
-           const std::filesystem::path& cwd, const std::shared_ptr<vfs::file>& file,
-           const std::filesystem::path& destination, const bool clip_copy);
+           const std::filesystem::path& cwd,
+           const std::span<const std::shared_ptr<vfs::file>>& files);
     ~rename();
 
   private:
     std::shared_ptr<config::settings> settings_;
     std::shared_ptr<vfs::file> file_;
+    std::queue<std::shared_ptr<vfs::file>> files_;
+
+    std::filesystem::path cwd_;
 
     std::filesystem::path full_path_;
     std::filesystem::path old_path_;
@@ -102,8 +105,9 @@ class rename : public Gtk::ApplicationWindow
 
     Gtk::Button button_options_;
     Gtk::Button button_revert_;
+    Gtk::Button button_skip_;
     Gtk::Button button_cancel_;
-    Gtk::Button button_next_;
+    Gtk::Button button_ok_;
     Gtk::Box button_box_;
 
     bool full_path_exists_{false};
@@ -138,17 +142,22 @@ class rename : public Gtk::ApplicationWindow
     std::vector<sigc::connection> on_move_change_signals_;
 
     // Signal Handlers
-    bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);
-    void on_button_ok_clicked();
-    void on_button_cancel_clicked();
-    void on_button_revert_clicked();
-    void on_button_options_clicked();
+    bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,
+                      Gdk::ModifierType state) noexcept;
+    void on_button_ok_clicked() noexcept;
+    void on_button_cancel_clicked() noexcept;
+    void on_button_skip_clicked() noexcept;
+    void on_button_revert_clicked() noexcept;
+    void on_button_options_clicked() noexcept;
 
-    void on_opt_toggled();
-    void on_toggled();
+    void on_opt_toggled() noexcept;
+    void on_toggled() noexcept;
 
     void select_input() noexcept;
-    void on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget);
+    void on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexcept;
+
+    void next_file() noexcept;
+    void update() noexcept;
 
   public:
     [[nodiscard]] auto

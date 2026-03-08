@@ -227,7 +227,7 @@ struct settings_on_disk
 
         struct rename final
         {
-            bool copy{false};
+            bool copy{true};
             bool copyt{false};
             bool filename{true};
             bool link{false};

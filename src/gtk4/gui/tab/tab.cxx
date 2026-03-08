@@ -2125,36 +2125,26 @@ gui::tab::show_rename_dialog() noexcept
         return;
     }
 
-    // TODO - figure out how to spawn one dialog at a time,
-    // or pass all files and update rename dialog
-    for (const auto& file : selected)
-    {
-        auto* dialog =
-            Gtk::make_managed<gui::dialog::rename>(parent_, settings_, cwd(), file, "", false);
-        dialog->signal_confirm().connect(
-            [this](const dialog::rename_response& response)
+    auto* dialog = Gtk::make_managed<gui::dialog::rename>(parent_, settings_, cwd(), selected);
+    dialog->signal_confirm().connect(
+        [this](const dialog::rename_response& response)
+        {
+            if (response.mode == dialog::rename_mode::rename)
             {
-                if (response.mode == dialog::rename_mode::rename)
-                {
-                    auto task = vfs::rename_task{
-                        .source = response.source,
-                        .destination = response.destination,
-                    };
-                    task_manager_->add(task);
-                }
-                else if (response.mode == dialog::rename_mode::cancel)
-                {
-                    return;
-                }
-                else
-                {
-                    auto alert = Gtk::AlertDialog::create("Not Implemented");
-                    alert->set_detail("This file task is not yet implemented");
-                    alert->set_modal(true);
-                    alert->show(parent_);
-                }
-            });
-    }
+                auto task = vfs::rename_task{
+                    .source = response.source,
+                    .destination = response.destination,
+                };
+                task_manager_->add(task);
+            }
+            else
+            {
+                auto alert = Gtk::AlertDialog::create("Not Implemented");
+                alert->set_detail("This file task is not yet implemented");
+                alert->set_modal(true);
+                alert->show(parent_);
+            }
+        });
 }
 
 void
