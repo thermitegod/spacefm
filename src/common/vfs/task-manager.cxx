@@ -197,10 +197,8 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
-
-        const auto pw = ztd::passwd::create(t.user);
-        const auto gr = ztd::group::create(t.group);
+        const auto pw = ztd::passwd::create(task.user);
+        const auto gr = ztd::group::create(task.group);
 
         if (!pw || !gr)
         {
@@ -210,36 +208,51 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
         const uid_t uid = pw->uid();
         const gid_t gid = gr->gid();
 
-        auto do_chown = [uid, gid](const std::filesystem::path& p)
+        auto chown_wrapper = [uid, gid](const std::filesystem::path& path)
         {
-            if (::lchown(p.c_str(), uid, gid) != 0)
+            if (::lchown(path.c_str(), uid, gid) != 0)
             {
                 throw std::filesystem::filesystem_error(
                     "Failed to change ownership",
-                    p,
+                    path,
                     std::error_code(errno, std::generic_category()));
             }
         };
 
-        if (t.recursive && std::filesystem::is_directory(t.path))
+        std::function<void(const std::filesystem::path&)> do_chown =
+            [&](const std::filesystem::path& path)
         {
-            do_chown(t.path);
-
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
+            if (!item->check_pause(stoken) || stoken.stop_requested())
             {
-                if (!item->check_pause(stoken) || stoken.stop_requested())
-                {
-                    return;
-                }
-
-                do_chown(entry.path());
+                return;
             }
-        }
-        else
+
+            if (task.recursive && std::filesystem::is_directory(path))
+            {
+                chown_wrapper(path);
+
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
+                {
+                    if (!item->check_pause(stoken) || stoken.stop_requested())
+                    {
+                        return;
+                    }
+
+                    do_chown(entry.path());
+                }
+            }
+            else
+            {
+                chown_wrapper(path);
+            }
+        };
+
+        for (const auto& path : task.paths)
         {
-            do_chown(t.path);
+            do_chown(path);
         }
     };
+
     queue_task(slot);
 }
 

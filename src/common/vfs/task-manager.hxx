@@ -44,7 +44,7 @@ struct chown_task final
 {
     std::string user;
     std::string group;
-    std::filesystem::path path;
+    std::vector<std::filesystem::path> paths;
     // options
     bool recursive = false;
 };
