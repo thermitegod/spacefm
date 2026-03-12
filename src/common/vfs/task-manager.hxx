@@ -74,7 +74,7 @@ struct trash_task final
 
 struct remove_task final
 {
-    std::filesystem::path path;
+    std::vector<std::filesystem::path> paths;
 };
 
 struct create_directory_task final

@@ -2548,15 +2548,12 @@ gui::tab::on_delete() const noexcept
         return;
     }
 
-    const auto submit_task = [this, selected]()
+    const auto submit_task = [this, selected = selected_paths()]()
     {
-        for (const auto& file : selected)
-        {
-            auto task = vfs::remove_task{
-                .path = file->path(),
-            };
-            task_manager_->add(task);
-        }
+        auto task = vfs::remove_task{
+            .paths = selected,
+        };
+        task_manager_->add(task);
     };
 
     if (settings_->general.confirm_delete)

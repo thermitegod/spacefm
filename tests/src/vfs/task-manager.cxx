@@ -461,7 +461,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::exists(path));
             CHECK(std::filesystem::is_regular_file(path));
 
-            manager->add(vfs::remove_task{.path = path});
+            manager->add(vfs::remove_task{.paths = {path}});
             sync.wait();
 
             CHECK(manager->empty());
@@ -479,7 +479,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             CHECK(std::filesystem::exists(path));
             CHECK(std::filesystem::is_directory(path));
 
-            manager->add(vfs::remove_task{.path = path});
+            manager->add(vfs::remove_task{.paths = {path}});
             sync.wait();
 
             CHECK(manager->empty());
@@ -506,7 +506,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
             ///////////////////////////
 
-            manager->add(vfs::remove_task{.path = path});
+            manager->add(vfs::remove_task{.paths = {path}});
             sync.wait();
 
             CHECK(manager->empty());
@@ -519,7 +519,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
 
         SUBCASE("remove error does not exist")
         {
-            manager->add(vfs::remove_task{.path = "bad.txt"});
+            manager->add(vfs::remove_task{.paths = {"bad.txt"}});
             sync.wait();
 
             CHECK(manager->empty());

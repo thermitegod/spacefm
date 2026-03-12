@@ -535,37 +535,45 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
-
-        if (!std::filesystem::exists(t.path))
+        std::function<void(const std::filesystem::path&)> do_remove =
+            [&](const std::filesystem::path& path)
         {
-            throw std::filesystem::filesystem_error(
-                "Trying to remove nonexistent path ",
-                t.path,
-                std::make_error_code(std::errc::invalid_argument));
-        }
-
-        if (std::filesystem::is_directory(t.path))
-        {
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
+            if (!item->check_pause(stoken) || stoken.stop_requested())
             {
-                if (!item->check_pause(stoken) || stoken.stop_requested())
-                {
-                    return;
-                }
-
-                if (entry.is_directory())
-                {
-                    continue;
-                }
-
-                std::filesystem::remove(entry.path());
+                return;
             }
-            std::filesystem::remove_all(t.path);
-        }
-        else
+
+            if (!std::filesystem::exists(path))
+            {
+                throw std::filesystem::filesystem_error(
+                    "Trying to remove nonexistent path ",
+                    path,
+                    std::make_error_code(std::errc::invalid_argument));
+            }
+
+            if (std::filesystem::is_directory(path))
+            {
+                for (const auto& entry : std::filesystem::directory_iterator(path))
+                {
+                    if (!item->check_pause(stoken) || stoken.stop_requested())
+                    {
+                        return;
+                    }
+
+                    do_remove(entry.path());
+                }
+
+                std::filesystem::remove(path);
+            }
+            else
+            {
+                std::filesystem::remove(path);
+            }
+        };
+
+        for (const auto& path : task.paths)
         {
-            std::filesystem::remove(t.path);
+            do_remove(path);
         }
     };
     queue_task(slot);
