@@ -578,12 +578,12 @@ vfs::task_manager::add(const vfs::create_directory_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
+        if (!item->check_pause(stoken) || stoken.stop_requested())
+        {
+            return;
+        }
 
-        (void)stoken;
-        (void)item;
-
-        std::filesystem::create_directories(t.path);
+        std::filesystem::create_directories(task.path);
     };
     queue_task(slot);
 }
@@ -593,24 +593,24 @@ vfs::task_manager::add(const vfs::create_file_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
+        if (!item->check_pause(stoken) || stoken.stop_requested())
+        {
+            return;
+        }
 
-        (void)stoken;
-        (void)item;
-
-        if (std::filesystem::exists(t.path))
+        if (std::filesystem::exists(task.path))
         {
             throw std::filesystem::filesystem_error("Path already exists",
-                                                    t.path,
+                                                    task.path,
                                                     std::make_error_code(std::errc::file_exists));
         }
 
-        if (!std::filesystem::exists(t.path.parent_path()))
+        if (!std::filesystem::exists(task.path.parent_path()))
         {
-            std::filesystem::create_directories(t.path.parent_path());
+            std::filesystem::create_directories(task.path.parent_path());
         }
 
-        std::ofstream(t.path);
+        std::ofstream(task.path);
     };
     queue_task(slot);
 }
@@ -620,27 +620,27 @@ vfs::task_manager::add(const vfs::create_symlink_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
-
-        (void)stoken;
-        (void)item;
-
-        if (std::filesystem::exists(t.name))
+        if (!item->check_pause(stoken) || stoken.stop_requested())
         {
-            if (t.force)
+            return;
+        }
+
+        if (std::filesystem::exists(task.name))
+        {
+            if (task.force)
             {
-                std::filesystem::remove(t.name);
+                std::filesystem::remove(task.name);
             }
             else
             {
                 throw std::filesystem::filesystem_error(
                     "Path already exists",
-                    t.name,
+                    task.name,
                     std::make_error_code(std::errc::file_exists));
             }
         }
 
-        std::filesystem::create_symlink(t.target, t.name);
+        std::filesystem::create_symlink(task.target, task.name);
     };
     queue_task(slot);
 }
