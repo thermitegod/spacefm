@@ -187,21 +187,22 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
                 auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
                     gslist_value.get(),
                     Glib::OwnershipType::OWNERSHIP_NONE);
+
+                std::vector<std::filesystem::path> paths;
                 for (const auto& file : files)
                 {
-                    Glib::RefPtr<Gio::File> destination =
-                        Gio::File::create_for_path(col->file->path() / file->get_basename());
-
                     // logger::debug<logger::gui>("DnD Source: {}", file->get_path());
-                    // logger::debug<logger::gui>("DnD Target: {}", col->file->path().string());
-
-                    // TODO smart, move if on same fs, copy otherwise
-                    auto task = vfs::move_task{
-                        .source = file->get_path(),
-                        .destination = col->file->path(),
-                    };
-                    task_manager_->add(task);
+                    paths.push_back(file->get_path());
                 }
+                // logger::debug<logger::gui>("DnD Target: {}", col->file->path().string());
+
+                // TODO smart, move if on same fs, copy otherwise
+                auto task = vfs::move_task{
+                    .sources = paths,
+                    .destination = col->file->path(),
+                };
+                task_manager_->add(task);
+
                 return true;
             },
             false);
@@ -378,21 +379,21 @@ gui::grid::on_drag_data_received(const Glib::ValueBase& value, double x, double 
     auto files = Glib::SListHandler<Glib::RefPtr<Gio::File>>::slist_to_vector(
         gslist_value.get(),
         Glib::OwnershipType::OWNERSHIP_NONE);
+
+    std::vector<std::filesystem::path> paths;
     for (const auto& file : files)
     {
-        Glib::RefPtr<Gio::File> destination =
-            Gio::File::create_for_path(dir_->path() / file->get_basename());
-
         // logger::debug<logger::gui>("DnD Source: {}", file->get_path());
-        // logger::debug<logger::gui>("DnD Target: {}", dir_->path().string());
-
-        // TODO smart, move if on same fs, copy otherwise
-        auto task = vfs::move_task{
-            .source = file->get_path(),
-            .destination = dir_->path(),
-        };
-        task_manager_->add(task);
+        paths.push_back(file->get_path());
     }
+    // logger::debug<logger::gui>("DnD Target: {}", dir_->path().string());
+
+    // TODO smart, move if on same fs, copy otherwise
+    auto task = vfs::move_task{
+        .sources = paths,
+        .destination = dir_->path(),
+    };
+    task_manager_->add(task);
 
     return true;
 }

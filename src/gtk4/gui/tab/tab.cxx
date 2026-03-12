@@ -2295,6 +2295,24 @@ gui::tab::selected_files() const noexcept
     }
 }
 
+std::vector<std::filesystem::path>
+gui::tab::selected_paths() const noexcept
+{
+    const auto selected = selected_files();
+    if (selected.empty())
+    {
+        return {};
+    }
+
+    std::vector<std::filesystem::path> paths;
+    paths.reserve(selected.size());
+    for (const auto& file : selected)
+    {
+        paths.push_back(file->path());
+    }
+    return paths;
+}
+
 void
 gui::tab::select_all() const noexcept
 {
@@ -2463,26 +2481,29 @@ gui::tab::on_paste() const noexcept
     auto callback = [this](const std::vector<std::string>& uris, bool is_cut)
     {
         // logger::trace("is_cut: {}", is_cut);
+        std::vector<std::filesystem::path> files;
+        files.reserve(uris.size());
         for (const auto& uri : uris)
         {
             // logger::trace("uri: {}", uri);
-            const auto file = Glib::filename_from_uri(uri);
-            if (is_cut)
-            {
-                auto task = vfs::move_task{
-                    .source = file,
-                    .destination = cwd(),
-                };
-                task_manager_->add(task);
-            }
-            else
-            {
-                auto task = vfs::copy_task{
-                    .source = file,
-                    .destination = cwd(),
-                };
-                task_manager_->add(task);
-            }
+            files.push_back(Glib::filename_from_uri(uri));
+        }
+
+        if (is_cut)
+        {
+            auto task = vfs::move_task{
+                .sources = files,
+                .destination = cwd(),
+            };
+            task_manager_->add(task);
+        }
+        else
+        {
+            auto task = vfs::copy_task{
+                .sources = files,
+                .destination = cwd(),
+            };
+            task_manager_->add(task);
         }
     };
 
@@ -2729,7 +2750,7 @@ gui::tab::on_move_to_select_path() noexcept
 void
 gui::tab::on_copy_to_last_path() noexcept
 {
-    const auto selected = selected_files();
+    const auto selected = selected_paths();
     if (selected.empty())
     {
         return;
@@ -2740,20 +2761,17 @@ gui::tab::on_copy_to_last_path() noexcept
         return;
     }
 
-    for (const auto& file : selected)
-    {
-        auto task = vfs::copy_task{
-            .source = file->path(),
-            .destination = *last_path_,
-        };
-        task_manager_->add(task);
-    }
+    auto task = vfs::copy_task{
+        .sources = selected,
+        .destination = *last_path_,
+    };
+    task_manager_->add(task);
 }
 
 void
 gui::tab::on_move_to_last_path() noexcept
 {
-    const auto selected = selected_files();
+    const auto selected = selected_paths();
     if (selected.empty())
     {
         return;
@@ -2764,14 +2782,11 @@ gui::tab::on_move_to_last_path() noexcept
         return;
     }
 
-    for (const auto& file : selected)
-    {
-        auto task = vfs::move_task{
-            .source = file->path(),
-            .destination = *last_path_,
-        };
-        task_manager_->add(task);
-    }
+    auto task = vfs::move_task{
+        .sources = selected,
+        .destination = *last_path_,
+    };
+    task_manager_->add(task);
 }
 
 void

@@ -51,13 +51,13 @@ struct chown_task final
 
 struct copy_task final
 {
-    std::filesystem::path source;
+    std::vector<std::filesystem::path> sources;
     std::filesystem::path destination;
 };
 
 struct move_task final
 {
-    std::filesystem::path source;
+    std::vector<std::filesystem::path> sources;
     std::filesystem::path destination;
 };
 

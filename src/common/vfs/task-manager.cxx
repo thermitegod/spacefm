@@ -236,14 +236,6 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 
     auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        if (!std::filesystem::exists(task.source))
-        {
-            throw std::filesystem::filesystem_error(
-                "Source path does not exist",
-                task.source,
-                std::make_error_code(std::errc::no_such_file_or_directory));
-        }
-
         if (!std::filesystem::exists(task.destination))
         {
             throw std::filesystem::filesystem_error(
@@ -278,7 +270,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
             }
 
             if (result.action == collision_resolve::skip ||
-                // result.action == collision_resolve::skip_all ||
+                result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::cancel)
             {
                 return;
@@ -306,7 +298,10 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
             }
         };
 
-        do_copy(task.source, task.destination / task.source.filename());
+        for (const auto& source : task.sources)
+        {
+            do_copy(source, task.destination / source.filename());
+        }
     };
     queue_task(slot);
 }
@@ -318,14 +313,6 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 
     auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        if (!std::filesystem::exists(task.source))
-        {
-            throw std::filesystem::filesystem_error(
-                "Source path does not exist",
-                task.source,
-                std::make_error_code(std::errc::no_such_file_or_directory));
-        }
-
         if (!std::filesystem::exists(task.destination))
         {
             throw std::filesystem::filesystem_error(
@@ -354,7 +341,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
             }
 
             if (result.action == collision_resolve::skip ||
-                // result.action == collision_resolve::skip_all ||
+                result.action == collision_resolve::skip_all ||
                 result.action == collision_resolve::cancel)
             {
                 return;
@@ -430,7 +417,10 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
             }
         };
 
-        do_move(task.source, task.destination / task.source.filename());
+        for (const auto& source : task.sources)
+        {
+            do_move(source, task.destination / source.filename());
+        }
     };
     queue_task(slot);
 }

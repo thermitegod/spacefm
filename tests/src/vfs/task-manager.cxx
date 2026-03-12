@@ -564,7 +564,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             const auto file = source / "test.txt";
             create_file(file, "data");
 
-            manager->add(vfs::copy_task{.source = file, .destination = destination});
+            manager->add(vfs::copy_task{.sources = {file}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -583,7 +583,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             const auto directory = source / "directory";
             std::filesystem::create_directories(directory);
 
-            manager->add(vfs::copy_task{.source = directory, .destination = destination});
+            manager->add(vfs::copy_task{.sources = {directory}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -608,7 +608,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
                 create_file(path, std::format("{}", i));
             }
 
-            manager->add(vfs::copy_task{.source = directory, .destination = destination});
+            manager->add(vfs::copy_task{.sources = {directory}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -634,7 +634,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(source / "directory/nested/d.txt");
 
             manager->add(
-                vfs::copy_task{.source = source / "directory", .destination = destination});
+                vfs::copy_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -655,7 +655,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(destination / "directory/b.txt");
 
             manager->add(
-                vfs::copy_task{.source = source / "directory", .destination = destination});
+                vfs::copy_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -675,7 +675,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(destination / "directory/nested/b.txt");
 
             manager->add(
-                vfs::copy_task{.source = source / "directory", .destination = destination});
+                vfs::copy_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -725,7 +725,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             const auto file = source / "test.txt";
             create_file(file, "data");
 
-            manager->add(vfs::move_task{.source = file, .destination = destination});
+            manager->add(vfs::move_task{.sources = {file}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -744,7 +744,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             const auto directory = source / "directory";
             std::filesystem::create_directories(directory);
 
-            manager->add(vfs::move_task{.source = directory, .destination = destination});
+            manager->add(vfs::move_task{.sources = {directory}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -769,7 +769,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
                 create_file(path, std::format("{}", i));
             }
 
-            manager->add(vfs::move_task{.source = directory, .destination = destination});
+            manager->add(vfs::move_task{.sources = {directory}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -795,7 +795,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(source / "directory/nested/d.txt");
 
             manager->add(
-                vfs::move_task{.source = source / "directory", .destination = destination});
+                vfs::move_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -818,7 +818,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(destination / "directory/d.txt");
 
             manager->add(
-                vfs::move_task{.source = source / "directory", .destination = destination});
+                vfs::move_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());
@@ -840,7 +840,7 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
             create_file(destination / "directory/nested/b.txt");
 
             manager->add(
-                vfs::move_task{.source = source / "directory", .destination = destination});
+                vfs::move_task{.sources = {source / "directory"}, .destination = destination});
             sync.wait();
 
             CHECK(manager->empty());

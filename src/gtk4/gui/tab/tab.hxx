@@ -123,6 +123,7 @@ class tab final : public Gtk::Box
     void set_state(const config::list_state& state, const bool update_model = false) noexcept;
 
     [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
+    [[nodiscard]] std::vector<std::filesystem::path> selected_paths() const noexcept;
 
     void select_all() const noexcept;
     void unselect_all() const noexcept;
