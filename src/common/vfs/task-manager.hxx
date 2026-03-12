@@ -35,7 +35,7 @@ namespace vfs
 struct chmod_task final
 {
     std::filesystem::perms mode;
-    std::filesystem::path path;
+    std::vector<std::filesystem::path> paths;
     // options
     bool recursive = false;
 };

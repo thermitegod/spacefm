@@ -156,23 +156,37 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
-
-        if (t.recursive && std::filesystem::is_directory(t.path))
+        std::function<void(const std::filesystem::path&)> do_chmod =
+            [&](const std::filesystem::path& path)
         {
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(t.path))
+            if (!item->check_pause(stoken) || stoken.stop_requested())
             {
-                if (!item->check_pause(stoken) || stoken.stop_requested())
-                {
-                    return;
-                }
-
-                std::filesystem::permissions(entry.path(), t.mode);
+                return;
             }
-        }
-        else
+
+            if (task.recursive && std::filesystem::is_directory(path))
+            {
+                std::filesystem::permissions(path, task.mode);
+
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
+                {
+                    if (!item->check_pause(stoken) || stoken.stop_requested())
+                    {
+                        return;
+                    }
+
+                    std::filesystem::permissions(entry.path(), task.mode);
+                }
+            }
+            else
+            {
+                std::filesystem::permissions(path, task.mode);
+            }
+        };
+
+        for (const auto& path : task.paths)
         {
-            std::filesystem::permissions(t.path, t.mode);
+            do_chmod(path);
         }
     };
     queue_task(slot);
