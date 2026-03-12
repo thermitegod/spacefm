@@ -69,7 +69,7 @@ struct rename_task final
 
 struct trash_task final
 {
-    std::filesystem::path path;
+    std::vector<std::filesystem::path> paths;
 };
 
 struct remove_task final

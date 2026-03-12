@@ -511,13 +511,21 @@ vfs::task_manager::add(const vfs::trash_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        const auto& t = task;
+        auto do_trash = [&](const std::filesystem::path& path)
+        {
+            if (!item->check_pause(stoken) || stoken.stop_requested())
+            {
+                return;
+            }
 
-        (void)stoken;
-        (void)item;
+            // TODO error case
+            auto _ = vfs::trash_can::trash(path);
+        };
 
-        // TODO error case
-        auto _ = vfs::trash_can::trash(t.path);
+        for (const auto& path : task.paths)
+        {
+            do_trash(path);
+        }
     };
     queue_task(slot);
 }
