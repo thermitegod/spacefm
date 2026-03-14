@@ -1857,7 +1857,7 @@ gui::tab::on_file_list_item_activated(std::uint32_t position) noexcept
 void
 gui::tab::on_update_statusbar() noexcept
 {
-    statusbar_.update(dir_, selected_files(), show_hidden_files_);
+    statusbar_.update(dir_, selected_files(), sorting_.show_hidden);
 }
 
 void
@@ -2059,19 +2059,6 @@ gui::tab::canon(const std::filesystem::path& path) noexcept
 
         files_grab_focus();
     }
-}
-
-void
-gui::tab::show_hidden_files(bool show) noexcept
-{
-    if (show_hidden_files_ == show)
-    {
-        return;
-    }
-    show_hidden_files_ = show;
-
-    update_model();
-    signal_change_selection().emit();
 }
 
 void

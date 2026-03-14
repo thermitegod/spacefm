@@ -75,8 +75,6 @@ class tab final : public Gtk::Box
                const gui::lib::history::mode mode = gui::lib::history::mode::normal) noexcept;
     void canon(const std::filesystem::path& path) noexcept;
 
-    void show_hidden_files(bool show) noexcept;
-
     [[nodiscard]] std::filesystem::path cwd() const noexcept;
 
     void on_copy() const noexcept;
@@ -278,9 +276,6 @@ class tab final : public Gtk::Box
     } actions_;
 
     std::optional<std::filesystem::path> last_path_;
-
-    bool show_hidden_files_{true};
-    bool large_icons_{true};
 
   public:
     [[nodiscard]] auto
