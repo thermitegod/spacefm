@@ -382,44 +382,59 @@ gui::files_base::set_pattern(const std::string_view pattern) noexcept
 void
 gui::files_base::set_sorting(const config::sorting& sorting, const bool update_model) noexcept
 {
-    sorting_ = sorting;
+    Glib::signal_idle().connect_once(
+        [this, sorting, update_model]()
+        {
+            sorting_ = sorting;
 
-    if (update_model)
-    {
-        update();
-    }
-    else
-    {
-        sort();
-    }
+            if (update_model)
+            {
+                update();
+            }
+            else
+            {
+                sort();
+            }
 
-    signal_update_sorting().emit();
+            signal_update_sorting().emit();
+        },
+        Glib::PRIORITY_DEFAULT);
 }
 
 void
 gui::files_base::set_state(const config::grid_state& state, const bool update_model) noexcept
 {
-    grid_state_ = state;
+    Glib::signal_idle().connect_once(
+        [this, state, update_model]()
+        {
+            grid_state_ = state;
 
-    if (update_model)
-    {
-        update();
-    }
+            if (update_model)
+            {
+                update();
+            }
 
-    signal_update_view_state().emit();
+            signal_update_view_state().emit();
+        },
+        Glib::PRIORITY_DEFAULT);
 }
 
 void
 gui::files_base::set_state(const config::list_state& state, const bool update_model) noexcept
 {
-    list_state_ = state;
+    Glib::signal_idle().connect_once(
+        [this, state, update_model]()
+        {
+            list_state_ = state;
 
-    if (update_model)
-    {
-        update();
-    }
+            if (update_model)
+            {
+                update();
+            }
 
-    signal_update_view_state().emit();
+            signal_update_view_state().emit();
+        },
+        Glib::PRIORITY_DEFAULT);
 }
 
 bool
