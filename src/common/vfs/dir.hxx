@@ -28,6 +28,7 @@
 #include <vector>
 
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <magic_enum/magic_enum.hpp>
@@ -192,11 +193,25 @@ class dir final : public std::enable_shared_from_this<dir>
         return this->signal_files_deleted_;
     }
 
+#if (GTK_MAJOR_VERSION == 4)
+    [[nodiscard]] auto
+    signal_directory_loaded() noexcept
+    {
+        return this->signal_directory_loaded_;
+    }
+
+    [[nodiscard]] auto
+    signal_directory_refresh() noexcept
+    {
+        return this->signal_directory_refresh_;
+    }
+#elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] auto
     signal_file_listed() noexcept
     {
         return this->signal_file_listed_;
     }
+#endif
 
     [[nodiscard]] auto
     signal_thumbnail_loaded() noexcept
@@ -218,7 +233,12 @@ class dir final : public std::enable_shared_from_this<dir>
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_created_;
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_changed_;
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_deleted_;
+#if (GTK_MAJOR_VERSION == 4)
+    sigc::signal<void()> signal_directory_loaded_;
+    sigc::signal<void()> signal_directory_refresh_;
+#elif (GTK_MAJOR_VERSION == 3)
     sigc::signal<void()> signal_file_listed_;
+#endif
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
     sigc::signal<void()> signal_directory_deleted_;
 };

@@ -376,7 +376,8 @@ class tab final : public Gtk::Box
     sigc::connection signal_file_created_;
     sigc::connection signal_file_deleted_;
     sigc::connection signal_file_changed_;
-    sigc::connection signal_file_listed_;
+    sigc::connection signal_directory_loaded_;
+    sigc::connection signal_directory_refresh_;
     sigc::connection signal_self_deleted_;
 };
 } // namespace gui

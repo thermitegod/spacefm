@@ -148,7 +148,12 @@ vfs::dir::~dir() noexcept
     this->signal_files_changed().clear();
     this->signal_files_deleted().clear();
 
+#if (GTK_MAJOR_VERSION == 4)
+    this->signal_directory_loaded().clear();
+    this->signal_directory_refresh().clear();
+#elif (GTK_MAJOR_VERSION == 3)
     this->signal_file_listed().clear();
+#endif
     this->signal_thumbnail_loaded().clear();
     this->signal_directory_deleted().clear();
 
@@ -320,7 +325,11 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
 
     this->load_running_ = false;
 
+#if (GTK_MAJOR_VERSION == 4)
+    this->signal_directory_loaded().emit();
+#elif (GTK_MAJOR_VERSION == 3)
     this->signal_file_listed().emit();
+#endif
 }
 
 void
@@ -406,7 +415,11 @@ vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
 
     this->load_running_ = false;
 
+#if (GTK_MAJOR_VERSION == 4)
+    this->signal_directory_refresh().emit();
+#elif (GTK_MAJOR_VERSION == 3)
     this->signal_file_listed().emit();
+#endif
 }
 
 #if (GTK_MAJOR_VERSION == 3)

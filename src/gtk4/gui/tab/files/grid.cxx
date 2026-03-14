@@ -93,11 +93,6 @@ gui::grid::grid(const config::grid_state& state,
                         // otherwise will be at the bottom of the view
                         scroll_to(0);
                     }
-
-                    if (grid_state_.thumbnails)
-                    {
-                        dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
-                    }
                 },
                 Glib::PRIORITY_DEFAULT);
         });

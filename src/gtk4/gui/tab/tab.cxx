@@ -1815,10 +1815,10 @@ gui::tab::on_button_refresh(const bool update_selected_files)
     }
 
     // destroy file list and create new one
-    update_model();
+    // update_model();
 
     // begin reload dir
-    signal_chdir_begin().emit();
+    // signal_chdir_begin().emit();
     dir_->refresh();
 }
 
@@ -1991,17 +1991,35 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
 
     // load new dir
 
-    signal_file_listed_.disconnect();
+    signal_directory_loaded_.disconnect();
+    signal_directory_refresh_.disconnect();
 
     dir_ = vfs::dir::create(path);
 
     signal_chdir_begin().emit();
 
-    signal_file_listed_ = dir_->signal_file_listed().connect([this]() { on_dir_file_listed(); });
+    signal_directory_loaded_ = dir_->signal_directory_loaded().connect(
+        [this]()
+        {
+            on_dir_file_listed();
+
+            if (view_mode_ == config::view_mode::grid)
+            {
+                dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+            }
+        });
+    signal_directory_refresh_ = dir_->signal_directory_refresh().connect(
+        [this]()
+        {
+            if (view_mode_ == config::view_mode::grid)
+            {
+                dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+            }
+        });
 
     if (dir_->is_loaded())
     {
-        // if the dir is loaded from cache then it will not run the file_listed signal.
+        // if the dir gets loaded from cache then it will not emit the signal_directory_loaded() signal.
         on_dir_file_listed();
     }
 
