@@ -339,8 +339,14 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
                          const std::optional<config::grid_state>& grid_state,
                          const std::optional<config::list_state>& list_state) noexcept
 {
-    if (!dir || dir_ == dir)
+    if (!dir)
     {
+        return;
+    }
+
+    if (dir_ == dir)
+    {
+        signal_dir_loaded().emit();
         return;
     }
 
