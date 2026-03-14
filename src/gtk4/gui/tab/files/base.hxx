@@ -160,9 +160,9 @@ class files_base
 
   protected:
     [[nodiscard]] auto
-    signal_dir_loaded() noexcept
+    signal_directory_loaded() noexcept
     {
-        return signal_dir_loaded_;
+        return signal_directory_loaded_;
     }
 
     [[nodiscard]] auto
@@ -178,8 +178,7 @@ class files_base
     }
 
     sigc::signal<void()> signal_model_loaded_;
-
-    sigc::signal<void()> signal_dir_loaded_;
+    sigc::signal<void()> signal_directory_loaded_;
     sigc::signal<void()> signal_update_sorting_;
     sigc::signal<void()> signal_update_view_state_;
 

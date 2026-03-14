@@ -346,7 +346,7 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
 
     if (dir_ == dir)
     {
-        signal_dir_loaded().emit();
+        signal_directory_loaded().emit();
         return;
     }
 
@@ -370,7 +370,7 @@ gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sor
     signal_thumbnail_loaded =
         dir_->signal_thumbnail_loaded().connect([this](auto f) { on_thumbnail_loaded(f); });
 
-    signal_dir_loaded().emit();
+    signal_directory_loaded().emit();
 }
 
 void

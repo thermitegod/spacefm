@@ -66,7 +66,7 @@ gui::list::list(const config::list_state& state,
     drop_target_->signal_motion().connect(sigc::mem_fun(*this, &list::on_drag_motion), false);
     add_controller(drop_target_);
 
-    signal_dir_loaded().connect(
+    signal_directory_loaded().connect(
         [this]()
         {
             Glib::signal_idle().connect_once(
