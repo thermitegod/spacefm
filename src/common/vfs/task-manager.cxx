@@ -281,10 +281,12 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
                 return;
             }
 
-            auto src_stat = ztd::lstat::create(source);
-            if (!src_stat)
+            if (!std::filesystem::exists(source))
             {
-                return;
+                throw std::filesystem::filesystem_error(
+                    "Source path does not exist",
+                    source,
+                    std::make_error_code(std::errc::no_such_file_or_directory));
             }
 
             const auto result =
@@ -356,6 +358,14 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
             if (!item->check_pause(stoken) || stoken.stop_requested())
             {
                 return;
+            }
+
+            if (!std::filesystem::exists(source))
+            {
+                throw std::filesystem::filesystem_error(
+                    "Source path does not exist",
+                    source,
+                    std::make_error_code(std::errc::no_such_file_or_directory));
             }
 
             const auto result =
