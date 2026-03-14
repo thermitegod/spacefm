@@ -71,7 +71,7 @@ class tab final : public Gtk::Box
 
     config::tab_state get_tab_state() const noexcept;
 
-    bool chdir(const std::filesystem::path& path,
+    void chdir(const std::filesystem::path& path,
                const gui::lib::history::mode mode = gui::lib::history::mode::normal) noexcept;
     void canon(const std::filesystem::path& path) noexcept;
 

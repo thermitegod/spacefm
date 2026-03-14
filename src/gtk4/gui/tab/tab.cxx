@@ -1929,7 +1929,7 @@ gui::tab::cwd() const noexcept
     return history_.path();
 }
 
-bool
+void
 gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode mode) noexcept
 {
     // TODO needs to be investigated
@@ -1946,7 +1946,7 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
         alert->set_modal(true);
         alert->show(parent_);
 
-        return false;
+        return;
     }
 
     if (!std::filesystem::is_directory(path))
@@ -1956,7 +1956,7 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
         alert->set_modal(true);
         alert->show(parent_);
 
-        return false;
+        return;
     }
 
     if (!vfs::utils::check_directory_permissions(path))
@@ -1966,7 +1966,7 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
         alert->set_modal(true);
         alert->show(parent_);
 
-        return false;
+        return;
     }
 
     signal_chdir_before().emit();
@@ -2008,8 +2008,6 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     toolbar_.update(cwd(), history_.has_back(), history_.has_forward(), cwd() != "/");
 
     files_grab_focus();
-
-    return true;
 }
 
 void
