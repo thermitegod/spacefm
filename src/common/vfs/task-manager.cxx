@@ -555,8 +555,14 @@ vfs::task_manager::add(const vfs::trash_task& task) noexcept
                 return;
             }
 
-            // TODO error case
-            auto _ = vfs::trash_can::trash(path);
+            const auto result = vfs::trash_can::trash(path);
+            if (!result)
+            {
+                throw std::filesystem::filesystem_error(
+                    "Failed to trash",
+                    path,
+                    std::make_error_code(std::errc::no_message));
+            }
         };
 
         for (const auto& path : task.paths)
