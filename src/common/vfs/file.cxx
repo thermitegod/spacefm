@@ -397,6 +397,18 @@ vfs::file::is_other() const noexcept
 }
 
 bool
+vfs::file::is_readable() const noexcept
+{
+    return vfs::utils::has_read_permission(this->path_);
+}
+
+bool
+vfs::file::is_writable() const noexcept
+{
+    return vfs::utils::has_write_permission(this->path_);
+}
+
+bool
 vfs::file::is_executable() const noexcept
 {
     return this->mime_type()->is_executable() && vfs::utils::has_execute_permission(this->path());
