@@ -574,6 +574,36 @@ vfs::task_manager::add(const vfs::trash_task& task) noexcept
 }
 
 void
+vfs::task_manager::add(const vfs::trash_restore_task& task) noexcept
+{
+    auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
+    {
+        auto do_restore = [&](const std::filesystem::path& path)
+        {
+            if (!item->check_pause(stoken) || stoken.stop_requested())
+            {
+                return;
+            }
+
+            const auto result = vfs::trash_can::restore(path);
+            if (!result)
+            {
+                throw std::filesystem::filesystem_error(
+                    "Failed to restore",
+                    path,
+                    std::make_error_code(std::errc::no_message));
+            }
+        };
+
+        for (const auto& path : task.paths)
+        {
+            do_restore(path);
+        }
+    };
+    queue_task(slot);
+}
+
+void
 vfs::task_manager::add(const vfs::remove_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)

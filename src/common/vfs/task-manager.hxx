@@ -72,6 +72,11 @@ struct trash_task final
     std::vector<std::filesystem::path> paths;
 };
 
+struct trash_restore_task final
+{
+    std::vector<std::filesystem::path> paths;
+};
+
 struct remove_task final
 {
     std::vector<std::filesystem::path> paths;
@@ -137,6 +142,7 @@ class task_manager final
     void add(const vfs::move_task& task) noexcept;
     void add(const vfs::rename_task& task) noexcept;
     void add(const vfs::trash_task& task) noexcept;
+    void add(const vfs::trash_restore_task& task) noexcept;
     void add(const vfs::remove_task& task) noexcept;
     void add(const vfs::create_directory_task& task) noexcept;
     void add(const vfs::create_file_task& task) noexcept;
