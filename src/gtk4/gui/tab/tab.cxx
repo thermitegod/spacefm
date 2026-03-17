@@ -1176,11 +1176,15 @@ gui::tab::create_context_menu_model() noexcept
                         std::to_underlying(v)));
                 smenu_sort->append_item(item);
             };
+            add_menu_item("XXX Small Icons", config::icon_size::xxx_small);
+            add_menu_item("XX Small Icons", config::icon_size::xx_small);
+            add_menu_item("X Small Icons", config::icon_size::x_small);
             add_menu_item("Small Icons", config::icon_size::small);
             add_menu_item("Normal Icons", config::icon_size::normal);
             add_menu_item("Large Icons", config::icon_size::large);
             add_menu_item("X Large Icons", config::icon_size::x_large);
             add_menu_item("XX Large Icons", config::icon_size::xx_large);
+            add_menu_item("XXX Large Icons", config::icon_size::xxx_large);
 
             smenu->append_section(smenu_sort);
         }

@@ -80,23 +80,16 @@ enum class sort_hidden : std::uint8_t
 
 enum class icon_size : std::uint8_t // std::int32_t
 {
-    small = 22,
+    xxx_small = 22,
+    xx_small = 24,
+    x_small = 32,
+    small = 36,
     normal = 48,
     large = 64,
-    x_large = 96,
-    xx_large = 128,
+    x_large = 72,
+    xx_large = 96,
+    xxx_large = 128,
 };
-
-#if 0 // TODO? configurable default icon sizes
-struct icon_size_state final
-{ // grid only
-    std::int32_t small = 22;
-    std::int32_t normal = 48;
-    std::int32_t large = 64;
-    std::int32_t x_large = 96;
-    std::int32_t xx_large = 128;
-};
-#endif
 
 struct sorting final
 {
