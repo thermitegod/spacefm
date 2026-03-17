@@ -15,7 +15,10 @@
 
 #pragma once
 
+#include <memory>
 #include <string_view>
+
+#include <cstdint>
 
 #include <gtkmm.h>
 
@@ -54,8 +57,9 @@ class preferences : public Gtk::ApplicationWindow
     void on_button_close_clicked() noexcept;
 
     void init_general_tab() noexcept;
-    void init_display_tab() noexcept;
-    void init_advanced_tab() noexcept;
+    void init_interface_tab() noexcept;
+    void init_dialog_tab() noexcept;
+    void init_defaults_tab() noexcept;
 
     void setup_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept;
     void bind_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept;
