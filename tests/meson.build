@@ -30,6 +30,7 @@ test_sources_sfm += files(
     # 'src/vfs/error.cxx',
     'src/vfs/execute.cxx',
     'src/vfs/task-manager.cxx',
+    'src/vfs/trash.cxx',
 
     'src/vfs/utils/utils.cxx',
     'src/vfs/utils/file-ops.cxx',

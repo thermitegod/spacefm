@@ -15,9 +15,11 @@
 
 #pragma once
 
+#include <chrono>
 #include <filesystem>
 #include <flat_map>
 #include <memory>
+#include <system_error>
 
 #include <ztd/ztd.hxx>
 
@@ -32,6 +34,16 @@ namespace vfs
 // This class implements some of the XDG Trash specification:
 //
 // https://specifications.freedesktop.org/trash/1.0/
+
+struct trashinfo
+{
+    std::filesystem::path path;
+    std::chrono::system_clock::time_point time;
+};
+
+std::error_code trashinfo_write(const std::filesystem::path& path, const trashinfo& info) noexcept;
+std::optional<trashinfo> trashinfo_read(const std::filesystem::path& infopath) noexcept;
+
 class trash_can final
 {
   public:
