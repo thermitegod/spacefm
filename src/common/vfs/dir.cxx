@@ -280,6 +280,8 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
     // load this dirs .hidden file
     this->load_user_hidden_files();
 
+    this->files_.reserve(1024);
+
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
         if (stoken.stop_requested())
