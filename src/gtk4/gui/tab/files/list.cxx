@@ -306,26 +306,42 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
     auto update_image = [this, image, col]()
     {
-        if (!image || !col)
-        {
-            return;
-        }
+        Glib::signal_idle().connect_once(
+            [this, image, col]()
+            {
+                // need to use Glib::signal_idle() to prevents
+                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
 
-        const auto size = std::to_underlying(list_state_.icon_size);
+                if (!image || !col)
+                {
+                    return;
+                }
 
-        image->set(col->file->icon(size));
+                const auto size = std::to_underlying(list_state_.icon_size);
+
+                image->set(col->file->icon(size));
+            },
+            Glib::PRIORITY_DEFAULT);
     };
 
     auto update_label = [label, col]()
     {
-        // TODO figure out what needs to be updated on a file change event.
-        // this is more needed for detailed/compact view mode
-        if (!label || !col)
-        {
-            return;
-        }
+        Glib::signal_idle().connect_once(
+            [label, col]()
+            {
+                // need to use Glib::signal_idle() to prevents
+                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
 
-        label->set_text(col->file->name().data());
+                // TODO figure out what needs to be updated on a file change event.
+                // this is more needed for detailed/compact view mode
+                if (!label || !col)
+                {
+                    return;
+                }
+
+                label->set_text(col->file->name().data());
+            },
+            Glib::PRIORITY_DEFAULT);
     };
 
     update_image();

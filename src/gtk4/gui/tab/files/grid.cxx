@@ -232,39 +232,55 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
     auto update_image = [this, box, picture, col]()
     {
-        if (!picture || !col)
-        {
-            return;
-        }
+        Glib::signal_idle().connect_once(
+            [this, box, picture, col]()
+            {
+                // need to use Glib::signal_idle() to prevents
+                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
 
-        const auto size = std::to_underlying(grid_state_.icon_size);
+                if (!picture || !col)
+                {
+                    return;
+                }
 
-        box->set_size_request(size, size);
-        picture->set_size_request(size, size);
+                const auto size = std::to_underlying(grid_state_.icon_size);
 
-        Glib::RefPtr<Gdk::Paintable> icon;
-        if (col->file->is_thumbnail_loaded(size) && grid_state_.thumbnails)
-        {
-            icon = col->file->thumbnail(size);
-        }
-        else
-        {
-            icon = col->file->icon(size);
-        }
+                box->set_size_request(size, size);
+                picture->set_size_request(size, size);
 
-        picture->set_paintable(icon);
+                Glib::RefPtr<Gdk::Paintable> icon;
+                if (col->file->is_thumbnail_loaded(size) && grid_state_.thumbnails)
+                {
+                    icon = col->file->thumbnail(size);
+                }
+                else
+                {
+                    icon = col->file->icon(size);
+                }
+
+                picture->set_paintable(icon);
+            },
+            Glib::PRIORITY_DEFAULT);
     };
 
     auto update_label = [label, col]()
     {
-        // TODO figure out what needs to be updated on a file change event.
-        // this is more needed for detailed/compact view mode
-        if (!label || !col)
-        {
-            return;
-        }
+        Glib::signal_idle().connect_once(
+            [label, col]()
+            {
+                // need to use Glib::signal_idle() to prevents
+                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
 
-        label->set_text(col->file->name().data());
+                // TODO figure out what needs to be updated on a file change event.
+                // this is more needed for detailed/compact view mode
+                if (!label || !col)
+                {
+                    return;
+                }
+
+                label->set_text(col->file->name().data());
+            },
+            Glib::PRIORITY_DEFAULT);
     };
 
     update_image();

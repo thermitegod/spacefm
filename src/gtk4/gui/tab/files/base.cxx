@@ -558,20 +558,8 @@ gui::files_base::on_files_changed(const std::span<const std::shared_ptr<vfs::fil
         const auto [found, position] = find_file(file);
         if (found)
         {
-#if 0
             auto item = dir_model_->get_item(position);
             item->signal_changed().emit();
-#else
-            // prevents log spam
-            // gdk-frame-clock: layout continuously requested, giving up after 4 tries
-            Glib::signal_idle().connect_once(
-                [this, file, position]()
-                {
-                    auto item = dir_model_->get_item(position);
-                    item->signal_changed().emit();
-                },
-                Glib::PRIORITY_DEFAULT);
-#endif
         }
 
         const auto now = std::chrono::system_clock::now();
@@ -596,19 +584,7 @@ gui::files_base::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noe
     const auto [found, position] = find_file(file);
     if (found)
     {
-#if 0
         auto item = dir_model_->get_item(position);
-        item->signal_thumbnail_loaded().emit();
-#else
-        // prevents log spam
-        // gdk-frame-clock: layout continuously requested, giving up after 4 tries
-        Glib::signal_idle().connect_once(
-            [this, file, position]()
-            {
-                auto item = dir_model_->get_item(position);
-                item->signal_update_thumbnail().emit();
-            },
-            Glib::PRIORITY_DEFAULT);
-#endif
+        item->signal_update_thumbnail().emit();
     }
 }
