@@ -401,8 +401,6 @@ gui::files_base::set_sorting(const config::sorting& sorting, const bool update_m
             {
                 sort();
             }
-
-            signal_update_sorting().emit();
         },
         Glib::PRIORITY_DEFAULT);
 }

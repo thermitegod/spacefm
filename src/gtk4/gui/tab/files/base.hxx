@@ -166,12 +166,6 @@ class files_base
     }
 
     [[nodiscard]] auto
-    signal_update_sorting() const noexcept
-    {
-        return signal_update_sorting_;
-    }
-
-    [[nodiscard]] auto
     signal_update_view_state() const noexcept
     {
         return signal_update_view_state_;
@@ -179,7 +173,6 @@ class files_base
 
     sigc::signal<void()> signal_model_loaded_;
     sigc::signal<void()> signal_directory_loaded_;
-    sigc::signal<void()> signal_update_sorting_;
     sigc::signal<void()> signal_update_view_state_;
 
     // Signals we connect to
