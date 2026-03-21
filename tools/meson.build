@@ -38,3 +38,24 @@ spacefm = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
+
+# Stress Testing Tools
+
+incdir = include_directories('stress')
+sources = files(
+    'stress/fs-events.cxx',
+)
+
+spacefm = build_target(
+    'stress-fs-events',
+    sources,
+    target_type: 'executable',
+    include_directories: incdir,
+    install: false,
+    install_dir: bindir,
+    dependencies: [
+        cli11_dep,
+        logger_dep,
+    ],
+    # cpp_pch: '../pch/pch.hxx',
+)
