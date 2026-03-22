@@ -232,62 +232,58 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
     auto update_image = [this, box, picture, col]()
     {
-        Glib::signal_idle().connect_once(
-            [this, box, picture, col]()
-            {
-                // need to use Glib::signal_idle() to prevents
-                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+        if (!picture || !col)
+        {
+            return;
+        }
 
-                if (!picture || !col)
-                {
-                    return;
-                }
+        const auto size = std::to_underlying(grid_state_.icon_size);
 
-                const auto size = std::to_underlying(grid_state_.icon_size);
+        box->set_size_request(size, size);
+        picture->set_size_request(size, size);
 
-                box->set_size_request(size, size);
-                picture->set_size_request(size, size);
+        Glib::RefPtr<Gdk::Paintable> icon;
+        if (col->file->is_thumbnail_loaded(size) && grid_state_.thumbnails)
+        {
+            icon = col->file->thumbnail(size);
+        }
+        else
+        {
+            icon = col->file->icon(size);
+        }
 
-                Glib::RefPtr<Gdk::Paintable> icon;
-                if (col->file->is_thumbnail_loaded(size) && grid_state_.thumbnails)
-                {
-                    icon = col->file->thumbnail(size);
-                }
-                else
-                {
-                    icon = col->file->icon(size);
-                }
-
-                picture->set_paintable(icon);
-            },
-            Glib::PRIORITY_DEFAULT);
+        picture->set_paintable(icon);
     };
 
     auto update_label = [label, col]()
     {
-        Glib::signal_idle().connect_once(
-            [label, col]()
-            {
-                // need to use Glib::signal_idle() to prevents
-                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+        // TODO figure out what needs to be updated on a file change event.
+        // this is more needed for detailed/compact view mode
+        if (!label || !col)
+        {
+            return;
+        }
 
-                // TODO figure out what needs to be updated on a file change event.
-                // this is more needed for detailed/compact view mode
-                if (!label || !col)
-                {
-                    return;
-                }
-
-                label->set_text(col->file->name().data());
-            },
-            Glib::PRIORITY_DEFAULT);
+        label->set_text(col->file->name().data());
     };
 
     update_image();
     update_label();
 
-    connections->push_back(col->signal_update_thumbnail().connect(update_image));
-    connections->push_back(col->signal_changed().connect(update_label));
+    connections->push_back(col->signal_update_thumbnail().connect(
+        [=]()
+        {
+            // need to use Glib::signal_idle() to prevents
+            // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+            Glib::signal_idle().connect_once(update_image, Glib::PRIORITY_DEFAULT);
+        }));
+    connections->push_back(col->signal_changed().connect(
+        [=]()
+        {
+            // need to use Glib::signal_idle() to prevents
+            // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+            Glib::signal_idle().connect_once(update_label, Glib::PRIORITY_DEFAULT);
+        }));
 
     item->set_data("connections",
                    connections.release(),

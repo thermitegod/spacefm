@@ -306,49 +306,45 @@ gui::list::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 
     auto update_image = [this, image, col]()
     {
-        Glib::signal_idle().connect_once(
-            [this, image, col]()
-            {
-                // need to use Glib::signal_idle() to prevents
-                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+        if (!image || !col)
+        {
+            return;
+        }
 
-                if (!image || !col)
-                {
-                    return;
-                }
+        const auto size = std::to_underlying(list_state_.icon_size);
 
-                const auto size = std::to_underlying(list_state_.icon_size);
-
-                image->set(col->file->icon(size));
-            },
-            Glib::PRIORITY_DEFAULT);
+        image->set(col->file->icon(size));
     };
 
     auto update_label = [label, col]()
     {
-        Glib::signal_idle().connect_once(
-            [label, col]()
-            {
-                // need to use Glib::signal_idle() to prevents
-                // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+        // TODO figure out what needs to be updated on a file change event.
+        // this is more needed for detailed/compact view mode
+        if (!label || !col)
+        {
+            return;
+        }
 
-                // TODO figure out what needs to be updated on a file change event.
-                // this is more needed for detailed/compact view mode
-                if (!label || !col)
-                {
-                    return;
-                }
-
-                label->set_text(col->file->name().data());
-            },
-            Glib::PRIORITY_DEFAULT);
+        label->set_text(col->file->name().data());
     };
 
     update_image();
     update_label();
 
-    connections->push_back(col->signal_update_thumbnail().connect(update_image));
-    connections->push_back(col->signal_changed().connect(update_label));
+    connections->push_back(col->signal_update_thumbnail().connect(
+        [=]()
+        {
+            // need to use Glib::signal_idle() to prevents
+            // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+            Glib::signal_idle().connect_once(update_image, Glib::PRIORITY_DEFAULT);
+        }));
+    connections->push_back(col->signal_changed().connect(
+        [=]()
+        {
+            // need to use Glib::signal_idle() to prevents
+            // gdk-frame-clock: layout continuously requested, giving up after 4 tries
+            Glib::signal_idle().connect_once(update_label, Glib::PRIORITY_DEFAULT);
+        }));
 
     item->set_data("connections",
                    connections.release(),
