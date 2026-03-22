@@ -31,8 +31,6 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
@@ -126,8 +124,13 @@ class dir final : public std::enable_shared_from_this<dir>
     void on_file_deleted(const std::filesystem::path& path) noexcept;
     void on_file_changed(const std::filesystem::path& path) noexcept;
     void on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
+    void on_self_deleted(const std::filesystem::path& path) noexcept;
 
     std::filesystem::path path_;
+
+#if (GTK_MAJOR_VERSION == 3)
+    std::shared_ptr<vfs::settings> settings_;
+#endif
 
     std::vector<std::shared_ptr<vfs::file>> files_;
     std::mutex files_lock_;
@@ -167,10 +170,6 @@ class dir final : public std::enable_shared_from_this<dir>
         std::vector<std::filesystem::path> created; // filenames only
     };
     file_events events_;
-
-#if (GTK_MAJOR_VERSION == 3)
-    std::shared_ptr<vfs::settings> settings_;
-#endif
 
   public:
     // Signals

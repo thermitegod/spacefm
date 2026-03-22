@@ -24,87 +24,154 @@
 #pragma once
 
 #include <filesystem>
-#include <flat_map>
-#include <functional>
-#include <memory>
 #include <set>
 #include <stop_token>
 
-#include "vfs/notify-cpp/notification.hxx"
+#include <sigc++/sigc++.h>
+
 #include "vfs/notify-cpp/notify.hxx"
 
 namespace notify
 {
-using event_observer = std::function<void(const notification&)>;
-
 class controller
 {
   public:
-    controller();
+    controller(const std::filesystem::path& path, std::set<event> events = {event::all});
 
     void run(const std::stop_token& stoken) noexcept;
     void run_once(const std::stop_token& stoken) noexcept;
 
-    /**
-     * @brief Add watch to a file.
-     * @param fse that will be watched
-     */
-    controller& watch_file(const file_system_event& fse);
+  private:
+    inotify notify_;
 
-    /**
-     * @brief Add watch to a directory.
-     * @param fse that will be watched
-     */
-    controller& watch_directory(const file_system_event& fse);
+  public:
+    // Supported events
 
-    /**
-     * @brief Add watch to a directory, recursively.
-     * @param fse that will be watched
-     */
-    controller& watch_path_recursively(const file_system_event& fse);
+    [[nodiscard]] auto
+    signal_access() noexcept
+    {
+        return signal_access_;
+    }
 
-    /**
-     * @brief Remove watch for a file or a directory.
-     * @param path that will be unwatched
-     */
-    controller& unwatch(const std::filesystem::path& f);
+    [[nodiscard]] auto
+    signal_modify() noexcept
+    {
+        return signal_modify_;
+    }
 
-    /**
-     * @brief Ignore all events for a path.
-     */
-    controller& ignore(const std::filesystem::path& p) noexcept;
+    [[nodiscard]] auto
+    signal_attrib() noexcept
+    {
+        return signal_attrib_;
+    }
 
-    /**
-     * @brief Ignore all events for a path once. After an event gets
-     *        ignored future events will trigger the EventObserver
-     */
-    controller& ignore_once(const std::filesystem::path& p) noexcept;
+    [[nodiscard]] auto
+    signal_close_write() noexcept
+    {
+        return signal_close_write_;
+    }
 
-    /**
-     * @brief Install an EventObserver for a single event. An event can have a single EventObserver.
-     */
-    controller& on_event(event event, const event_observer& event_observer) noexcept;
+    [[nodiscard]] auto
+    signal_close_nowrite() noexcept
+    {
+        return signal_close_nowrite_;
+    }
 
-    /**
-     * @brief Install an EventObserver for multiple events. An event can have a single EventObserver.
-     */
-    controller& on_events(const std::set<event>& event,
-                          const event_observer& event_observer) noexcept;
+    [[nodiscard]] auto
+    signal_open() noexcept
+    {
+        return signal_open_;
+    }
 
-    /**
-     * @brief Install a custom EventObserver for events that are being watched and are not
-     *        handled by on_event() or on_events().
-     */
-    controller& on_unexpected_event(const event_observer& event_observer) noexcept;
+    [[nodiscard]] auto
+    signal_moved_from() noexcept
+    {
+        return signal_moved_from_;
+    }
+
+    [[nodiscard]] auto
+    signal_moved_to() noexcept
+    {
+        return signal_moved_to_;
+    }
+
+    [[nodiscard]] auto
+    signal_create() noexcept
+    {
+        return signal_create_;
+    }
+
+    [[nodiscard]] auto
+    signal_delete() noexcept
+    {
+        return signal_delete_;
+    }
+
+    [[nodiscard]] auto
+    signal_delete_self() noexcept
+    {
+        return signal_delete_self_;
+    }
+
+    [[nodiscard]] auto
+    signal_move_self() noexcept
+    {
+        return signal_move_self_;
+    }
+
+    // Events sent by the kernel.
+
+    [[nodiscard]] auto
+    signal_umount() noexcept
+    {
+        return signal_umount_;
+    }
+
+    [[nodiscard]] auto
+    signal_queue_overflow() noexcept
+    {
+        return signal_queue_overflow_;
+    }
+
+    [[nodiscard]] auto
+    signal_ignored() noexcept
+    {
+        return signal_ignored_;
+    }
+
+    // Helper events
+
+    [[nodiscard]] auto
+    signal_close() noexcept
+    {
+        return signal_close_;
+    }
+
+    [[nodiscard]] auto
+    signal_move() noexcept
+    {
+        return signal_move_;
+    }
 
   private:
-    [[nodiscard]] std::vector<std::pair<event, event_observer>>
-    find_observer(event e) const noexcept;
+    sigc::signal<void(std::filesystem::path)> signal_access_;
+    sigc::signal<void(std::filesystem::path)> signal_modify_;
+    sigc::signal<void(std::filesystem::path)> signal_attrib_;
+    sigc::signal<void(std::filesystem::path)> signal_close_write_;
+    sigc::signal<void(std::filesystem::path)> signal_close_nowrite_;
+    sigc::signal<void(std::filesystem::path)> signal_open_;
+    sigc::signal<void(std::filesystem::path)> signal_moved_from_;
+    sigc::signal<void(std::filesystem::path)> signal_moved_to_;
+    sigc::signal<void(std::filesystem::path)> signal_create_;
+    sigc::signal<void(std::filesystem::path)> signal_delete_;
+    sigc::signal<void(std::filesystem::path)> signal_delete_self_;
+    sigc::signal<void(std::filesystem::path)> signal_move_self_;
 
-    std::flat_map<event, event_observer> event_observer_;
+    sigc::signal<void(std::filesystem::path)> signal_umount_;
+    sigc::signal<void(std::filesystem::path)> signal_queue_overflow_;
+    sigc::signal<void(std::filesystem::path)> signal_ignored_;
 
-    event_observer unexpected_event_observer_ = [](const notification&) {};
-
-    std::shared_ptr<inotify> notify_ = nullptr;
+    sigc::signal<void(std::filesystem::path)> signal_close_;
+    sigc::signal<void(std::filesystem::path)> signal_move_;
 };
 } // namespace notify

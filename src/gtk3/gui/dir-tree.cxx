@@ -627,6 +627,7 @@ gui::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
 
     if (std::filesystem::is_directory(path))
     {
+#if 0
         node->notifier.watch_directory({path, notify::event::all})
             .on_events(
                 {
@@ -645,6 +646,7 @@ gui::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
                 { node->on_file_deleted(notification.path()); });
         node->notifier_thread =
             std::jthread([node](const std::stop_token& stoken) { node->notifier.run(stoken); });
+#endif
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
@@ -687,7 +689,9 @@ gui::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
         {
             return;
         }
+#if 0
         node->notifier = notify::controller();
+#endif
 
         std::shared_ptr<gui::dir_tree::node> child;
         std::shared_ptr<gui::dir_tree::node> next;

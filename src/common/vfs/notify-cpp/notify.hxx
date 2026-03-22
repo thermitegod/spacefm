@@ -24,55 +24,61 @@
 #pragma once
 
 #include <filesystem>
-#include <flat_map>
-#include <memory>
 #include <queue>
+#include <set>
 #include <stop_token>
-#include <vector>
 
 #include <cstdint>
 
-#include "vfs/notify-cpp/file_system_event.hxx"
+#include <sys/inotify.h>
+
+#include <sigc++/sigc++.h>
 
 namespace notify
 {
+enum class event : std::uint32_t
+{
+    none = 0,
+
+    // Supported events
+    access = IN_ACCESS,               // File was accessed.
+    modify = IN_MODIFY,               // File was modified.
+    attrib = IN_ATTRIB,               // Metadata changed.
+    close_write = IN_CLOSE_WRITE,     // Writtable file was closed.
+    close_nowrite = IN_CLOSE_NOWRITE, // Unwrittable file closed.
+    open = IN_OPEN,                   // File was opened.
+    moved_from = IN_MOVED_FROM,       // File was moved from X.
+    moved_to = IN_MOVED_TO,           // File was moved to Y.
+    create = IN_CREATE,               // Subfile was created.
+    delete_sub = IN_DELETE,           // Subfile was deleted.
+    delete_self = IN_DELETE_SELF,     // Self was deleted.
+    move_self = IN_MOVE_SELF,         // Self was moved.
+
+    // Events sent by the kernel.
+    umount = IN_UNMOUNT,            // Backing fs was unmounted.
+    queue_overflow = IN_Q_OVERFLOW, // Event queued overflowed.
+    ignored = IN_IGNORED,           // File was ignored.
+
+    // Helper events
+    close = IN_CLOSE, // Close.
+    move = IN_MOVE,   // Moves.
+
+    // All events which a program can wait on.
+    all = IN_ALL_EVENTS,
+};
+
 class inotify
 {
   public:
-    inotify();
+    inotify(const std::filesystem::path& path, std::set<event> events);
     ~inotify() noexcept;
 
-    /**
-     * @brief Adds a single file to the list of watches.
-     * @param path that will be watched
-     */
-    void watch_file(const file_system_event& fse);
-
-    /**
-     * @brief Adds a single directory to the list of watches.
-     * @param path that will be watched
-     */
-    void watch_directory(const file_system_event& fse);
-
-    /**
-     * @brief Add watch to a directory, recursively.
-     * @param fse that will be watched
-     */
-    void watch_path_recursively(const file_system_event& fse);
-
-    /**
-     * @brief remove watch for a file or directory.
-     * @param path that will be unwatched
-     */
-
-    /**
-     * @brief Remove watch for a file or directory. This is not done recursively.
-     * @param fse - filesystem event to remove
-     */
-    void unwatch(const file_system_event& fse);
-
-    void ignore(const std::filesystem::path& p) noexcept;
-    void ignore_once(const std::filesystem::path& p) noexcept;
+    struct file_system_event final
+    {
+        // absoulte path + filename
+        std::filesystem::path path;
+        event event;
+    };
 
     /**
      * @brief Blocking wait on new events of watched files/directories
@@ -82,34 +88,22 @@ class inotify
      *        loop.
      * @return A new file_system_event
      */
-    [[nodiscard]] std::shared_ptr<file_system_event> get_next_event(const std::stop_token& stoken);
-    [[nodiscard]] std::uint32_t get_event_mask(const event event) const;
+    [[nodiscard]] std::optional<file_system_event> get_next_event(const std::stop_token& stoken);
 
     void stop() const noexcept;
 
   private:
-    [[nodiscard]] bool check_watch_file(const file_system_event& fse) const;
-    [[nodiscard]] bool check_watch_directory(const file_system_event& fse) const;
-    [[nodiscard]] bool is_ignored(const std::filesystem::path& p) const noexcept;
-    [[nodiscard]] bool is_ignored_once(const std::filesystem::path& p) noexcept;
+    [[nodiscard]] file_system_event get_next_event_from_queue() noexcept;
 
-    [[nodiscard]] std::shared_ptr<file_system_event> get_next_event_from_queue() noexcept;
+    [[nodiscard]] event get_inotify(const std::uint32_t event) noexcept;
 
-    [[nodiscard]] std::filesystem::path wd_to_path(const std::int32_t wd) const noexcept;
-    [[nodiscard]] std::filesystem::path path_from_fd(const std::int32_t fd) const noexcept;
+    std::int32_t inotify_fd_ = 0;
+    std::int32_t event_fd_ = 0;
+    std::int32_t epoll_fd_ = 0;
 
-    void watch(const file_system_event& fse);
-    void remove_watch(const std::int32_t wd) const;
+    std::int32_t wd_ = 0;
+    std::filesystem::path path_;
 
-    std::flat_map<std::int32_t, std::filesystem::path> directory_map_;
-
-    std::int32_t inotify_fd_;
-    std::int32_t event_fd_;
-    std::int32_t epoll_fd_;
-
-    std::queue<std::shared_ptr<file_system_event>> queue_;
-
-    std::vector<std::filesystem::path> ignored_;
-    std::vector<std::filesystem::path> ignored_once_;
+    std::queue<file_system_event> queue_;
 };
 } // namespace notify

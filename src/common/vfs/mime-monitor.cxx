@@ -23,7 +23,6 @@
 
 namespace
 {
-notify::controller notifier;
 std::jthread thread;
 } // namespace
 
@@ -36,31 +35,29 @@ vfs::mime_monitor_init() noexcept
         return;
     }
 
-    notifier
-        .watch_directory({path,
-                          {
-                              notify::event::attrib,
-                              notify::event::close_write,
-                              notify::event::moved_from,
-                              notify::event::moved_to,
-                              notify::event::create,
-                              notify::event::delete_sub,
-                          }})
-        .on_unexpected_event( // this can technically be used as the default handler
-            [](const notify::notification&)
-            {
-                if (std::filesystem::exists(vfs::user::data() / "mime"))
-                {
-                    vfs::execute::command_line_async("update-mime-database {}/mime",
-                                                     vfs::user::data().string());
-                }
+    static notify::controller notifier(path);
 
-                if (std::filesystem::exists(vfs::user::data() / "applications"))
-                {
-                    vfs::execute::command_line_async("update-desktop-database {}/applications",
-                                                     vfs::user::data().string());
-                }
-            });
+    auto slot = [](const std::filesystem::path&)
+    {
+        if (std::filesystem::exists(vfs::user::data() / "mime"))
+        {
+            vfs::execute::command_line_async("update-mime-database {}/mime",
+                                             vfs::user::data().string());
+        }
+
+        if (std::filesystem::exists(vfs::user::data() / "applications"))
+        {
+            vfs::execute::command_line_async("update-desktop-database {}/applications",
+                                             vfs::user::data().string());
+        }
+    };
+
+    notifier.signal_attrib().connect(slot);
+    notifier.signal_close_write().connect(slot);
+    notifier.signal_moved_from().connect(slot);
+    notifier.signal_moved_to().connect(slot);
+    notifier.signal_create().connect(slot);
+    notifier.signal_delete().connect(slot);
 
     thread = std::jthread([&](const std::stop_token& stoken) { notifier.run(stoken); });
     pthread_setname_np(thread.native_handle(), "mime notifier");

@@ -22,133 +22,98 @@
  */
 
 #include <filesystem>
-#include <functional>
-#include <memory>
-#include <set>
 #include <stop_token>
+#include <utility>
 
 #include "vfs/notify-cpp/controller.hxx"
-#include "vfs/notify-cpp/notification.hxx"
-#include "vfs/notify-cpp/notify.hxx"
 
-namespace notify
+notify::controller::controller(const std::filesystem::path& path, std::set<event> events)
+    : notify_(path, events)
 {
-controller::controller() : notify_(std::make_shared<inotify>()) {}
-
-controller&
-controller::watch_file(const file_system_event& fse)
-{
-    this->notify_->watch_file(fse);
-    return *this;
-}
-
-controller&
-controller::watch_directory(const file_system_event& fse)
-{
-    this->notify_->watch_directory(fse);
-    return *this;
-}
-
-controller&
-controller::watch_path_recursively(const file_system_event& fse)
-{
-    this->notify_->watch_path_recursively(fse);
-    return *this;
-}
-
-controller&
-controller::unwatch(const std::filesystem::path& f)
-{
-    this->notify_->unwatch(f);
-    return *this;
-}
-
-controller&
-controller::ignore(const std::filesystem::path& p) noexcept
-{
-    this->notify_->ignore(p);
-    return *this;
-}
-
-controller&
-controller::ignore_once(const std::filesystem::path& p) noexcept
-{
-    this->notify_->ignore_once(p);
-    return *this;
-}
-
-controller&
-controller::on_event(const event event, const event_observer& event_observer) noexcept
-{
-    this->event_observer_[event] = event_observer;
-    return *this;
-}
-
-controller&
-controller::on_events(const std::set<event>& events, const event_observer& event_observer) noexcept
-{
-    for (const auto event : events)
-    {
-        this->event_observer_[event] = event_observer;
-    }
-    return *this;
-}
-
-controller&
-controller::on_unexpected_event(const event_observer& event_observer) noexcept
-{
-    this->unexpected_event_observer_ = event_observer;
-    return *this;
 }
 
 void
-controller::run(const std::stop_token& stoken) noexcept
+notify::controller::run(const std::stop_token& stoken) noexcept
 {
-    // std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
+    // std::stop_callback cb(stoken, [this]() { notify_.stop(); });
 
     while (!stoken.stop_requested())
     {
-        this->run_once(stoken);
+        run_once(stoken);
     }
 }
 
 void
-controller::run_once(const std::stop_token& stoken) noexcept
+notify::controller::run_once(const std::stop_token& stoken) noexcept
 {
-    std::stop_callback cb(stoken, [this]() { this->notify_->stop(); });
+    std::stop_callback cb(stoken, [this]() { notify_.stop(); });
 
-    const auto fse = this->notify_->get_next_event(stoken);
+    const auto fse = notify_.get_next_event(stoken);
     if (!fse)
     {
         return;
     }
 
-    const auto observers = this->find_observer(fse->event());
-
-    if (observers.empty())
+    switch (fse->event)
     {
-        this->unexpected_event_observer_({fse->event(), fse->path()});
-    }
-    else
-    {
-        for (const auto& [event, observer] : observers)
-        { /* handle observed processes */
-            observer({event, fse->path()});
-        }
+        case event::access:
+            signal_access().emit(fse->path);
+            return;
+        case event::modify:
+            signal_modify().emit(fse->path);
+            return;
+        case event::attrib:
+            signal_attrib().emit(fse->path);
+            return;
+        case event::close_write:
+            signal_close_write().emit(fse->path);
+            signal_close().emit(fse->path);
+            return;
+        case event::close_nowrite:
+            signal_close_nowrite().emit(fse->path);
+            signal_close().emit(fse->path);
+            return;
+        case event::open:
+            signal_open().emit(fse->path);
+            return;
+        case event::moved_from:
+            signal_moved_from().emit(fse->path);
+            signal_move().emit(fse->path);
+            return;
+        case event::moved_to:
+            signal_moved_to().emit(fse->path);
+            signal_move().emit(fse->path);
+            return;
+        case event::create:
+            signal_create().emit(fse->path);
+            return;
+        case event::delete_sub:
+            signal_delete().emit(fse->path);
+            return;
+        case event::delete_self:
+            signal_delete_self().emit(fse->path);
+            return;
+        case event::move_self:
+            signal_move_self().emit(fse->path);
+            return;
+        case event::umount:
+            signal_umount().emit(fse->path);
+            return;
+        case event::queue_overflow:
+            signal_queue_overflow().emit(fse->path);
+            return;
+        case event::ignored:
+            signal_ignored().emit(fse->path);
+            return;
+        case event::close:
+            signal_close().emit(fse->path);
+            return;
+        case event::move:
+            signal_move().emit(fse->path);
+            return;
+        case event::none:
+        case event::all:
+        default:
+            std::unreachable();
     }
 }
-
-std::vector<std::pair<notify::event, notify::event_observer>>
-controller::find_observer(const notify::event e) const noexcept
-{
-    std::vector<std::pair<notify::event, event_observer>> observers;
-    for (const auto& [event, observer] : this->event_observer_)
-    {
-        if ((event & e) == e)
-        {
-            observers.emplace_back(event, observer);
-        }
-    }
-    return observers;
-}
-} // namespace notify

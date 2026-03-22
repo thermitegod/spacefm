@@ -58,9 +58,6 @@ vfs_gtk3_sources = files(
     'vfs/mime-type/chrome/mime-utils.cxx',
 
     'vfs/notify-cpp/controller.cxx',
-    'vfs/notify-cpp/event.cxx',
-    'vfs/notify-cpp/file_system_event.cxx',
-    'vfs/notify-cpp/notification.cxx',
     'vfs/notify-cpp/notify.cxx',
 )
 
@@ -128,9 +125,6 @@ vfs_gtk4_sources = files(
     'vfs/mime-type/chrome/mime-utils.cxx',
 
     'vfs/notify-cpp/controller.cxx',
-    'vfs/notify-cpp/event.cxx',
-    'vfs/notify-cpp/file_system_event.cxx',
-    'vfs/notify-cpp/notification.cxx',
     'vfs/notify-cpp/notify.cxx',
 )
 

@@ -32,7 +32,6 @@
 
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
-#include "vfs/notify-cpp/controller.hxx"
 #if (GTK_MAJOR_VERSION == 3)
 #include "vfs/settings.hxx"
 #endif
@@ -49,79 +48,47 @@ static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
 #if (GTK_MAJOR_VERSION == 4)
-vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)
+vfs::dir::dir(const std::filesystem::path& path) noexcept
+    : path_(path), notifier_(path_, {
+                                        notify::event::create,
+                                        notify::event::moved_to,
+                                        notify::event::delete_self,
+                                        notify::event::delete_sub,
+                                        notify::event::moved_from,
+                                        notify::event::umount,
+                                        notify::event::modify,
+                                        notify::event::attrib,
+                                    })
 #elif (GTK_MAJOR_VERSION == 3)
 vfs::dir::dir(const std::filesystem::path& path,
               const std::shared_ptr<vfs::settings>& settings) noexcept
-    : path_(path), settings_(settings)
+    : path_(path), settings_(settings), notifier_(path_, {
+                                                             notify::event::create,
+                                                             notify::event::moved_to,
+                                                             notify::event::delete_self,
+                                                             notify::event::delete_sub,
+                                                             notify::event::moved_from,
+                                                             notify::event::umount,
+                                                             notify::event::modify,
+                                                             notify::event::attrib,
+                                                         })
 #endif
 {
     // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
 
-    this->notifier_
-        .watch_directory({path,
-                          {
-                              notify::event::create,
-                              notify::event::moved_to,
-                              notify::event::delete_self,
-                              notify::event::delete_sub,
-                              notify::event::moved_from,
-                              notify::event::umount,
-                              notify::event::modify,
-                              notify::event::attrib,
-                          }})
-        .on_events(
-            {
-                notify::event::create,
-                notify::event::moved_to,
-            },
-            [this](const notify::notification& notification)
-            {
-                // logger::info<logger::vfs>("EVENT(created) {}, {}", notification.event(), notification.path().string());
+    // create events
+    notifier_.signal_create().connect([this](const auto& p) { on_file_created(p); });
+    notifier_.signal_moved_to().connect([this](const auto& p) { on_file_created(p); });
+    // delete events
+    notifier_.signal_delete().connect([this](const auto& p) { on_file_deleted(p); });
+    notifier_.signal_moved_from().connect([this](const auto& p) { on_file_deleted(p); });
+    // modify events
+    notifier_.signal_modify().connect([this](const auto& p) { on_file_changed(p); });
+    notifier_.signal_attrib().connect([this](const auto& p) { on_file_changed(p); });
+    // self event
+    notifier_.signal_delete_self().connect([this](const auto& p) { on_self_deleted(p); });
+    notifier_.signal_umount().connect([this](const auto& p) { on_self_deleted(p); });
 
-                this->on_file_created(notification.path());
-            })
-        .on_events(
-            {
-                notify::event::delete_sub,
-                notify::event::moved_from,
-            },
-            [this](const notify::notification& notification)
-            {
-                // logger::info<logger::vfs>("EVENT(deleted) {}, {}", notification.event(), notification.path().string());
-
-                this->on_file_deleted(notification.path());
-            })
-        .on_events(
-            {
-                notify::event::modify,
-                notify::event::attrib,
-            },
-            [this](const notify::notification& notification)
-            {
-                // logger::info<logger::vfs>("EVENT(modify) {}, {}", notification.event(), notification.path().string());
-
-                this->on_file_changed(notification.path());
-            })
-        .on_events(
-            {
-                notify::event::delete_self,
-                notify::event::umount,
-            },
-            [this](const notify::notification&)
-            {
-                // logger::info<logger::vfs>("EVENT(self delete) {}, {}", notification.event(), notification.path().string());
-
-                this->signal_directory_deleted().emit();
-            })
-        .on_event(notify::event::ignored, [](const notify::notification&) { /* NOOP */ })
-        .on_unexpected_event(
-            [](const notify::notification& notification)
-            {
-                logger::warn<logger::vfs>("BUG unhandled inotify event: {}, {}",
-                                          notification.event(),
-                                          notification.path().string());
-            });
     this->notifier_thread_ =
         std::jthread([this](const std::stop_token& stoken) { this->notifier_.run(stoken); });
     pthread_setname_np(this->notifier_thread_.native_handle(), "notifier");
@@ -813,5 +780,14 @@ vfs::dir::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
     if (std::ranges::contains(this->files_, file))
     {
         this->signal_thumbnail_loaded().emit(file);
+    }
+}
+
+void
+vfs::dir::on_self_deleted(const std::filesystem::path& path) noexcept
+{
+    if (path_ == path)
+    {
+        this->signal_directory_deleted().emit();
     }
 }

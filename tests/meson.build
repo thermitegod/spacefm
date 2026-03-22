@@ -36,6 +36,8 @@ test_sources_sfm += files(
     'src/vfs/utils/file-ops.cxx',
     'src/vfs/utils/permissions.cxx',
 
+    'src/vfs/notify-cpp/controller.cxx',
+
     # vfs - chrome
     'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
@@ -58,29 +60,4 @@ test_suite = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
-# notify-cpp
-
-# Test Source Files
-test_sources_inotify = files(
-    'src/main.cxx',
-
-    'src/vfs/notify-cpp/event_handler_test.cxx',
-    'src/vfs/notify-cpp/inotify_controller_test.cxx',
-)
-
-test_suite_notify_inotify = build_target(
-    'test_suite_inotify',
-    sources: test_sources_inotify,
-    target_type: 'executable',
-    include_directories: include_directories(['src', '../src']),
-    install: false,
-    dependencies: [
-        doctest_dep,
-
-        vfs_gtk4_dep,
-    ],
-    cpp_pch: '../pch/pch.hxx',
-)
-
 test('Test Suite - SpaceFM', test_suite)
-test('Test Suite - vendor notify-cpp, inotify', test_suite_notify_inotify)

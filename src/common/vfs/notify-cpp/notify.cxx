@@ -21,15 +21,12 @@
  * SOFTWARE.
  */
 
-#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <format>
-#include <memory>
-#include <stdexcept>
+#include <set>
 #include <stop_token>
-#include <string>
-#include <vector>
+#include <utility>
 
 #include <cerrno>
 #include <cstddef>
@@ -41,14 +38,13 @@
 
 #include "vfs/notify-cpp/notify.hxx"
 
-namespace notify
-{
 // #define PRINT_DBG
 #if defined(PRINT_DBG)
 #include <print>
 #endif
 
-inotify::inotify() : inotify_fd_(0)
+notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::event> events)
+    : path_(path)
 {
     this->inotify_fd_ = inotify_init1(IN_NONBLOCK);
     if (this->inotify_fd_ == -1)
@@ -86,9 +82,38 @@ inotify::inotify() : inotify_fd_(0)
         throw std::runtime_error(
             std::format("failed to add inotify to epoll: {}", std::strerror(errno)));
     }
+
+    const auto mask = std::invoke(
+        [](std::set<notify::event> events) noexcept
+        {
+            std::uint32_t mask = 0;
+            for (const auto& e : events)
+            {
+                mask = mask | std::to_underlying(e);
+            }
+            return mask;
+        },
+        events);
+
+    wd_ = inotify_add_watch(this->inotify_fd_, path.c_str(), mask);
+
+    if (wd_ == -1)
+    {
+        if (errno == 28)
+        {
+            throw std::runtime_error(
+                std::format("adding inotify watch failed with '{}' (Help: increase "
+                            "/proc/sys/fs/inotify/max_user_watches) for path '{}'",
+                            std::strerror(errno),
+                            path.string()));
+        }
+        throw std::runtime_error(std::format("adding inotify watch failed with '{}' for path '{}'",
+                                             std::strerror(errno),
+                                             path.string()));
+    }
 }
 
-inotify::~inotify() noexcept
+notify::inotify::~inotify() noexcept
 {
     // std::println("notify::~notify({})", static_cast<void*>(this));
     close(this->inotify_fd_);
@@ -97,189 +122,22 @@ inotify::~inotify() noexcept
 }
 
 void
-inotify::ignore(const std::filesystem::path& p) noexcept
-{
-    this->ignored_.push_back(p);
-}
-
-void
-inotify::ignore_once(const std::filesystem::path& p) noexcept
-{
-    this->ignored_once_.push_back(p);
-}
-
-bool
-inotify::is_ignored_once(const std::filesystem::path& p) noexcept
-{
-    const auto found = std::ranges::find(this->ignored_once_, p);
-    if (found != this->ignored_once_.cend())
-    {
-        this->ignored_once_.erase(found);
-        return true;
-    }
-    return false;
-}
-
-bool
-inotify::is_ignored(const std::filesystem::path& p) const noexcept
-{
-    return std::ranges::contains(this->ignored_, p);
-}
-
-std::filesystem::path
-inotify::path_from_fd(const std::int32_t fd) const noexcept
-{
-    const std::filesystem::path link_path = std::format("/proc/self/fd/{}", fd);
-
-    std::error_code ec;
-    auto target = std::filesystem::read_symlink(link_path, ec);
-    if (ec)
-    {
-        return {};
-    }
-    return target;
-}
-
-bool
-inotify::check_watch_file(const file_system_event& fse) const
-{
-    if (!std::filesystem::exists(fse.path()))
-    {
-        throw std::invalid_argument(
-            std::format("Failed to watch file, does not exist: {}", fse.path().string()));
-    }
-
-    if (!std::filesystem::is_regular_file(fse.path()))
-    {
-        throw std::invalid_argument(
-            std::format("Failed to watch file, not a regular file: {}", fse.path().string()));
-    }
-    return !this->is_ignored(fse.path());
-}
-
-bool
-inotify::check_watch_directory(const file_system_event& fse) const
-{
-    if (!std::filesystem::exists(fse.path()))
-    {
-        throw std::invalid_argument(
-            std::format("Failed to watch path, does not exist: {}", fse.path().string()));
-    }
-
-    if (!std::filesystem::is_directory(fse.path()))
-    {
-        throw std::invalid_argument(
-            std::format("Failed to watch path, not a directory: {}", fse.path().string()));
-    }
-    return !this->is_ignored(fse.path());
-}
-
-void
-inotify::watch_path_recursively(const file_system_event& fse)
-{
-    this->watch_directory(fse);
-    for (const auto& p : std::filesystem::recursive_directory_iterator(fse.path()))
-    {
-        if (p.is_directory())
-        {
-            this->watch_directory({p, fse.event()});
-        }
-    }
-}
-
-void
-inotify::stop() const noexcept
+notify::inotify::stop() const noexcept
 {
     std::uint64_t value = 1;
     auto _ = write(this->event_fd_, &value, sizeof(value));
 }
 
-void
-inotify::watch_file(const file_system_event& fse)
-{
-    if (!this->check_watch_file(fse))
-    {
-        return;
-    }
-
-    this->watch(fse);
-}
-
-void
-inotify::watch_directory(const file_system_event& fse)
-{
-    if (!this->check_watch_directory(fse))
-    {
-        return;
-    }
-
-    this->watch(fse);
-}
-
-void
-inotify::watch(const file_system_event& fse)
-{
-    const auto wd =
-        inotify_add_watch(this->inotify_fd_, fse.path().c_str(), this->get_event_mask(fse.event()));
-
-    if (wd == -1)
-    {
-        if (errno == 28)
-        {
-            throw std::runtime_error(
-                std::format("adding inotify watch failed with '{}' (Help: increase "
-                            "/proc/sys/fs/inotify/max_user_watches) for path '{}'",
-                            std::strerror(errno),
-                            fse.path().string()));
-        }
-        throw std::runtime_error(std::format("adding inotify watch failed with '{}' for path '{}'",
-                                             std::strerror(errno),
-                                             fse.path().string()));
-    }
-
-    this->directory_map_.emplace(wd, fse.path());
-}
-
-void
-inotify::unwatch(const file_system_event& fse)
-{
-    const auto it = std::ranges::find_if(this->directory_map_,
-                                         [&](const std::pair<std::int32_t, std::string>& key)
-                                         { return key.second == fse.path(); });
-
-    if (it != this->directory_map_.cend())
-    {
-        this->remove_watch(it->first);
-    }
-}
-
-void
-inotify::remove_watch(const std::int32_t wd) const
-{
-    const auto result = inotify_rm_watch(this->inotify_fd_, wd);
-    if (result == -1)
-    {
-        throw std::runtime_error(
-            std::format("removing inotify watch failed with '{}'", std::strerror(errno)));
-    }
-}
-
-std::filesystem::path
-inotify::wd_to_path(const std::int32_t wd) const noexcept
-{
-    return this->directory_map_.at(wd);
-}
-
-std::shared_ptr<notify::file_system_event>
-inotify::get_next_event_from_queue() noexcept
+notify::inotify::file_system_event
+notify::inotify::get_next_event_from_queue() noexcept
 {
     auto event = this->queue_.front();
     this->queue_.pop();
     return event;
 }
 
-std::shared_ptr<notify::file_system_event>
-inotify::get_next_event(const std::stop_token& stoken)
+std::optional<notify::inotify::file_system_event>
+notify::inotify::get_next_event(const std::stop_token& stoken)
 {
     static constexpr std::size_t MAX_EVENTS = 4096;
     static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));
@@ -300,7 +158,7 @@ inotify::get_next_event(const std::stop_token& stoken)
         const auto nfds = epoll_pwait(this->epoll_fd_, events.data(), events.size(), -1, nullptr);
         if (nfds == -1)
         {
-            return nullptr;
+            return std::nullopt;
         }
 
         if (nfds == 0)
@@ -336,47 +194,80 @@ inotify::get_next_event(const std::stop_token& stoken)
         const auto* event = reinterpret_cast<inotify_event*>(&buffer[i]);
         if (!event)
         {
-            return nullptr;
+            return std::nullopt;
         }
 
-        const auto path = this->wd_to_path(event->wd);
+        // remove IN_ISDIR bit from event mask, if the
+        // mask is i.e. (IN_CREATE | IN_ISDIR) we only want IN_CREATE
+        const auto mask = event->mask & static_cast<std::uint32_t>(IN_ISDIR)
+                              ? event->mask & ~static_cast<std::uint32_t>(IN_ISDIR)
+                              : event->mask;
 
-        if (!this->is_ignored_once(path))
-        {
-            // remove IN_ISDIR bit from event mask, if the
-            // mask is (IN_CREATE | IN_ISDIR) we only want IN_CREATE
-            // TODO, report event occurred to a directory
-            const auto mask = event->mask & static_cast<std::uint32_t>(IN_ISDIR)
-                                  ? event->mask & ~static_cast<std::uint32_t>(IN_ISDIR)
-                                  : event->mask;
-
-            this->queue_.push(
-                std::make_shared<file_system_event>(event->len ? path / event->name : path,
-                                                    event_handler::get_inotify(mask)));
+        this->queue_.push(
+            file_system_event(event->len ? path_ / event->name : path_, get_inotify(mask)));
 
 #if defined(PRINT_DBG)
-            std::println("raw = {}\t| lookup = {},{}\t| cookie = {}\t| {}",
-                         event->mask,
-                         event_handler::get_inotify(mask),
-                         static_cast<std::uint32_t>(event_handler::get_inotify(mask)),
-                         event->cookie,
-                         event->len ? (path / event->name).string() : path.string());
+        std::println("raw = {}\t| lookup = {},{}\t| cookie = {}\t| {}",
+                     event->mask,
+                     get_inotify(mask),
+                     static_cast<std::uint32_t>(get_inotify(mask)),
+                     event->cookie,
+                     event->len ? (path_ / event->name).string() : path_.string());
 #endif
-        }
+
         i += EVENT_SIZE + event->len;
     }
 
     if (stoken.stop_requested() || this->queue_.empty())
     {
-        return nullptr;
+        return std::nullopt;
     }
 
     return this->get_next_event_from_queue();
 }
 
-std::uint32_t
-inotify::get_event_mask(const event event) const
+notify::event
+notify::inotify::get_inotify(const std::uint32_t event) noexcept
 {
-    return event_handler::convert_to_inotify_events(event);
+    switch (event)
+    {
+        case IN_ACCESS:
+            return event::access;
+        case IN_MODIFY:
+            return event::modify;
+        case IN_ATTRIB:
+            return event::attrib;
+        case IN_CLOSE_WRITE:
+            return event::close_write;
+        case IN_CLOSE_NOWRITE:
+            return event::close_nowrite;
+        case IN_OPEN:
+            return event::open;
+        case IN_MOVED_FROM:
+            return event::moved_from;
+        case IN_MOVED_TO:
+            return event::moved_to;
+        case IN_CREATE:
+            return event::create;
+        case IN_DELETE:
+            return event::delete_sub;
+        case IN_DELETE_SELF:
+            return event::delete_self;
+        case IN_MOVE_SELF:
+            return event::move_self;
+        case IN_UNMOUNT:
+            return event::umount;
+        case IN_Q_OVERFLOW:
+            return event::queue_overflow;
+        case IN_IGNORED:
+            return event::ignored;
+        case IN_CLOSE:
+            return event::close;
+        case IN_MOVE:
+            return event::move;
+        case IN_ALL_EVENTS:
+            return event::all;
+        default:
+            return event::none;
+    }
 }
-} // namespace notify

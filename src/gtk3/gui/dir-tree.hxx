@@ -61,11 +61,13 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         node() = default;
         ~node()
         {
+#if 0
             if (this->notifier_thread.joinable())
             {
                 this->notifier_thread.request_stop();
                 this->notifier_thread.join();
             }
+#endif
         }
 
         [[nodiscard]] static std::shared_ptr<node> create() noexcept;
@@ -83,8 +85,10 @@ struct dir_tree // : public std::enable_shared_from_this<gui::dir_tree>, Gtk::Tr
         std::shared_ptr<node> last{nullptr};
         gui::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
+#if 0
         notify::controller notifier;
         std::jthread notifier_thread;
+#endif
 
         std::shared_ptr<node> get_nth_node(std::int32_t n) const noexcept;
         std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
