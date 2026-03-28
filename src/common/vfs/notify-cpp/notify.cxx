@@ -46,20 +46,20 @@
 notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::event> events)
     : path_(path)
 {
-    this->inotify_fd_ = inotify_init1(IN_NONBLOCK);
-    if (this->inotify_fd_ == -1)
+    inotify_fd_ = inotify_init1(IN_NONBLOCK);
+    if (inotify_fd_ == -1)
     {
         throw std::runtime_error(std::format("inotify init failed: {}", std::strerror(errno)));
     }
 
-    this->event_fd_ = eventfd(0, EFD_NONBLOCK);
-    if (this->event_fd_ == -1)
+    event_fd_ = eventfd(0, EFD_NONBLOCK);
+    if (event_fd_ == -1)
     {
         throw std::runtime_error(std::format("eventfd init failed: {}", std::strerror(errno)));
     }
 
-    this->epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
-    if (this->epoll_fd_ == -1)
+    epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
+    if (epoll_fd_ == -1)
     {
         throw std::runtime_error(std::format("epoll init failed: {}", std::strerror(errno)));
     }
@@ -67,16 +67,16 @@ notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::eve
     std::int32_t result = 0;
     epoll_event event{};
 
-    event = {.events = EPOLLIN, .data = {.fd = this->event_fd_}};
-    result = epoll_ctl(this->epoll_fd_, EPOLL_CTL_ADD, this->event_fd_, &event);
+    event = {.events = EPOLLIN, .data = {.fd = event_fd_}};
+    result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, event_fd_, &event);
     if (result == -1)
     {
         throw std::runtime_error(
             std::format("failed to add eventfd to epoll: {}", std::strerror(errno)));
     }
 
-    event = {.events = EPOLLIN, .data = {.fd = this->inotify_fd_}};
-    result = epoll_ctl(this->epoll_fd_, EPOLL_CTL_ADD, this->inotify_fd_, &event);
+    event = {.events = EPOLLIN, .data = {.fd = inotify_fd_}};
+    result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, inotify_fd_, &event);
     if (result == -1)
     {
         throw std::runtime_error(
@@ -95,7 +95,7 @@ notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::eve
         },
         events);
 
-    wd_ = inotify_add_watch(this->inotify_fd_, path.c_str(), mask);
+    wd_ = inotify_add_watch(inotify_fd_, path.c_str(), mask);
 
     if (wd_ == -1)
     {
@@ -116,23 +116,23 @@ notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::eve
 notify::inotify::~inotify() noexcept
 {
     // std::println("notify::~notify({})", static_cast<void*>(this));
-    close(this->inotify_fd_);
-    close(this->event_fd_);
-    close(this->epoll_fd_);
+    close(inotify_fd_);
+    close(event_fd_);
+    close(epoll_fd_);
 }
 
 void
 notify::inotify::stop() const noexcept
 {
     std::uint64_t value = 1;
-    auto _ = write(this->event_fd_, &value, sizeof(value));
+    auto _ = write(event_fd_, &value, sizeof(value));
 }
 
 notify::inotify::file_system_event
 notify::inotify::get_next_event_from_queue() noexcept
 {
-    auto event = this->queue_.front();
-    this->queue_.pop();
+    auto event = queue_.front();
+    queue_.pop();
     return event;
 }
 
@@ -143,9 +143,9 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
     static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));
     static constexpr std::size_t EVENT_BUF_LEN = (MAX_EVENTS * (EVENT_SIZE + 16));
 
-    if (!this->queue_.empty())
+    if (!queue_.empty())
     {
-        return this->get_next_event_from_queue();
+        return get_next_event_from_queue();
     }
 
     std::ptrdiff_t length = 0;
@@ -155,7 +155,7 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
     {
         std::array<epoll_event, 1> events{};
 
-        const auto nfds = epoll_pwait(this->epoll_fd_, events.data(), events.size(), -1, nullptr);
+        const auto nfds = epoll_pwait(epoll_fd_, events.data(), events.size(), -1, nullptr);
         if (nfds == -1)
         {
             return std::nullopt;
@@ -168,11 +168,11 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
 
         const auto& event = events.front();
 
-        if (event.data.fd == this->inotify_fd_)
+        if (event.data.fd == inotify_fd_)
         {
             buffer.fill('\0');
 
-            length = read(this->inotify_fd_, buffer.data(), buffer.size());
+            length = read(inotify_fd_, buffer.data(), buffer.size());
             if (length == -1)
             {
                 if (errno != EINTR)
@@ -182,7 +182,7 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
             }
             break;
         }
-        else if (event.data.fd == this->event_fd_)
+        else if (event.data.fd == event_fd_)
         {
             continue;
         }
@@ -203,8 +203,7 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
                               ? event->mask & ~static_cast<std::uint32_t>(IN_ISDIR)
                               : event->mask;
 
-        this->queue_.push(
-            file_system_event(event->len ? path_ / event->name : path_, get_inotify(mask)));
+        queue_.push(file_system_event(event->len ? path_ / event->name : path_, get_inotify(mask)));
 
 #if defined(PRINT_DBG)
         std::println("raw = {}\t| lookup = {},{}\t| cookie = {}\t| {}",
@@ -218,12 +217,12 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
         i += EVENT_SIZE + event->len;
     }
 
-    if (stoken.stop_requested() || this->queue_.empty())
+    if (stoken.stop_requested() || queue_.empty())
     {
         return std::nullopt;
     }
 
-    return this->get_next_event_from_queue();
+    return get_next_event_from_queue();
 }
 
 notify::event
