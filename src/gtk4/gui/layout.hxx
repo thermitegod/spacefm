@@ -24,13 +24,16 @@
 #include "gui/browser.hxx"
 
 #include "vfs/task-manager.hxx"
+#include "vfs/volume-manager.hxx"
 
 namespace gui
 {
 class layout : public Gtk::Paned
 {
   public:
-    layout(Gtk::ApplicationWindow& parent, const std::shared_ptr<vfs::task_manager>& task_manager,
+    layout(Gtk::ApplicationWindow& parent,
+           const std::shared_ptr<vfs::volume_manager>& volume_manager,
+           const std::shared_ptr<vfs::task_manager>& task_manager,
            const std::shared_ptr<config::settings>& settings);
 
     [[nodiscard]] bool is_visible(config::panel_id id) const noexcept;
@@ -49,6 +52,7 @@ class layout : public Gtk::Paned
     void unfreeze_browsers() noexcept;
 
     Gtk::ApplicationWindow& parent_;
+    std::shared_ptr<vfs::volume_manager> volume_manager_;
     std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;
 

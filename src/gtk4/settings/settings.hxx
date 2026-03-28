@@ -186,6 +186,8 @@ struct settings_on_disk
         bool confirm_delete{true};
         bool confirm_trash{true};
 
+        bool auto_open_mounted_volumes{true};
+
         bool load_saved_tabs{true};
 
         bool use_si_prefix{false};

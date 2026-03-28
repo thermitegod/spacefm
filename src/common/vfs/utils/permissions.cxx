@@ -119,14 +119,14 @@ vfs::utils::check_directory_permissions(const std::filesystem::path& path) noexc
         return false;
     }
 
-    std::filesystem::path parent = path.parent_path();
-    while (parent != "/")
-    {
-        if (!has_execute_permission(parent))
-        {
-            return false;
-        }
-        parent = parent.parent_path();
-    }
+    // std::filesystem::path parent = path.parent_path();
+    // while (parent != "/")
+    // {
+    //     if (!has_execute_permission(parent))
+    //     {
+    //         return false;
+    //     }
+    //     parent = parent.parent_path();
+    // }
     return true;
 }

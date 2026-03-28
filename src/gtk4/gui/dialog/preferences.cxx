@@ -238,6 +238,17 @@ gui::dialog::preferences::init_general_tab() noexcept
     }
 
     {
+        auto& opt = settings_->general.auto_open_mounted_volumes;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Auto Open Mounted Volumes");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
         auto& opt = settings_->general.load_saved_tabs;
 
         auto button = Gtk::make_managed<Gtk::CheckButton>();

@@ -27,9 +27,11 @@
 #include "logger.hxx"
 
 gui::layout::layout(Gtk::ApplicationWindow& parent,
+                    const std::shared_ptr<vfs::volume_manager>& volume_manager,
                     const std::shared_ptr<vfs::task_manager>& task_manager,
                     const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), task_manager_(task_manager), settings_(settings)
+    : parent_(parent), volume_manager_(volume_manager), task_manager_(task_manager),
+      settings_(settings)
 {
     set_orientation(Gtk::Orientation::VERTICAL);
     top_.set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -71,7 +73,8 @@ gui::layout::set_pane_visible(config::panel_id id, bool visible) noexcept
 void
 gui::layout::create_browser(config::panel_id id) noexcept
 {
-    auto* browser = Gtk::make_managed<gui::browser>(parent_, id, task_manager_, settings_);
+    auto* browser =
+        Gtk::make_managed<gui::browser>(parent_, id, volume_manager_, task_manager_, settings_);
     browsers_.at(id) = browser;
 
     switch (id)

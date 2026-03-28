@@ -28,6 +28,7 @@
 
 #include "vfs/bookmarks.hxx"
 #include "vfs/task-manager.hxx"
+#include "vfs/volume-manager.hxx"
 
 namespace gui
 {
@@ -39,6 +40,7 @@ class main_window : public Gtk::ApplicationWindow
 
   private:
     std::shared_ptr<vfs::task_manager> task_manager_ = vfs::task_manager::create();
+    std::shared_ptr<vfs::volume_manager> volume_manager_ = vfs::volume_manager::create();
     std::shared_ptr<config::settings> settings_ = std::make_shared<config::settings>();
     std::shared_ptr<config::manager> config_manager_ = std::make_shared<config::manager>(settings_);
     std::shared_ptr<vfs::bookmarks> bookmark_manager_ = std::make_shared<vfs::bookmarks>();
@@ -46,7 +48,7 @@ class main_window : public Gtk::ApplicationWindow
     Gtk::Box box_;
     gui::menubar menubar_;
 
-    gui::layout layout_ = gui::layout(*this, task_manager_, settings_);
+    gui::layout layout_ = gui::layout(*this, volume_manager_, task_manager_, settings_);
 
     Gtk::ScrolledWindow task_scroll_;
     gui::task tasks_ = gui::task(*this, task_manager_);

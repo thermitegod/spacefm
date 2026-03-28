@@ -36,7 +36,11 @@
 #include "vfs/settings.hxx"
 #endif
 #include "vfs/thumbnailer.hxx"
+#if (GTK_MAJOR_VERSION == 4)
+#include "vfs/volume-manager.hxx"
+#elif (GTK_MAJOR_VERSION == 3)
 #include "vfs/volume.hxx"
+#endif
 
 #include "vfs/utils/file-ops.hxx"
 
@@ -206,11 +210,8 @@ vfs::dir::hidden_files() const noexcept
 void
 vfs::dir::update_avoid_changes() noexcept
 {
-#if (GTK_MAJOR_VERSION == 4) // TODO
-    avoid_changes_ = false;
-#elif (GTK_MAJOR_VERSION == 3)
-    avoid_changes_ = vfs::volume_dir_avoid_changes(path_);
-#endif
+    // TODO
+    // avoid_changes_ = vfs::volume_dir_avoid_changes(path_);
 }
 
 void

@@ -102,7 +102,7 @@ vfs_gtk4_sources = files(
     'vfs/thumbnailer.cxx',
     'vfs/trash-can.cxx',
     'vfs/user-dirs.cxx',
-    # 'vfs/volume.cxx', TODO
+    'vfs/volume-manager.cxx',
 
     # 'vfs/utils/editor.cxx', # TODO move to gui/utils
     'vfs/utils/icon.cxx',

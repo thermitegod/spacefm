@@ -30,13 +30,16 @@
 
 #include "vfs/task-manager.hxx"
 #include "vfs/user-dirs.hxx"
+#include "vfs/volume-manager.hxx"
 
 #include "logger.hxx"
 
 gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
+                      const std::shared_ptr<vfs::volume_manager>& volume_manager,
                       const std::shared_ptr<vfs::task_manager>& task_manager,
                       const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), panel_(panel), task_manager_(task_manager), settings_(settings)
+    : parent_(parent), panel_(panel), volume_manager_(volume_manager), task_manager_(task_manager),
+      settings_(settings)
 {
     logger::debug("gui::browser::browser({})", std::to_underlying(panel_));
 
@@ -73,6 +76,15 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     signal_page_reordered_ =
         signal_page_reordered().connect([this](auto, auto) { save_tab_state(); });
     signal_switch_page_ = signal_switch_page().connect([this](auto, auto) { save_tab_state(); });
+
+    volume_manager_->signal_mounted().connect(
+        [this](const auto& path)
+        {
+            if (settings_->general.auto_open_mounted_volumes)
+            { // TODO need to only open in active browser, not all browsers
+                new_tab(path);
+            }
+        });
 }
 
 gui::browser::~browser()
