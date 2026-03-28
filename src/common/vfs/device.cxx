@@ -31,7 +31,12 @@
 std::shared_ptr<vfs::device>
 vfs::device::create(const libudev::device& udevice) noexcept
 {
-    return std::make_shared<vfs::device>(udevice);
+    struct hack : public vfs::device
+    {
+        hack(const libudev::device& udevice) : device(udevice) {}
+    };
+
+    return std::make_shared<hack>(udevice);
 }
 
 vfs::device::device(const libudev::device& udevice) noexcept : udevice(udevice)

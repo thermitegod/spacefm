@@ -42,9 +42,9 @@
 
 namespace vfs
 {
-class dir final : public std::enable_shared_from_this<dir>
+class dir : public std::enable_shared_from_this<dir>
 {
-  public:
+  private:
     dir() = delete;
 #if (GTK_MAJOR_VERSION == 4)
     explicit dir(const std::filesystem::path& path) noexcept;
@@ -58,6 +58,7 @@ class dir final : public std::enable_shared_from_this<dir>
     dir& operator=(const dir& other) = delete;
     dir& operator=(dir&& other) = delete;
 
+  public:
 #if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
                                                           const bool permanent = false) noexcept;

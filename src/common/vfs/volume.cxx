@@ -719,7 +719,12 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
 std::shared_ptr<vfs::volume>
 vfs::volume::create(const std::shared_ptr<vfs::device>& device) noexcept
 {
-    return std::make_shared<vfs::volume>(device);
+    struct hack : public vfs::volume
+    {
+        hack(const std::shared_ptr<vfs::device>& device) : volume(device) {}
+    };
+
+    return std::make_shared<hack>(device);
 }
 
 std::optional<std::string>

@@ -46,14 +46,27 @@
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path) noexcept
 {
-    return std::make_shared<vfs::file>(path);
+    struct hack : public vfs::file
+    {
+        hack(const std::filesystem::path& path) : file(path) {}
+    };
+
+    return std::make_shared<hack>(path);
 }
 #elif (GTK_MAJOR_VERSION == 3)
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path,
                   const std::shared_ptr<vfs::settings>& settings) noexcept
 {
-    return std::make_shared<vfs::file>(path, settings);
+    struct hack : public vfs::file
+    {
+        hack(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings)
+            : file(path, settings)
+        {
+        }
+    };
+
+    return std::make_shared<hack>(path, settings);
 }
 #endif
 

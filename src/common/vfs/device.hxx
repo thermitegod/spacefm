@@ -26,9 +26,9 @@
 
 namespace vfs
 {
-class device final
+class device
 {
-  public:
+  private:
     device() = delete;
     device(const libudev::device& udevice) noexcept;
     ~device() = default;
@@ -37,6 +37,7 @@ class device final
     device& operator=(const device& other) = delete;
     device& operator=(device&& other) = delete;
 
+  public:
     [[nodiscard]] static std::shared_ptr<vfs::device>
     create(const libudev::device& udevice) noexcept;
 

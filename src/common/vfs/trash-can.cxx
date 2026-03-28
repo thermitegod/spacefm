@@ -62,7 +62,12 @@ vfs::trash_can::mount_id(const std::filesystem::path& path) noexcept
 std::shared_ptr<vfs::trash_can>
 vfs::trash_can::create() noexcept
 {
-    return std::make_shared<vfs::trash_can>();
+    struct hack : public vfs::trash_can
+    {
+        hack() : trash_can() {}
+    };
+
+    return std::make_shared<hack>();
 }
 
 std::filesystem::path

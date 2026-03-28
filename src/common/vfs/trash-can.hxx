@@ -44,10 +44,12 @@ struct trashinfo
 std::error_code trashinfo_write(const std::filesystem::path& path, const trashinfo& info) noexcept;
 std::optional<trashinfo> trashinfo_read(const std::filesystem::path& infopath) noexcept;
 
-class trash_can final
+class trash_can
 {
-  public:
+  private:
     trash_can() noexcept;
+
+  public:
     [[nodiscard]] static std::shared_ptr<vfs::trash_can> create() noexcept;
 
     // Move a file or directory into the trash.

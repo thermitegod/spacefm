@@ -32,7 +32,7 @@ namespace vfs
 {
 class device;
 
-class volume final : public std::enable_shared_from_this<volume>
+class volume : public std::enable_shared_from_this<volume>
 {
   public:
     enum class state : std::uint8_t
@@ -52,15 +52,16 @@ class volume final : public std::enable_shared_from_this<volume>
         other, // eg fuseiso mounted file
     };
 
+  private:
     volume() = delete;
     volume(const std::shared_ptr<vfs::device>& device) noexcept;
     ~volume() = default;
-    // ~volume() { logger::debug<logger::vfs>("vfs::volume::~volume({})", logger::utils::ptr(this)); };
     volume(const volume& other) = delete;
     volume(volume&& other) = delete;
     volume& operator=(const volume& other) = delete;
     volume& operator=(volume&& other) = delete;
 
+  public:
     [[nodiscard]] static std::shared_ptr<vfs::volume>
     create(const std::shared_ptr<vfs::device>& device) noexcept;
 

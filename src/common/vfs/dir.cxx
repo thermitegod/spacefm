@@ -152,14 +152,27 @@ vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::s
     else
     {
 #if (GTK_MAJOR_VERSION == 4)
+        struct hack : public vfs::dir
+        {
+            hack(const std::filesystem::path& path) : dir(path) {}
+        };
+
         dir = global::dir_smart_cache.create(
             path,
-            [&path]() { return std::make_shared<vfs::dir>(path); },
+            [&path]() { return std::make_shared<hack>(path); },
             permanent);
 #elif (GTK_MAJOR_VERSION == 3)
+        struct hack : public vfs::dir
+        {
+            hack(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings)
+                : dir(path, settings)
+            {
+            }
+        };
+
         dir = global::dir_smart_cache.create(
             path,
-            [&path, &settings]() { return std::make_shared<vfs::dir>(path, settings); },
+            [&path, &settings]() { return std::make_shared<hack>(path, settings); },
             permanent);
 #endif
         // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());

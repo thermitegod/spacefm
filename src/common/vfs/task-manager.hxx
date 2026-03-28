@@ -128,12 +128,13 @@ struct task_error final
     std::string message;
 };
 
-class task_manager final
+class task_manager
 {
-  public:
+  private:
     task_manager() noexcept;
     ~task_manager() noexcept;
 
+  public:
     [[nodiscard]] static std::shared_ptr<vfs::task_manager> create() noexcept;
 
     void add(const vfs::chmod_task& task) noexcept;

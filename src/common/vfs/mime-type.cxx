@@ -62,9 +62,22 @@ vfs::mime_type::create(const std::string_view type,
     }
 
 #if (GTK_MAJOR_VERSION == 4)
-    const auto mime_type = std::make_shared<vfs::mime_type>(type);
+    struct hack : public vfs::mime_type
+    {
+        hack(const std::string_view type) : mime_type(type) {}
+    };
+
+    const auto mime_type = std::make_shared<hack>(type);
 #elif (GTK_MAJOR_VERSION == 3)
-    const auto mime_type = std::make_shared<vfs::mime_type>(type, settings);
+    struct hack : public vfs::mime_type
+    {
+        hack(const std::string_view type, const std::shared_ptr<vfs::settings>& settings)
+            : mime_type(type, settings)
+        {
+        }
+    };
+
+    const auto mime_type = std::make_shared<hack>(type, settings);
 #endif
     global::mime_map.insert({type.data(), mime_type});
     return mime_type;

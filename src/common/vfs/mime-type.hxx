@@ -45,9 +45,9 @@ inline constexpr std::string_view plain_text{"text/plain"};
 inline constexpr std::string_view zerosize{"application/x-zerosize"};
 } // namespace constants::mime_type
 
-class mime_type final
+class mime_type
 {
-  public:
+  private:
     mime_type() = delete;
 #if (GTK_MAJOR_VERSION == 4)
     explicit mime_type(const std::string_view type) noexcept;
@@ -61,6 +61,7 @@ class mime_type final
     mime_type& operator=(const mime_type& other) = delete;
     mime_type& operator=(mime_type&& other) = delete;
 
+  public:
 #if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_file(const std::filesystem::path& path) noexcept;

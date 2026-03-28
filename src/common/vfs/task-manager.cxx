@@ -52,7 +52,12 @@ vfs::task_manager::~task_manager() noexcept
 std::shared_ptr<vfs::task_manager>
 vfs::task_manager::create() noexcept
 {
-    return std::make_shared<vfs::task_manager>();
+    struct hack : public vfs::task_manager
+    {
+        hack() : task_manager() {}
+    };
+
+    return std::make_shared<hack>();
 }
 
 bool
