@@ -597,7 +597,7 @@ vfs::dir::remove_file(const std::shared_ptr<vfs::file>& file) noexcept
 {
     std::scoped_lock files_lock(files_lock_);
 
-    files_.erase(std::ranges::remove(files_, file).begin(), files_.end());
+    std::erase_if(files_, [&](const auto& f) { return f == file; });
 }
 
 void

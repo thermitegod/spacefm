@@ -119,7 +119,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
         const std::string rem = r;
         if (std::ranges::contains(actions, rem))
         {
-            std::ranges::remove(actions, rem);
+            std::erase_if(actions, [&](const auto& a) { return a == rem; });
             // logger::info<logger::vfs>("        ACTION-REMOVED {}", rem);
         }
     }
