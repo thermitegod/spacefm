@@ -52,7 +52,7 @@ class thumbnailer
     [[nodiscard]] auto
     signal_thumbnail_created() noexcept
     {
-        return this->signal_thumbnail_created_;
+        return signal_thumbnail_created_;
     }
 
   private:

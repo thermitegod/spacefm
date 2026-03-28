@@ -52,7 +52,7 @@ vfs::bookmarks::save() noexcept
     }
 
     const auto data =
-        bookmark_disk_format::bookmark_data{bookmark_disk_format::version, this->bookmarks_};
+        bookmark_disk_format::bookmark_data{bookmark_disk_format::version, bookmarks_};
 
     std::string buffer;
     const auto ec =
@@ -64,7 +64,7 @@ vfs::bookmarks::save() noexcept
     {
         // logger::error("Failed to write bookmark file: {}", glz::format_error(ec, buffer));
 
-        this->signal_save_error().emit(glz::format_error(ec, buffer));
+        signal_save_error().emit(glz::format_error(ec, buffer));
     }
 }
 
@@ -77,11 +77,11 @@ vfs::bookmarks::load() noexcept
     }
 
     const auto statx = ztd::stat::create(bookmark_disk_format::path);
-    if (statx->mtime() == this->bookmark_mtime_)
+    if (statx->mtime() == bookmark_mtime_)
     { // Bookmark file has not been modified since last read
         return;
     }
-    this->bookmark_mtime_ = statx->mtime();
+    bookmark_mtime_ = statx->mtime();
 
     bookmark_disk_format::bookmark_data config_data;
     std::string buffer;
@@ -94,58 +94,58 @@ vfs::bookmarks::load() noexcept
     {
         // logger::error("Failed to load bookmark file: {}", glz::format_error(ec, buffer));
 
-        this->signal_load_error().emit(glz::format_error(ec, buffer));
+        signal_load_error().emit(glz::format_error(ec, buffer));
         return;
     }
 
-    this->bookmarks_ = config_data.bookmarks;
+    bookmarks_ = config_data.bookmarks;
 }
 
 void
 vfs::bookmarks::add(const std::filesystem::path& path) noexcept
 {
-    this->load();
+    load();
 
     const auto now = std::chrono::system_clock::now();
 
-    for (auto& bookmark : this->bookmarks_)
+    for (auto& bookmark : bookmarks_)
     {
         if (bookmark.path == path)
         {
             bookmark.created = now;
-            this->save();
+            save();
             return;
         }
     }
 
-    this->bookmarks_.push_back({path.filename().string(), path, now});
-    this->save();
+    bookmarks_.push_back({path.filename().string(), path, now});
+    save();
 }
 
 void
 vfs::bookmarks::remove(const std::filesystem::path& path) noexcept
 {
-    this->load();
+    load();
 
-    std::erase_if(this->bookmarks_,
+    std::erase_if(bookmarks_,
                   [&path](const bookmark_data& bookmark) { return bookmark.path == path; });
 
-    this->save();
+    save();
 }
 
 void
 vfs::bookmarks::remove_all() noexcept
 {
-    this->bookmarks_.clear();
-    this->save();
+    bookmarks_.clear();
+    save();
 }
 
 std::span<const vfs::bookmarks::bookmark_data>
 vfs::bookmarks::get_bookmarks() noexcept
 {
-    this->load();
+    load();
 
-    return this->bookmarks_;
+    return bookmarks_;
 }
 
 #else

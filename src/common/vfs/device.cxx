@@ -41,110 +41,110 @@ vfs::device::create(const libudev::device& udevice) noexcept
 
 vfs::device::device(const libudev::device& udevice) noexcept : udevice(udevice)
 {
-    this->is_valid_ = this->device_get_info();
+    is_valid_ = device_get_info();
 }
 
 dev_t
 vfs::device::devnum() const noexcept
 {
-    return this->devnum_;
+    return devnum_;
 }
 
 std::string_view
 vfs::device::devnode() const noexcept
 {
-    return this->devnode_;
+    return devnode_;
 }
 
 std::string_view
 vfs::device::native_path() const noexcept
 {
-    return this->native_path_;
+    return native_path_;
 }
 
 std::string_view
 vfs::device::mount_points() const noexcept
 {
-    return this->mount_points_;
+    return mount_points_;
 }
 
 bool
 vfs::device::is_valid() const noexcept
 {
-    return this->is_valid_;
+    return is_valid_;
 }
 
 bool
 vfs::device::is_system_internal() const noexcept
 {
-    return this->is_system_internal_;
+    return is_system_internal_;
 }
 
 bool
 vfs::device::is_removable() const noexcept
 {
-    return this->is_removable_;
+    return is_removable_;
 }
 
 bool
 vfs::device::is_media_available() const noexcept
 {
-    return this->is_media_available_;
+    return is_media_available_;
 }
 
 bool
 vfs::device::is_optical_disc() const noexcept
 {
-    return this->is_optical_disc_;
+    return is_optical_disc_;
 }
 
 bool
 vfs::device::is_mounted() const noexcept
 {
-    return this->is_mounted_;
+    return is_mounted_;
 }
 
 bool
 vfs::device::is_media_ejectable() const noexcept
 {
-    return this->is_media_ejectable_;
+    return is_media_ejectable_;
 }
 
 std::string_view
 vfs::device::id() const noexcept
 {
-    return this->id_;
+    return id_;
 }
 
 std::string_view
 vfs::device::id_label() const noexcept
 {
-    return this->id_label_;
+    return id_label_;
 }
 
 u64
 vfs::device::size() const noexcept
 {
-    return this->size_;
+    return size_;
 }
 
 u64
 vfs::device::block_size() const noexcept
 {
-    return this->block_size_;
+    return block_size_;
 }
 
 std::string_view
 vfs::device::fstype() const noexcept
 {
-    return this->fstype_;
+    return fstype_;
 }
 
 std::optional<std::string>
 vfs::device::info_mount_points() const noexcept
 {
-    const dev_t dmajor = gnu_dev_major(this->devnum_);
-    const dev_t dminor = gnu_dev_minor(this->devnum_);
+    const dev_t dmajor = gnu_dev_major(devnum_);
+    const dev_t dminor = gnu_dev_minor(devnum_);
 
     // TODO MAYBE - pass devmounts as an argument to the constructor?
 
@@ -197,30 +197,30 @@ vfs::device::info_mount_points() const noexcept
 bool
 vfs::device::device_get_info() noexcept
 {
-    const auto device_syspath = this->udevice.get_syspath();
-    const auto device_devnode = this->udevice.get_devnode();
-    const auto device_devnum = this->udevice.get_devnum();
+    const auto device_syspath = udevice.get_syspath();
+    const auto device_devnode = udevice.get_devnode();
+    const auto device_devnum = udevice.get_devnum();
     if (!device_syspath || !device_devnode || device_devnum == 0)
     {
         return false;
     }
 
-    this->native_path_ = device_syspath.value();
-    this->devnode_ = device_devnode.value();
-    this->devnum_ = device_devnum;
+    native_path_ = device_syspath.value();
+    devnode_ = device_devnode.value();
+    devnum_ = device_devnum;
 
-    const auto prop_id_fs_usage = this->udevice.get_property("ID_FS_USAGE");
-    const auto prop_id_fs_uuid = this->udevice.get_property("ID_FS_UUID");
+    const auto prop_id_fs_usage = udevice.get_property("ID_FS_USAGE");
+    const auto prop_id_fs_uuid = udevice.get_property("ID_FS_UUID");
 
-    const auto prop_id_fs_type = this->udevice.get_property("ID_FS_TYPE");
+    const auto prop_id_fs_type = udevice.get_property("ID_FS_TYPE");
     if (prop_id_fs_type)
     {
-        this->fstype_ = prop_id_fs_type.value();
+        fstype_ = prop_id_fs_type.value();
     }
-    const auto prop_id_fs_label = this->udevice.get_property("ID_FS_LABEL");
+    const auto prop_id_fs_label = udevice.get_property("ID_FS_LABEL");
     if (prop_id_fs_label)
     {
-        this->id_label_ = prop_id_fs_label.value();
+        id_label_ = prop_id_fs_label.value();
     }
 
     // device_is_media_available
@@ -230,15 +230,15 @@ vfs::device::device_get_info() noexcept
     {
         media_available = true;
     }
-    else if (this->devnode_.starts_with("/dev/loop"))
+    else if (devnode_.starts_with("/dev/loop"))
     {
         media_available = false;
     }
-    else if (this->is_removable())
+    else if (is_removable())
     {
         bool is_cd = false;
 
-        const auto prop_id_cdrom = this->udevice.get_property("ID_CDROM");
+        const auto prop_id_cdrom = udevice.get_property("ID_CDROM");
         if (prop_id_cdrom)
         {
             is_cd = i32::create(prop_id_cdrom.value()).value_or(0) != 0;
@@ -252,7 +252,7 @@ vfs::device::device_get_info() noexcept
         {
             // this test is limited for non-root - user may not have read
             // access to device file even if media is present
-            const auto fd = open(this->devnode_.data(), O_RDONLY);
+            const auto fd = open(devnode_.data(), O_RDONLY);
             if (fd >= 0)
             {
                 media_available = true;
@@ -261,7 +261,7 @@ vfs::device::device_get_info() noexcept
         }
         else
         {
-            const auto prop_id_cdrom_media = this->udevice.get_property("ID_CDROM_MEDIA");
+            const auto prop_id_cdrom_media = udevice.get_property("ID_CDROM_MEDIA");
             if (prop_id_cdrom_media)
             {
                 media_available = i32::create(prop_id_cdrom_media.value()).value_or(0) == 1;
@@ -270,7 +270,7 @@ vfs::device::device_get_info() noexcept
     }
     else
     {
-        const auto prop_id_cdrom_media = this->udevice.get_property("ID_CDROM_MEDIA");
+        const auto prop_id_cdrom_media = udevice.get_property("ID_CDROM_MEDIA");
         if (prop_id_cdrom_media)
         {
             media_available = i32::create(prop_id_cdrom_media.value()).value_or(0) == 1;
@@ -281,80 +281,79 @@ vfs::device::device_get_info() noexcept
         }
     }
 
-    this->is_media_available_ = media_available;
+    is_media_available_ = media_available;
 
-    if (this->is_media_available())
+    if (is_media_available())
     {
-        const auto check_size = vfs::linux::sysfs::get_u64(this->native_path_, "size");
+        const auto check_size = vfs::linux::sysfs::get_u64(native_path_, "size");
         if (check_size)
         {
-            this->size_ = check_size.value() * 512;
+            size_ = check_size.value() * 512;
         }
 
         //  This is not available on all devices so fall back to 512 if unavailable.
         //
         //  Another way to get this information is the BLKSSZGET ioctl but we do not want
         //  to open the device. Ideally vol_id would export it.
-        const auto block_size =
-            vfs::linux::sysfs::get_u64(this->native_path_, "queue/hw_sector_size");
+        const auto block_size = vfs::linux::sysfs::get_u64(native_path_, "queue/hw_sector_size");
         if (block_size)
         {
             if (block_size.value() != 0)
             {
-                this->block_size_ = block_size.value();
+                block_size_ = block_size.value();
             }
             else
             {
-                this->block_size_ = 512;
+                block_size_ = 512;
             }
         }
         else
         {
-            this->block_size_ = 512;
+            block_size_ = 512;
         }
     }
 
     // links
-    const auto entrys = this->udevice.get_devlinks();
+    const auto entrys = udevice.get_devlinks();
     for (const std::string_view entry : entrys)
     {
         if (entry.starts_with("/dev/disk/by-id/") || entry.starts_with("/dev/disk/by-uuid/"))
         {
-            this->id_ = entry;
+            id_ = entry;
             break;
         }
     }
 
-    if (this->native_path_.empty() || this->devnum_ == 0)
+    if (native_path_.empty() || devnum_ == 0)
     {
         return false;
     }
 
-    this->is_removable_ = this->udevice.is_removable();
+    is_removable_ = udevice.is_removable();
 
     // is_ejectable
     bool drive_is_ejectable = false;
-    const auto prop_id_drive_ejectable = this->udevice.get_property("ID_DRIVE_EJECTABLE");
+    const auto prop_id_drive_ejectable = udevice.get_property("ID_DRIVE_EJECTABLE");
     if (prop_id_drive_ejectable)
     {
         drive_is_ejectable = i32::create(prop_id_drive_ejectable.value()).value_or(0) != 0;
     }
     else
     {
-        drive_is_ejectable = this->udevice.has_property("ID_CDROM");
+        drive_is_ejectable = udevice.has_property("ID_CDROM");
     }
-    this->is_media_ejectable_ = drive_is_ejectable;
+    is_media_ejectable_ = drive_is_ejectable;
 
     // devices with removable media are never system internal
-    this->is_system_internal_ = !this->is_removable_;
+    is_system_internal_ = !is_removable_;
 
-    this->mount_points_ = this->info_mount_points().value_or("");
-    this->is_mounted_ = !this->mount_points_.empty();
+    mount_points_ = info_mount_points().value_or("");
+    is_mounted_ = !mount_points_.empty();
 
-    const auto prop_id_cdrom = this->udevice.get_property("ID_CDROM");
+    const auto prop_id_cdrom = udevice.get_property("ID_CDROM");
     if (prop_id_cdrom)
     {
-        this->is_optical_disc_ = i32::create(prop_id_cdrom.value()).value_or(0) != 0;
+        is_optical_disc_ = i32::create(prop_id_cdrom.value()).value_or(0) != 0;
     }
 
     return true;

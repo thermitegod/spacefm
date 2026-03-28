@@ -73,7 +73,7 @@ vfs::task_manager::run(const std::stop_token& stoken) noexcept
 {
     while (!stoken.stop_requested())
     {
-        this->run_once(stoken);
+        run_once(stoken);
     }
 }
 

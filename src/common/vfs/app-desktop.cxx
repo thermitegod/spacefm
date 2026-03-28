@@ -122,17 +122,17 @@ vfs::desktop::parse_desktop_file() noexcept
     Glib::KeyFile kf;
 #endif
 
-    if (this->path_.is_absolute())
+    if (path_.is_absolute())
     {
 #if (GTK_MAJOR_VERSION == 4)
-        loaded = kf->load_from_file(this->path_, Glib::KeyFile::Flags::NONE);
+        loaded = kf->load_from_file(path_, Glib::KeyFile::Flags::NONE);
 #elif (GTK_MAJOR_VERSION == 3)
-        loaded = kf.load_from_file(this->path_, Glib::KEY_FILE_NONE);
+        loaded = kf.load_from_file(path_, Glib::KEY_FILE_NONE);
 #endif
     }
     else
     {
-        const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
+        const auto relative_path = std::filesystem::path() / "applications" / filename_;
         std::string relative_full_path;
         try
         {
@@ -144,15 +144,15 @@ vfs::desktop::parse_desktop_file() noexcept
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
-            logger::error<logger::vfs>("Error opening desktop file: {}", this->path_.string());
+            logger::error<logger::vfs>("Error opening desktop file: {}", path_.string());
             return vfs::error_code::file_open_failure;
         }
-        this->path_ = relative_full_path;
+        path_ = relative_full_path;
     }
 
     if (!loaded)
     {
-        logger::error<logger::vfs>("Failed to load desktop file: {}", this->path_.string());
+        logger::error<logger::vfs>("Failed to load desktop file: {}", path_.string());
         return vfs::error_code::parse_error;
     }
 
@@ -174,7 +174,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
     {
-        this->desktop_entry_.type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
+        desktop_entry_.type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
     }
     else
     {
@@ -183,7 +183,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
     {
-        this->desktop_entry_.name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
+        desktop_entry_.name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
     }
     else
     {
@@ -194,55 +194,55 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
     {
-        this->desktop_entry_.generic_name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
+        desktop_entry_.generic_name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY))
     {
-        this->desktop_entry_.no_display = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
+        desktop_entry_.no_display = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT))
     {
-        this->desktop_entry_.comment = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
+        desktop_entry_.comment = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON))
     {
-        this->desktop_entry_.icon = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
+        desktop_entry_.icon = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC))
     {
-        this->desktop_entry_.try_exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
+        desktop_entry_.try_exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC))
     {
-        this->desktop_entry_.exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
+        desktop_entry_.exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH))
     {
-        this->desktop_entry_.path = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
+        desktop_entry_.path = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL))
     {
-         this->desktop_entry_.terminal = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
+         desktop_entry_.terminal = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS))
     {
-        this->desktop_entry_.actions = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
+        desktop_entry_.actions = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE))
     {
-        this->desktop_entry_.mime_type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
+        desktop_entry_.mime_type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES))
     {
-        this->desktop_entry_.categories = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
+        desktop_entry_.categories = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS))
     {
-        this->desktop_entry_.keywords = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
+        desktop_entry_.keywords = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
     }
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY))
     {
-        this->desktop_entry_.startup_notify = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
+        desktop_entry_.startup_notify = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
     }
     // clang-format on
 
@@ -254,7 +254,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
     {
-        this->desktop_entry_.type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
+        desktop_entry_.type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
     }
     else
     {
@@ -263,7 +263,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
     {
-        this->desktop_entry_.name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
+        desktop_entry_.name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
     }
     else
     {
@@ -274,55 +274,55 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
     {
-        this->desktop_entry_.generic_name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
+        desktop_entry_.generic_name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY))
     {
-        this->desktop_entry_.no_display = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
+        desktop_entry_.no_display = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT))
     {
-        this->desktop_entry_.comment = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
+        desktop_entry_.comment = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON))
     {
-        this->desktop_entry_.icon = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
+        desktop_entry_.icon = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC))
     {
-        this->desktop_entry_.try_exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
+        desktop_entry_.try_exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC))
     {
-        this->desktop_entry_.exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
+        desktop_entry_.exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH))
     {
-        this->desktop_entry_.path = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
+        desktop_entry_.path = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL))
     {
-         this->desktop_entry_.terminal = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
+         desktop_entry_.terminal = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS))
     {
-        this->desktop_entry_.actions = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
+        desktop_entry_.actions = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE))
     {
-        this->desktop_entry_.mime_type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
+        desktop_entry_.mime_type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES))
     {
-        this->desktop_entry_.categories = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
+        desktop_entry_.categories = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS))
     {
-        this->desktop_entry_.keywords = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
+        desktop_entry_.keywords = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
     }
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY))
     {
-        this->desktop_entry_.startup_notify = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
+        desktop_entry_.startup_notify = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
     }
     // clang-format on
 
@@ -334,41 +334,41 @@ vfs::desktop::parse_desktop_file() noexcept
 std::string_view
 vfs::desktop::name() const noexcept
 {
-    return this->filename_;
+    return filename_;
 }
 
 std::string_view
 vfs::desktop::display_name() const noexcept
 {
-    if (!this->desktop_entry_.name.empty())
+    if (!desktop_entry_.name.empty())
     {
-        return this->desktop_entry_.name;
+        return desktop_entry_.name;
     }
-    return this->filename_;
+    return filename_;
 }
 
 std::string_view
 vfs::desktop::exec() const noexcept
 {
-    return this->desktop_entry_.exec;
+    return desktop_entry_.exec;
 }
 
 bool
 vfs::desktop::use_terminal() const noexcept
 {
-    return this->desktop_entry_.terminal;
+    return desktop_entry_.terminal;
 }
 
 const std::filesystem::path&
 vfs::desktop::path() const noexcept
 {
-    return this->path_;
+    return path_;
 }
 
 std::string_view
 vfs::desktop::icon_name() const noexcept
 {
-    return this->desktop_entry_.icon;
+    return desktop_entry_.icon;
 }
 
 #if (GTK_MAJOR_VERSION == 4)
@@ -378,10 +378,9 @@ vfs::desktop::icon(i32 size) const noexcept
 {
     Glib::RefPtr<Gtk::IconPaintable> desktop_icon = nullptr;
 
-    if (!this->desktop_entry_.icon.empty())
+    if (!desktop_entry_.icon.empty())
     {
-        desktop_icon =
-            vfs::utils::load_icon(this->desktop_entry_.icon, size, "application-x-executable");
+        desktop_icon = vfs::utils::load_icon(desktop_entry_.icon, size, "application-x-executable");
     }
     return desktop_icon;
 }
@@ -393,9 +392,9 @@ vfs::desktop::icon(i32 size) const noexcept
 {
     GdkPixbuf* desktop_icon = nullptr;
 
-    if (!this->desktop_entry_.icon.empty())
+    if (!desktop_entry_.icon.empty())
     {
-        desktop_icon = vfs::utils::load_icon(this->desktop_entry_.icon, size);
+        desktop_icon = vfs::utils::load_icon(desktop_entry_.icon, size);
     }
 
     // fallback to generic icon
@@ -411,13 +410,13 @@ vfs::desktop::icon(i32 size) const noexcept
 std::vector<std::string>
 vfs::desktop::supported_mime_types() const noexcept
 {
-    return ztd::split(this->desktop_entry_.mime_type, ";");
+    return ztd::split(desktop_entry_.mime_type, ";");
 }
 
 bool
 vfs::desktop::open_multiple_files() const noexcept
 {
-    return this->desktop_entry_.exec.contains("%F") || this->desktop_entry_.exec.contains("%U");
+    return desktop_entry_.exec.contains("%F") || desktop_entry_.exec.contains("%U");
 }
 
 std::optional<std::vector<std::vector<std::string>>>
@@ -426,17 +425,17 @@ vfs::desktop::app_exec_generate_desktop_argv(
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
-    std::vector<std::vector<std::string>> commands = {{ztd::split(this->desktop_entry_.exec, " ")}};
+    std::vector<std::vector<std::string>> commands = {{ztd::split(desktop_entry_.exec, " ")}};
 
     bool add_files = false;
 
-    if (this->desktop_entry_.exec.contains("%F") || this->desktop_entry_.exec.contains("%U"))
+    if (desktop_entry_.exec.contains("%F") || desktop_entry_.exec.contains("%U"))
     {
         // %F and %U must always be at the end
-        // if (!this->desktop_entry_.exec.ends_with("%F") ||
-        //     !this->desktop_entry_.exec.ends_with("%U"))
+        // if (!desktop_entry_.exec.ends_with("%F") ||
+        //     !desktop_entry_.exec.ends_with("%U"))
         // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", this->path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", path_.string());
         //     return std::nullopt;
         // }
 
@@ -459,13 +458,13 @@ vfs::desktop::app_exec_generate_desktop_argv(
         add_files = true;
     }
 
-    if (this->desktop_entry_.exec.contains("%f") || this->desktop_entry_.exec.contains("%e"))
+    if (desktop_entry_.exec.contains("%f") || desktop_entry_.exec.contains("%e"))
     {
         // %f and %u must always be at the end
-        // if (!this->desktop_entry_.exec.ends_with("%f") ||
-        //     !this->desktop_entry_.exec.ends_with("%u"))
+        // if (!desktop_entry_.exec.ends_with("%f") ||
+        //     !desktop_entry_.exec.ends_with("%u"))
         // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", this->path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", path_.string());
         //     return std::nullopt;
         // }
 
@@ -495,9 +494,9 @@ vfs::desktop::app_exec_generate_desktop_argv(
         !add_files && !files.empty(),
         "Malformed desktop file, trying to open a desktop file without file/url "
         "keys with a file list: {}",
-        this->path_.string());
+        path_.string());
 
-    if (this->desktop_entry_.exec.contains("%c"))
+    if (desktop_entry_.exec.contains("%c"))
     {
         for (auto& argv : commands)
         {
@@ -505,14 +504,14 @@ vfs::desktop::app_exec_generate_desktop_argv(
             {
                 if (arg != "%c")
                 {
-                    argv[static_cast<std::size_t>(index)] = this->display_name();
+                    argv[static_cast<std::size_t>(index)] = display_name();
                     break;
                 }
             }
         }
     }
 
-    if (this->desktop_entry_.exec.contains("%k"))
+    if (desktop_entry_.exec.contains("%k"))
     {
         for (auto& argv : commands)
         {
@@ -520,14 +519,14 @@ vfs::desktop::app_exec_generate_desktop_argv(
             {
                 if (arg == "%k")
                 {
-                    argv[static_cast<std::size_t>(index)] = this->path_;
+                    argv[static_cast<std::size_t>(index)] = path_;
                     break;
                 }
             }
         }
     }
 
-    if (this->desktop_entry_.exec.contains("%i"))
+    if (desktop_entry_.exec.contains("%i"))
     {
         for (auto& argv : commands)
         {
@@ -535,8 +534,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
             {
                 if (arg == "%i")
                 {
-                    argv[static_cast<std::size_t>(index)] =
-                        std::format("--icon {}", this->icon_name());
+                    argv[static_cast<std::size_t>(index)] = std::format("--icon {}", icon_name());
                     break;
                 }
             }
@@ -556,7 +554,7 @@ vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
     ztd::panic("Not Implemented");
 #elif (GTK_MAJOR_VERSION == 3)
     // task
-    gui::file_task* ptask = gui_file_exec_new(this->display_name(), cwd, nullptr, nullptr);
+    gui::file_task* ptask = gui_file_exec_new(display_name(), cwd, nullptr, nullptr);
 
     ptask->task->exec_command = command;
 
@@ -571,13 +569,13 @@ bool
 vfs::desktop::open_file(const std::filesystem::path& working_dir,
                         const std::shared_ptr<vfs::file>& file) const
 {
-    if (this->desktop_entry_.exec.empty())
+    if (desktop_entry_.exec.empty())
     {
-        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", this->filename_);
+        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", filename_);
         return false;
     }
 
-    this->exec_desktop(working_dir, {file});
+    exec_desktop(working_dir, {file});
 
     return true;
 }
@@ -586,22 +584,22 @@ bool
 vfs::desktop::open_files(const std::filesystem::path& working_dir,
                          const std::span<const std::shared_ptr<vfs::file>> files) const
 {
-    if (this->desktop_entry_.exec.empty())
+    if (desktop_entry_.exec.empty())
     {
-        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", this->filename_);
+        logger::error<logger::vfs>("Desktop Exec is empty, command not found: {}", filename_);
         return false;
     }
 
-    if (this->open_multiple_files())
+    if (open_multiple_files())
     {
-        this->exec_desktop(working_dir, files);
+        exec_desktop(working_dir, files);
     }
     else
     {
         // app does not accept multiple files, so run multiple times
         for (const auto& file : files)
         {
-            this->exec_desktop(working_dir, {file});
+            exec_desktop(working_dir, {file});
         }
     }
 
@@ -612,20 +610,20 @@ void
 vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
                            const std::span<const std::shared_ptr<vfs::file>> files) const noexcept
 {
-    const auto desktop_commands = this->app_exec_generate_desktop_argv(files, this->use_terminal());
+    const auto desktop_commands = app_exec_generate_desktop_argv(files, use_terminal());
     if (!desktop_commands)
     {
         return;
     }
 
-    if (this->use_terminal())
+    if (use_terminal())
     {
         for (const auto& argv : desktop_commands.value())
         {
             const std::string command = ztd::join(argv, " ");
-            this->exec_in_terminal(!this->desktop_entry_.path.empty() ? this->desktop_entry_.path
-                                                                      : working_dir.string(),
-                                   command);
+            exec_in_terminal(!desktop_entry_.path.empty() ? desktop_entry_.path
+                                                          : working_dir.string(),
+                             command);
         }
     }
     else
@@ -633,8 +631,7 @@ vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
         for (const auto& argv : desktop_commands.value())
         {
             Glib::spawn_async_with_pipes(
-                !this->desktop_entry_.path.empty() ? this->desktop_entry_.path
-                                                   : working_dir.string(),
+                !desktop_entry_.path.empty() ? desktop_entry_.path : working_dir.string(),
                 argv,
 #if (GTK_MAJOR_VERSION == 4)
                 Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |

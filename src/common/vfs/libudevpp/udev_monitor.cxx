@@ -21,19 +21,19 @@
 bool
 libudev::monitor::enable_receiving() const noexcept
 {
-    return udev_monitor_enable_receiving(this->handle.get()) >= 0;
+    return udev_monitor_enable_receiving(handle.get()) >= 0;
 }
 
 int
 libudev::monitor::get_fd() const noexcept
 {
-    return udev_monitor_get_fd(this->handle.get());
+    return udev_monitor_get_fd(handle.get());
 }
 
 std::optional<libudev::device>
 libudev::monitor::receive_device() const noexcept
 {
-    auto* const device = udev_monitor_receive_device(this->handle.get());
+    auto* const device = udev_monitor_receive_device(handle.get());
     if (device)
     {
         return libudev::device(device);
@@ -45,7 +45,7 @@ bool
 libudev::monitor::filter_add_match_subsystem_devtype(
     const std::string_view subsystem) const noexcept
 {
-    return udev_monitor_filter_add_match_subsystem_devtype(this->handle.get(),
+    return udev_monitor_filter_add_match_subsystem_devtype(handle.get(),
                                                            subsystem.data(),
                                                            nullptr) == 0;
 }
@@ -54,7 +54,7 @@ bool
 libudev::monitor::filter_add_match_subsystem_devtype(const std::string_view subsystem,
                                                      const std::string_view devtype) const noexcept
 {
-    return udev_monitor_filter_add_match_subsystem_devtype(this->handle.get(),
+    return udev_monitor_filter_add_match_subsystem_devtype(handle.get(),
                                                            subsystem.data(),
                                                            devtype.data()) == 0;
 }
@@ -62,11 +62,11 @@ libudev::monitor::filter_add_match_subsystem_devtype(const std::string_view subs
 bool
 libudev::monitor::filter_add_match_tag(const std::string_view tag) const noexcept
 {
-    return udev_monitor_filter_add_match_tag(this->handle.get(), tag.data()) == 0;
+    return udev_monitor_filter_add_match_tag(handle.get(), tag.data()) == 0;
 }
 
 bool
 libudev::monitor::is_initialized() const noexcept
 {
-    return this->handle != nullptr;
+    return handle != nullptr;
 }

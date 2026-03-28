@@ -29,10 +29,10 @@ void
 vfs::thumbnailer::request(const request_data& request) noexcept
 {
     {
-        std::scoped_lock lock(this->mutex_);
-        this->queue_.push(request);
+        std::scoped_lock lock(mutex_);
+        queue_.push(request);
     }
-    this->cv_.notify_one();
+    cv_.notify_one();
 }
 
 void
@@ -40,7 +40,7 @@ vfs::thumbnailer::run(const std::stop_token& stoken) noexcept
 {
     while (!stoken.stop_requested())
     {
-        this->run_once(stoken);
+        run_once(stoken);
     }
 }
 
@@ -49,18 +49,18 @@ vfs::thumbnailer::run_once(const std::stop_token& stoken) noexcept
 {
     request_data request;
     {
-        std::unique_lock lock(this->mutex_);
-        this->cv_.wait(lock, stoken, [this] { return !queue_.empty(); });
+        std::unique_lock lock(mutex_);
+        cv_.wait(lock, stoken, [this] { return !queue_.empty(); });
 
-        if (stoken.stop_requested()) // && this->queue_.empty())
+        if (stoken.stop_requested()) // && queue_.empty())
         {
             return;
         }
 
-        if (!this->queue_.empty())
+        if (!queue_.empty())
         {
-            request = this->queue_.front();
-            this->queue_.pop();
+            request = queue_.front();
+            queue_.pop();
         }
     }
 
@@ -76,6 +76,6 @@ vfs::thumbnailer::run_once(const std::stop_token& stoken) noexcept
     {
         // since thumbnail generation can take an indeterminate amount of time there
         // needs to be another abort check before calling the callback.
-        this->signal_thumbnail_created().emit(request.file);
+        signal_thumbnail_created().emit(request.file);
     }
 }

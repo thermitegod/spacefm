@@ -178,45 +178,45 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] auto
     signal_files_changed() noexcept
     {
-        return this->signal_files_changed_;
+        return signal_files_changed_;
     }
 
     [[nodiscard]] auto
     signal_files_created() noexcept
     {
-        return this->signal_files_created_;
+        return signal_files_created_;
     }
 
     [[nodiscard]] auto
     signal_files_deleted() noexcept
     {
-        return this->signal_files_deleted_;
+        return signal_files_deleted_;
     }
 
 #if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] auto
     signal_directory_loaded() noexcept
     {
-        return this->signal_directory_loaded_;
+        return signal_directory_loaded_;
     }
 
     [[nodiscard]] auto
     signal_directory_refresh() noexcept
     {
-        return this->signal_directory_refresh_;
+        return signal_directory_refresh_;
     }
 #elif (GTK_MAJOR_VERSION == 3)
     [[nodiscard]] auto
     signal_file_listed() noexcept
     {
-        return this->signal_file_listed_;
+        return signal_file_listed_;
     }
 #endif
 
     [[nodiscard]] auto
     signal_thumbnail_loaded() noexcept
     {
-        return this->signal_file_thumbnail_loaded_;
+        return signal_file_thumbnail_loaded_;
     }
 
     /**
@@ -225,7 +225,7 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] auto
     signal_directory_deleted() noexcept
     {
-        return this->signal_directory_deleted_;
+        return signal_directory_deleted_;
     }
 
   private:

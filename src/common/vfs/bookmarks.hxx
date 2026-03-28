@@ -51,13 +51,13 @@ class bookmarks
     [[nodiscard]] auto
     signal_load_error() noexcept
     {
-        return this->signal_load_error_;
+        return signal_load_error_;
     }
 
     [[nodiscard]] auto
     signal_save_error() noexcept
     {
-        return this->signal_save_error_;
+        return signal_save_error_;
     }
 
   private:

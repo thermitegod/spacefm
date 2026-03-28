@@ -26,7 +26,7 @@ libudev::udev::monitor_new_from_netlink(const std::string_view name) const noexc
 {
     assert(std::string(name) == "udev" || std::string(name) == "kernel");
 
-    auto* const monitor = udev_monitor_new_from_netlink(this->handle.get(), name.data());
+    auto* const monitor = udev_monitor_new_from_netlink(handle.get(), name.data());
     if (monitor)
     {
         return libudev::monitor(monitor);
@@ -39,7 +39,7 @@ libudev::udev::monitor_new_from_netlink(const netlink_type name) const noexcept
 {
     if (name == netlink_type::udev)
     {
-        auto* const monitor = udev_monitor_new_from_netlink(this->handle.get(), "udev");
+        auto* const monitor = udev_monitor_new_from_netlink(handle.get(), "udev");
         if (monitor)
         {
             return libudev::monitor(monitor);
@@ -47,7 +47,7 @@ libudev::udev::monitor_new_from_netlink(const netlink_type name) const noexcept
     }
     else if (name == netlink_type::kernel)
     {
-        auto* const monitor = udev_monitor_new_from_netlink(this->handle.get(), "kernel");
+        auto* const monitor = udev_monitor_new_from_netlink(handle.get(), "kernel");
         if (monitor)
         {
             return libudev::monitor(monitor);
@@ -59,7 +59,7 @@ libudev::udev::monitor_new_from_netlink(const netlink_type name) const noexcept
 std::optional<libudev::device>
 libudev::udev::device_from_syspath(const std::filesystem::path& syspath) const noexcept
 {
-    auto* const device = udev_device_new_from_syspath(this->handle.get(), syspath.c_str());
+    auto* const device = udev_device_new_from_syspath(handle.get(), syspath.c_str());
     if (device)
     {
         return libudev::device(device);
@@ -71,7 +71,7 @@ std::optional<libudev::device>
 libudev::udev::device_from_devnum(const char type, const dev_t devnum) const noexcept
 {
     assert(type == 'b' || type == 'c');
-    auto* const device = udev_device_new_from_devnum(this->handle.get(), type, devnum);
+    auto* const device = udev_device_new_from_devnum(handle.get(), type, devnum);
     if (device)
     {
         return libudev::device(device);
@@ -84,7 +84,7 @@ libudev::udev::device_from_devnum(const device_type type, const dev_t devnum) co
 {
     if (type == device_type::block)
     {
-        auto* const device = udev_device_new_from_devnum(this->handle.get(), 'b', devnum);
+        auto* const device = udev_device_new_from_devnum(handle.get(), 'b', devnum);
         if (device)
         {
             return libudev::device(device);
@@ -92,7 +92,7 @@ libudev::udev::device_from_devnum(const device_type type, const dev_t devnum) co
     }
     else if (type == device_type::character)
     {
-        auto* const device = udev_device_new_from_devnum(this->handle.get(), 'c', devnum);
+        auto* const device = udev_device_new_from_devnum(handle.get(), 'c', devnum);
         if (device)
         {
             return libudev::device(device);
@@ -104,11 +104,11 @@ libudev::udev::device_from_devnum(const device_type type, const dev_t devnum) co
 libudev::enumerate
 libudev::udev::enumerate_new() const noexcept
 {
-    return {udev_enumerate_new(this->handle.get())};
+    return {udev_enumerate_new(handle.get())};
 }
 
 bool
 libudev::udev::is_initialized() const noexcept
 {
-    return this->handle != nullptr;
+    return handle != nullptr;
 }

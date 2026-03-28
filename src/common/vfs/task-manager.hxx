@@ -263,19 +263,19 @@ class task_manager
     [[nodiscard]] auto
     signal_task_added() noexcept
     {
-        return this->signal_task_added_;
+        return signal_task_added_;
     }
 
     [[nodiscard]] auto
     signal_task_finished() noexcept
     {
-        return this->signal_task_finished_;
+        return signal_task_finished_;
     }
 
     [[nodiscard]] auto
     signal_task_error() noexcept
     {
-        return this->signal_task_error_;
+        return signal_task_error_;
     }
 
     [[nodiscard]] auto
