@@ -146,7 +146,7 @@ class dir : public std::enable_shared_from_this<dir>
     std::jthread notifier_thread_;
 
     bool enable_thumbnails_{true};
-    bool avoid_changes_{true};            // disable file events, for nfs mount locations.
+    bool avoid_changes_{false};           // disable file events, for nfs mount locations.
     std::atomic_bool load_running_{true}; // is dir loaded, initial load or refresh
     u64 xhidden_count_;                   // filenames starting with '.' and user hidden files
 
