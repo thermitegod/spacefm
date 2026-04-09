@@ -24,7 +24,15 @@
 int
 main(int argc, char** argv)
 {
-    logger::initialize();
+    logger::initialize({
+        {"basic", "off"},
+        {"dev", "off"},
+        {"autosave", "off"},
+        {"execute", "off"},
+        {"socket", "off"},
+        {"gui", "off"},
+        {"vfs", "off"},
+    });
 
     return doctest::Context(argc, argv).run();
 }
