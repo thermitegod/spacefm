@@ -16,42 +16,110 @@
  */
 
 #include <filesystem>
+#include <system_error>
 
 #include <doctest/doctest.h>
 
 #include "vfs/utils/file-ops.hxx"
 
-const std::filesystem::path test_data_path = TEST_DATA_PATH;
+using namespace std::string_literals;
 
 TEST_SUITE("vfs::utils file-ops" * doctest::description(""))
 {
+    const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "file-ops";
+
     TEST_CASE("vfs::utils::read_file")
     {
-        REQUIRE(std::filesystem::exists(test_data_path));
-
-        SUBCASE("")
+        const auto test_path = root / "read";
+        if (std::filesystem::exists(test_path))
         {
-            // TODO
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+        REQUIRE(std::filesystem::exists(test_path));
+
+        auto result = vfs::utils::write_file(test_path / "test.txt", "data"s);
+        REQUIRE(result == std::error_code{});
+
+        SUBCASE("good read")
+        {
+            auto data = vfs::utils::read_file(test_path / "test.txt");
+            CHECK_EQ(*data, "data"s);
+        }
+
+        SUBCASE("file open failure")
+        {
+            auto data = vfs::utils::read_file(test_path / "bad_path" / "test.txt");
+            CHECK_EQ(data.error(), vfs::error_code::file_open_failure);
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
         }
     }
 
     TEST_CASE("vfs::utils::read_file_partial")
     {
-        REQUIRE(std::filesystem::exists(test_data_path));
-
-        SUBCASE("")
+        const auto test_path = root / "read_partial";
+        if (std::filesystem::exists(test_path))
         {
-            // TODO
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+        REQUIRE(std::filesystem::exists(test_path));
+
+#if 0
+        SUBCASE("good read")
+        {
+            auto data = vfs::utils::read_file_partial(test_path / "test.txt", 1024uz);
+            CHECK_EQ(*data, "data"s);
+        }
+
+        SUBCASE("good read partial")
+        {
+            auto data = vfs::utils::read_file_partial(test_path / "test.txt", 1uz);
+            CHECK_EQ(*data, "d"s);
+        }
+
+        SUBCASE("file open failure")
+        {
+            auto data = vfs::utils::read_file_partial(test_path / "bad_path" / "test.txt", 1024uz);
+            CHECK_EQ(data.error(), vfs::error_code::file_open_failure);
+        }
+#endif
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
         }
     }
 
     TEST_CASE("vfs::utils::write_file")
     {
-        REQUIRE(std::filesystem::exists(test_data_path));
-
-        SUBCASE("")
+        const auto test_path = root / "write";
+        if (std::filesystem::exists(test_path))
         {
-            // TODO
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+        REQUIRE(std::filesystem::exists(test_path));
+
+        SUBCASE("good write")
+        {
+            auto result = vfs::utils::write_file(test_path / "test.txt", "data"s);
+            CHECK_EQ(result, std::error_code{});
+        }
+
+        SUBCASE("file open failure")
+        {
+            auto result = vfs::utils::write_file(test_path / "bad_path" / "test.txt", "data"s);
+            CHECK_EQ(result, vfs::error_code::file_open_failure);
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
         }
     }
 }
