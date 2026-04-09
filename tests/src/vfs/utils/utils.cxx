@@ -21,67 +21,182 @@
 
 #include "vfs/utils/utils.hxx"
 
-const std::filesystem::path test_data_path = TEST_DATA_PATH;
+#include "utils.hxx"
 
 TEST_SUITE("vfs::utils" * doctest::description(""))
 {
+    const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "vfs-utils";
+
     TEST_CASE("vfs::utils::unique_path")
     {
-        REQUIRE(std::filesystem::exists(test_data_path));
-
-        SUBCASE("file missing extension")
+        const auto test_path = root / "unique_path";
+        if (std::filesystem::exists(test_path))
         {
-            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-missing";
-            const std::filesystem::path filename = "test";
+            std::filesystem::remove_all(test_path);
+        }
+        std::filesystem::create_directories(test_path);
+        REQUIRE(std::filesystem::exists(test_path));
 
-            const auto result_wanted = path / "test-copy11";
+        SUBCASE("file no extension")
+        {
+            create_file(test_path / "test");
+            ////
+            create_file(test_path / "test1");
+            create_file(test_path / "test2");
+            create_file(test_path / "test3");
+            create_file(test_path / "test4");
+            create_file(test_path / "test5");
+            create_file(test_path / "test6");
+            create_file(test_path / "test7");
+            create_file(test_path / "test8");
+            create_file(test_path / "test9");
+            create_file(test_path / "test10");
 
-            const auto result = vfs::utils::unique_path(path, filename, "-copy");
-
-            CHECK_EQ(result, result_wanted);
+            const auto result = vfs::utils::unique_path(test_path, "test");
+            CHECK_EQ(result, test_path / "test11");
         }
 
-        SUBCASE("file multiple extension")
+        SUBCASE("file no extension with tag")
         {
-            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-multiple";
-            const std::filesystem::path filename = "test.tar.gz";
+            create_file(test_path / "test");
+            ////
+            create_file(test_path / "test-copy1");
+            create_file(test_path / "test-copy2");
+            create_file(test_path / "test-copy3");
+            create_file(test_path / "test-copy4");
+            create_file(test_path / "test-copy5");
+            create_file(test_path / "test-copy6");
+            create_file(test_path / "test-copy7");
+            create_file(test_path / "test-copy8");
+            create_file(test_path / "test-copy9");
+            create_file(test_path / "test-copy10");
 
-            const auto result_wanted = path / "test-copy11.tar.gz";
-
-            const auto result = vfs::utils::unique_path(path, filename, "-copy");
-
-            CHECK_EQ(result, result_wanted);
+            const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
+            CHECK_EQ(result, test_path / "test-copy11");
         }
 
         SUBCASE("file single extension")
         {
-            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-single";
-            const std::filesystem::path filename = "test.txt";
+            create_file(test_path / "test.txt");
+            ////
+            create_file(test_path / "test1.txt");
+            create_file(test_path / "test2.txt");
+            create_file(test_path / "test3.txt");
+            create_file(test_path / "test4.txt");
+            create_file(test_path / "test5.txt");
+            create_file(test_path / "test6.txt");
+            create_file(test_path / "test7.txt");
+            create_file(test_path / "test8.txt");
+            create_file(test_path / "test9.txt");
+            create_file(test_path / "test10.txt");
 
-            const auto result_wanted = path / "test-copy11.txt";
+            const auto result = vfs::utils::unique_path(test_path, "test.txt");
+            CHECK_EQ(result, test_path / "test11.txt");
+        }
 
-            const auto result = vfs::utils::unique_path(path, filename, "-copy");
+        SUBCASE("file single extension with tag")
+        {
+            create_file(test_path / "test.txt");
+            ////
+            create_file(test_path / "test-copy1.txt");
+            create_file(test_path / "test-copy2.txt");
+            create_file(test_path / "test-copy3.txt");
+            create_file(test_path / "test-copy4.txt");
+            create_file(test_path / "test-copy5.txt");
+            create_file(test_path / "test-copy6.txt");
+            create_file(test_path / "test-copy7.txt");
+            create_file(test_path / "test-copy8.txt");
+            create_file(test_path / "test-copy9.txt");
+            create_file(test_path / "test-copy10.txt");
 
-            CHECK_EQ(result, result_wanted);
+            const auto result = vfs::utils::unique_path(test_path, "test.txt", "-copy");
+            CHECK_EQ(result, test_path / "test-copy11.txt");
+        }
+
+        SUBCASE("file multiple extension")
+        {
+            create_file(test_path / "test.tar.gz");
+            ////
+            create_file(test_path / "test1.tar.gz");
+            create_file(test_path / "test2.tar.gz");
+            create_file(test_path / "test3.tar.gz");
+            create_file(test_path / "test4.tar.gz");
+            create_file(test_path / "test5.tar.gz");
+            create_file(test_path / "test6.tar.gz");
+            create_file(test_path / "test7.tar.gz");
+            create_file(test_path / "test8.tar.gz");
+            create_file(test_path / "test9.tar.gz");
+            create_file(test_path / "test10.tar.gz");
+
+            const auto result = vfs::utils::unique_path(test_path, "test.tar.gz");
+            CHECK_EQ(result, test_path / "test11.tar.gz");
+        }
+
+        SUBCASE("file multiple extension with tag")
+        {
+            create_file(test_path / "test.tar.gz");
+            ////
+            create_file(test_path / "test-copy1.tar.gz");
+            create_file(test_path / "test-copy2.tar.gz");
+            create_file(test_path / "test-copy3.tar.gz");
+            create_file(test_path / "test-copy4.tar.gz");
+            create_file(test_path / "test-copy5.tar.gz");
+            create_file(test_path / "test-copy6.tar.gz");
+            create_file(test_path / "test-copy7.tar.gz");
+            create_file(test_path / "test-copy8.tar.gz");
+            create_file(test_path / "test-copy9.tar.gz");
+            create_file(test_path / "test-copy10.tar.gz");
+
+            const auto result = vfs::utils::unique_path(test_path, "test.tar.gz", "-copy");
+            CHECK_EQ(result, test_path / "test-copy11.tar.gz");
         }
 
         SUBCASE("directory")
         {
-            const auto path = test_data_path / "vfs/utils/unique_name/directory";
-            const std::filesystem::path filename = "test";
+            std::filesystem::create_directories(test_path / "test");
+            ////
+            std::filesystem::create_directories(test_path / "test1");
+            std::filesystem::create_directories(test_path / "test2");
+            std::filesystem::create_directories(test_path / "test3");
+            std::filesystem::create_directories(test_path / "test4");
+            std::filesystem::create_directories(test_path / "test5");
+            std::filesystem::create_directories(test_path / "test6");
+            std::filesystem::create_directories(test_path / "test7");
+            std::filesystem::create_directories(test_path / "test8");
+            std::filesystem::create_directories(test_path / "test9");
+            std::filesystem::create_directories(test_path / "test10");
 
-            const auto result_wanted = path / "test-copy11";
+            const auto result = vfs::utils::unique_path(test_path, "test");
+            CHECK_EQ(result, test_path / "test11");
+        }
 
-            const auto result = vfs::utils::unique_path(path, filename, "-copy");
+        SUBCASE("directory with tag")
+        {
+            std::filesystem::create_directories(test_path / "test");
+            ////
+            std::filesystem::create_directories(test_path / "test-copy1");
+            std::filesystem::create_directories(test_path / "test-copy2");
+            std::filesystem::create_directories(test_path / "test-copy3");
+            std::filesystem::create_directories(test_path / "test-copy4");
+            std::filesystem::create_directories(test_path / "test-copy5");
+            std::filesystem::create_directories(test_path / "test-copy6");
+            std::filesystem::create_directories(test_path / "test-copy7");
+            std::filesystem::create_directories(test_path / "test-copy8");
+            std::filesystem::create_directories(test_path / "test-copy9");
+            std::filesystem::create_directories(test_path / "test-copy10");
 
-            CHECK_EQ(result, result_wanted);
+            const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
+            CHECK_EQ(result, test_path / "test-copy11");
+        }
+
+        if (std::filesystem::exists(test_path))
+        {
+            std::filesystem::remove_all(test_path);
         }
     }
 
     TEST_CASE("vfs::utils::filename_stem_and_extension")
     {
-        REQUIRE(std::filesystem::exists(test_data_path));
-
         SUBCASE("empty")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension("");

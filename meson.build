@@ -291,10 +291,6 @@ if get_option('dev')
     ]
 endif
 
-if get_option('tests')
-    preprocessor += '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data'))
-endif
-
 foreach a: preprocessor
     add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
