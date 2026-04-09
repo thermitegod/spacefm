@@ -18,9 +18,7 @@
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
-#include <functional>
 #include <mutex>
-#include <print>
 
 #include <doctest/doctest.h>
 
@@ -28,7 +26,7 @@
 
 #include "vfs/task-manager.hxx"
 
-#include "vfs/utils/file-ops.hxx"
+#include "utils.hxx"
 
 struct test_sync
 {
@@ -80,30 +78,9 @@ struct test_sync
     }
 };
 
-static void
-create_file(const std::filesystem::path& path, std::string_view content = "data") noexcept
-{
-    std::filesystem::create_directories(path.parent_path());
-
-    auto result = vfs::utils::write_file(path, content);
-    ztd::panic_if(bool(result), "Test Suite bad write");
-}
-
-static std::string
-read_file(const std::filesystem::path& path) noexcept
-{
-    auto data = vfs::utils::read_file(path);
-    ztd::panic_if(!data, "Test Suite bad read");
-    return *data;
-}
-
 static std::size_t
 count_files(const std::filesystem::path& path, bool recursive = false) noexcept
 {
-    ztd::panic_if(!std::filesystem::exists(path),
-                  "Test Suite missing required path: {}",
-                  path.string());
-
     size_t count = 0;
     if (recursive)
     {

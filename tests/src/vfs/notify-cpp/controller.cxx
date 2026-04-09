@@ -21,9 +21,7 @@
  * SOFTWARE.
  */
 
-#include <chrono>
 #include <filesystem>
-#include <fstream>
 #include <stop_token>
 #include <thread>
 
@@ -33,7 +31,7 @@
 
 #include "vfs/notify-cpp/controller.hxx"
 
-#include "vfs/utils/file-ops.hxx"
+#include "utils.hxx"
 
 struct event_counter
 {
@@ -81,23 +79,6 @@ struct event_counter
         move = 0;
     }
 };
-
-static void
-create_file(const std::filesystem::path& path) noexcept
-{
-    using namespace std::string_literals;
-
-    auto result = vfs::utils::write_file(path, "data"s);
-    ztd::panic_if(bool(result), "Test Suite bad write");
-}
-
-static std::string
-read_file(const std::filesystem::path& path) noexcept
-{
-    auto data = vfs::utils::read_file(path);
-    ztd::panic_if(!data, "Test Suite bad read");
-    return *data;
-}
 
 TEST_SUITE("notify-cpp" * doctest::description(""))
 {

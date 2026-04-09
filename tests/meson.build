@@ -48,7 +48,7 @@ test_suite = build_target(
     'test_suite',
     sources: test_sources_sfm,
     target_type: 'executable',
-    include_directories: include_directories(['../src/common', '../src/gtk4']),
+    include_directories: include_directories(['./src', '../src/common', '../src/gtk4']),
     install: false,
     dependencies: [
         doctest_dep,
@@ -60,4 +60,4 @@ test_suite = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
-test('Test Suite - SpaceFM', test_suite)
+test('Test Suite', test_suite)
