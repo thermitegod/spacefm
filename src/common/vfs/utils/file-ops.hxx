@@ -88,47 +88,6 @@ read_file(const std::filesystem::path& path,
 }
 
 /**
- * Read part of a file into a string.
- *
- * @param[in] path - file to read
- * @param[in] size - number of bytes to read from a file
- *
- * @return the files contents in a string or an error_code
- */
-[[nodiscard]] inline std::expected<std::string, std::error_code>
-read_file_partial(const std::filesystem::path& path, const std::size_t size) noexcept
-{
-    auto file = std::ifstream(path, std::ios::in | std::ios::binary);
-    if (!file.is_open()) [[unlikely]]
-    {
-        logger::error<logger::vfs>("Failed to open file for reading: {}", path.string());
-        return std::unexpected{vfs::error_code::file_open_failure};
-    }
-
-    std::string result;
-    std::vector<char> buffer(size, 0);
-
-    file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
-    result.append(buffer.data(), static_cast<std::string::size_type>(file.gcount()));
-
-    if (file.fail() && !file.eof()) [[unlikely]]
-    {
-        logger::error<logger::vfs>("Failed to read file: {}", path.string());
-        return std::unexpected{vfs::error_code::file_read_failure};
-    }
-
-    file.close();
-
-    if (file.is_open()) [[unlikely]]
-    {
-        logger::error<logger::vfs>("Failed to close file: {}", path.string());
-        return std::unexpected{vfs::error_code::file_close_failure};
-    }
-
-    return result;
-}
-
-/**
  * Write a file from a text buffer.
  *
  * @param[in] path - file to write

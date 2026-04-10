@@ -21,6 +21,8 @@
 #include <array>
 #include <filesystem>
 #include <format>
+#include <fstream>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -83,10 +85,26 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
         return vfs::constants::mime_type::executable.data();
     }
 
-    // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
-    constexpr auto MIME_HEADER_MAX_SIZE = 127;
-    const auto buffer = vfs::utils::read_file_partial(path, MIME_HEADER_MAX_SIZE);
-    if (buffer)
+    auto read_mime_header = [](const std::filesystem::path& path) -> std::string
+    {
+        // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
+        constexpr std::size_t MIME_HEADER_MAX_SIZE = 127;
+
+        std::ifstream file(path, std::ios::in | std::ios::binary);
+        if (!file)
+        {
+            return "";
+        }
+
+        std::string buffer(MIME_HEADER_MAX_SIZE, '\0');
+        file.read(&buffer[0], MIME_HEADER_MAX_SIZE);
+
+        buffer.resize(static_cast<std::size_t>(file.gcount()));
+        return buffer;
+    };
+
+    const auto buffer = read_mime_header(path);
+    if (!buffer.empty())
     {
         constexpr auto is_data_plain_text = [](const std::string_view data)
         {
@@ -97,7 +115,7 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
             return std::ranges::all_of(data, [](const auto& byte) { return byte != '\0'; });
         };
 
-        if (is_data_plain_text(*buffer))
+        if (is_data_plain_text(buffer))
         {
             type = vfs::constants::mime_type::plain_text.data();
         }

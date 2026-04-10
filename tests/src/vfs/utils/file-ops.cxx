@@ -82,42 +82,6 @@ TEST_SUITE("vfs::utils file-ops" * doctest::description(""))
         }
     }
 
-    TEST_CASE("vfs::utils::read_file_partial")
-    {
-        const auto test_path = root / "read_partial";
-        if (std::filesystem::exists(test_path))
-        {
-            std::filesystem::remove_all(test_path);
-        }
-        std::filesystem::create_directories(test_path);
-        REQUIRE(std::filesystem::exists(test_path));
-
-#if 0
-        SUBCASE("good read")
-        {
-            auto data = vfs::utils::read_file_partial(test_path / "test.txt", 1024uz);
-            CHECK_EQ(*data, "data"s);
-        }
-
-        SUBCASE("good read partial")
-        {
-            auto data = vfs::utils::read_file_partial(test_path / "test.txt", 1uz);
-            CHECK_EQ(*data, "d"s);
-        }
-
-        SUBCASE("file open failure")
-        {
-            auto data = vfs::utils::read_file_partial(test_path / "bad_path" / "test.txt", 1024uz);
-            CHECK_EQ(data.error(), vfs::error_code::file_open_failure);
-        }
-#endif
-
-        if (std::filesystem::exists(test_path))
-        {
-            std::filesystem::remove_all(test_path);
-        }
-    }
-
     TEST_CASE("vfs::utils::write_file")
     {
         const auto test_path = root / "write";
