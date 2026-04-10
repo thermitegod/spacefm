@@ -18,13 +18,10 @@
 #include <expected>
 #include <filesystem>
 #include <fstream>
-#include <optional>
+#include <span>
 #include <string>
-#include <vector>
 
 #include "vfs/error.hxx"
-
-#include "logger.hxx"
 
 namespace vfs::utils
 {
@@ -96,29 +93,25 @@ read_file(const std::filesystem::path& path,
  * @return the result of the write as an error_code
  */
 [[nodiscard]] inline std::error_code
-write_file(const std::filesystem::path& path, auto&& buffer) noexcept
+write_file(const std::filesystem::path& path, std::span<const char> buffer) noexcept
 {
-    auto file = std::ofstream(path.c_str(), std::ios::out);
-    if (!file.is_open()) [[unlikely]]
+    std::ofstream file(path, std::ios::out | std::ios::binary);
+    if (!file.is_open())
     {
-        logger::error<logger::vfs>("Failed to open file for writing: {}", path.string());
-        return {vfs::error_code::file_open_failure};
+        return vfs::error_code::file_open_failure;
     }
 
     file.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
 
-    if (file.fail()) [[unlikely]]
+    if (file.fail())
     {
-        logger::error<logger::vfs>("Failed to write file: {}", path.string());
-        return {vfs::error_code::file_write_failure};
+        return vfs::error_code::file_write_failure;
     }
 
     file.close();
-
-    if (file.fail()) [[unlikely]]
+    if (file.fail())
     {
-        logger::error<logger::vfs>("Failed to close file: {}", path.string());
-        return {vfs::error_code::file_close_failure};
+        return vfs::error_code::file_close_failure;
     }
 
     return {};
