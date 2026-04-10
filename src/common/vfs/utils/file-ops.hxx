@@ -18,6 +18,7 @@
 #include <expected>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -43,41 +44,44 @@ namespace vfs::utils
 read_file(const std::filesystem::path& path,
           const std::size_t max_size = (10uz * 1024uz * 1024uz)) noexcept
 {
-    constexpr std::size_t CHUNK_SIZE = 4096;
+    std::error_code ec;
+    const std::size_t file_size = std::filesystem::file_size(path, ec);
 
-    auto file = std::ifstream(path, std::ios::in | std::ios::binary);
-    if (!file.is_open()) [[unlikely]]
+    if (!ec && file_size > max_size)
     {
-        logger::error<logger::vfs>("Failed to open file for reading: {}", path.string());
+        return std::unexpected{vfs::error_code::file_too_large};
+    }
+
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    if (!file)
+    {
         return std::unexpected{vfs::error_code::file_open_failure};
     }
 
+    constexpr std::size_t CHUNK_SIZE = 4096;
+    std::array<char, CHUNK_SIZE> buffer;
+
     std::string result;
-
-    while (file.good())
+    if (!ec && file_size > 0)
     {
-        std::vector<char> buffer(CHUNK_SIZE, 0);
+        result.reserve(file_size);
+    }
 
-        file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
-        result.append(buffer.data(), static_cast<std::string::size_type>(file.gcount()));
-        if (result.size() > max_size) [[unlikely]]
+    while (file.read(buffer.data(), buffer.size()) || file.gcount() > 0)
+    {
+        const auto bytes_read = static_cast<std::size_t>(file.gcount());
+
+        if (result.size() + bytes_read > max_size)
         {
             return std::unexpected{vfs::error_code::file_too_large};
         }
+
+        result.append(buffer.data(), bytes_read);
     }
 
-    if (file.fail() && !file.eof()) [[unlikely]]
+    if (file.bad())
     {
-        logger::error<logger::vfs>("Failed to read file: {}", path.string());
         return std::unexpected{vfs::error_code::file_read_failure};
-    }
-
-    file.close();
-
-    if (file.is_open()) [[unlikely]]
-    {
-        logger::error<logger::vfs>("Failed to close file: {}", path.string());
-        return std::unexpected{vfs::error_code::file_close_failure};
     }
 
     return result;

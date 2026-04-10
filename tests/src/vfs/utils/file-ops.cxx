@@ -44,12 +44,35 @@ TEST_SUITE("vfs::utils file-ops" * doctest::description(""))
         SUBCASE("good read")
         {
             auto data = vfs::utils::read_file(test_path / "test.txt");
+            REQUIRE(data);
             CHECK_EQ(*data, "data"s);
+        }
+
+        SUBCASE("good read /proc")
+        {
+            auto data = vfs::utils::read_file("/proc/version");
+            REQUIRE(data);
+            CHECK_GE(data.value().size(), 10uz);
+        }
+
+        SUBCASE("read /proc max size")
+        {
+            auto data = vfs::utils::read_file("/proc/version", 1uz);
+            REQUIRE(!data);
+            CHECK_EQ(data.error(), vfs::error_code::file_too_large);
+        }
+
+        SUBCASE("file max size")
+        {
+            auto data = vfs::utils::read_file(test_path / "test.txt", 1uz);
+            REQUIRE(!data);
+            CHECK_EQ(data.error(), vfs::error_code::file_too_large);
         }
 
         SUBCASE("file open failure")
         {
             auto data = vfs::utils::read_file(test_path / "bad_path" / "test.txt");
+            REQUIRE(!data);
             CHECK_EQ(data.error(), vfs::error_code::file_open_failure);
         }
 
