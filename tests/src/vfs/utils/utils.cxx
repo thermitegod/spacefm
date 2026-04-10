@@ -37,6 +37,42 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
         std::filesystem::create_directories(test_path);
         REQUIRE(std::filesystem::exists(test_path));
 
+        SUBCASE("file no collision")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test");
+            CHECK_EQ(result, test_path / "test");
+        }
+
+        SUBCASE("file no collision with tag")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
+            CHECK_EQ(result, test_path / "test");
+        }
+
+        SUBCASE("file single extension no collision")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test.txt");
+            CHECK_EQ(result, test_path / "test.txt");
+        }
+
+        SUBCASE("file single extension no collision with tag")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test.txt", "-copy");
+            CHECK_EQ(result, test_path / "test.txt");
+        }
+
+        SUBCASE("file multiple extension no collision")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test.tar.gz");
+            CHECK_EQ(result, test_path / "test.tar.gz");
+        }
+
+        SUBCASE("file multiple extension no collision with tag")
+        {
+            const auto result = vfs::utils::unique_path(test_path, "test.tar.gz", "-copy");
+            CHECK_EQ(result, test_path / "test.tar.gz");
+        }
+
         SUBCASE("file no extension")
         {
             create_file(test_path / "test");
@@ -183,6 +219,44 @@ TEST_SUITE("vfs::utils" * doctest::description(""))
             std::filesystem::create_directories(test_path / "test-copy7");
             std::filesystem::create_directories(test_path / "test-copy8");
             std::filesystem::create_directories(test_path / "test-copy9");
+            std::filesystem::create_directories(test_path / "test-copy10");
+
+            const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
+            CHECK_EQ(result, test_path / "test-copy11");
+        }
+
+        SUBCASE("mixed")
+        {
+            create_file(test_path / "test");
+            ////
+            create_file(test_path / "test1");
+            std::filesystem::create_directories(test_path / "test2");
+            create_file(test_path / "test3");
+            std::filesystem::create_directories(test_path / "test4");
+            create_file(test_path / "test5");
+            std::filesystem::create_directories(test_path / "test6");
+            create_file(test_path / "test7");
+            std::filesystem::create_directories(test_path / "test8");
+            create_file(test_path / "test9");
+            std::filesystem::create_directories(test_path / "test10");
+
+            const auto result = vfs::utils::unique_path(test_path, "test");
+            CHECK_EQ(result, test_path / "test11");
+        }
+
+        SUBCASE("mixed with tag")
+        {
+            create_file(test_path / "test");
+            ////
+            create_file(test_path / "test-copy1");
+            std::filesystem::create_directories(test_path / "test-copy2");
+            create_file(test_path / "test-copy3");
+            std::filesystem::create_directories(test_path / "test-copy4");
+            create_file(test_path / "test-copy5");
+            std::filesystem::create_directories(test_path / "test-copy6");
+            create_file(test_path / "test-copy7");
+            std::filesystem::create_directories(test_path / "test-copy8");
+            create_file(test_path / "test-copy9");
             std::filesystem::create_directories(test_path / "test-copy10");
 
             const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
