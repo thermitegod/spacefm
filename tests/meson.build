@@ -26,7 +26,7 @@ test_sources_sfm += files(
     'src/gui/utils/history.cxx',
 
     # vfs
-    # 'src/vfs/error.cxx',
+    'src/vfs/error.cxx',
     'src/vfs/execute.cxx',
     'src/vfs/task-manager.cxx',
     'src/vfs/trash.cxx',

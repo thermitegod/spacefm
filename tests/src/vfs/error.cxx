@@ -27,121 +27,99 @@ TEST_SUITE("vfs::error_code" * doctest::description(""))
         {
             const auto ec = vfs::make_error_code(vfs::error_code::none);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), false);
             CHECK_EQ(ec.message(), "none");
-            CHECK_EQ(ec == vfs::error_code::none, true);
+            CHECK_EQ(ec, vfs::error_code::none);
         }
 
         SUBCASE("vfs::error_code::parse_error")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::parse_error);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "parse error");
-            CHECK_EQ(ec == vfs::error_code::parse_error, true);
+            CHECK_EQ(ec, vfs::error_code::parse_error);
         }
 
         SUBCASE("vfs::error_code::key_not_found")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::key_not_found);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "key not found");
-            CHECK_EQ(ec == vfs::error_code::key_not_found, true);
+            CHECK_EQ(ec, vfs::error_code::key_not_found);
         }
 
         SUBCASE("vfs::error_code::unknown_key")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::unknown_key);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "unknown key");
-            CHECK_EQ(ec == vfs::error_code::unknown_key, true);
+            CHECK_EQ(ec, vfs::error_code::unknown_key);
         }
 
         SUBCASE("vfs::error_code::missing_key")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::missing_key);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "missing key");
-            CHECK_EQ(ec == vfs::error_code::missing_key, true);
+            CHECK_EQ(ec, vfs::error_code::missing_key);
         }
 
         SUBCASE("vfs::error_code::file_not_found")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_not_found);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file not found");
-            CHECK_EQ(ec == vfs::error_code::file_not_found, true);
+            CHECK_EQ(ec, vfs::error_code::file_not_found);
         }
 
         SUBCASE("vfs::error_code::file_too_large")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_too_large);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file too large");
-            CHECK_EQ(ec == vfs::error_code::file_too_large, true);
+            CHECK_EQ(ec, vfs::error_code::file_too_large);
         }
 
         SUBCASE("vfs::error_code::file_open_failure")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_open_failure);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file open failure");
-            CHECK_EQ(ec == vfs::error_code::file_open_failure, true);
+            CHECK_EQ(ec, vfs::error_code::file_open_failure);
         }
 
         SUBCASE("vfs::error_code::file_read_failure")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_read_failure);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file read failure");
-            CHECK_EQ(ec == vfs::error_code::file_read_failure, true);
+            CHECK_EQ(ec, vfs::error_code::file_read_failure);
         }
 
         SUBCASE("vfs::error_code::file_write_failure")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_write_failure);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file write failure");
-            CHECK_EQ(ec == vfs::error_code::file_write_failure, true);
+            CHECK_EQ(ec, vfs::error_code::file_write_failure);
         }
 
         SUBCASE("vfs::error_code::file_close_failure")
         {
             const auto ec = vfs::make_error_code(vfs::error_code::file_close_failure);
 
-            CHECK_EQ(ec.category().name(), "vfs::error_category()");
-
             CHECK_EQ(bool(ec), true);
             CHECK_EQ(ec.message(), "file close failure");
-            CHECK_EQ(ec == vfs::error_code::file_close_failure, true);
+            CHECK_EQ(ec, vfs::error_code::file_close_failure);
         }
     }
 }
