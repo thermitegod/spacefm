@@ -31,6 +31,8 @@ test_sources_sfm += files(
     'src/vfs/task-manager.cxx',
     'src/vfs/trash.cxx',
 
+    'src/vfs/linux/mountinfo.cxx',
+
     'src/vfs/utils/utils.cxx',
     'src/vfs/utils/file-ops.cxx',
     'src/vfs/utils/permissions.cxx',

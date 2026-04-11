@@ -46,7 +46,7 @@ vfs_sources = files(
     'vfs/libudevpp/udev_enumerate.cxx',
     'vfs/libudevpp/udev_monitor.cxx',
 
-    'vfs/linux/procfs.cxx',
+    'vfs/linux/mountinfo.cxx',
     'vfs/linux/self.cxx',
     'vfs/linux/sysfs.cxx',
 

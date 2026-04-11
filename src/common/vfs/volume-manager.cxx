@@ -35,7 +35,7 @@
 #include "vfs/volume-manager.hxx"
 
 #include "vfs/libudevpp/libudevpp.hxx"
-#include "vfs/linux/procfs.hxx"
+#include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 #include "vfs/utils/utils.hxx"
 
@@ -515,7 +515,7 @@ vfs::volume_manager::volume_manager()
         uchannel_,
         Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
-    mchannel_ = Glib::IOChannel::create_from_file(MOUNTINFO, "r");
+    mchannel_ = Glib::IOChannel::create_from_file(vfs::proc::MOUNTINFO, "r");
     mchannel_->set_close_on_unref(true);
 
     Glib::signal_io().connect(
@@ -526,7 +526,7 @@ vfs::volume_manager::volume_manager()
                 return true;
             }
 
-            // logger::debug<logger::vfs>("@@@ {} changed", MOUNTINFO);
+            // logger::debug<logger::vfs>("@@@ {} changed", vfs::proc::MOUNTINFO);
             parse_mounts(true);
 
             return true;
@@ -594,25 +594,25 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
     std::vector<std::shared_ptr<device_mount>> newmounts;
     std::unordered_map<dev_t, std::shared_ptr<device_mount>> device_map;
 
-    for (const auto& mount : vfs::linux::procfs::mountinfo())
+    for (const auto& mount : vfs::proc::mountinfo())
     {
         // mount where only a subtree of a filesystem is mounted?
-        const bool subdir_mount = mount.root != "/";
+        const bool subdir_mount = mount.root() != "/";
 
-        if (mount.mount_point.empty())
+        if (mount.mount_point().empty())
         {
             continue;
         }
 
-        // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.major, mount.minor, mount.mount_point);
-        const dev_t devnum = makedev(static_cast<std::uint32_t>(mount.major),
-                                     static_cast<std::uint32_t>(mount.minor));
+        // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.major(), mount.minor(), mount.mount_point());
+        const dev_t devnum = makedev(static_cast<std::uint32_t>(mount.major()),
+                                     static_cast<std::uint32_t>(mount.minor()));
 
         auto& devmount = device_map[devnum];
 
         if (!devmount)
         {
-            // logger::debug<logger::vfs>("     new devmount {}", mount.mount_point);
+            // logger::debug<logger::vfs>("     new devmount {}", mount.mount_point());
             const auto udevice = udev_.device_from_devnum('b', devnum);
             const bool is_block = udevice && udevice->is_initialized();
 
@@ -625,8 +625,8 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
 
             if (report || is_block)
             {
-                devmount = device_mount::create(mount.major, mount.minor);
-                devmount->fstype = mount.filesystem_type;
+                devmount = device_mount::create(mount.major(), mount.minor());
+                devmount->fstype = mount.filesystem_type();
                 newmounts.push_back(devmount);
             }
             else
@@ -636,10 +636,10 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
             }
         }
 
-        if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point))
+        if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
         {
             // logger::debug<logger::vfs>("    prepended");
-            devmount->mounts.push_back(mount.mount_point);
+            devmount->mounts.push_back(mount.mount_point());
         }
     }
 

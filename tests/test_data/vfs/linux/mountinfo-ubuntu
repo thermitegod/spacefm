@@ -1,0 +1,67 @@
+27 32 0:24 / /sys rw,nosuid,nodev,noexec,relatime shared:6 - sysfs sysfs rw
+28 32 0:25 / /proc rw,nosuid,nodev,noexec,relatime shared:12 - proc proc rw
+29 32 0:6 / /dev rw,nosuid,relatime shared:2 - devtmpfs udev rw,size=31782964k,nr_inodes=7945741,mode=755,inode64
+30 29 0:26 / /dev/pts rw,nosuid,noexec,relatime shared:3 - devpts devpts rw,gid=5,mode=600,ptmxmode=000
+31 32 0:27 / /run rw,nosuid,nodev,noexec,relatime shared:5 - tmpfs tmpfs rw,size=6365604k,mode=755,inode64
+32 2 259:2 / / rw,relatime shared:1 - ext4 /dev/nvme0n1p2 rw
+33 27 0:7 / /sys/kernel/security rw,nosuid,nodev,noexec,relatime shared:7 - securityfs securityfs rw
+34 29 0:28 / /dev/shm rw,nosuid,nodev shared:4 - tmpfs tmpfs rw,inode64
+35 27 0:29 / /sys/fs/cgroup rw,nosuid,nodev,noexec,relatime shared:8 - cgroup2 cgroup2 rw,nsdelegate,memory_recursiveprot
+36 27 0:30 / /sys/fs/pstore rw,nosuid,nodev,noexec,relatime shared:9 - pstore none rw
+37 27 0:31 / /sys/firmware/efi/efivars rw,nosuid,nodev,noexec,relatime shared:10 - efivarfs efivarfs rw
+38 27 0:32 / /sys/fs/bpf rw,nosuid,nodev,noexec,relatime shared:11 - bpf bpf rw,mode=700
+39 28 0:33 / /proc/sys/fs/binfmt_misc rw,relatime shared:13 - autofs systemd-1 rw,fd=36,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=11309
+40 29 0:22 / /dev/mqueue rw,nosuid,nodev,noexec,relatime shared:14 - mqueue mqueue rw
+41 27 0:8 / /sys/kernel/debug rw,nosuid,nodev,noexec,relatime shared:15 - debugfs debugfs rw
+42 29 0:34 / /dev/hugepages rw,nosuid,nodev,relatime shared:16 - hugetlbfs hugetlbfs rw,pagesize=2M
+43 27 0:13 / /sys/kernel/tracing rw,nosuid,nodev,noexec,relatime shared:17 - tracefs tracefs rw
+44 31 0:35 / /run/lock rw,nosuid,nodev,noexec,relatime shared:18 - tmpfs tmpfs rw,size=5120k,inode64
+65 31 0:36 / /run/credentials/systemd-journald.service ro,nosuid,nodev,noexec,relatime,nosymfollow shared:19 - tmpfs tmpfs rw,size=1024k,nr_inodes=1024,mode=700,inode64,noswap
+45 27 0:20 / /sys/kernel/config rw,nosuid,nodev,noexec,relatime shared:21 - configfs configfs rw
+46 27 0:38 / /sys/fs/fuse/connections rw,nosuid,nodev,noexec,relatime shared:22 - fusectl fusectl rw
+179 31 0:37 / /run/credentials/systemd-resolved.service ro,nosuid,nodev,noexec,relatime,nosymfollow shared:49 - tmpfs tmpfs rw,size=1024k,nr_inodes=1024,mode=700,inode64,noswap
+49 32 0:49 / /tmp rw,nosuid,nodev shared:135 - tmpfs tmpfs rw,size=31828020k,nr_inodes=1048576,inode64
+54 32 259:1 / /boot/efi rw,relatime shared:177 - vfat /dev/nvme0n1p1 rw,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro
+61 28 0:50 / /proc/fs/nfsd rw,relatime shared:182 - nfsd nfsd rw
+63 32 7:0 / /snap/bare/5 ro,nodev,relatime shared:184 - squashfs /dev/loop0 ro,errors=continue,threads=single
+69 32 7:1 / /snap/core22/2339 ro,nodev,relatime shared:189 - squashfs /dev/loop1 ro,errors=continue,threads=single
+187 32 7:2 / /snap/core24/1499 ro,nodev,relatime shared:194 - squashfs /dev/loop2 ro,errors=continue,threads=single
+228 32 7:4 / /snap/core22/2411 ro,nodev,relatime shared:199 - squashfs /dev/loop4 ro,errors=continue,threads=single
+238 32 7:3 / /snap/core24/1587 ro,nodev,relatime shared:204 - squashfs /dev/loop3 ro,errors=continue,threads=single
+243 32 7:5 / /snap/desktop-security-center/99 ro,nodev,relatime shared:209 - squashfs /dev/loop5 ro,errors=continue,threads=single
+253 32 7:7 / /snap/ghostty/704 ro,nodev,relatime shared:219 - squashfs /dev/loop7 ro,errors=continue,threads=single
+258 32 7:9 / /snap/desktop-security-center/105 ro,nodev,relatime shared:224 - squashfs /dev/loop9 ro,errors=continue,threads=single
+263 32 7:14 / /snap/gnome-42-2204/247 ro,nodev,relatime shared:229 - squashfs /dev/loop14 ro,errors=continue,threads=single
+268 32 7:11 / /snap/firmware-updater/223 ro,nodev,relatime shared:234 - squashfs /dev/loop11 ro,errors=continue,threads=single
+269 32 7:10 / /snap/firefox/8054 ro,nodev,relatime shared:239 - squashfs /dev/loop10 ro,errors=continue,threads=single
+270 32 7:13 / /snap/gnome-42-2204/226 ro,nodev,relatime shared:244 - squashfs /dev/loop13 ro,errors=continue,threads=single
+275 32 7:12 / /snap/ghostty/718 ro,nodev,relatime shared:249 - squashfs /dev/loop12 ro,errors=continue,threads=single
+293 32 7:15 / /snap/gnome-46-2404/145 ro,nodev,relatime shared:259 - squashfs /dev/loop15 ro,errors=continue,threads=single
+298 32 7:16 / /snap/gnome-46-2404/153 ro,nodev,relatime shared:264 - squashfs /dev/loop16 ro,errors=continue,threads=single
+303 32 7:17 / /snap/mpv/237 ro,nodev,relatime shared:269 - squashfs /dev/loop17 ro,errors=continue,threads=single
+308 32 7:19 / /snap/mesa-2404/1165 ro,nodev,relatime shared:274 - squashfs /dev/loop19 ro,errors=continue,threads=single
+313 32 7:21 / /snap/mesa-2404/912 ro,nodev,relatime shared:279 - squashfs /dev/loop21 ro,errors=continue,threads=single
+318 32 7:22 / /snap/mpv/239 ro,nodev,relatime shared:284 - squashfs /dev/loop22 ro,errors=continue,threads=single
+323 32 7:18 / /snap/prompting-client/204 ro,nodev,relatime shared:294 - squashfs /dev/loop18 ro,errors=continue,threads=single
+324 32 7:20 / /snap/gtk-common-themes/1535 ro,nodev,relatime shared:289 - squashfs /dev/loop20 ro,errors=continue,threads=single
+333 32 7:25 / /snap/snap-store/1310 ro,nodev,relatime shared:299 - squashfs /dev/loop25 ro,errors=continue,threads=single
+338 32 7:23 / /snap/prompting-client/104 ro,nodev,relatime shared:304 - squashfs /dev/loop23 ro,errors=continue,threads=single
+343 32 7:24 / /snap/snap-store/1270 ro,nodev,relatime shared:309 - squashfs /dev/loop24 ro,errors=continue,threads=single
+348 32 7:26 / /snap/snapd/26382 ro,nodev,relatime shared:314 - squashfs /dev/loop26 ro,errors=continue,threads=single
+353 32 7:27 / /snap/snapd/25935 ro,nodev,relatime shared:319 - squashfs /dev/loop27 ro,errors=continue,threads=single
+358 32 7:28 / /snap/snapd-desktop-integration/357 ro,nodev,relatime shared:324 - squashfs /dev/loop28 ro,errors=continue,threads=single
+363 32 259:2 /usr/share/hunspell /var/snap/firefox/common/host-hunspell ro,noexec,noatime shared:1 - ext4 /dev/nvme0n1p2 rw
+368 32 7:29 / /snap/snapd-desktop-integration/343 ro,nodev,relatime shared:333 - squashfs /dev/loop29 ro,errors=continue,threads=single
+383 39 0:52 / /proc/sys/fs/binfmt_misc rw,nosuid,nodev,noexec,relatime shared:353 - binfmt_misc binfmt_misc rw
+391 31 0:51 / /run/rpc_pipefs rw,relatime shared:348 - rpc_pipefs sunrpc rw
+473 31 0:66 / /run/user/1000 rw,nosuid,nodev,relatime shared:979 - tmpfs tmpfs rw,size=6365600k,nr_inodes=1591400,mode=700,uid=1000,gid=1000,inode64
+490 473 0:68 / /run/user/1000/doc rw,nosuid,nodev,relatime shared:1077 - fuse.portal portal rw,user_id=1000,group_id=1000
+507 473 0:69 / /run/user/1000/gvfs rw,nosuid,nodev,relatime shared:1143 - fuse.gvfsd-fuse gvfsd-fuse rw,user_id=1000,group_id=1000
+913 31 0:27 /snapd/ns /run/snapd/ns rw,nosuid,nodev,noexec,relatime - tmpfs tmpfs rw,size=6365604k,mode=755,inode64
+3887 913 0:4 mnt:[4026532958] /run/snapd/ns/snapd-desktop-integration.mnt rw - nsfs nsfs rw
+3888 913 0:4 mnt:[4026532957] /run/snapd/ns/prompting-client.mnt rw - nsfs nsfs rw
+8200 32 7:32 / /snap/firmware-updater/224 ro,nodev,relatime shared:825 - squashfs /dev/loop32 ro,errors=continue,threads=single
+6600 913 0:4 mnt:[4026532585] /run/snapd/ns/firmware-updater.mnt rw - nsfs nsfs rw
+1085 32 7:6 / /snap/firefox/8107 ro,nodev,relatime shared:214 - squashfs /dev/loop6 ro,errors=continue,threads=single
+9396 913 0:4 mnt:[4026533073] /run/snapd/ns/firefox.mnt rw - nsfs nsfs rw
+280 32 0:113 / /home/brandon/media/sshfs rw,nosuid,nodev,relatime shared:254 - fuse.sshfs brandon@192.168.0.244:/mnt/anime rw,user_id=1000,group_id=1000,default_permissions,allow_other

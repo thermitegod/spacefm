@@ -258,6 +258,9 @@ preprocessor = [
     # data paths
     '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm'),
     '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(join_paths(meson.current_source_dir(), 'data/images')),
+
+    # test data
+    '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data')),
 ]
 
 if get_option('dev')

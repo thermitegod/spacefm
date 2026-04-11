@@ -13,17 +13,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <ztd/ztd.hxx>
 
-inline const std::string MOUNTINFO{"/proc/self/mountinfo"};
-// inline const std::string MTAB{"/proc/self/mounts"};
-
-namespace vfs::linux::procfs
+namespace vfs::proc
 {
-/* See Documentation/filesystems/proc.rst for the format of /proc/self/mountinfo
+inline const std::filesystem::path MOUNTINFO = "/proc/self/mountinfo";
+
+/**
+ * See Documentation/filesystems/proc.rst for the format of /proc/self/mountinfo
  *
  * Note that things like space are encoded as \020.
  *
@@ -42,22 +44,40 @@ namespace vfs::linux::procfs
  * (m+3) mount source:    filesystem specific information or "none"
  * (m+4) super options:   per super block options
  */
-
-struct MountInfoEntry final
+struct mountinfo_entry final
 {
-    u64 mount_id;
-    u64 parent_id;
-    dev_t major;
-    dev_t minor;
-    std::string root;
-    std::string mount_point;
-    std::string mount_options;
-    std::string optional_fields;
-    std::string separator;
-    std::string filesystem_type;
-    std::string mount_source;
-    std::string super_options;
+  public:
+    mountinfo_entry() = default;
+    mountinfo_entry(std::string_view line);
+
+    [[nodiscard]] static std::optional<mountinfo_entry>
+    create(const std::string_view line) noexcept;
+
+    [[nodiscard]] std::size_t mount_id() const noexcept;
+    [[nodiscard]] std::size_t parent_id() const noexcept;
+    [[nodiscard]] dev_t major() const noexcept;
+    [[nodiscard]] dev_t minor() const noexcept;
+    [[nodiscard]] std::string root() const noexcept;
+    [[nodiscard]] std::string mount_point() const noexcept;
+    [[nodiscard]] std::string mount_options() const noexcept;
+    [[nodiscard]] std::string optional_fields() const noexcept;
+    [[nodiscard]] std::string filesystem_type() const noexcept;
+    [[nodiscard]] std::string mount_source() const noexcept;
+    [[nodiscard]] std::string super_options() const noexcept;
+
+  private:
+    std::size_t mount_id_;
+    std::size_t parent_id_;
+    dev_t major_;
+    dev_t minor_;
+    std::string root_;
+    std::string mount_point_;
+    std::string mount_options_;
+    std::string optional_fields_;
+    std::string filesystem_type_;
+    std::string mount_source_;
+    std::string super_options_;
 };
 
-std::vector<MountInfoEntry> mountinfo() noexcept;
-} // namespace vfs::linux::procfs
+std::vector<mountinfo_entry> mountinfo(const std::filesystem::path& path = MOUNTINFO) noexcept;
+} // namespace vfs::proc

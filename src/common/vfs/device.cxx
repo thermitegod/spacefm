@@ -25,7 +25,7 @@
 #include "vfs/device.hxx"
 
 #include "vfs/libudevpp/libudevpp.hxx"
-#include "vfs/linux/procfs.hxx"
+#include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 
 std::shared_ptr<vfs::device>
@@ -163,23 +163,23 @@ vfs::device::info_mount_points() const noexcept
 
     std::vector<std::string> device_mount_points;
 
-    for (const auto& mount : vfs::linux::procfs::mountinfo())
+    for (const auto& mount : vfs::proc::mountinfo())
     {
         // ignore mounts where only a subtree of a filesystem is mounted
         // this function is only used for block devices.
-        if (mount.root == "/")
+        if (mount.root() == "/")
         {
             continue;
         }
 
-        if (mount.major != dmajor || mount.minor != dminor)
+        if (mount.major() != dmajor || mount.minor() != dminor)
         {
             continue;
         }
 
-        if (!std::ranges::contains(device_mount_points, mount.mount_point))
+        if (!std::ranges::contains(device_mount_points, mount.mount_point()))
         {
-            device_mount_points.push_back(mount.mount_point);
+            device_mount_points.push_back(mount.mount_point());
         }
     }
 
