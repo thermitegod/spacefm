@@ -20,16 +20,8 @@
 #include <filesystem>
 #include <string>
 
-namespace vfs::linux::proc::self
+namespace vfs::proc
 {
-namespace detail
-{
-const std::filesystem::path proc{"/proc"};
-const std::filesystem::path proc_self{"/proc/self"};
-const std::filesystem::path proc_self_exe{"/proc/self/exe"};
-const std::filesystem::path proc_self_stat{"/proc/self/stat"};
-} // namespace detail
-
 /**
  * @brief Program Executable
  *
@@ -43,4 +35,4 @@ const std::filesystem::path proc_self_stat{"/proc/self/stat"};
  * @return Current executing program name
  */
 [[nodiscard]] std::string name() noexcept;
-} // namespace vfs::linux::proc::self
+} // namespace vfs::proc

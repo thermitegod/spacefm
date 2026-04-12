@@ -872,7 +872,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
                 else
                 {
                     vfs::execute::command_line_async("{} {}",
-                                                     vfs::linux::proc::self::exe().string(),
+                                                     vfs::proc::exe().string(),
                                                      vfs::execute::quote(volume->mount_point()));
                 }
             }
@@ -1084,7 +1084,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     else
     {
         vfs::execute::command_line_async("{} {}",
-                                         vfs::linux::proc::self::exe().string(),
+                                         vfs::proc::exe().string(),
                                          vfs::execute::quote(vol->mount_point()));
     }
 }

@@ -282,7 +282,7 @@ main(int argc, char* argv[]) noexcept
                 continue;
             }
             vfs::execute::command_line_async("{} socket set new-tab {}",
-                                             vfs::linux::proc::self::exe().string(),
+                                             vfs::proc::exe().string(),
                                              vfs::execute::quote(file.string()));
         }
 
