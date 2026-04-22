@@ -21,6 +21,7 @@
 
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <glycin-gtk4.h>
 #include <gtkmm.h>
 
 #include <glaze/glaze.hpp>
@@ -92,41 +93,56 @@ enum class thumbnail_mode : std::uint8_t
 };
 
 [[nodiscard]] static bool
-is_metadata_valid(const std::shared_ptr<vfs::file>& file,
-                  std::chrono::system_clock::time_point mtime, std::string_view uri,
-                  usize size) noexcept
+is_metadata_valid(GlyImage* image, const std::shared_ptr<vfs::file>& file) noexcept
 {
-    (void)uri;
-
-    if (std::chrono::time_point_cast<std::chrono::seconds>(file->mtime()) !=
-        std::chrono::time_point_cast<std::chrono::seconds>(mtime))
+    if (!image || !file)
     {
         return false;
     }
 
-#if 0 // TODO CJK problems with on disk uri in thumbnails metadata
-    if (uri.starts_with("file://"))
-    {
-        if (file->uri() != uri)
-        {
-            return false;
-        }
-    }
-    else
-    {
-        if (file->path() != uri)
-        {
-            return false;
-        }
-    }
-#endif
+#if 1
+    // TODO
+    // glycin-thumbnailer does not set Thumb metadata keys.
+    // What a waste of time to figure this out.
+    // $ exiftool -list <path> | grep Thumb
+    return true;
+#else
+    // MTime
+    const char* mtime_val = gly_image_get_metadata_key_value(image, "Thumb::MTime");
+    auto mtime = mtime_val ? std::chrono::system_clock::from_time_t(
+                                 ztd::from_string<std::time_t>(mtime_val).value_or(0))
+                           : std::chrono::system_clock::time_point{};
 
+    // URI
+    const char* uri_val = gly_image_get_metadata_key_value(image, "Thumb::URI");
+    std::string uri = uri_val ? uri_val : "";
+
+    // Size
+    const char* size_val = gly_image_get_metadata_key_value(image, "Thumb::Size");
+    usize size = size_val ? usize::create(size_val).value_or(0) : usize{0};
+
+    // logger::trace<logger::vfs>("uri={}, mtime={}, size={}", uri, std::chrono::duration_cast<std::chrono::seconds>(mtime.time_since_epoch()).count(), size);
+
+    // validate //
+
+    // MTime
+    const auto file_mtime = std::chrono::time_point_cast<std::chrono::seconds>(file->mtime());
+    const auto meta_mtime = std::chrono::time_point_cast<std::chrono::seconds>(mtime);
+    if (file_mtime != meta_mtime)
+    {
+        // logger::trace<logger::vfs>("MTime mismatch for '{}': expected {}, got {}", uri, meta_mtime.time_since_epoch().count(), file_mtime.time_since_epoch().count());
+        return false;
+    }
+
+    // Size
     if (file->size() != size)
     {
+        // logger::trace<logger::vfs>("Size mismatch for '{}': expected {}, got {}", uri, size, file->size());
         return false;
     }
 
     return true;
+#endif
 }
 
 static Glib::RefPtr<Gdk::Texture>
@@ -179,7 +195,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         return nullptr;
     }
 
-    // logger::debug<logger::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
+    // logger::debug<logger::vfs>("path={}, uri={}, thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
@@ -191,54 +207,58 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         return nullptr;
     }
 
-    // thumbnail metadata
-    std::chrono::system_clock::time_point metadata_mtime;
-    std::string metadata_uri;
-    usize metadata_size;
+    auto glycin_load_image = [](const std::filesystem::path& filepath) -> GlyImage*
+    {
+        auto file = Gio::File::create_for_path(filepath);
 
-    Glib::RefPtr<Gdk::Pixbuf> thumbnail = nullptr;
+        GError* error = nullptr;
+        GlyLoader* loader = gly_loader_new(file->gobj());
+        GlyImage* image = gly_loader_load(loader, &error);
+        g_object_unref(loader);
+        if (error)
+        {
+            logger::error<logger::vfs>("Loading '{}' failed with: {}",
+                                       file->get_path(),
+                                       error->message);
+            g_error_free(error);
+            return nullptr;
+        }
+        return image;
+    };
+
+    auto glycin_get_texture = [](GlyImage* image) -> Glib::RefPtr<Gdk::Texture>
+    {
+        GError* error = nullptr;
+        GlyFrame* frame = gly_image_next_frame(image, &error);
+        g_object_unref(image);
+        if (error)
+        {
+            g_error_free(error);
+            return nullptr;
+        }
+        return Glib::wrap(gly_gtk_frame_get_texture(frame));
+    };
+
+    GlyImage* thumbnail = nullptr;
 
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
         // logger::debug<logger::vfs>("Existing thumb: {}", thumbnail_file);
-        try
+        thumbnail = glycin_load_image(thumbnail_file);
+        if (!thumbnail)
         {
-            thumbnail = Gdk::Pixbuf::create_from_file(thumbnail_file);
-        }
-        catch (const Glib::Error& e)
-        { // broken/corrupt/empty thumbnail
-            logger::error<logger::vfs>("Loading existing thumbnail for file '{}' failed with: {}",
-                                       file->path().string(),
-                                       e.what());
+            g_object_unref(thumbnail);
             std::filesystem::remove(thumbnail_file);
-        }
-
-        if (thumbnail)
-        {
-            const auto metadata_mtime_raw = thumbnail->get_option("tEXt::Thumb::MTime");
-            if (!metadata_mtime_raw.empty())
-            {
-                metadata_mtime = std::chrono::system_clock::from_time_t(
-                    ztd::from_string<std::time_t>(metadata_mtime_raw.data()).value_or(0));
-            }
-
-            const auto metadata_uri_raw = thumbnail->get_option("tEXt::Thumb::URI");
-            if (!metadata_uri_raw.empty())
-            {
-                metadata_uri = metadata_uri_raw.data();
-            }
-
-            const auto metadata_size_raw = thumbnail->get_option("tEXt::Thumb::Size");
-            if (!metadata_size_raw.empty())
-            {
-                metadata_size = usize::create(metadata_size_raw.data()).value_or(0);
-            }
         }
     }
 
-    if (!thumbnail || !is_metadata_valid(file, metadata_mtime, metadata_uri, metadata_size))
+    if (!thumbnail || !is_metadata_valid(thumbnail, file))
     {
-        // logger::debug<logger::vfs>("New thumb: {}", thumbnail_file);
+        // logger::debug<logger::vfs>("New thumb for '{}', {}", file->path().string(), thumbnail_file.string());
+        if (thumbnail)
+        {
+            g_object_unref(thumbnail);
+        }
 
         // Need to create thumbnail directory if it is missing,
         // ffmpegthumbnailer will not create missing directories.
@@ -256,9 +276,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         {
             case thumbnail_mode::image:
             {
-                command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                command = std::format("glycin-thumbnailer -s {} -i {} -o {}",
                                       thumbnail_create_size,
-                                      vfs::execute::quote(file->path().string()),
+                                      vfs::execute::quote(file->uri()),
                                       vfs::execute::quote(thumbnail_file.string()));
                 break;
             }
@@ -277,31 +297,20 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         {
             logger::error<logger::vfs>("Failed to create thumbnail for '{}'",
                                        file->path().string());
-
             create_fail(file, fail_file);
-
             return nullptr;
         }
 
-        try
+        thumbnail = glycin_load_image(thumbnail_file);
+        if (!thumbnail)
         {
-            thumbnail = Gdk::Pixbuf::create_from_file(thumbnail_file);
-        }
-        catch (const Glib::Error& e)
-        {
-            logger::error<logger::vfs>("Loading new thumbnail for file '{}' failed with: {}",
-                                       file->path().string(),
-                                       e.what());
-
             create_fail(file, fail_file);
             std::filesystem::remove(thumbnail_file);
-
             return nullptr;
         }
     }
 
-    // return the raw thumbnail, it will get scaled to the requested size later
-    return Gdk::Texture::create_for_pixbuf(thumbnail);
+    return glycin_get_texture(thumbnail);
 }
 
 Glib::RefPtr<Gdk::Texture>

@@ -156,9 +156,7 @@ IncludeCategories:
   - Regex: '^<[^.]*>$'
     Priority: 1
   # GTK
-  - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h|giomm.h)>'
-    Priority: 10
-  - Regex: '^<sigc\+\+/sigc\+\+\.h>'
+  - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h|giomm.h|glycin-gtk4.h|sigc\+\+/sigc\+\+\.h)>'
     Priority: 10
   # Third Party
   # - Regex: '^<(glaze/.*|magic_enum/.*|ztd/.*)>'

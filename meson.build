@@ -253,11 +253,15 @@ gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
 glibmm4_dep = dependency('glibmm-2.68', required: true)
 giomm4_dep = dependency('giomm-2.68', required: true)
 
+glycin_dep = dependency('glycin-gtk4-2', required: true)
+
 gtk4_dependencies = [
     gtkmm4_dep,
     glibmm4_dep,
     giomm4_dep,
     sigc_dep,
+
+    glycin_dep,
 ]
 
 ## preprocessor static
