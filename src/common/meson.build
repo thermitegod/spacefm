@@ -42,7 +42,7 @@ vfs_gtk3_sources = files(
     'vfs/utils/permissions.cxx',
     'vfs/utils/utils.cxx',
 
-    'vfs/thumbnails/thumbnails.cxx',
+    'vfs/thumbnails/thumbnails-legacy.cxx',
 
     'vfs/libudevpp/udev.cxx',
     'vfs/libudevpp/udev_device.cxx',

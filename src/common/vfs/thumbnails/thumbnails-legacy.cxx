@@ -129,7 +129,7 @@ is_metadata_valid(const std::shared_ptr<vfs::file>& file,
     return true;
 }
 
-static Glib::RefPtr<Gdk::Texture>
+static GdkPixbuf*
 thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
                  const thumbnail_mode mode) noexcept
 {
@@ -196,49 +196,54 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     std::string metadata_uri;
     usize metadata_size;
 
-    Glib::RefPtr<Gdk::Pixbuf> thumbnail = nullptr;
+    GdkPixbuf* thumbnail = nullptr;
 
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
         // logger::debug<logger::vfs>("Existing thumb: {}", thumbnail_file);
-        try
+        GError* error = nullptr;
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
+        if (thumbnail)
         {
-            thumbnail = Gdk::Pixbuf::create_from_file(thumbnail_file);
+            const char* metadata_mtime_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
+            if (metadata_mtime_raw != nullptr)
+            {
+                const auto result = ztd::from_string<std::time_t>(metadata_mtime_raw);
+                metadata_mtime = std::chrono::system_clock::from_time_t(result.value_or(0));
+            }
+
+            const char* metadata_uri_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::URI");
+            if (metadata_uri_raw != nullptr)
+            {
+                metadata_uri = metadata_uri_raw;
+            }
+
+            const char* metadata_size_raw = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::Size");
+            if (metadata_size_raw != nullptr)
+            {
+                metadata_size = usize::create(metadata_size_raw).value_or(0);
+            }
         }
-        catch (const Glib::Error& e)
+        else
         { // broken/corrupt/empty thumbnail
             logger::error<logger::vfs>("Loading existing thumbnail for file '{}' failed with: {}",
                                        file->path().string(),
-                                       e.what());
+                                       error->message);
+            g_error_free(error);
+
+            // delete the bad thumbnail file
             std::filesystem::remove(thumbnail_file);
-        }
-
-        if (thumbnail)
-        {
-            const auto metadata_mtime_raw = thumbnail->get_option("tEXt::Thumb::MTime");
-            if (!metadata_mtime_raw.empty())
-            {
-                metadata_mtime = std::chrono::system_clock::from_time_t(
-                    ztd::from_string<std::time_t>(metadata_mtime_raw.data()).value_or(0));
-            }
-
-            const auto metadata_uri_raw = thumbnail->get_option("tEXt::Thumb::URI");
-            if (!metadata_uri_raw.empty())
-            {
-                metadata_uri = metadata_uri_raw.data();
-            }
-
-            const auto metadata_size_raw = thumbnail->get_option("tEXt::Thumb::Size");
-            if (!metadata_size_raw.empty())
-            {
-                metadata_size = usize::create(metadata_size_raw.data()).value_or(0);
-            }
         }
     }
 
     if (!thumbnail || !is_metadata_valid(file, metadata_mtime, metadata_uri, metadata_size))
     {
         // logger::debug<logger::vfs>("New thumb: {}", thumbnail_file);
+
+        if (thumbnail)
+        {
+            g_object_unref(thumbnail);
+        }
 
         // Need to create thumbnail directory if it is missing,
         // ffmpegthumbnailer will not create missing directories.
@@ -283,15 +288,14 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             return nullptr;
         }
 
-        try
-        {
-            thumbnail = Gdk::Pixbuf::create_from_file(thumbnail_file);
-        }
-        catch (const Glib::Error& e)
+        GError* error = nullptr;
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
+        if (!thumbnail)
         {
             logger::error<logger::vfs>("Loading new thumbnail for file '{}' failed with: {}",
                                        file->path().string(),
-                                       e.what());
+                                       error->message);
+            g_error_free(error);
 
             create_fail(file, fail_file);
             std::filesystem::remove(thumbnail_file);
@@ -300,18 +304,36 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
         }
     }
 
-    // return the raw thumbnail, it will get scaled to the requested size later
-    return Gdk::Texture::create_for_pixbuf(thumbnail);
+    // Scale thumbnail to requested size from cached thumbnail
+    const auto original_width = gdk_pixbuf_get_width(thumbnail);
+    const auto original_height = gdk_pixbuf_get_height(thumbnail);
+    auto new_width = thumb_size;
+    auto new_height = thumb_size;
+    if (original_width > original_height)
+    { // Scale by width
+        new_height = (thumb_size * original_height) / original_width;
+    }
+    else
+    { // Scale by height
+        new_width = (thumb_size * original_width) / original_height;
+    }
+
+    GdkPixbuf* scaled = gdk_pixbuf_scale_simple(thumbnail,
+                                                new_width.data(),
+                                                new_height.data(),
+                                                GdkInterpType::GDK_INTERP_BILINEAR);
+    g_object_unref(thumbnail);
+    return scaled;
 }
 
-Glib::RefPtr<Gdk::Texture>
+GdkPixbuf*
 vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file,
                               const std::int32_t thumb_size) noexcept
 {
     return thumbnail_create(file, thumb_size, thumbnail_mode::image);
 }
 
-Glib::RefPtr<Gdk::Texture>
+GdkPixbuf*
 vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file,
                               const std::int32_t thumb_size) noexcept
 {
