@@ -24,7 +24,7 @@ meson setup \
     -Dgtk4=true \
     -Dwith-system-glaze=true \
     -Dwith-system-ztd=true \
-    --buildtype=debug \
+    --buildtype=debugoptimized \
     --prefix=$(pwd)/build ./build-clang
 
 # debug
