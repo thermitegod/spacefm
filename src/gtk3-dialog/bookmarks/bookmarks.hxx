@@ -19,7 +19,7 @@
 
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include "datatypes.hxx"
 

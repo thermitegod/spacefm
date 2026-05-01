@@ -19,7 +19,7 @@
 #include <string_view>
 #include <vector>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <CLI/CLI.hpp>
 

@@ -20,7 +20,7 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include "datatypes.hxx"
 #include "keybinding.hxx"

@@ -24,7 +24,7 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <ztd/ztd.hxx>
 

@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
@@ -156,7 +156,7 @@ vfs::bookmarks::get_bookmarks() noexcept
 #include <span>
 #include <vector>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <ztd/ztd.hxx>
 

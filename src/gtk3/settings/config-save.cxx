@@ -15,7 +15,7 @@
 
 #include <format>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <magic_enum/magic_enum.hpp>
 

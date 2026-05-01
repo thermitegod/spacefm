@@ -25,7 +25,7 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include <magic_enum/magic_enum.hpp>
 

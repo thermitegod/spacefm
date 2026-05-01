@@ -19,7 +19,7 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-#include <glaze/glaze.hpp>
+#include <glaze/json.hpp>
 
 #include "chooser.hxx"
 #include "datatypes.hxx"
