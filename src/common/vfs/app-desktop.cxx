@@ -575,7 +575,9 @@ vfs::desktop::open_file(const std::filesystem::path& working_dir,
         return false;
     }
 
-    exec_desktop(working_dir, {file});
+    std::vector<std::shared_ptr<vfs::file>> files = {file};
+
+    exec_desktop(working_dir, files);
 
     return true;
 }
@@ -599,7 +601,9 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
         // app does not accept multiple files, so run multiple times
         for (const auto& file : files)
         {
-            exec_desktop(working_dir, {file});
+            std::vector<std::shared_ptr<vfs::file>> files = {file};
+
+            exec_desktop(working_dir, files);
         }
     }
 
