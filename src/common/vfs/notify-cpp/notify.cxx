@@ -35,6 +35,7 @@
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <sys/inotify.h>
+#include <unistd.h>
 
 #include "vfs/notify-cpp/notify.hxx"
 
