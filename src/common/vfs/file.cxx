@@ -30,9 +30,6 @@
 
 #include "vfs/file.hxx"
 #include "vfs/mime-type.hxx"
-#if (GTK_MAJOR_VERSION == 3)
-#include "vfs/settings.hxx"
-#endif
 #include "vfs/user-dirs.hxx"
 
 #include "vfs/thumbnails/thumbnails.hxx"
@@ -42,7 +39,6 @@
 
 #include "logger.hxx"
 
-#if (GTK_MAJOR_VERSION == 4)
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path) noexcept
 {
@@ -53,30 +49,8 @@ vfs::file::create(const std::filesystem::path& path) noexcept
 
     return std::make_shared<hack>(path);
 }
-#elif (GTK_MAJOR_VERSION == 3)
-std::shared_ptr<vfs::file>
-vfs::file::create(const std::filesystem::path& path,
-                  const std::shared_ptr<vfs::settings>& settings) noexcept
-{
-    struct hack : public vfs::file
-    {
-        hack(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings)
-            : file(path, settings)
-        {
-        }
-    };
 
-    return std::make_shared<hack>(path, settings);
-}
-#endif
-
-#if (GTK_MAJOR_VERSION == 4)
 vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
-#elif (GTK_MAJOR_VERSION == 3)
-vfs::file::file(const std::filesystem::path& path,
-                const std::shared_ptr<vfs::settings>& settings) noexcept
-    : path_(path), settings_(settings)
-#endif
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), path_);
 
@@ -102,17 +76,7 @@ vfs::file::file(const std::filesystem::path& path,
 
 vfs::file::~file() noexcept
 {
-// logger::debug<logger::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), path_);
-#if (GTK_MAJOR_VERSION == 3)
-    if (thumbnail_.big)
-    {
-        g_object_unref(thumbnail_.big);
-    }
-    if (thumbnail_.small)
-    {
-        g_object_unref(thumbnail_.small);
-    }
-#endif
+    // logger::debug<logger::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), path_);
 }
 
 bool
@@ -121,23 +85,14 @@ vfs::file::update() noexcept
     const auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
-#if (GTK_MAJOR_VERSION == 4)
         mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-#elif (GTK_MAJOR_VERSION == 3)
-        mime_type_ =
-            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, settings_);
-#endif
         return false;
     }
     stat_ = stat.value();
 
     // logger::debug<logger::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), name, file_stat.size());
 
-#if (GTK_MAJOR_VERSION == 4)
     mime_type_ = vfs::mime_type::create_from_file(path_);
-#elif (GTK_MAJOR_VERSION == 3)
-    mime_type_ = vfs::mime_type::create_from_file(path_, settings_);
-#endif
 
     // file size formated
     display_size_ = vfs::utils::format_file_size(size());
@@ -488,8 +443,6 @@ vfs::file::is_dax() const noexcept
     return stat_.is_dax();
 }
 
-#if (GTK_MAJOR_VERSION == 4)
-
 Glib::RefPtr<Gtk::IconPaintable>
 vfs::file::icon(const std::int32_t size) const noexcept
 {
@@ -684,186 +637,3 @@ vfs::file::thumbnail_data::clear() noexcept
     x_large = nullptr;
     xx_large = nullptr;
 }
-
-#elif (GTK_MAJOR_VERSION == 3)
-
-GdkPixbuf*
-vfs::file::icon(const thumbnail_size size) noexcept
-{
-    ztd::panic_if(settings_ == nullptr, "Function disabled");
-
-    if (size == thumbnail_size::big)
-    {
-        if (is_desktop_entry() && thumbnail_.big)
-        {
-            return g_object_ref(thumbnail_.big);
-        }
-
-        if (is_directory())
-        {
-            const auto icon_name = special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, settings_->icon_size_big);
-        }
-
-        if (!mime_type_)
-        {
-            return nullptr;
-        }
-        return mime_type_->icon(true);
-    }
-    else
-    {
-        if (is_desktop_entry() && thumbnail_.small)
-        {
-            return g_object_ref(thumbnail_.small);
-        }
-
-        if (is_directory())
-        {
-            const auto icon_name = special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, settings_->icon_size_small);
-        }
-
-        if (!mime_type_)
-        {
-            return nullptr;
-        }
-        return mime_type_->icon(false);
-    }
-}
-
-GdkPixbuf*
-vfs::file::thumbnail(const thumbnail_size size) const noexcept
-{
-    if (size == thumbnail_size::big)
-    {
-        return thumbnail_.big ? g_object_ref(thumbnail_.big) : nullptr;
-    }
-    else
-    {
-        return thumbnail_.small ? g_object_ref(thumbnail_.small) : nullptr;
-    }
-}
-
-void
-vfs::file::load_thumbnail(const thumbnail_size size) noexcept
-{
-    ztd::panic_if(settings_ == nullptr, "Function disabled");
-
-    static const auto thumbnail_cache = vfs::user::thumbnail_cache();
-    if (path_.string().starts_with(thumbnail_cache.parent.string()))
-    {
-        // TODO use cache images directly
-        logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}", path_.string());
-        return;
-    }
-
-    if (size == thumbnail_size::big)
-    {
-        if (thumbnail_.big)
-        {
-            return;
-        }
-
-        std::error_code ec;
-        const bool exists = std::filesystem::exists(path_, ec);
-        if (ec || !exists)
-        {
-            return;
-        }
-
-        GdkPixbuf* thumbnail = nullptr;
-        if (mime_type_->is_image())
-        {
-            thumbnail =
-                vfs::detail::thumbnail::image(shared_from_this(), settings_->icon_size_big.data());
-        }
-        else if (mime_type_->is_video())
-        {
-            thumbnail =
-                vfs::detail::thumbnail::video(shared_from_this(), settings_->icon_size_big.data());
-        }
-
-        if (thumbnail)
-        {
-            thumbnail_.big = thumbnail;
-        }
-        else
-        {
-            // fallback to mime_type icon
-            thumbnail_.big = icon(thumbnail_size::big);
-        }
-    }
-    else
-    {
-        if (thumbnail_.small)
-        {
-            return;
-        }
-
-        std::error_code ec;
-        const bool exists = std::filesystem::exists(path_, ec);
-        if (ec || !exists)
-        {
-            return;
-        }
-
-        GdkPixbuf* thumbnail = nullptr;
-        if (mime_type_->is_image())
-        {
-            thumbnail = vfs::detail::thumbnail::image(shared_from_this(),
-                                                      settings_->icon_size_small.data());
-        }
-        else if (mime_type_->is_video())
-        {
-            thumbnail = vfs::detail::thumbnail::video(shared_from_this(),
-                                                      settings_->icon_size_small.data());
-        }
-
-        if (thumbnail)
-        {
-            thumbnail_.small = thumbnail;
-        }
-        else
-        {
-            // fallback to mime_type icon
-            thumbnail_.small = icon(thumbnail_size::small);
-        }
-    }
-}
-
-void
-vfs::file::unload_thumbnail(const thumbnail_size size) noexcept
-{
-    if (size == thumbnail_size::big)
-    {
-        if (thumbnail_.big)
-        {
-            g_object_unref(thumbnail_.big);
-            thumbnail_.big = nullptr;
-        }
-    }
-    else
-    {
-        if (thumbnail_.small)
-        {
-            g_object_unref(thumbnail_.small);
-            thumbnail_.small = nullptr;
-        }
-    }
-}
-
-bool
-vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
-{
-    if (size == thumbnail_size::big)
-    {
-        return (thumbnail_.big != nullptr);
-    }
-    else
-    {
-        return (thumbnail_.small != nullptr);
-    }
-}
-
-#endif

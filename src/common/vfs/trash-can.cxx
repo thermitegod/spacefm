@@ -228,21 +228,12 @@ vfs::trashinfo_write(const std::filesystem::path& path, const vfs::trashinfo& in
 {
     try
     {
-#if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
         // clang-format off
         kf->set_string("Trash Info", "Path", std::format("{}", info.path));
         kf->set_string("Trash Info", "DeletionDate", std::format("{:%Y-%m-%dT%H:%M:%S}", info.time));
         // clang-format on
         kf->save_to_file(path);
-#elif (GTK_MAJOR_VERSION == 3)
-        Glib::KeyFile kf;
-        // clang-format off
-        kf.set_string("Trash Info", "Path", info.path.string());
-        kf.set_string("Trash Info", "DeletionDate", std::format("{:%Y-%m-%dT%H:%M:%S}", info.time));
-        // clang-format on
-        kf.save_to_file(path);
-#endif
     }
     catch (const Glib::FileError& e)
     {
@@ -259,13 +250,8 @@ vfs::trashinfo_read(const std::filesystem::path& path) noexcept
         return std::nullopt;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
     const auto kf = Glib::KeyFile::create();
     const auto loaded = kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
-#elif (GTK_MAJOR_VERSION == 3)
-    Glib::KeyFile kf;
-    const auto loaded = kf.load_from_file(path, Glib::KEY_FILE_NONE);
-#endif
     if (!loaded)
     {
         return std::nullopt;
@@ -275,13 +261,8 @@ vfs::trashinfo_read(const std::filesystem::path& path) noexcept
 
     try
     {
-#if (GTK_MAJOR_VERSION == 4)
         info.path = kf->get_string("Trash Info", "Path");
         const auto date = kf->get_string("Trash Info", "DeletionDate");
-#elif (GTK_MAJOR_VERSION == 3)
-        info.path = kf.get_string("Trash Info", "Path");
-        const auto date = kf.get_string("Trash Info", "DeletionDate");
-#endif
         std::istringstream stream(date.raw());
         std::chrono::from_stream(stream, "%Y-%m-%dT%H:%M:%S", info.time);
     }

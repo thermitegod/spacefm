@@ -21,14 +21,7 @@
 #include <ztd/ztd.hxx>
 namespace vfs::utils
 {
-#if (GTK_MAJOR_VERSION == 4)
 Glib::RefPtr<Gtk::IconPaintable>
 load_icon(const std::string_view icon_name, const i32 icon_size,
           const std::string_view fallback = "text-x-generic") noexcept;
-
-#elif (GTK_MAJOR_VERSION == 3)
-
-GdkPixbuf* load_icon(const std::string_view icon_name, i32 icon_size) noexcept;
-
-#endif
 } // namespace vfs::utils

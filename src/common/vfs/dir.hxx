@@ -36,9 +36,6 @@
 
 #include "vfs/file.hxx"
 #include "vfs/notify-cpp/controller.hxx"
-#if (GTK_MAJOR_VERSION == 3)
-#include "vfs/settings.hxx"
-#endif
 #include "vfs/thumbnailer.hxx"
 
 namespace vfs
@@ -47,12 +44,7 @@ class dir : public std::enable_shared_from_this<dir>
 {
   private:
     dir() = delete;
-#if (GTK_MAJOR_VERSION == 4)
     explicit dir(const std::filesystem::path& path) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    explicit dir(const std::filesystem::path& path,
-                 const std::shared_ptr<vfs::settings>& settings) noexcept;
-#endif
     ~dir() noexcept;
     dir(const dir& other) = delete;
     dir(dir&& other) = delete;
@@ -60,21 +52,8 @@ class dir : public std::enable_shared_from_this<dir>
     dir& operator=(dir&& other) = delete;
 
   public:
-#if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
                                                           const bool permanent = false) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    [[nodiscard]] static std::shared_ptr<vfs::dir>
-    create(const std::filesystem::path& path, const std::shared_ptr<vfs::settings>& settings,
-           const bool permanent = false) noexcept;
-#endif
-
-#if (GTK_MAJOR_VERSION == 4)
-// TODO
-#elif (GTK_MAJOR_VERSION == 3)
-    // unloads thumbnails in every vfs::dir
-    static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
-#endif
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> files() noexcept;
@@ -94,16 +73,9 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) noexcept;
     [[nodiscard]] bool add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 
-#if (GTK_MAJOR_VERSION == 4)
     void load_thumbnails(const std::int32_t size) noexcept;
     void load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int32_t size) noexcept;
     void unload_thumbnails(const std::int32_t size) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    void load_thumbnails(const vfs::file::thumbnail_size size) noexcept;
-    void load_thumbnail(const std::shared_ptr<vfs::file>& file,
-                        const vfs::file::thumbnail_size size) noexcept;
-    void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
-#endif
     void enable_thumbnails(const bool enabled) noexcept;
 
   private:
@@ -127,10 +99,6 @@ class dir : public std::enable_shared_from_this<dir>
     void on_self_deleted(const std::filesystem::path& path) noexcept;
 
     std::filesystem::path path_;
-
-#if (GTK_MAJOR_VERSION == 3)
-    std::shared_ptr<vfs::settings> settings_;
-#endif
 
     std::vector<std::shared_ptr<vfs::file>> files_;
     std::mutex files_lock_;
@@ -194,7 +162,6 @@ class dir : public std::enable_shared_from_this<dir>
         return signal_files_deleted_;
     }
 
-#if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] auto
     signal_directory_loaded() noexcept
     {
@@ -206,13 +173,6 @@ class dir : public std::enable_shared_from_this<dir>
     {
         return signal_directory_refresh_;
     }
-#elif (GTK_MAJOR_VERSION == 3)
-    [[nodiscard]] auto
-    signal_file_listed() noexcept
-    {
-        return signal_file_listed_;
-    }
-#endif
 
     [[nodiscard]] auto
     signal_thumbnail_loaded() noexcept
@@ -234,12 +194,8 @@ class dir : public std::enable_shared_from_this<dir>
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_created_;
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_changed_;
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_deleted_;
-#if (GTK_MAJOR_VERSION == 4)
     sigc::signal<void()> signal_directory_loaded_;
     sigc::signal<void()> signal_directory_refresh_;
-#elif (GTK_MAJOR_VERSION == 3)
-    sigc::signal<void()> signal_file_listed_;
-#endif
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
     sigc::signal<void()> signal_directory_deleted_;
 };

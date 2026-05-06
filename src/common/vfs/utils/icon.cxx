@@ -26,8 +26,6 @@
 
 #include "logger.hxx"
 
-#if (GTK_MAJOR_VERSION == 4)
-
 Glib::RefPtr<Gtk::IconPaintable>
 vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size,
                       const std::string_view fallback) noexcept
@@ -50,42 +48,3 @@ vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size,
 
     return icon_theme->lookup_icon(icon_name.data(), icon_size.data());
 }
-
-#elif (GTK_MAJOR_VERSION == 3)
-
-GdkPixbuf*
-vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
-{
-    static GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-
-    GtkIconInfo* icon_info = gtk_icon_theme_lookup_icon(
-        icon_theme,
-        icon_name.data(),
-        icon_size.data(),
-        GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
-                           GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
-
-    if (!icon_info && !icon_name.starts_with('/'))
-    {
-        return gdk_pixbuf_new_from_file_at_size(icon_name.data(),
-                                                icon_size.data(),
-                                                icon_size.data(),
-                                                nullptr);
-    }
-
-    if (!icon_info)
-    {
-        return nullptr;
-    }
-
-    const char* file = gtk_icon_info_get_filename(icon_info);
-    GdkPixbuf* icon = nullptr;
-    if (file)
-    {
-        icon = gdk_pixbuf_new_from_file_at_size(file, icon_size.data(), icon_size.data(), nullptr);
-    }
-
-    return icon;
-}
-
-#endif

@@ -88,7 +88,6 @@ endif
 vfs_gtk4_sources = files(
     'vfs/app-desktop.cxx',
     'vfs/bookmarks.cxx',
-    # 'vfs/clipboard.cxx',
     'vfs/device.cxx',
     'vfs/dir.cxx',
     'vfs/error.cxx',

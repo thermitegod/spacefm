@@ -20,8 +20,6 @@
 
 #include <gtkmm.h>
 
-#if (GTK_MAJOR_VERSION == 4)
-
 namespace vfs
 {
 class bookmarks
@@ -65,22 +63,3 @@ class bookmarks
     sigc::signal<void(std::string)> signal_save_error_;
 };
 } // namespace vfs
-
-#else
-
-#include "datatypes/datatypes.hxx"
-
-namespace vfs::bookmarks
-{
-[[nodiscard]] std::span<datatype::bookmarks::bookmark> bookmarks() noexcept;
-
-void bookmarks(const datatype::bookmarks::bookmarks& bookmarks) noexcept;
-
-void load() noexcept;
-void save() noexcept;
-
-void add(const std::filesystem::path& path) noexcept;
-void remove(const std::filesystem::path& path) noexcept;
-} // namespace vfs::bookmarks
-
-#endif

@@ -27,9 +27,6 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/mime-type.hxx"
-#if (GTK_MAJOR_VERSION == 3)
-#include "vfs/settings.hxx"
-#endif
 
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 
@@ -39,12 +36,7 @@ class file : public std::enable_shared_from_this<file>
 {
   private:
     file() = delete;
-#if (GTK_MAJOR_VERSION == 4)
     explicit file(const std::filesystem::path& file_path) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    explicit file(const std::filesystem::path& file_path,
-                  const std::shared_ptr<vfs::settings>& settings) noexcept;
-#endif
     ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
@@ -52,14 +44,8 @@ class file : public std::enable_shared_from_this<file>
     file& operator=(file&& other) = delete;
 
   public:
-#if (GTK_MAJOR_VERSION == 4)
     [[nodiscard]] static std::shared_ptr<vfs::file>
     create(const std::filesystem::path& path) noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    [[nodiscard]] static std::shared_ptr<vfs::file>
-    create(const std::filesystem::path& path,
-           const std::shared_ptr<vfs::settings>& settings = nullptr) noexcept;
-#endif
 
     [[nodiscard]] std::string_view name() const noexcept;
 
@@ -90,24 +76,11 @@ class file : public std::enable_shared_from_this<file>
     [[nodiscard]] std::chrono::system_clock::time_point ctime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point mtime() const noexcept;
 
-#if (GTK_MAJOR_VERSION == 4)
     Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) const noexcept;
     Glib::RefPtr<Gdk::Paintable> thumbnail(const std::int32_t size) const noexcept;
     void load_thumbnail(const std::int32_t size, bool force_reload = false) noexcept;
     // void unload_thumbnail(const std::int32_t size) noexcept;
     [[nodiscard]] bool is_thumbnail_loaded(const std::int32_t size) const noexcept;
-#elif (GTK_MAJOR_VERSION == 3)
-    enum class thumbnail_size : std::uint8_t
-    {
-        big,
-        small,
-    };
-    GdkPixbuf* icon(const thumbnail_size size) noexcept;
-    GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
-    void load_thumbnail(const thumbnail_size size) noexcept;
-    void unload_thumbnail(const thumbnail_size size) noexcept;
-    [[nodiscard]] bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
-#endif
 
     [[nodiscard]] bool is_directory() const noexcept;
     [[nodiscard]] bool is_regular_file() const noexcept;
@@ -165,7 +138,6 @@ class file : public std::enable_shared_from_this<file>
 
     struct thumbnail_data final
     {
-#if (GTK_MAJOR_VERSION == 4)
         enum class raw_size : std::int32_t
         {
             normal = 128,
@@ -186,16 +158,8 @@ class file : public std::enable_shared_from_this<file>
         Glib::RefPtr<Gdk::Texture> large;
         Glib::RefPtr<Gdk::Texture> x_large;
         Glib::RefPtr<Gdk::Texture> xx_large;
-#elif (GTK_MAJOR_VERSION == 3)
-        GdkPixbuf* big{nullptr};
-        GdkPixbuf* small{nullptr};
-#endif
     };
     thumbnail_data thumbnail_;
-
-#if (GTK_MAJOR_VERSION == 3)
-    std::shared_ptr<vfs::settings> settings_;
-#endif
 
     [[nodiscard]] std::string create_file_perm_string() const noexcept;
 
