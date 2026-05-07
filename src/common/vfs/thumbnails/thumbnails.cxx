@@ -18,14 +18,13 @@
 #include <format>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <gdkmm.h>
 #include <glibmm.h>
 #include <gtkmm.h>
 
 #include <glaze/json.hpp>
-
-#include <magic_enum/magic_enum.hpp>
 
 #include <botan/hash.h>
 #include <botan/hex.h>
@@ -78,7 +77,7 @@ create_fail(const std::shared_ptr<vfs::file>& file, const std::filesystem::path&
     logger::error_if(ec, "Failed to create thumbnail fail file: {}", glz::format_error(ec, buffer));
 }
 
-enum class thumbnail_size : std::uint16_t
+enum class thumbnail_size : std::int32_t
 {
     normal = 128,
     large = 256,
@@ -152,23 +151,23 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     static thread_local auto cache_dirs = vfs::user::thumbnail_cache();
 
     const auto [thumbnail_create_size, thumbnail_cache] = std::invoke(
-        [](const auto size) -> std::pair<std::uint32_t, std::filesystem::path>
+        [](const auto size) -> std::pair<std::int32_t, std::filesystem::path>
         {
             if (size <= 128)
             {
-                return {magic_enum::enum_integer(thumbnail_size::normal), cache_dirs.normal};
+                return {std::to_underlying(thumbnail_size::normal), cache_dirs.normal};
             }
             else if (size <= 256)
             {
-                return {magic_enum::enum_integer(thumbnail_size::large), cache_dirs.large};
+                return {std::to_underlying(thumbnail_size::large), cache_dirs.large};
             }
             else if (size <= 512)
             {
-                return {magic_enum::enum_integer(thumbnail_size::x_large), cache_dirs.x_large};
+                return {std::to_underlying(thumbnail_size::x_large), cache_dirs.x_large};
             }
             else if (size <= 1024)
             {
-                return {magic_enum::enum_integer(thumbnail_size::xx_large), cache_dirs.xx_large};
+                return {std::to_underlying(thumbnail_size::xx_large), cache_dirs.xx_large};
             }
             else
             {
