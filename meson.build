@@ -39,7 +39,9 @@ cpp = meson.get_compiler('cpp')
 # message(cc.get_id())
 # message(cpp.get_id())
 
-flags = []
+flags = [
+    # '-freflection', # very slow builds
+]
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
     flags += cpp.get_supported_arguments([
@@ -66,8 +68,6 @@ endif
 
 # Default
 flags += cpp.get_supported_arguments([
-    '-fexceptions',
-
     '-finput-charset=UTF-8',
     '-fexec-charset=UTF-8',
 
