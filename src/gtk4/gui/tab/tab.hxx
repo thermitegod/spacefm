@@ -32,6 +32,7 @@
 #include "gui/lib/history.hxx"
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/files/list.hxx"
+#include "gui/tab/side.hxx"
 #include "gui/tab/statusbar.hxx"
 #include "gui/tab/toolbar.hxx"
 
@@ -168,6 +169,8 @@ class tab final : public Gtk::Box
     config::sorting sorting_;
     config::grid_state grid_state_;
     config::list_state list_state_;
+    gui::side side_;
+
     gui::lib::history history_;
 
     std::shared_ptr<vfs::dir> dir_;

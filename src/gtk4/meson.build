@@ -12,9 +12,7 @@ sources = files(
 
     'gui/tab/path.cxx',
     'gui/tab/search.cxx',
-    'gui/tab/side_default.cxx',
-    'gui/tab/side_device.cxx',
-    'gui/tab/side_tree.cxx',
+    'gui/tab/side.cxx',
     'gui/tab/statusbar.cxx',
     'gui/tab/tab.cxx',
     'gui/tab/toolbar.cxx',

@@ -196,6 +196,8 @@ struct settings_on_disk
 
     struct interface final
     {
+        bool show_sidebar{true};
+
         bool always_show_tabs{true};
         bool show_tab_close_button{false};
         bool new_tab_here{true};

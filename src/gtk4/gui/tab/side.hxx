@@ -15,23 +15,37 @@
 
 #pragma once
 
+#include <filesystem>
+#include <string_view>
+
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
+#include "settings/settings.hxx"
+
 namespace gui
 {
-class side_default final : public Gtk::ScrolledWindow
+class side final : public Gtk::Box
 {
   public:
-    side_default();
+    side(const std::shared_ptr<config::settings>& settings);
 
+  private:
+    std::shared_ptr<config::settings> settings_;
+
+    void add_location(const std::string_view name, const std::filesystem::path& path,
+                      const std::string_view icon_name = "folder-symbolic") noexcept;
+
+    void add_separator() noexcept;
+
+  public:
     [[nodiscard]] auto
-    signal_confirm() noexcept
+    signal_chdir() noexcept
     {
-        return signal_confirm_;
+        return signal_chdir_;
     }
 
   private:
-    sigc::signal<void()> signal_confirm_;
+    sigc::signal<void(std::filesystem::path)> signal_chdir_;
 };
 } // namespace gui

@@ -279,6 +279,19 @@ gui::dialog::preferences::init_interface_tab() noexcept
 {
     auto page = preference_page();
 
+    page.add_section("Sidebar");
+
+    {
+        auto& opt = settings_->interface.show_sidebar;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Sidebar");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
     page.add_section("Tabs");
 
     {

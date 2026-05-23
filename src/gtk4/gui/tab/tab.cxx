@@ -60,7 +60,7 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<config::settings>& settings) noexcept
     : parent_(parent), task_manager_(task_manager), settings_(settings), view_mode_(state.view),
       sorting_(state.sorting), grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
-      list_state_(state.list ? *state.list : settings_->defaults.list)
+      list_state_(state.list ? *state.list : settings_->defaults.list), side_(settings_)
 {
     logger::debug("gui::tab::tab({})", cwd().string());
 
@@ -80,10 +80,14 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
     add_actions();
     add_context_menu();
 
+    // sidebar
+    side_.signal_chdir().connect([this](auto path) { chdir(path); });
+
     // List areas
     pane_.set_orientation(Gtk::Orientation::HORIZONTAL);
-    side_view_.set_size_request(140, -1);
-    side_view_.set_visible(false); // TODO
+    side_view_.set_size_request(200, -1);
+    side_view_.set_visible(settings_->interface.show_sidebar);
+    side_view_.set_child(side_);
     pane_.set_start_child(side_view_);
     pane_.set_resize_start_child(false);
     pane_.set_shrink_start_child(false);
