@@ -85,7 +85,7 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
 
     // List areas
     pane_.set_orientation(Gtk::Orientation::HORIZONTAL);
-    side_view_.set_size_request(200, -1);
+    side_view_.set_size_request(settings_->interface.sidebar_width, -1);
     side_view_.set_visible(settings_->interface.show_sidebar);
     side_view_.set_child(side_);
     pane_.set_start_child(side_view_);

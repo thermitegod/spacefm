@@ -197,6 +197,7 @@ struct settings_on_disk
     struct interface final
     {
         bool show_sidebar{true};
+        std::int32_t sidebar_width{200};
 
         bool always_show_tabs{true};
         bool show_tab_close_button{false};

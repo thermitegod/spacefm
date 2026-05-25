@@ -292,6 +292,22 @@ gui::dialog::preferences::init_interface_tab() noexcept
         page.add_row(*button);
     }
 
+    {
+        auto& opt = settings_->interface.sidebar_width;
+
+        auto adjust = Gtk::Adjustment::create(opt, 1, 512);
+        adjust->set_step_increment(1);
+        adjust->set_page_increment(1);
+        adjust->signal_value_changed().connect(
+            [&opt, adjust]() { opt = static_cast<std::int32_t>(adjust->get_value()); });
+
+        auto button = Gtk::make_managed<Gtk::SpinButton>();
+        button->set_value(opt);
+        button->set_adjustment(adjust);
+
+        page.add_row("Sidebar default width", *button);
+    }
+
     page.add_section("Tabs");
 
     {
