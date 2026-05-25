@@ -24,15 +24,17 @@
 
 #include "gui/dialog/preferences.hxx"
 
-class preference_page : public Gtk::Box
+class preference_page : public Gtk::ScrolledWindow
 {
   public:
     explicit preference_page() noexcept
     {
-        set_orientation(Gtk::Orientation::VERTICAL);
-        set_margin(6);
-        set_homogeneous(false);
-        set_vexpand(true);
+        box_.set_orientation(Gtk::Orientation::VERTICAL);
+        box_.set_margin(6);
+        box_.set_homogeneous(false);
+        box_.set_vexpand(true);
+
+        set_child(box_);
     }
 
     void
@@ -41,7 +43,7 @@ class preference_page : public Gtk::Box
         Gtk::Label label;
         label.set_markup(std::format("<b>{}</b>", header.data()));
         label.set_xalign(0.0f);
-        append(label);
+        box_.append(label);
     }
 
     void
@@ -69,7 +71,7 @@ class preference_page : public Gtk::Box
     void
     add_row(Gtk::Widget& item) noexcept
     {
-        append(item);
+        box_.append(item);
     }
 
   private:
@@ -85,8 +87,11 @@ class preference_page : public Gtk::Box
         Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 12);
         hbox.append(left_box);
         hbox.append(right_box);
-        append(hbox);
+
+        box_.append(hbox);
     }
+
+    Gtk::Box box_;
 };
 
 gui::dialog::preferences::preferences(Gtk::ApplicationWindow& parent,
@@ -96,7 +101,7 @@ gui::dialog::preferences::preferences(Gtk::ApplicationWindow& parent,
     set_transient_for(parent);
     set_modal(true);
 
-    set_size_request(470, 400);
+    set_size_request(600, 600);
     set_title("Preferences");
     set_resizable(false);
 
