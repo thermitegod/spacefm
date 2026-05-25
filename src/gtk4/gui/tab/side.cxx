@@ -38,18 +38,38 @@ gui::side::side(const std::shared_ptr<config::settings>& settings) : settings_(s
     add_location("Home", vfs::user::home(), "user-home-symbolic");
     add_separator();
 
-    // TODO option to enable/disable these
-    // add_location("Cache", vfs::user::cache(), "folder-symbolic");
-    // add_location("Config", vfs::user::config(), "folder-symbolic");
-    // add_location("Data", vfs::user::data(), "folder-symbolic");
-    // add_separator();
+    if (settings_->interface.sidebar_show_advanced)
+    {
+        add_location("Cache", vfs::user::cache(), "folder-symbolic");
+        add_location("Config", vfs::user::config(), "folder-symbolic");
+        add_location("Data", vfs::user::data(), "folder-symbolic");
+        add_separator();
+    }
 
-    add_location("Desktop", vfs::user::desktop(), "user-desktop-symbolic");
-    add_location("Documents", vfs::user::documents(), "folder-documents-symbolic");
-    add_location("Download", vfs::user::download(), "folder-download-symbolic");
-    add_location("Music", vfs::user::music(), "folder-music-symbolic");
-    add_location("Pictures", vfs::user::pictures(), "folder-pictures-symbolic");
-    add_location("Videos", vfs::user::videos(), "folder-videos-symbolic");
+    if (settings_->interface.sidebar_show_desktop)
+    {
+        add_location("Desktop", vfs::user::desktop(), "user-desktop-symbolic");
+    }
+    if (settings_->interface.sidebar_show_documents)
+    {
+        add_location("Documents", vfs::user::documents(), "folder-documents-symbolic");
+    }
+    if (settings_->interface.sidebar_show_download)
+    {
+        add_location("Download", vfs::user::download(), "folder-download-symbolic");
+    }
+    if (settings_->interface.sidebar_show_music)
+    {
+        add_location("Music", vfs::user::music(), "folder-music-symbolic");
+    }
+    if (settings_->interface.sidebar_show_pictures)
+    {
+        add_location("Pictures", vfs::user::pictures(), "folder-pictures-symbolic");
+    }
+    if (settings_->interface.sidebar_show_videos)
+    {
+        add_location("Videos", vfs::user::videos(), "folder-videos-symbolic");
+    }
 
     set_visible(true);
 }

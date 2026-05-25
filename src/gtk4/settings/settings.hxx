@@ -198,6 +198,14 @@ struct settings_on_disk
     {
         bool show_sidebar{true};
         std::int32_t sidebar_width{200};
+        // bool sidebar_show_home{true}; // should always show
+        bool sidebar_show_advanced{false};
+        bool sidebar_show_desktop{true};
+        bool sidebar_show_documents{true};
+        bool sidebar_show_download{true};
+        bool sidebar_show_music{true};
+        bool sidebar_show_pictures{true};
+        bool sidebar_show_videos{true};
 
         bool always_show_tabs{true};
         bool show_tab_close_button{false};

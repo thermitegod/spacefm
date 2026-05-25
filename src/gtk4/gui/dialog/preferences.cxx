@@ -308,6 +308,83 @@ gui::dialog::preferences::init_interface_tab() noexcept
         page.add_row("Sidebar default width", *button);
     }
 
+    {
+        auto& opt = settings_->interface.sidebar_show_advanced;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show section for Config, Data, and Cache");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_desktop;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Desktop");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_documents;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Documents");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_download;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Download");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_music;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Music");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_pictures;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Pictures");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
+    {
+        auto& opt = settings_->interface.sidebar_show_videos;
+
+        auto button = Gtk::make_managed<Gtk::CheckButton>();
+        button->set_label("Show Videos");
+        button->set_active(opt);
+        button->signal_toggled().connect([&opt]() { opt = !opt; });
+
+        page.add_row(*button);
+    }
+
     page.add_section("Tabs");
 
     {
