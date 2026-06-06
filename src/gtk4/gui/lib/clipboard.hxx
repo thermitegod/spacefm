@@ -29,8 +29,8 @@ namespace gui::clipboard
 
 void copy_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
 void cut_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
-void
-paste_files(const std::function<void(const std::vector<std::string>&, bool)>& callback) noexcept;
+void paste_files(
+    std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept;
 
 void set_text(const std::string_view text) noexcept;
 } // namespace gui::clipboard
