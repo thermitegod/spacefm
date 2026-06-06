@@ -113,19 +113,6 @@ vfs::dir::~dir() noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), path_.string());
 
-    signal_files_created().clear();
-    signal_files_changed().clear();
-    signal_files_deleted().clear();
-
-#if (GTK_MAJOR_VERSION == 4)
-    signal_directory_loaded().clear();
-    signal_directory_refresh().clear();
-#elif (GTK_MAJOR_VERSION == 3)
-    signal_file_listed().clear();
-#endif
-    signal_thumbnail_loaded().clear();
-    signal_directory_deleted().clear();
-
     thumbnailer_thread_.request_stop();
     thumbnailer_thread_.join();
 
