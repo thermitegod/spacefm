@@ -25,6 +25,7 @@
 #include <span>
 #include <stop_token>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 #include <glibmm.h>
@@ -118,7 +119,7 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool write_hidden() const noexcept;
     void load_user_hidden_files() noexcept;
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
-    std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
+    std::optional<std::unordered_set<std::string>> user_hidden_files_{std::nullopt};
 
     // handle file events
     void on_file_created(const std::filesystem::path& path) noexcept;

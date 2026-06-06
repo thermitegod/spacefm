@@ -235,8 +235,7 @@ vfs::dir::load_user_hidden_files() noexcept
         return;
     }
 
-    std::vector<std::filesystem::path> hidden;
-
+    std::unordered_set<std::string> hidden;
     for (const std::filesystem::path file : ztd::split(*buffer, "\n"))
     {
         if (file.is_absolute())
@@ -245,7 +244,7 @@ vfs::dir::load_user_hidden_files() noexcept
             continue;
         }
 
-        hidden.push_back(file);
+        hidden.insert(file.filename().string());
     }
 
     user_hidden_files_ = hidden;
@@ -438,7 +437,7 @@ vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) noexcept
         user_hidden_files_ = {};
     }
 
-    user_hidden_files_->push_back(file->path());
+    user_hidden_files_->insert(file->name().data());
 
     return write_hidden();
 }
@@ -453,7 +452,7 @@ vfs::dir::add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) no
 
     for (const auto& file : files)
     {
-        user_hidden_files_->push_back(file->path());
+        user_hidden_files_->insert(file->name().data());
     }
 
     return write_hidden();
@@ -462,10 +461,16 @@ vfs::dir::add_hidden(const std::span<const std::shared_ptr<vfs::file>> files) no
 bool
 vfs::dir::write_hidden() const noexcept
 {
+    if (!user_hidden_files_)
+    {
+        logger::debug<logger::vfs>("Trying to write an empty .hidden file");
+        return true;
+    }
+
     std::string text;
     for (const auto& path : *user_hidden_files_)
     {
-        text += path.string();
+        text += path;
         text += '\n';
     }
 
