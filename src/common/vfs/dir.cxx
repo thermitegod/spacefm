@@ -279,7 +279,8 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
     // load this dirs .hidden file
     load_user_hidden_files();
 
-    files_.reserve(1024);
+    std::vector<std::shared_ptr<vfs::file>> files;
+    files.reserve(4096);
 
     for (const auto& dfile : std::filesystem::directory_iterator(path_))
     {
@@ -294,14 +295,16 @@ vfs::dir::load_thread(const std::stop_token& stoken) noexcept
             continue;
         }
 
-        {
-            std::scoped_lock files_lock(files_lock_);
 #if (GTK_MAJOR_VERSION == 4)
-            files_.push_back(vfs::file::create(dfile.path()));
+        files.push_back(vfs::file::create(dfile.path()));
 #elif (GTK_MAJOR_VERSION == 3)
-            files_.push_back(vfs::file::create(dfile.path(), settings_));
+        files.push_back(vfs::file::create(dfile.path(), settings_));
 #endif
-        }
+    }
+
+    {
+        std::scoped_lock files_lock(files_lock_);
+        files_ = std::move(files);
     }
 
     load_running_ = false;
