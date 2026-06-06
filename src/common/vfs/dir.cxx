@@ -176,9 +176,10 @@ vfs::dir::path() const noexcept
     return path_;
 }
 
-std::span<const std::shared_ptr<vfs::file>>
-vfs::dir::files() const noexcept
+std::vector<std::shared_ptr<vfs::file>>
+vfs::dir::files() noexcept
 {
+    std::scoped_lock files_lock(files_lock_);
     return files_;
 }
 

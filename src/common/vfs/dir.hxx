@@ -77,7 +77,7 @@ class dir : public std::enable_shared_from_this<dir>
 #endif
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
+    [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> files() noexcept;
 
     void refresh() noexcept;
 
