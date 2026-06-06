@@ -119,7 +119,7 @@ vfs::task_manager::run_once(const std::stop_token& stoken) noexcept
 
 void
 vfs::task_manager::queue_task(
-    const std::function<void(const std::stop_token&, const std::shared_ptr<task_item>&)>&
+    std::copyable_function<void(const std::stop_token&, const std::shared_ptr<task_item>&) const>
         slot) noexcept
 {
     auto item = std::make_shared<task_item>(create_task_id());
@@ -161,7 +161,7 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        std::function<void(const std::filesystem::path&)> do_chmod =
+        std::copyable_function<void(const std::filesystem::path&)> do_chmod =
             [&](const std::filesystem::path& path)
         {
             if (!item->check_pause(stoken) || stoken.stop_requested())
@@ -224,7 +224,7 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
             }
         };
 
-        std::function<void(const std::filesystem::path&)> do_chown =
+        std::copyable_function<void(const std::filesystem::path&)> do_chown =
             [&](const std::filesystem::path& path)
         {
             if (!item->check_pause(stoken) || stoken.stop_requested())
@@ -278,8 +278,9 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 
         auto collision_action = collision_resolve::pending;
 
-        std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_copy =
-            [&](const std::filesystem::path& source, const std::filesystem::path& destination)
+        std::copyable_function<void(const std::filesystem::path&, const std::filesystem::path&)>
+            do_copy =
+                [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
             if (!item->check_pause(stoken) || stoken.stop_requested())
             {
@@ -357,8 +358,9 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 
         auto collision_action = collision_resolve::pending;
 
-        std::function<void(const std::filesystem::path&, const std::filesystem::path&)> do_move =
-            [&](const std::filesystem::path& source, const std::filesystem::path& destination)
+        std::copyable_function<void(const std::filesystem::path&, const std::filesystem::path&)>
+            do_move =
+                [&](const std::filesystem::path& source, const std::filesystem::path& destination)
         {
             if (!item->check_pause(stoken) || stoken.stop_requested())
             {
@@ -613,7 +615,7 @@ vfs::task_manager::add(const vfs::remove_task& task) noexcept
 {
     auto slot = [task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
-        std::function<void(const std::filesystem::path&)> do_remove =
+        std::copyable_function<void(const std::filesystem::path&)> do_remove =
             [&](const std::filesystem::path& path)
         {
             if (!item->check_pause(stoken) || stoken.stop_requested())

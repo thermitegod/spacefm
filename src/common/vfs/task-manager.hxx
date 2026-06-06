@@ -119,7 +119,8 @@ struct task_collision final
     std::filesystem::path source;
     std::filesystem::path destination;
 
-    std::function<void(std::uint64_t, collision_resolve, std::filesystem::path)> resolved;
+    std::copyable_function<void(std::uint64_t, collision_resolve, std::filesystem::path) const>
+        resolved;
 };
 
 struct task_error final
@@ -178,7 +179,9 @@ class task_manager
         std::uint64_t id;
         std::stop_source stop_source;
         std::atomic<status> state{status::pending};
-        std::function<void(const std::stop_token&, std::shared_ptr<task_item>&)> action;
+        std::copyable_function<void(const std::stop_token&, const std::shared_ptr<task_item>&)
+                                   const>
+            action;
 
         // pause/stop handling
         std::mutex pause_mutex;
@@ -246,8 +249,9 @@ class task_manager
         return next_task_id_;
     }
 
-    void queue_task(const std::function<void(const std::stop_token&,
-                                             const std::shared_ptr<task_item>&)>& slot) noexcept;
+    void queue_task(std::copyable_function<void(const std::stop_token&,
+                                                const std::shared_ptr<task_item>&) const>
+                        slot) noexcept;
 
     struct collision_result final
     {
