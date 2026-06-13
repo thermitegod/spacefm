@@ -607,23 +607,9 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
         timer_.connect_once(
             [this]()
             {
-                {
-                    std::scoped_lock lock(events_.deleted_lock);
-                    update_deleted_files();
-                    events_.deleted.clear();
-                }
-
-                {
-                    std::scoped_lock lock(events_.changed_lock);
-                    update_changed_files();
-                    events_.changed.clear();
-                }
-
-                {
-                    std::scoped_lock lock(events_.created_lock);
-                    update_created_files();
-                    events_.created.clear();
-                }
+                update_deleted_files();
+                update_changed_files();
+                update_created_files();
 
                 timer_running_ = false;
             },
@@ -635,6 +621,8 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
 void
 vfs::dir::update_deleted_files() noexcept
 {
+    std::scoped_lock lock(events_.deleted_lock);
+
     if (events_.deleted.empty())
     {
         return;
@@ -644,13 +632,16 @@ vfs::dir::update_deleted_files() noexcept
     {
         remove_file(file);
     }
-
     signal_files_deleted().emit(events_.deleted);
+
+    events_.deleted.clear();
 }
 
 void
 vfs::dir::update_changed_files() noexcept
 {
+    std::scoped_lock lock(events_.changed_lock);
+
     if (events_.changed.empty())
     {
         return;
@@ -665,11 +656,15 @@ vfs::dir::update_changed_files() noexcept
         }
     }
     signal_files_changed().emit(changed_files);
+
+    events_.changed.clear();
 }
 
 void
 vfs::dir::update_created_files() noexcept
 {
+    std::scoped_lock lock(events_.created_lock);
+
     if (events_.created.empty())
     {
         return;
@@ -712,8 +707,9 @@ vfs::dir::update_created_files() noexcept
             }
         }
     }
-
     signal_files_created().emit(created_files);
+
+    events_.created.clear();
 }
 
 void
