@@ -125,7 +125,6 @@ class dir : public std::enable_shared_from_this<dir>
     void on_file_created(const std::filesystem::path& path) noexcept;
     void on_file_deleted(const std::filesystem::path& path) noexcept;
     void on_file_changed(const std::filesystem::path& path) noexcept;
-    void on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
     void on_self_deleted(const std::filesystem::path& path) noexcept;
 
     std::filesystem::path path_;

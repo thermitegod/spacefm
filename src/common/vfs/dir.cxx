@@ -97,7 +97,8 @@ vfs::dir::dir(const std::filesystem::path& path,
         std::jthread([this](const std::stop_token& stoken) { notifier_.run(stoken); });
     pthread_setname_np(notifier_thread_.native_handle(), "notifier");
 
-    thumbnailer_.signal_thumbnail_created().connect([this](auto a) { on_thumbnail_loaded(a); });
+    thumbnailer_.signal_thumbnail_created().connect([this](auto f)
+                                                    { signal_thumbnail_loaded().emit(f); });
 
     thumbnailer_thread_ =
         std::jthread([this](const std::stop_token& stoken) { thumbnailer_.run(stoken); });
@@ -776,17 +777,6 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
     }
 
     notify_file_change(std::chrono::milliseconds(500));
-}
-
-void
-vfs::dir::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
-{
-    std::scoped_lock files_lock(files_lock_);
-
-    if (std::ranges::contains(files_, file))
-    {
-        signal_thumbnail_loaded().emit(file);
-    }
 }
 
 void
