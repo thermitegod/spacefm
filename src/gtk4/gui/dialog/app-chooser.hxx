@@ -49,8 +49,10 @@ class app_chooser : public Gtk::ApplicationWindow
       protected:
         Glib::RefPtr<Gio::ListModel>
         create_application_list(const std::shared_ptr<vfs::mime_type>& mime_type);
-        void setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item);
-        void bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item);
+
+        void on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item);
+        void on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item);
+
         void activate(const std::uint32_t position);
 
         Gtk::ListView* list_;

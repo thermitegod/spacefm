@@ -181,8 +181,8 @@ gui::dialog::app_chooser::page::init(app_chooser* parent,
     set_expand(true);
 
     auto factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(sigc::mem_fun(*this, &app_chooser::page::setup_listitem));
-    factory->signal_bind().connect(sigc::mem_fun(*this, &app_chooser::page::bind_listitem));
+    factory->signal_setup().connect(sigc::mem_fun(*this, &app_chooser::page::on_setup_item));
+    factory->signal_bind().connect(sigc::mem_fun(*this, &app_chooser::page::on_bind_item));
 
     auto model = create_application_list(mime_type);
     list_ = Gtk::make_managed<Gtk::ListView>(Gtk::SingleSelection::create(model), factory);
@@ -216,7 +216,7 @@ gui::dialog::app_chooser::page::create_application_list(
 }
 
 void
-gui::dialog::app_chooser::page::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item)
+gui::dialog::app_chooser::page::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item)
 {
     auto* box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 12);
     auto* image = Gtk::make_managed<Gtk::Image>();
@@ -228,7 +228,7 @@ gui::dialog::app_chooser::page::setup_listitem(const Glib::RefPtr<Gtk::ListItem>
 }
 
 void
-gui::dialog::app_chooser::page::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item)
+gui::dialog::app_chooser::page::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item)
 {
     if (auto* image = dynamic_cast<Gtk::Image*>(item->get_child()->get_first_child()))
     {

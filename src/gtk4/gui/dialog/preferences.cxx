@@ -153,14 +153,14 @@ gui::dialog::preferences::on_button_close_clicked() noexcept
 }
 
 void
-gui::dialog::preferences::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+gui::dialog::preferences::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
     auto* label = Gtk::make_managed<Gtk::Label>();
     item->set_child(*label);
 }
 
 void
-gui::dialog::preferences::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+gui::dialog::preferences::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
     if (auto* label = dynamic_cast<Gtk::Label*>(item->get_child()))
     {
@@ -686,8 +686,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.sorting.sort_by;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off
@@ -720,8 +720,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.sorting.sort_dir;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off
@@ -745,8 +745,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.sorting.sort_type;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off
@@ -769,8 +769,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.sorting.sort_hidden;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off
@@ -795,8 +795,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.view;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off
@@ -821,8 +821,8 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto& opt = settings_->defaults.grid.icon_size;
 
         auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::setup_listitem));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::bind_listitem));
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
 
         auto store = Gio::ListStore<ListColumns>::create();
         // clang-format off

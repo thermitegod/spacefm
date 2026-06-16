@@ -61,8 +61,8 @@ class preferences : public Gtk::ApplicationWindow
     void init_dialog_tab() noexcept;
     void init_defaults_tab() noexcept;
 
-    void setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
-    void bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
+    void on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
+    void on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
 
     Gtk::Box box_;
     Gtk::Notebook notebook_;
