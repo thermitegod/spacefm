@@ -182,7 +182,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Click Can Execute");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -193,7 +193,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Single Click Execute");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -204,7 +204,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Single Click Activate");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -215,7 +215,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Confirm Dialog For Some Tasks");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -226,7 +226,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Confirm Dialog Before Delete");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -237,7 +237,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Confirm Dialog Before Trash");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -248,7 +248,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Auto Open Mounted Volumes");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -259,7 +259,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Save Tabs");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -270,7 +270,7 @@ gui::dialog::preferences::init_general_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Use SI Units");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -292,7 +292,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Sidebar");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -319,7 +319,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show section for Config, Data, and Cache");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -330,7 +330,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Desktop");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -341,7 +341,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Documents");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -352,7 +352,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Download");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -363,7 +363,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Music");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -374,7 +374,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Pictures");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -385,7 +385,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Videos");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -398,7 +398,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Always Show Tabs");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -409,7 +409,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Tabs Close Button");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -420,7 +420,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("New Tab Here");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -433,7 +433,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Home Button");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -444,7 +444,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Refresh Button");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -455,7 +455,7 @@ gui::dialog::preferences::init_interface_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Search Bar");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -477,7 +477,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Filename");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -488,7 +488,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Parent");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -499,7 +499,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Path");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -510,7 +510,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Target");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -521,7 +521,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Confirm");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -534,7 +534,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Copy");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -545,7 +545,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("CopyT");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -556,7 +556,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Filename");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -567,7 +567,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Link");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -578,7 +578,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("LinkT");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -589,7 +589,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Parent");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -600,7 +600,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Path");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -611,7 +611,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Target");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -622,7 +622,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Type");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -633,7 +633,7 @@ gui::dialog::preferences::init_dialog_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Confirm");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -655,7 +655,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Show Hidden Files");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -666,7 +666,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Sort Natural");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -677,7 +677,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Sort Case Sensitive");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -865,7 +865,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Thumbnails");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -878,7 +878,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Compact");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -889,7 +889,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Name");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -900,7 +900,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Size");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -911,7 +911,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Bytes");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -922,7 +922,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Type");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -933,7 +933,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Mime Type");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -944,7 +944,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Permissions");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -955,7 +955,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Owner");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -966,7 +966,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Group");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -977,7 +977,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Date Accessed");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -988,7 +988,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Date Created");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -999,7 +999,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Date Metadata");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
@@ -1010,7 +1010,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         auto button = Gtk::make_managed<Gtk::CheckButton>();
         button->set_label("Date Modified");
         button->set_active(opt);
-        button->signal_toggled().connect([&opt]() { opt = !opt; });
+        button->signal_toggled().connect([button, &opt]() { opt = button->get_active(); });
 
         page.add_row(*button);
     }
