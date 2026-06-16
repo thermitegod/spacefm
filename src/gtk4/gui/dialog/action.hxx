@@ -76,9 +76,9 @@ class action : public Gtk::ApplicationWindow
     void on_button_ok_clicked();
     void on_button_cancel_clicked();
 
-    void on_setup_label(const Glib::RefPtr<Gtk::ListItem>& list_item, Gtk::Align halign);
-    void on_bind_name(const Glib::RefPtr<Gtk::ListItem>& list_item);
-    void on_bind_size(const Glib::RefPtr<Gtk::ListItem>& list_item);
+    void on_setup_label(const Glib::RefPtr<Gtk::ListItem>& item, Gtk::Align halign);
+    void on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item);
+    void on_bind_size(const Glib::RefPtr<Gtk::ListItem>& item);
 
   public:
     [[nodiscard]] auto

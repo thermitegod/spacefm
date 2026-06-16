@@ -153,18 +153,18 @@ gui::dialog::preferences::on_button_close_clicked() noexcept
 }
 
 void
-gui::dialog::preferences::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept
+gui::dialog::preferences::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
     auto* label = Gtk::make_managed<Gtk::Label>();
-    list_item->set_child(*label);
+    item->set_child(*label);
 }
 
 void
-gui::dialog::preferences::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept
+gui::dialog::preferences::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
-    if (auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child()))
+    if (auto* label = dynamic_cast<Gtk::Label*>(item->get_child()))
     {
-        if (auto info = std::dynamic_pointer_cast<ListColumns>(list_item->get_item()))
+        if (auto info = std::dynamic_pointer_cast<ListColumns>(item->get_item()))
         {
             label->set_label(info->entry_);
         }

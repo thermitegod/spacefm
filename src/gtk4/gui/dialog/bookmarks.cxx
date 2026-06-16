@@ -217,21 +217,21 @@ gui::dialog::bookmarks::add_columns() noexcept
 }
 
 void
-gui::dialog::bookmarks::on_setup_label(const Glib::RefPtr<Gtk::ListItem>& list_item,
+gui::dialog::bookmarks::on_setup_label(const Glib::RefPtr<Gtk::ListItem>& item,
                                        Gtk::Align halign) noexcept
 {
-    list_item->set_child(*Gtk::make_managed<Gtk::Label>("", halign));
+    item->set_child(*Gtk::make_managed<Gtk::Label>("", halign));
 }
 
 void
-gui::dialog::bookmarks::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept
+gui::dialog::bookmarks::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
-    auto col = std::dynamic_pointer_cast<ModelColumns>(list_item->get_item());
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
     if (!col)
     {
         return;
     }
-    auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child());
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
     if (!label)
     {
         return;
@@ -240,14 +240,14 @@ gui::dialog::bookmarks::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& list_ite
 }
 
 void
-gui::dialog::bookmarks::on_bind_path(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept
+gui::dialog::bookmarks::on_bind_path(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
-    auto col = std::dynamic_pointer_cast<ModelColumns>(list_item->get_item());
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
     if (!col)
     {
         return;
     }
-    auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child());
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
     if (!label)
     {
         return;
@@ -256,14 +256,14 @@ gui::dialog::bookmarks::on_bind_path(const Glib::RefPtr<Gtk::ListItem>& list_ite
 }
 
 void
-gui::dialog::bookmarks::on_bind_created(const Glib::RefPtr<Gtk::ListItem>& list_item) noexcept
+gui::dialog::bookmarks::on_bind_created(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
 {
-    auto col = std::dynamic_pointer_cast<ModelColumns>(list_item->get_item());
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
     if (!col)
     {
         return;
     }
-    auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child());
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
     if (!label)
     {
         return;

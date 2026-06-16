@@ -216,7 +216,7 @@ gui::dialog::app_chooser::page::create_application_list(
 }
 
 void
-gui::dialog::app_chooser::page::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item)
+gui::dialog::app_chooser::page::setup_listitem(const Glib::RefPtr<Gtk::ListItem>& item)
 {
     auto* box = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 12);
     auto* image = Gtk::make_managed<Gtk::Image>();
@@ -224,17 +224,17 @@ gui::dialog::app_chooser::page::setup_listitem(const Glib::RefPtr<Gtk::ListItem>
     box->append(*image);
     auto* label = Gtk::make_managed<Gtk::Label>();
     box->append(*label);
-    list_item->set_child(*box);
+    item->set_child(*box);
 }
 
 void
-gui::dialog::app_chooser::page::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& list_item)
+gui::dialog::app_chooser::page::bind_listitem(const Glib::RefPtr<Gtk::ListItem>& item)
 {
-    if (auto* image = dynamic_cast<Gtk::Image*>(list_item->get_child()->get_first_child()))
+    if (auto* image = dynamic_cast<Gtk::Image*>(item->get_child()->get_first_child()))
     {
         if (auto* label = dynamic_cast<Gtk::Label*>(image->get_next_sibling()))
         {
-            if (auto app_info = std::dynamic_pointer_cast<Gio::AppInfo>(list_item->get_item()))
+            if (auto app_info = std::dynamic_pointer_cast<Gio::AppInfo>(item->get_item()))
             {
                 image->set(app_info->get_icon());
                 label->set_label(app_info->get_display_name());

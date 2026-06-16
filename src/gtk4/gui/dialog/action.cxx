@@ -169,20 +169,20 @@ gui::dialog::action::add_columns()
 }
 
 void
-gui::dialog::action::on_setup_label(const Glib::RefPtr<Gtk::ListItem>& list_item, Gtk::Align halign)
+gui::dialog::action::on_setup_label(const Glib::RefPtr<Gtk::ListItem>& item, Gtk::Align halign)
 {
-    list_item->set_child(*Gtk::make_managed<Gtk::Label>("", halign));
+    item->set_child(*Gtk::make_managed<Gtk::Label>("", halign));
 }
 
 void
-gui::dialog::action::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& list_item)
+gui::dialog::action::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& item)
 {
-    auto col = std::dynamic_pointer_cast<ModelColumns>(list_item->get_item());
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
     if (!col)
     {
         return;
     }
-    auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child());
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
     if (!label)
     {
         return;
@@ -191,14 +191,14 @@ gui::dialog::action::on_bind_name(const Glib::RefPtr<Gtk::ListItem>& list_item)
 }
 
 void
-gui::dialog::action::on_bind_size(const Glib::RefPtr<Gtk::ListItem>& list_item)
+gui::dialog::action::on_bind_size(const Glib::RefPtr<Gtk::ListItem>& item)
 {
-    auto col = std::dynamic_pointer_cast<ModelColumns>(list_item->get_item());
+    auto col = std::dynamic_pointer_cast<ModelColumns>(item->get_item());
     if (!col)
     {
         return;
     }
-    auto* label = dynamic_cast<Gtk::Label*>(list_item->get_child());
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
     if (!label)
     {
         return;
