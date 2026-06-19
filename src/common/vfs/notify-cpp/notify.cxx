@@ -39,6 +39,11 @@
 
 #include "vfs/notify-cpp/notify.hxx"
 
+// #define PRINT_DBG
+#if defined(PRINT_DBG)
+#include <print>
+#endif
+
 notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::event> events)
     : path_(path)
 {
@@ -200,6 +205,12 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
                               : event->mask;
 
         queue_.push(file_system_event(event->len ? path_ / event->name : path_, get_inotify(mask)));
+
+#if defined(PRINT_DBG)
+        std::println("event = {}\t| {}",
+                     event->mask,
+                     event->len ? (path_ / event->name).string() : path_.string());
+#endif
 
         i += EVENT_SIZE + event->len;
     }
