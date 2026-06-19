@@ -113,7 +113,6 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
     [[nodiscard]] bool update_file(const std::shared_ptr<vfs::file>& file) noexcept;
-    void remove_file(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // dir .hidden file
     [[nodiscard]] bool write_hidden() const noexcept;
@@ -161,14 +160,16 @@ class dir : public std::enable_shared_from_this<dir>
 
     struct file_events
     {
+        // filenames only
+
         std::mutex deleted_lock;
-        std::vector<std::shared_ptr<vfs::file>> deleted;
+        std::unordered_set<std::filesystem::path> deleted;
 
         std::mutex changed_lock;
-        std::vector<std::shared_ptr<vfs::file>> changed;
+        std::unordered_set<std::filesystem::path> changed;
 
         std::mutex created_lock;
-        std::vector<std::filesystem::path> created; // filenames only
+        std::unordered_set<std::filesystem::path> created;
     };
     file_events events_;
 

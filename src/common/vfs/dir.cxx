@@ -582,20 +582,10 @@ vfs::dir::update_file(const std::shared_ptr<vfs::file>& file) noexcept
     { /* The file does not exist */
         if (std::ranges::contains(files_, file))
         {
-            remove_file(file);
-
-            events_.deleted.push_back(file);
+            on_file_deleted(file->path());
         }
     }
     return updated;
-}
-
-void
-vfs::dir::remove_file(const std::shared_ptr<vfs::file>& file) noexcept
-{
-    std::scoped_lock files_lock(files_lock_);
-
-    std::erase_if(files_, [&](const auto& f) { return f == file; });
 }
 
 void
@@ -629,11 +619,22 @@ vfs::dir::update_deleted_files() noexcept
         return;
     }
 
-    for (const auto& file : events_.deleted)
+    std::vector<std::shared_ptr<vfs::file>> deleted_files;
     {
-        remove_file(file);
+        for (const auto& filename : events_.deleted)
+        {
+            const auto file = find_file(filename);
+            if (file)
+            {
+                std::scoped_lock files_lock(files_lock_);
+                std::erase_if(files_, [&](const auto& f) { return f == file; });
+
+                deleted_files.push_back(file);
+            }
+        }
     }
-    signal_files_deleted().emit(events_.deleted);
+
+    signal_files_deleted().emit(deleted_files);
 
     events_.deleted.clear();
 }
@@ -649,9 +650,10 @@ vfs::dir::update_changed_files() noexcept
     }
 
     std::vector<std::shared_ptr<vfs::file>> changed_files;
-    for (const auto& file : events_.changed)
+    for (const auto& filename : events_.changed)
     {
-        if (update_file(file))
+        const auto file = find_file(filename);
+        if (file && update_file(file))
         {
             changed_files.push_back(file);
         }
@@ -672,16 +674,16 @@ vfs::dir::update_created_files() noexcept
     }
 
     std::vector<std::shared_ptr<vfs::file>> created_files;
-    for (const auto& created_file : events_.created)
+    for (const auto& filename : events_.created)
     {
-        const auto file = find_file(created_file);
+        const auto file = find_file(filename);
         if (!file)
         {
             // file is not in files_
-            const auto file_path = path_ / created_file;
+            const auto file_path = path_ / filename;
             if (std::filesystem::exists(file_path))
             {
-                if (is_file_user_hidden(created_file))
+                if (is_file_user_hidden(filename))
                 {
                     xhidden_count_ += 1;
                     continue;
@@ -723,7 +725,7 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
 
     {
         std::scoped_lock lock(events_.created_lock);
-        events_.created.push_back(path.filename());
+        events_.created.insert(path.filename());
     }
 
     notify_file_change(std::chrono::milliseconds(200));
@@ -737,14 +739,9 @@ vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
         return;
     }
 
-    const auto file = find_file(path.filename());
-    if (file)
     {
         std::scoped_lock lock(events_.deleted_lock);
-        if (!std::ranges::contains(events_.deleted, file))
-        {
-            events_.deleted.push_back(file);
-        }
+        events_.deleted.insert(path.filename());
     }
 
     notify_file_change(std::chrono::milliseconds(200));
@@ -763,17 +760,9 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
         return;
     }
 
-    const auto file = find_file(path.filename());
-    if (file)
     {
         std::scoped_lock lock(events_.changed_lock);
-        if (!std::ranges::contains(events_.changed, file))
-        {
-            if (update_file(file)) // update file info the first time
-            {
-                events_.changed.push_back(file);
-            }
-        }
+        events_.changed.insert(path.filename());
     }
 
     notify_file_change(std::chrono::milliseconds(500));
