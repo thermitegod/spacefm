@@ -68,7 +68,7 @@ void
 gui::toolbar::update(const std::filesystem::path& path, bool has_back, bool has_forward,
                      bool has_up) noexcept
 {
-    path_.set_text(path.string());
+    path_.set_text(std::format("{}", path));
 
     button_back_.set_sensitive(has_back);
     button_forward_.set_sensitive(has_forward);

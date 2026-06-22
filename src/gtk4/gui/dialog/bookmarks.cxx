@@ -252,7 +252,7 @@ gui::dialog::bookmarks::on_bind_path(const Glib::RefPtr<Gtk::ListItem>& item) no
     {
         return;
     }
-    label->set_text(col->path_.string());
+    label->set_text(std::format("{}", col->path_));
 }
 
 void

@@ -295,7 +295,7 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
         [this, tab, label]()
         {
             label->set_label(display_filename(tab->cwd()));
-            label->set_tooltip_text(tab->cwd().string());
+            label->set_tooltip_text(std::format("{}", tab->cwd()));
         });
     tab->signal_chdir_after().connect([this]() { save_tab_state(); });
     tab->signal_close_tab().connect([this]() { close_tab(); });

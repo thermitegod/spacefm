@@ -185,7 +185,7 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     label_full_path_.set_mnemonic_widget(input_full_path_);
     label_full_path_.set_selectable(true);
     buf_full_path_ = Gtk::TextBuffer::create();
-    buf_full_path_->set_text(new_path_.string());
+    buf_full_path_->set_text(std::format("{}", new_path_));
     input_full_path_.set_buffer(buf_full_path_);
     input_full_path_.set_wrap_mode(Gtk::WrapMode::CHAR);
     input_full_path_.set_monospace(true);

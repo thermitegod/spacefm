@@ -332,7 +332,7 @@ gui::dialog::properties::init_file_info_tab() noexcept
         }
     }
 
-    page.add_entry("Location:    ", cwd_.string());
+    page.add_entry("Location:    ", std::format("{}", cwd_));
 
     if (file->is_symlink())
     {

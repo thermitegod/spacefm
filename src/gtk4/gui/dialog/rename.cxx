@@ -469,7 +469,7 @@ gui::dialog::rename::update() noexcept
     entry_target_.set_text(mime_type_.data());
 
     // Path
-    buf_full_path_->set_text(new_path_.string());
+    buf_full_path_->set_text(std::format("{}", new_path_));
 
     // Options
     opt_copy_target_.set_sensitive(is_link_ && !target_missing);

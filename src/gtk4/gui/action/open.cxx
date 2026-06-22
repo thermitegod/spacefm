@@ -59,7 +59,7 @@ open_files(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
         std::string file_list;
         for (const auto& file : files)
         {
-            file_list.append(file->path().string());
+            file_list.append(std::format("{}", file->path()));
             file_list.append("\n");
         }
 

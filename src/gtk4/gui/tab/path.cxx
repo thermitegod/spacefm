@@ -23,7 +23,7 @@
 gui::path::path()
 {
     set_hexpand(true);
-    set_text(vfs::user::home().string());
+    set_text(std::format("{}", vfs::user::home()));
     set_editable(true);
 
     auto key_controller = Gtk::EventControllerKey::create();
