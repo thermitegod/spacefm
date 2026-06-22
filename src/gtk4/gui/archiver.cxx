@@ -47,7 +47,7 @@ archiver_create_shell_file_list(
     std::string file_list;
     for (const auto& file : selected_files)
     {
-        file_list.append(vfs::execute::quote(file->path().string()));
+        file_list.append(vfs::execute::quote(file->path()));
         file_list.append(" ");
     }
     return file_list;
@@ -93,7 +93,7 @@ gui::archiver::extract_to(Gtk::ApplicationWindow& parent,
     }
 
     const auto command = std::format("file-roller --extract-to={} {}",
-                                     vfs::execute::quote(dest_dir.string()),
+                                     vfs::execute::quote(dest_dir),
                                      archiver_create_shell_file_list(selected_files));
 
     vfs::execute::command_line_async(command);

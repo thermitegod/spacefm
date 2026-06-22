@@ -446,7 +446,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(vfs::execute::quote(file->path().string()));
+                    argv.push_back(vfs::execute::quote(file->path()));
                 }
                 else
                 {
@@ -479,7 +479,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(vfs::execute::quote(file->path().string()));
+                    argv.push_back(vfs::execute::quote(file->path()));
                 }
                 else
                 {

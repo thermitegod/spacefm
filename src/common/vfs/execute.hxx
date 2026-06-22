@@ -15,21 +15,46 @@
 
 #pragma once
 
+#include <concepts>
+#include <filesystem>
 #include <format>
 #include <string>
 #include <string_view>
 
 #include <cstdint>
 
+#include <ztd/ztd.hxx>
+
 namespace vfs::execute
 {
 /**
  * @brief add quotes and escape existing quotes in a string,
  *        other special shell characters do not need to be escaped.
- * @param[in] str The string to be quoted
+ * @param[in] input The string like object to be quoted
  * @return a quoted string, if string is empty returns empty quotes
  */
-[[nodiscard]] std::string quote(const std::string_view str) noexcept;
+template<typename T>
+[[nodiscard]] std::string
+quote(const T& input) noexcept
+    requires std::convertible_to<T, std::string_view> ||
+             std::same_as<std::remove_cvref_t<T>, std::filesystem::path>
+{
+    std::string_view str;
+    if constexpr (std::same_as<std::decay_t<decltype(input)>, std::filesystem::path>)
+    {
+        str = input.native();
+    }
+    else
+    {
+        str = input;
+    }
+
+    if (str.empty())
+    {
+        return R"("")";
+    }
+    return std::format(R"("{}")", ztd::replace(str, "\"", "\\\""));
+}
 
 struct sync_data final
 {

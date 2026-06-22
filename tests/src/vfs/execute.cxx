@@ -15,46 +15,123 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <string>
+
 #include <doctest/doctest.h>
 
 #include <ztd/ztd.hxx>
 
 #include "vfs/execute.hxx"
 
-TEST_SUITE("vfs::clipboard" * doctest::description(""))
+TEST_SUITE("vfs::execute" * doctest::description(""))
 {
     TEST_CASE("vfs::execute::quote")
     {
-        SUBCASE("empty")
+        SUBCASE("std::string")
         {
-            const auto result = vfs::execute::quote("");
+            std::string input;
 
-            CHECK(!result.empty());
-            CHECK_EQ(result, R"("")");
+            SUBCASE("empty")
+            {
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("")");
+            }
+
+            SUBCASE("basic")
+            {
+                input = "Test Test";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("Test Test")");
+            }
+
+            SUBCASE("path")
+            {
+                input = "/usr/bin/yes";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("/usr/bin/yes")");
+            }
+
+            SUBCASE("quotes")
+            {
+                input = R"(Double " Quote)";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("Double \" Quote")");
+            }
+
+            SUBCASE("special shell characters")
+            {
+                input = R"($ !)";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("$ !")");
+            }
         }
 
-        SUBCASE("basic")
+        SUBCASE("std::filesystem::path")
         {
-            const auto result = vfs::execute::quote("Test Test");
+            std::filesystem::path input;
 
-            CHECK(!result.empty());
-            CHECK_EQ(result, R"("Test Test")");
-        }
+            SUBCASE("empty")
+            {
+                const auto result = vfs::execute::quote(input);
 
-        SUBCASE("quotes")
-        {
-            const auto result = vfs::execute::quote(R"(Double " Quote)");
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("")");
+            }
 
-            CHECK(!result.empty());
-            CHECK_EQ(result, R"("Double \" Quote")");
-        }
+            SUBCASE("basic")
+            {
+                input = "Test Test";
 
-        SUBCASE("special shell characters")
-        {
-            const auto result = vfs::execute::quote(R"($ !)");
+                const auto result = vfs::execute::quote(input);
 
-            CHECK(!result.empty());
-            CHECK_EQ(result, R"("$ !")");
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("Test Test")");
+            }
+
+            SUBCASE("path")
+            {
+                input = "/usr/bin/yes";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("/usr/bin/yes")");
+            }
+
+            SUBCASE("quotes")
+            {
+                input = R"(Double " Quote)";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("Double \" Quote")");
+            }
+
+            SUBCASE("special shell characters")
+            {
+                input = R"($ !)";
+
+                const auto result = vfs::execute::quote(input);
+
+                CHECK(!result.empty());
+                CHECK_EQ(result, R"("$ !")");
+            }
         }
     }
 

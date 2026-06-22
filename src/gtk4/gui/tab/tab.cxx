@@ -2609,7 +2609,7 @@ gui::tab::on_copy_path() const noexcept
     std::string text;
     for (const auto& file : selected)
     {
-        text += vfs::execute::quote(file->path().string());
+        text += vfs::execute::quote(file->path());
     }
 
     gui::clipboard::set_text(text);
