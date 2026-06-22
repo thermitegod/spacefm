@@ -408,9 +408,9 @@ vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
     std::scoped_lock files_lock(files_lock_);
 
-    const auto it = std::ranges::find_if(files_,
-                                         [&filename](const auto& file)
-                                         { return file->name() == filename.string(); });
+    const auto it =
+        std::ranges::find_if(files_,
+                             [&filename](const auto& file) { return file->name() == filename; });
     if (it != files_.cend())
     {
         return *it;

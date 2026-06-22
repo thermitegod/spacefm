@@ -79,7 +79,7 @@ vfs::file::file(const std::filesystem::path& path,
 #endif
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), path_);
-    uri_ = Glib::filename_to_uri(path_.string());
+    uri_ = Glib::filename_to_uri(path_);
 
     if (path_ == "/")
     {
@@ -516,7 +516,7 @@ void
 vfs::file::load_thumbnail(const std::int32_t size, bool force_reload) noexcept
 {
     static const auto thumbnail_cache = vfs::user::thumbnail_cache();
-    if (path_.string().starts_with(thumbnail_cache.parent.string()))
+    if (std::ranges::starts_with(path_, thumbnail_cache.parent))
     {
         // TODO use cache images directly
         logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}", path_);
