@@ -632,11 +632,11 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
 
     if (copy || copy_target)
     { // copy task
-        std::string source;
-        std::string destination = full_path.string();
+        std::filesystem::path source;
+        std::filesystem::path destination = full_path;
         if (copy || !is_link_)
         {
-            source = full_path_.string();
+            source = full_path_;
         }
         else
         {
@@ -650,7 +650,7 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
 
                 return;
             }
-            source = real_path.string();
+            source = real_path;
         }
 
         signal_confirm().emit(rename_response{
@@ -662,11 +662,11 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
     }
     else if (link || link_target)
     { // link task
-        std::string source;
-        std::string destination;
+        std::filesystem::path source;
+        std::filesystem::path destination;
         if (link || !is_link_)
         {
-            source = full_path_.string();
+            source = full_path_;
         }
         else
         {
@@ -680,9 +680,9 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
 
                 return;
             }
-            source = real_path.string();
+            source = real_path;
         }
-        destination = full_path.string();
+        destination = full_path;
 
         signal_confirm().emit(rename_response{
             .source = source,
@@ -693,8 +693,8 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
     }
     else if (old_path != path)
     { // need move?
-        std::string source = full_path_.string();
-        std::string destination = full_path.string();
+        std::filesystem::path source = full_path_;
+        std::filesystem::path destination = full_path;
 
         signal_confirm().emit(rename_response{
             .source = source,
@@ -706,8 +706,8 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
     else
     { // rename (does overwrite)
 
-        std::string source = full_path_.string();
-        std::string destination = full_path.string();
+        std::filesystem::path source = full_path_;
+        std::filesystem::path destination = full_path;
 
         signal_confirm().emit(rename_response{
             .source = source,
