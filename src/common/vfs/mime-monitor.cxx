@@ -41,14 +41,13 @@ vfs::mime_monitor_init() noexcept
     {
         if (std::filesystem::exists(vfs::user::data() / "mime"))
         {
-            vfs::execute::command_line_async("update-mime-database {}/mime",
-                                             vfs::user::data().string());
+            vfs::execute::command_line_async("update-mime-database {}/mime", vfs::user::data());
         }
 
         if (std::filesystem::exists(vfs::user::data() / "applications"))
         {
             vfs::execute::command_line_async("update-desktop-database {}/applications",
-                                             vfs::user::data().string());
+                                             vfs::user::data());
         }
     };
 

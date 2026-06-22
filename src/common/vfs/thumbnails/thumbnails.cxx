@@ -189,12 +189,11 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     const auto fail_file = cache_dirs.fail / std::format("{}.json", hash);
     if (std::filesystem::exists(fail_file))
     {
-        logger::trace<logger::vfs>("failed to create thumbnail in the past: {}",
-                                   file->path().string());
+        logger::trace<logger::vfs>("failed to create thumbnail in the past: {}", file->path());
         return nullptr;
     }
 
-    // logger::debug<logger::vfs>("path={}, uri={}, thumb_size={}", file->path().string(), file->uri(), thumb_size);
+    // logger::debug<logger::vfs>("path={}, uri={}, thumb_size={}", file->path(), file->uri(), thumb_size);
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
@@ -254,7 +253,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
     if (!thumbnail || !is_metadata_valid(thumbnail, file))
     {
-        // logger::debug<logger::vfs>("New thumb for '{}', {}", file->path().string(), thumbnail_file.string());
+        // logger::debug<logger::vfs>("New thumb for '{}', {}", file->path(), thumbnail_file);
 
         // Need to create thumbnail directory if it is missing,
         // ffmpegthumbnailer will not create missing directories.
@@ -291,8 +290,7 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
 
         if (result.exit_status != 0 || !std::filesystem::exists(thumbnail_file))
         {
-            logger::error<logger::vfs>("Failed to create thumbnail for '{}'",
-                                       file->path().string());
+            logger::error<logger::vfs>("Failed to create thumbnail for '{}'", file->path());
             create_fail(file, fail_file);
             return nullptr;
         }

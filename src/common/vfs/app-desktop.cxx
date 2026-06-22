@@ -58,7 +58,7 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
     {
-        // logger::info<logger::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
+        // logger::info<logger::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file);
         const auto& cache = desktops_cache.at(desktop_file);
 
         const auto desktop_stat = ztd::stat::create(cache.desktop.path());
@@ -83,7 +83,7 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
     }
 
     desktops_cache.insert({desktop_file, {desktop, stat->mtime()}});
-    // logger::info<logger::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file.string());
+    // logger::info<logger::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file);
     return desktop;
 }
 
@@ -144,7 +144,7 @@ vfs::desktop::parse_desktop_file() noexcept
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
-            logger::error<logger::vfs>("Error opening desktop file: {}", path_.string());
+            logger::error<logger::vfs>("Error opening desktop file: {}", path_);
             return vfs::error_code::file_open_failure;
         }
         path_ = relative_full_path;
@@ -152,7 +152,7 @@ vfs::desktop::parse_desktop_file() noexcept
 
     if (!loaded)
     {
-        logger::error<logger::vfs>("Failed to load desktop file: {}", path_.string());
+        logger::error<logger::vfs>("Failed to load desktop file: {}", path_);
         return vfs::error_code::parse_error;
     }
 
@@ -435,7 +435,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
         // if (!desktop_entry_.exec.ends_with("%F") ||
         //     !desktop_entry_.exec.ends_with("%U"))
         // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", path_);
         //     return std::nullopt;
         // }
 
@@ -464,7 +464,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
         // if (!desktop_entry_.exec.ends_with("%f") ||
         //     !desktop_entry_.exec.ends_with("%u"))
         // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", path_.string());
+        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", path_);
         //     return std::nullopt;
         // }
 
@@ -494,7 +494,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
         !add_files && !files.empty(),
         "Malformed desktop file, trying to open a desktop file without file/url "
         "keys with a file list: {}",
-        path_.string());
+        path_);
 
     if (desktop_entry_.exec.contains("%c"))
     {

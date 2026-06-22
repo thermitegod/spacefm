@@ -579,7 +579,7 @@ gui::files_base::on_files_changed(const std::span<const std::shared_ptr<vfs::fil
 void
 gui::files_base::on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    // logger::debug("gui::grid::on_thumbnail_loaded({})", file->path().string());
+    // logger::debug("gui::grid::on_thumbnail_loaded({})", file->path());
 
     const auto [found, position] = find_file(file);
     if (found)

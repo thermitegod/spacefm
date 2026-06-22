@@ -49,8 +49,8 @@ gui::task::task(Gtk::ApplicationWindow& parent,
             alert->set_detail(
                 std::format("File will be skipped\nTask ID: {}\nSource: {}\nDestination: {}",
                             c.task_id,
-                            c.source.string(),
-                            c.destination.string()));
+                            c.source,
+                            c.destination));
             alert->set_modal(true);
             alert->set_buttons({"Close"});
             alert->set_cancel_button(0);

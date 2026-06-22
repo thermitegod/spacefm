@@ -51,7 +51,7 @@ open_files(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
         return false;
     }
 
-    logger::info<logger::gui>("EXEC({})={}", desktop->path().string(), desktop->exec());
+    logger::info<logger::gui>("EXEC({})={}", desktop->path(), desktop->exec());
 
     const auto opened = desktop->open_files(cwd, files);
     if (!opened)
@@ -115,7 +115,7 @@ gui::action::open_files_auto(Gtk::ApplicationWindow& parent, const std::filesyst
     {
         if (file->is_directory())
         { // directories do not get handled here
-            logger::warn("open_files_with_app() directory {}", file->path().string());
+            logger::warn("open_files_with_app() directory {}", file->path());
             continue;
         }
 
@@ -168,8 +168,8 @@ gui::action::open_files_auto(Gtk::ApplicationWindow& parent, const std::filesyst
                 auto alert = Gtk::AlertDialog::create("Broken Link");
                 alert->set_detail(std::format("This symlink's target is missing or you do not "
                                               "have permission to access it:\n{}\n\nTarget: {}",
-                                              file->path().string(),
-                                              target_path.string()));
+                                              file->path(),
+                                              target_path));
                 alert->set_modal(true);
                 alert->show(parent);
 
@@ -217,8 +217,7 @@ gui::action::open_files_execute(Gtk::ApplicationWindow& parent, const std::files
         else
         {
             auto alert = Gtk::AlertDialog::create("Cannot Execute");
-            alert->set_detail(
-                std::format("This file is not an executable: '{}'", file->path().string()));
+            alert->set_detail(std::format("This file is not an executable: '{}'", file->path()));
             alert->set_modal(true);
             alert->show(parent);
         }

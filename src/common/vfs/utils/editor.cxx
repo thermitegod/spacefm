@@ -61,6 +61,6 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
     {
         gui::dialog::error(
             "Error",
-            std::format("Unable to use '{}' to open file:\n{}", editor.value(), path.string()));
+            std::format("Unable to use '{}' to open file:\n{}", editor.value(), path));
     }
 }

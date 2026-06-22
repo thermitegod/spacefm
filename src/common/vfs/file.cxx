@@ -98,7 +98,7 @@ vfs::file::file(const std::filesystem::path& path,
 
     const auto result = update();
 
-    logger::error_if<logger::vfs>(!result, "Failed to create vfs::file for {}", path.string());
+    logger::error_if<logger::vfs>(!result, "Failed to create vfs::file for {}", path);
 }
 
 vfs::file::~file() noexcept
@@ -519,7 +519,7 @@ vfs::file::load_thumbnail(const std::int32_t size, bool force_reload) noexcept
     if (path_.string().starts_with(thumbnail_cache.parent.string()))
     {
         // TODO use cache images directly
-        logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}", path_.string());
+        logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}", path_);
         return;
     }
 

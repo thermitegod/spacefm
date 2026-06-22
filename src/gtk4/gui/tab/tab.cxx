@@ -62,7 +62,7 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
       sorting_(state.sorting), grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
       list_state_(state.list ? *state.list : settings_->defaults.list), side_(settings_)
 {
-    logger::debug("gui::tab::tab({})", cwd().string());
+    logger::debug("gui::tab::tab({})", cwd());
 
     set_orientation(Gtk::Orientation::VERTICAL);
     set_visible(true);
@@ -860,54 +860,40 @@ gui::tab::create_context_menu_model() noexcept
             { // Tab
                 auto smenu_tab = Gio::Menu::create();
 
-                smenu_tab->append(
-                    "Tab 1",
-                    std::format("files.open_in_tab((0,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 2",
-                    std::format("files.open_in_tab((1,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 3",
-                    std::format("files.open_in_tab((2,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 4",
-                    std::format("files.open_in_tab((3,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 5",
-                    std::format("files.open_in_tab((4,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 6",
-                    std::format("files.open_in_tab((5,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 7",
-                    std::format("files.open_in_tab((6,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 8",
-                    std::format("files.open_in_tab((7,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 9",
-                    std::format("files.open_in_tab((8,'{}'))", file->path().string()));
-                smenu_tab->append(
-                    "Tab 10",
-                    std::format("files.open_in_tab((9,'{}'))", file->path().string()));
+                smenu_tab->append("Tab 1",
+                                  std::format("files.open_in_tab((0,'{}'))", file->path()));
+                smenu_tab->append("Tab 2",
+                                  std::format("files.open_in_tab((1,'{}'))", file->path()));
+                smenu_tab->append("Tab 3",
+                                  std::format("files.open_in_tab((2,'{}'))", file->path()));
+                smenu_tab->append("Tab 4",
+                                  std::format("files.open_in_tab((3,'{}'))", file->path()));
+                smenu_tab->append("Tab 5",
+                                  std::format("files.open_in_tab((4,'{}'))", file->path()));
+                smenu_tab->append("Tab 6",
+                                  std::format("files.open_in_tab((5,'{}'))", file->path()));
+                smenu_tab->append("Tab 7",
+                                  std::format("files.open_in_tab((6,'{}'))", file->path()));
+                smenu_tab->append("Tab 8",
+                                  std::format("files.open_in_tab((7,'{}'))", file->path()));
+                smenu_tab->append("Tab 9",
+                                  std::format("files.open_in_tab((8,'{}'))", file->path()));
+                smenu_tab->append("Tab 10",
+                                  std::format("files.open_in_tab((9,'{}'))", file->path()));
                 section->append_submenu("In Tab", smenu_tab);
             }
 
             {
                 auto smenu_panel = Gio::Menu::create();
 
-                smenu_panel->append(
-                    "Panel 1",
-                    std::format("files.open_in_panel((0,'{}'))", file->path().string()));
-                smenu_panel->append(
-                    "Panel 2",
-                    std::format("files.open_in_panel((1,'{}'))", file->path().string()));
-                smenu_panel->append(
-                    "Panel 3",
-                    std::format("files.open_in_panel((2,'{}'))", file->path().string()));
-                smenu_panel->append(
-                    "Panel 4",
-                    std::format("files.open_in_panel((3,'{}'))", file->path().string()));
+                smenu_panel->append("Panel 1",
+                                    std::format("files.open_in_panel((0,'{}'))", file->path()));
+                smenu_panel->append("Panel 2",
+                                    std::format("files.open_in_panel((1,'{}'))", file->path()));
+                smenu_panel->append("Panel 3",
+                                    std::format("files.open_in_panel((2,'{}'))", file->path()));
+                smenu_panel->append("Panel 4",
+                                    std::format("files.open_in_panel((3,'{}'))", file->path()));
                 section->append_submenu("In Panel", smenu_panel);
             }
 
@@ -1945,12 +1931,12 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     // only seems to happen with root path "/"
     // const auto path = new_path;
 
-    logger::debug<logger::gui>("gui::tab::chdir({})", path.string());
+    logger::debug<logger::gui>("gui::tab::chdir({})", path);
 
     if (!std::filesystem::exists(path))
     {
         auto alert = Gtk::AlertDialog::create("Error");
-        alert->set_detail(std::format("Path does not exist\n\n{}", path.string()));
+        alert->set_detail(std::format("Path does not exist\n\n{}", path));
         alert->set_modal(true);
         alert->show(parent_);
 
@@ -1960,7 +1946,7 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     if (!std::filesystem::is_directory(path))
     {
         auto alert = Gtk::AlertDialog::create("Error");
-        alert->set_detail(std::format("Path is not a directory\n\n{}", path.string()));
+        alert->set_detail(std::format("Path is not a directory\n\n{}", path));
         alert->set_modal(true);
         alert->show(parent_);
 
@@ -1970,7 +1956,7 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
     if (!vfs::utils::check_directory_permissions(path))
     {
         auto alert = Gtk::AlertDialog::create("Missing permissions");
-        alert->set_detail(std::format("Unable to access {}", path.string()));
+        alert->set_detail(std::format("Unable to access {}", path));
         alert->set_modal(true);
         alert->show(parent_);
 
@@ -2180,7 +2166,7 @@ gui::tab::show_rename_batch_dialog() noexcept
 void
 gui::tab::update_selection_history() noexcept
 {
-    // logger::debug<logger::gui>("selection history: {}", cwd.string());
+    // logger::debug<logger::gui>("selection history: {}", cwd);
 
     const auto selected = selected_files();
     if (selected.empty())

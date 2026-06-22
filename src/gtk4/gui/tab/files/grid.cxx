@@ -189,7 +189,7 @@ gui::grid::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
                     // logger::debug<logger::gui>("DnD Source: {}", file->get_path());
                     paths.push_back(file->get_path());
                 }
-                // logger::debug<logger::gui>("DnD Target: {}", col->file->path().string());
+                // logger::debug<logger::gui>("DnD Target: {}", col->file->path());
 
                 // TODO smart, move if on same fs, copy otherwise
                 auto task = vfs::move_task{
@@ -393,7 +393,7 @@ gui::grid::on_drag_data_received(const Glib::ValueBase& value, double x, double 
         // logger::debug<logger::gui>("DnD Source: {}", file->get_path());
         paths.push_back(file->get_path());
     }
-    // logger::debug<logger::gui>("DnD Target: {}", dir_->path().string());
+    // logger::debug<logger::gui>("DnD Target: {}", dir_->path());
 
     // TODO smart, move if on same fs, copy otherwise
     auto task = vfs::move_task{

@@ -111,9 +111,7 @@ ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& cont
     const auto buffer = vfs::utils::read_file(path, max_size);
     if (!buffer)
     {
-        logger::error<logger::vfs>("Failed to read file: {} {}",
-                                   path.string(),
-                                   buffer.error().message());
+        logger::error<logger::vfs>("Failed to read file: {} {}", path, buffer.error().message());
         return false;
     }
 
@@ -251,7 +249,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     std::string buf;
     if (!ReadFileToStringWithMaxSize(file_path, buf, kMaxMimeTypesFileSize))
     {
-        logger::error<logger::vfs>("Failed reading in mime.cache file: {}", file_path.string());
+        logger::error<logger::vfs>("Failed reading in mime.cache file: {}", file_path);
         return false;
     }
 

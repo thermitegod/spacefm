@@ -264,7 +264,7 @@ vfs::task_manager::add(const vfs::chown_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::copy_task& task) noexcept
 {
-    // logger::trace("copy: {} -> {}", task.source.string(), task.destination.string());
+    // logger::trace("copy: {} -> {}", task.source, task.destination);
 
     auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
@@ -344,7 +344,7 @@ vfs::task_manager::add(const vfs::copy_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::move_task& task) noexcept
 {
-    // logger::trace("move: {} -> {}", task.source.string(), task.destination.string());
+    // logger::trace("move: {} -> {}", task.source, task.destination);
 
     auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {
@@ -472,7 +472,7 @@ vfs::task_manager::add(const vfs::move_task& task) noexcept
 void
 vfs::task_manager::add(const vfs::rename_task& task) noexcept
 {
-    // logger::trace("rename: {} -> {}", task.source.string(), task.destination.string());
+    // logger::trace("rename: {} -> {}", task.source, task.destination);
 
     auto slot = [this, task](const std::stop_token& stoken, const std::shared_ptr<task_item>& item)
     {

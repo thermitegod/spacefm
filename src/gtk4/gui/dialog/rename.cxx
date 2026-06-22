@@ -438,11 +438,11 @@ gui::dialog::rename::update() noexcept
             mime_type_ = target_path;
             if (std::filesystem::exists(target_path))
             {
-                type = std::format("Link-> {}", target_path.string());
+                type = std::format("Link-> {}", target_path);
             }
             else
             {
-                type = std::format("!Link-> {} (missing)", target_path.string());
+                type = std::format("!Link-> {} (missing)", target_path);
                 target_missing = true;
             }
         }

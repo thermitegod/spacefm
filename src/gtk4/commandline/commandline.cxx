@@ -117,13 +117,13 @@ setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
                 {
                     if (std::filesystem::exists(input) && !std::filesystem::is_directory(input))
                     {
-                        return std::format("Config path must be a directory: {}", input.string());
+                        return std::format("Config path must be a directory: {}", input);
                     }
 
                     // Validate pass
                     return std::string();
                 }
-                return std::format("Config path must be absolute: {}", input.string());
+                return std::format("Config path must be absolute: {}", input);
             });
 
     app.add_option("--loglevel", opt->raw_log_levels, "Set the loglevel. Format: domain=level")
@@ -165,7 +165,7 @@ setup_commandline(CLI::App& app, const std::shared_ptr<opts_data>& opt) noexcept
                 {
                     return std::string();
                 }
-                return std::format("Logfile path must be absolute: {}", input.string());
+                return std::format("Logfile path must be absolute: {}", input);
             });
 
 #if defined(DEV_MODE)

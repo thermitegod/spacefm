@@ -111,7 +111,7 @@ vfs::volume::device_mount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), vfs::execute::quote(device_file_));
+    return std::format("{} {}", path, vfs::execute::quote(device_file_));
 }
 
 std::optional<std::string>
@@ -122,7 +122,7 @@ vfs::volume::device_unmount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), vfs::execute::quote(mount_point_));
+    return std::format("{} {}", path, vfs::execute::quote(mount_point_));
 }
 
 std::string_view

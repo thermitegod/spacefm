@@ -106,11 +106,11 @@ notify::inotify::inotify(const std::filesystem::path& path, std::set<notify::eve
                 std::format("adding inotify watch failed with '{}' (Help: increase "
                             "/proc/sys/fs/inotify/max_user_watches) for path '{}'",
                             std::strerror(errno),
-                            path.string()));
+                            path));
         }
         throw std::runtime_error(std::format("adding inotify watch failed with '{}' for path '{}'",
                                              std::strerror(errno),
-                                             path.string()));
+                                             path));
     }
 }
 
@@ -207,9 +207,7 @@ notify::inotify::get_next_event(const std::stop_token& stoken)
         queue_.push(file_system_event(event->len ? path_ / event->name : path_, get_inotify(mask)));
 
 #if defined(PRINT_DBG)
-        std::println("event = {}\t| {}",
-                     event->mask,
-                     event->len ? (path_ / event->name).string() : path_.string());
+        std::println("event = {}\t| {}", event->mask, event->len ? (path_ / event->name) : path_);
 #endif
 
         i += EVENT_SIZE + event->len;

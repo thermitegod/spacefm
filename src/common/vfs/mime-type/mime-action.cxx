@@ -52,7 +52,7 @@ static void
 update_desktop_database() noexcept
 {
     vfs::execute::command_line_async("update-desktop-database {}",
-                                     (vfs::user::data() / "applications").string());
+                                     vfs::user::data() / "applications");
 }
 
 /* Determine removed associations for this type */
@@ -532,7 +532,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
     {
         /* Make a user-created desktop file for the command */
         const auto name = std::filesystem::path(desktop_id).filename();
-        cust_template = std::format("{}-usercreated-{}.desktop", name.string(), replace_txt);
+        cust_template = std::format("{}-usercreated-{}.desktop", name, replace_txt);
 
         file_content = std::format("[Desktop Entry]\n"
                                    "Type=Application"
@@ -542,7 +542,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
                                    "Icon=exec\n"
                                    "Terminal=false\n"
                                    "NoDisplay=true\n",
-                                   name.string(),
+                                   name,
                                    desktop_id,
                                    mime_type);
     }

@@ -61,7 +61,7 @@ gui::statusbar::update(const std::shared_ptr<vfs::dir>& dir,
     // Show Reading... while sill loading
     if (dir->is_loading())
     {
-        statusbar_.set_label(std::format("Reading {} ...", cwd.string()));
+        statusbar_.set_label(std::format("Reading {} ...", cwd));
         return;
     }
 
@@ -129,11 +129,11 @@ gui::statusbar::update(const std::shared_ptr<vfs::dir>& dir,
                     {
                         if (std::filesystem::exists(target_path))
                         {
-                            text.append(std::format("  Link -> {}/", target.string()));
+                            text.append(std::format("  Link -> {}/", target));
                         }
                         else
                         {
-                            text.append(std::format("  !Link -> {}/ (missing)", target.string()));
+                            text.append(std::format("  !Link -> {}/ (missing)", target));
                         }
                     }
                     else
@@ -142,11 +142,11 @@ gui::statusbar::update(const std::shared_ptr<vfs::dir>& dir,
                         if (results)
                         {
                             const auto lsize = vfs::utils::format_file_size(results->size());
-                            text.append(std::format("  Link -> {} ({})", target.string(), lsize));
+                            text.append(std::format("  Link -> {} ({})", target, lsize));
                         }
                         else
                         {
-                            text.append(std::format("  !Link -> {} (missing)", target.string()));
+                            text.append(std::format("  !Link -> {} (missing)", target));
                         }
                     }
                 }
@@ -275,11 +275,11 @@ gui::statusbar::update(const std::shared_ptr<vfs::dir>& dir,
         if (std::filesystem::is_symlink(cwd))
         {
             const auto canon = std::filesystem::read_symlink(cwd);
-            text.append(std::format("  {} -> {}", cwd.string(), canon.string()));
+            text.append(std::format("  {} -> {}", cwd, canon));
         }
         else
         {
-            text.append(std::format("  {}", cwd.string()));
+            text.append(std::format("  {}", cwd));
         }
     }
 

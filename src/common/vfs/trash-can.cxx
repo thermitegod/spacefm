@@ -120,19 +120,19 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
         if (path.string().ends_with("/Trash") ||
             path.string().ends_with(std::format("/.Trash-{}", getuid())))
         {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Dir: {}", path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Dir: {}", path);
             return true;
         }
         else if (path.string().ends_with("/Trash/files") ||
                  path.string().ends_with(std::format("/.Trash-{}/files", getuid())))
         {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Files Dir: {}", path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Files Dir: {}", path);
             return true;
         }
         else if (path.string().ends_with("/Trash/info") ||
                  path.string().ends_with(std::format("/.Trash-{}/info", getuid())))
         {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Info Dir: {}", path.string());
+            logger::warn<logger::vfs>("Refusing to trash the Trash Info Dir: {}", path);
             return true;
         }
     }
@@ -241,7 +241,7 @@ vfs::trashinfo_write(const std::filesystem::path& path, const vfs::trashinfo& in
 #if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
         // clang-format off
-        kf->set_string("Trash Info", "Path", info.path.string());
+        kf->set_string("Trash Info", "Path", std::format("{}", info.path));
         kf->set_string("Trash Info", "DeletionDate", std::format("{:%Y-%m-%dT%H:%M:%S}", info.time));
         // clang-format on
         kf->save_to_file(path);

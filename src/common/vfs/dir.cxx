@@ -78,7 +78,7 @@ vfs::dir::dir(const std::filesystem::path& path,
                                                          })
 #endif
 {
-    // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), path_.string());
+    // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), path_);
 
     // create events
     notifier_.signal_create().connect([this](const auto& p) { on_file_created(p); });
@@ -112,7 +112,7 @@ vfs::dir::dir(const std::filesystem::path& path,
 
 vfs::dir::~dir() noexcept
 {
-    // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), path_.string());
+    // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), path_);
 
     thumbnailer_thread_.request_stop();
     thumbnailer_thread_.join();
@@ -137,7 +137,7 @@ vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::s
     if (global::dir_smart_cache.contains(path))
     {
         dir = global::dir_smart_cache.at(path);
-        // logger::debug<logger::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), path_.string());
+        // logger::debug<logger::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), path_);
     }
     else
     {
@@ -165,9 +165,9 @@ vfs::dir::create(const std::filesystem::path& path, const std::shared_ptr<vfs::s
             [&path, &settings]() { return std::make_shared<hack>(path, settings); },
             permanent);
 #endif
-        // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), path_.string());
+        // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), path_);
     }
-    // logger::debug<logger::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path.string());
+    // logger::debug<logger::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path_);
     return dir;
 }
 
@@ -218,7 +218,7 @@ vfs::dir::load_user_hidden_files() noexcept
     if (!buffer)
     {
         logger::error<logger::vfs>("Failed to read .hidden file: {} {}",
-                                   hidden_path.string(),
+                                   hidden_path,
                                    buffer.error().message());
         user_hidden_files_ = std::nullopt;
         return;
@@ -229,7 +229,7 @@ vfs::dir::load_user_hidden_files() noexcept
     {
         if (file.is_absolute())
         {
-            logger::warn<logger::vfs>("Absolute path ignored in {}", hidden_path.string());
+            logger::warn<logger::vfs>("Absolute path ignored in {}", hidden_path);
             continue;
         }
 
@@ -257,7 +257,7 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
 void
 vfs::dir::load_thread(const std::stop_token& stoken) noexcept
 {
-    // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), path_.string());
+    // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), path_);
 
     std::scoped_lock lock(loader_mutex_);
 
