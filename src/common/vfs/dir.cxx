@@ -224,7 +224,7 @@ vfs::dir::load_user_hidden_files() noexcept
         return;
     }
 
-    std::unordered_set<std::string> hidden;
+    std::unordered_set<std::filesystem::path> hidden;
     for (const std::filesystem::path file : ztd::split(*buffer, "\n"))
     {
         if (file.is_absolute())
@@ -233,10 +233,10 @@ vfs::dir::load_user_hidden_files() noexcept
             continue;
         }
 
-        hidden.insert(file.filename().string());
+        hidden.insert(file.filename());
     }
 
-    user_hidden_files_ = hidden;
+    user_hidden_files_ = std::move(hidden);
 }
 
 bool
