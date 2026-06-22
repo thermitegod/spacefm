@@ -123,7 +123,7 @@ gui::action::open_files_auto(Gtk::ApplicationWindow& parent, const std::filesyst
         if (!xnever && file->mime_type()->is_executable() &&
             (settings->general.click_executes || xforce))
         {
-            vfs::execute::command_line_async(file->path().string());
+            vfs::execute::command_line_async(file->path());
             continue;
         }
 
@@ -212,7 +212,7 @@ gui::action::open_files_execute(Gtk::ApplicationWindow& parent, const std::files
     {
         if (file->is_executable())
         {
-            vfs::execute::command_line_async(file->path().string());
+            vfs::execute::command_line_async(file->path());
         }
         else
         {

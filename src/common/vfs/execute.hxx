@@ -23,7 +23,11 @@
 
 #include <cstdint>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
+
+#include "logger.hxx"
 
 namespace vfs::execute
 {
@@ -62,7 +66,33 @@ struct sync_data final
     std::string standard_output;
     std::string standard_error;
 };
-[[nodiscard]] sync_data command_line_sync(const std::string_view command) noexcept;
+
+template<typename T>
+[[nodiscard]] sync_data
+command_line_sync(const T& command) noexcept
+    requires std::convertible_to<T, std::string_view> ||
+             std::same_as<std::remove_cvref_t<T>, std::filesystem::path>
+{
+    logger::info<logger::execute>("{}", command);
+
+    std::string cmd;
+    if constexpr (std::same_as<std::decay_t<decltype(command)>, std::filesystem::path>)
+    {
+        cmd = command.string();
+    }
+    else
+    {
+        cmd = std::string(command);
+    }
+
+    sync_data data;
+    Glib::spawn_command_line_sync(cmd.c_str(),
+                                  &data.standard_output,
+                                  &data.standard_error,
+                                  &data.exit_status);
+
+    return data;
+}
 
 template<typename... Args>
 [[nodiscard]] sync_data
@@ -71,7 +101,26 @@ command_line_sync(std::format_string<Args...> fmt, Args&&... args) noexcept
     return command_line_sync(std::format(fmt, std::forward<Args>(args)...));
 }
 
-void command_line_async(const std::string_view command) noexcept;
+template<typename T>
+void
+command_line_async(const T& command) noexcept
+    requires std::convertible_to<T, std::string_view> ||
+             std::same_as<std::remove_cvref_t<T>, std::filesystem::path>
+{
+    logger::info<logger::execute>("{}", command);
+
+    std::string cmd;
+    if constexpr (std::same_as<std::decay_t<decltype(command)>, std::filesystem::path>)
+    {
+        cmd = command.string();
+    }
+    else
+    {
+        cmd = std::string(command);
+    }
+
+    Glib::spawn_command_line_async(cmd.c_str());
+}
 
 template<typename... Args>
 void

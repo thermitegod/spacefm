@@ -186,18 +186,76 @@ TEST_SUITE("vfs::execute" * doctest::description(""))
         }
     }
 
-    TEST_CASE("vfs::execute::command_line_async")
-    {
-        SUBCASE("true")
+    TEST_CASE("vfs::execute::command_line_* - compile only test")
+    { // compile test only
+        SUBCASE("command_line_sync")
         {
-            vfs::execute::command_line_async("true");
-            vfs::execute::command_line_async("{}", "true");
+            SUBCASE("true")
+            {
+                auto _ = vfs::execute::command_line_sync("true");
+                auto _ = vfs::execute::command_line_sync(std::string("true"));
+                auto _ = vfs::execute::command_line_sync(std::filesystem::path("true"));
+                auto _ = vfs::execute::command_line_sync("{}", "true");
+            }
+
+            SUBCASE("/usr/bin/true")
+            {
+                auto _ = vfs::execute::command_line_sync("/usr/bin/true");
+                auto _ = vfs::execute::command_line_sync(std::string("/usr/bin/true"));
+                auto _ = vfs::execute::command_line_sync(std::filesystem::path("/usr/bin/true"));
+                auto _ = vfs::execute::command_line_sync("{}", "/usr/bin/true");
+            }
+
+            SUBCASE("false")
+            {
+                auto _ = vfs::execute::command_line_sync("false");
+                auto _ = vfs::execute::command_line_sync(std::string("false"));
+                auto _ = vfs::execute::command_line_sync(std::filesystem::path("false"));
+                auto _ = vfs::execute::command_line_sync("{}", "false");
+            }
+
+            SUBCASE("/usr/bin/false")
+            {
+                auto _ = vfs::execute::command_line_sync("/usr/bin/false");
+                auto _ = vfs::execute::command_line_sync(std::string("/usr/bin/false"));
+                auto _ = vfs::execute::command_line_sync(std::filesystem::path("/usr/bin/false"));
+                auto _ = vfs::execute::command_line_sync("{}", "/usr/bin/false");
+            }
         }
 
-        SUBCASE("false")
+        SUBCASE("command_line_async")
         {
-            vfs::execute::command_line_async("false");
-            vfs::execute::command_line_async("{}", "false");
+            SUBCASE("true")
+            {
+                vfs::execute::command_line_async("true");
+                vfs::execute::command_line_async(std::string("true"));
+                vfs::execute::command_line_async(std::filesystem::path("true"));
+                vfs::execute::command_line_async("{}", "true");
+            }
+
+            SUBCASE("/usr/bin/true")
+            {
+                vfs::execute::command_line_async("/usr/bin/true");
+                vfs::execute::command_line_async(std::string("/usr/bin/true"));
+                vfs::execute::command_line_async(std::filesystem::path("/usr/bin/true"));
+                vfs::execute::command_line_async("{}", "/usr/bin/true");
+            }
+
+            SUBCASE("false")
+            {
+                vfs::execute::command_line_async("false");
+                vfs::execute::command_line_async(std::string("false"));
+                vfs::execute::command_line_async(std::filesystem::path("false"));
+                vfs::execute::command_line_async("{}", "false");
+            }
+
+            SUBCASE("/usr/bin/false")
+            {
+                vfs::execute::command_line_async("/usr/bin/false");
+                vfs::execute::command_line_async(std::string("/usr/bin/false"));
+                vfs::execute::command_line_async(std::filesystem::path("/usr/bin/false"));
+                vfs::execute::command_line_async("{}", "/usr/bin/false");
+            }
         }
     }
 }
