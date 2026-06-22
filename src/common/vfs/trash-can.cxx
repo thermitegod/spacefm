@@ -115,26 +115,10 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
         return false;
     }
 
-    if (path.string().contains("Trash"))
+    if (trash_dir->is_trash_dir(path))
     {
-        if (path.string().ends_with("/Trash") ||
-            path.string().ends_with(std::format("/.Trash-{}", getuid())))
-        {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Dir: {}", path);
-            return true;
-        }
-        else if (path.string().ends_with("/Trash/files") ||
-                 path.string().ends_with(std::format("/.Trash-{}/files", getuid())))
-        {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Files Dir: {}", path);
-            return true;
-        }
-        else if (path.string().ends_with("/Trash/info") ||
-                 path.string().ends_with(std::format("/.Trash-{}/info", getuid())))
-        {
-            logger::warn<logger::vfs>("Refusing to trash the Trash Info Dir: {}", path);
-            return true;
-        }
+        logger::warn<logger::vfs>("Refusing to trash a Trash Dir: {}", path);
+        return false;
     }
 
     trash_dir->create_trash_dir();
@@ -231,6 +215,12 @@ vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
     std::filesystem::rename(path, files_path_ / target_filename, ec);
 
     logger::error_if<logger::vfs>(ec, "Failed to trash file: {}", ec.message());
+}
+
+bool
+vfs::trash_can::trash_dir::is_trash_dir(const std::filesystem::path& path) const noexcept
+{
+    return path == trash_path_ || path == files_path_ || path == info_path_;
 }
 
 std::error_code

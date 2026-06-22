@@ -77,6 +77,8 @@ class trash_can
         void move(const std::filesystem::path& path,
                   const std::filesystem::path& target_filename) const noexcept;
 
+        [[nodiscard]] bool is_trash_dir(const std::filesystem::path& path) const noexcept;
+
       private:
         std::filesystem::path trash_path_;
         std::filesystem::path files_path_;
