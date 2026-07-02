@@ -64,7 +64,7 @@ class file : public std::enable_shared_from_this<file>
     [[nodiscard]] std::string_view name() const noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] std::string_view uri() const noexcept;
+    [[nodiscard]] std::string uri() const noexcept;
 
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
@@ -146,7 +146,6 @@ class file : public std::enable_shared_from_this<file>
     ztd::statx stat_;
 
     std::filesystem::path path_; // real path on file system
-    std::string uri_;            // uri of the real path on file system
 
     std::string name_;                          // real name on file system
     std::string display_size_;                  // displayed human-readable file size

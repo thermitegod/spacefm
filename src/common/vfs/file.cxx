@@ -79,7 +79,6 @@ vfs::file::file(const std::filesystem::path& path,
 #endif
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), path_);
-    uri_ = Glib::filename_to_uri(path_);
 
     if (path_ == "/")
     {
@@ -185,10 +184,10 @@ vfs::file::path() const noexcept
     return path_;
 }
 
-std::string_view
+std::string
 vfs::file::uri() const noexcept
 {
-    return uri_;
+    return Glib::filename_to_uri(path_);
 }
 
 u64
