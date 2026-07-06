@@ -292,6 +292,6 @@ class task_manager
     sigc::signal<void(std::uint64_t)> signal_task_added_;
     sigc::signal<void(std::uint64_t)> signal_task_finished_;
     sigc::signal<void(vfs::task_error)> signal_task_error_;
-    sigc::signal<void(vfs::task_collision)> signal_task_collision_;
+    sigc::signal<void(std::shared_ptr<vfs::task_collision>)> signal_task_collision_;
 };
 } // namespace vfs

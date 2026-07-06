@@ -828,7 +828,7 @@ vfs::task_manager::handle_collision(const std::stop_token& stoken,
         item->resolve_action = collision_resolve::pending;
     }
 
-    signal_task_collision().emit({
+    signal_task_collision().emit(std::make_shared<vfs::task_collision>(task_collision{
         .task_id = item->id,
         .source = source,
         .destination = destination,
@@ -851,7 +851,7 @@ vfs::task_manager::handle_collision(const std::stop_token& stoken,
             item->new_name = new_name;
             item->collision_cv.notify_all();
         },
-    });
+    }));
 
     // block for gui resolve
     item->wait_for_resolve(stoken);

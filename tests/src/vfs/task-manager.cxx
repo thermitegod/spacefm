@@ -121,8 +121,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         /////////////////////////////////////////////////////
 
@@ -223,8 +223,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         /////////////////////////////////////////////////////
 
@@ -312,8 +312,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         /////////////////////////////////////////////////////
 
@@ -426,8 +426,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         /////////////////////////////////////////////////////
 
@@ -533,8 +533,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         SUBCASE("copy file")
         {
@@ -694,8 +694,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         SUBCASE("move file")
         {
@@ -859,8 +859,8 @@ TEST_SUITE("vfs::task_manager" * doctest::description(""))
         manager->signal_task_error().connect([&](const vfs::task_error& error)
                                              { sync.notify_error(error); });
         manager->signal_task_collision().connect(
-            [](const vfs::task_collision& c)
-            { c.resolved(c.task_id, vfs::collision_resolve::skip, {}); });
+            [](const std::shared_ptr<vfs::task_collision>& c)
+            { c->resolved(c->task_id, vfs::collision_resolve::skip, {}); });
 
         SUBCASE("rename file")
         {

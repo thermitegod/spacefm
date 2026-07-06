@@ -43,14 +43,14 @@ gui::task::task(Gtk::ApplicationWindow& parent,
         });
 
     task_manager_->signal_task_collision().connect(
-        [this](const vfs::task_collision& c)
+        [this](const std::shared_ptr<vfs::task_collision>& c)
         {
             auto alert = Gtk::AlertDialog::create("Collision Dialog Not Implemented");
             alert->set_detail(
                 std::format("File will be skipped\nTask ID: {}\nSource: {}\nDestination: {}",
-                            c.task_id,
-                            c.source,
-                            c.destination));
+                            c->task_id,
+                            c->source,
+                            c->destination));
             alert->set_modal(true);
             alert->set_buttons({"Close"});
             alert->set_cancel_button(0);
@@ -62,7 +62,7 @@ gui::task::task(Gtk::ApplicationWindow& parent,
                     {
                         [[maybe_unused]] const auto response = alert->choose_finish(result);
 
-                        c.resolved(c.task_id, vfs::collision_resolve::skip, {});
+                        c->resolved(c->task_id, vfs::collision_resolve::skip, {});
                     }
                     catch (const Gtk::DialogError& err)
                     {
