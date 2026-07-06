@@ -39,11 +39,11 @@ class main_window : public Gtk::ApplicationWindow
     ~main_window();
 
   private:
-    std::shared_ptr<vfs::task_manager> task_manager_ = vfs::task_manager::create();
-    std::shared_ptr<vfs::volume_manager> volume_manager_ = vfs::volume_manager::create();
     std::shared_ptr<config::settings> settings_ = std::make_shared<config::settings>();
     std::shared_ptr<config::manager> config_manager_ = std::make_shared<config::manager>(settings_);
     std::shared_ptr<vfs::bookmarks> bookmark_manager_ = std::make_shared<vfs::bookmarks>();
+    std::shared_ptr<vfs::task_manager> task_manager_ = vfs::task_manager::create();
+    std::shared_ptr<vfs::volume_manager> volume_manager_ = vfs::volume_manager::create();
 
     Gtk::Box box_;
     gui::menubar menubar_;

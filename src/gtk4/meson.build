@@ -29,6 +29,7 @@ sources = files(
     'gui/dialog/bookmarks.cxx',
     'gui/dialog/create.cxx',
     'gui/dialog/donate.cxx',
+    'gui/dialog/overwrite.cxx',
     'gui/dialog/pattern.cxx',
     'gui/dialog/rename.cxx',
     'gui/dialog/preferences.cxx',

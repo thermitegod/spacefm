@@ -20,6 +20,8 @@
 
 #include "gui/task.hxx"
 
+#include "gui/dialog/overwrite.hxx"
+
 #include "vfs/task-manager.hxx"
 
 #include "logger.hxx"
@@ -43,35 +45,14 @@ gui::task::task(Gtk::ApplicationWindow& parent,
         });
 
     task_manager_->signal_task_collision().connect(
-        [this](const std::shared_ptr<vfs::task_collision>& c)
-        {
-            auto alert = Gtk::AlertDialog::create("Collision Dialog Not Implemented");
-            alert->set_detail(
-                std::format("File will be skipped\nTask ID: {}\nSource: {}\nDestination: {}",
-                            c->task_id,
-                            c->source,
-                            c->destination));
-            alert->set_modal(true);
-            alert->set_buttons({"Close"});
-            alert->set_cancel_button(0);
-            alert->choose(
-                parent_,
-                [c, alert](Glib::RefPtr<Gio::AsyncResult>& result) mutable
-                {
-                    try
-                    {
-                        [[maybe_unused]] const auto response = alert->choose_finish(result);
+         [this](const std::shared_ptr<vfs::task_collision>& c)
+         { //
+            Glib::signal_idle().connect([this, c]()
+            {
+                Gtk::make_managed<gui::dialog::overwrite>(parent_, c);
 
-                        c->resolved(c->task_id, vfs::collision_resolve::skip, {});
-                    }
-                    catch (const Gtk::DialogError& err)
-                    {
-                        logger::warn<logger::gui>("Gtk::AlertDialog error: {}", err.what());
-                    }
-                    catch (const Glib::Error& err)
-                    {
-                        logger::warn<logger::gui>("Unexpected exception: {}", err.what());
-                    }
-                });
-        });
+                return false;
+            },
+            Glib::PRIORITY_DEFAULT);
+         });
 }
