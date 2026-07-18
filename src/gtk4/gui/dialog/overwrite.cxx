@@ -312,6 +312,14 @@ gui::dialog::overwrite::on_filename_update() noexcept
 
     ///////////////////////
 
+    if (filename.empty())
+    {
+        button_rename_.set_sensitive(false);
+        button_overwrite_.set_sensitive(false);
+        button_overwrite_all_.set_sensitive(false);
+        label_name_state_.set_text("<i>filename cannot be empty</i>");
+    }
+
     // tests
     bool full_path_exists = false;
     bool full_path_exists_dir = false;
