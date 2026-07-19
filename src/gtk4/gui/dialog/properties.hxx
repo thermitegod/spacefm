@@ -57,6 +57,7 @@ class properties : public Gtk::ApplicationWindow
 
     void init_file_info_tab() noexcept;
     void init_media_info_tab() noexcept;
+    void init_checksum_tab() noexcept;
     void init_attributes_tab() noexcept;
     void init_permissions_tab() noexcept;
 

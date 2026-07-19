@@ -27,6 +27,9 @@
 
 #include "gui/dialog/media/metadata.hxx"
 #include "gui/dialog/properties.hxx"
+#include "gui/dialog/widgets/checksum.hxx"
+#include "gui/dialog/widgets/paste-button.hxx"
+#include "gui/dialog/widgets/validated-entry.hxx"
 
 #include "vfs/file.hxx"
 
@@ -147,6 +150,7 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent, std::int32_t
 
     init_file_info_tab();
     init_media_info_tab();
+    init_checksum_tab();
     init_attributes_tab();
     init_permissions_tab();
 
@@ -714,6 +718,71 @@ gui::dialog::properties::init_attributes_tab() noexcept
     notebook_.append_page(page, tab_label);
 }
 
+void
+gui::dialog::properties::init_checksum_tab() noexcept
+{
+    auto page = properties_page();
+
+    const auto& selected_file = files_.front();
+
+    auto box = Gtk::make_managed<Gtk::Box>();
+    box->set_orientation(Gtk::Orientation::VERTICAL);
+    box->set_margin(5);
+
+    auto info_label = Gtk::make_managed<Gtk::Label>();
+    info_label->set_text("Paste a checksum into the entry box below to verify");
+    box->append(*info_label);
+
+    auto entry_box = Gtk::make_managed<Gtk::Box>();
+    entry_box->set_orientation(Gtk::Orientation::HORIZONTAL);
+    auto paste_button = Gtk::make_managed<gui::widget::PasteButton>();
+    auto entry = Gtk::make_managed<gui::widget::ValidatedEntry>();
+    paste_button->signal_paste_text().connect([entry](const std::string_view text)
+                                              { entry->set_text(text.data()); });
+    entry_box->append(*entry);
+    entry_box->append(*paste_button);
+
+    box->append(*entry_box);
+
+    auto separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
+    box->append(*separator);
+
+    auto entry_validate = [entry](const std::string_view checksum)
+    {
+        const std::string current_input = entry->get_text();
+
+        if (!current_input.empty())
+        {
+            if (checksum == current_input)
+            {
+                entry->set_success();
+            }
+            else
+            {
+                entry->set_error();
+            }
+        }
+        else
+        {
+            entry->clear_validation();
+        }
+    };
+
+    const std::vector<std::string_view> algo_types = {"MD5", "SHA-1", "SHA-256", "SHA-512"};
+    for (const auto type : algo_types)
+    {
+        auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, selected_file->path());
+        checksum->signal_calculated().connect([entry_validate](const std::string_view checksum)
+                                              { entry_validate(checksum); });
+
+        box->append(*checksum);
+    }
+
+    page.add_row(*box);
+
+    auto tab_label = Gtk::Label("Checksums");
+    notebook_.append_page(page, tab_label);
+}
 void
 gui::dialog::properties::init_permissions_tab() noexcept
 {
