@@ -26,6 +26,7 @@
 
 #include "gui/dialog/create.hxx"
 #include "gui/dialog/widgets/button-box.hxx"
+#include "gui/dialog/widgets/radio-button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -186,16 +187,12 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
         on_move_change_signals_.push_back(s);
     }
 
-    // Options
-    opt_new_file_.set_label("File");
-    opt_new_folder_.set_label("Directory");
-    opt_new_link_.set_label("Link");
-    opt_new_folder_.set_group(opt_new_file_);
-    opt_new_link_.set_group(opt_new_file_);
-
-    opt_new_file_.set_focus_on_click(false);
-    opt_new_folder_.set_focus_on_click(false);
-    opt_new_link_.set_focus_on_click(false);
+    // Options //
+    auto* radio_buttons = gui::widget::RadioButtonBox::create({
+        {"Link", [this] { on_opt_toggled(); }, &opt_new_link_},
+        {"Directory", [this] { on_opt_toggled(); }, &opt_new_folder_},
+        {"File", [this] { on_opt_toggled(); }, &opt_new_file_},
+    });
 
     // Options Context Menu
     auto menu_model = Gio::Menu::create();
@@ -268,11 +265,7 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     hbox_target_.set_margin(3);
     box_.append(hbox_target_);
 
-    radio_button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 4);
-    radio_button_box_.append(opt_new_file_);
-    radio_button_box_.append(opt_new_folder_);
-    radio_button_box_.append(opt_new_link_);
-    box_.append(radio_button_box_);
+    box_.append(*radio_buttons);
     box_.append(*buttons);
 
     // show
@@ -280,20 +273,20 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     on_toggled();
     if (mode_ == create_mode::file)
     {
-        opt_new_file_.set_active(true);
+        opt_new_file_->set_active(true);
     }
     else if (mode_ == create_mode::dir)
     {
-        opt_new_folder_.set_active(true);
+        opt_new_folder_->set_active(true);
     }
     else if (mode_ == create_mode::link)
     {
-        opt_new_link_.set_active(true);
+        opt_new_link_->set_active(true);
     }
 
-    opt_new_file_.signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
-    opt_new_folder_.signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
-    opt_new_link_.signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
+    opt_new_file_->signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
+    opt_new_folder_->signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
+    opt_new_link_->signal_toggled().connect(sigc::mem_fun(*this, &create::on_opt_toggled));
 
     // init
     on_move_change(buf_full_path_);
@@ -357,9 +350,9 @@ gui::dialog::create::on_button_ok_clicked()
     const auto path = full_path.parent_path();
 
     // determine job
-    const bool new_file = opt_new_file_.get_active();
-    const bool new_folder = opt_new_folder_.get_active();
-    const bool new_link = opt_new_link_.get_active();
+    const bool new_file = opt_new_file_->get_active();
+    const bool new_folder = opt_new_folder_->get_active();
+    const bool new_link = opt_new_link_->get_active();
 
     if (!std::filesystem::exists(path))
     {
@@ -525,8 +518,8 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
     }
 
     // change is_dir to reflect state of new directory or link option
-    const bool new_folder = opt_new_folder_.get_active();
-    const bool new_link = opt_new_link_.get_active();
+    const bool new_folder = opt_new_folder_->get_active();
+    const bool new_link = opt_new_link_->get_active();
 
     const std::string text = entry_target_.get_text();
 
@@ -624,7 +617,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
     if (full_path == full_path_)
     {
         full_path_same = true;
-        if (opt_new_link_.get_active())
+        if (opt_new_link_->get_active())
         {
             if (std::filesystem::exists(full_path))
             {
@@ -741,7 +734,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         }
     }
 
-    if (opt_new_link_.get_active())
+    if (opt_new_link_->get_active())
     {
         path = entry_target_.get_text();
 
@@ -777,9 +770,9 @@ gui::dialog::create::select_input() noexcept
 void
 gui::dialog::create::on_opt_toggled()
 {
-    const bool new_file = opt_new_file_.get_active();
-    const bool new_folder = opt_new_folder_.get_active();
-    const bool new_link = opt_new_link_.get_active();
+    const bool new_file = opt_new_file_->get_active();
+    const bool new_folder = opt_new_folder_->get_active();
+    const bool new_link = opt_new_link_->get_active();
 
     std::string desc;
     if (new_file)
@@ -852,9 +845,9 @@ gui::dialog::create::on_toggled()
         scroll_full_path_.set_visible(false);
     }
 
-    [[maybe_unused]] const bool new_file = opt_new_file_.get_active();
-    [[maybe_unused]] const bool new_folder = opt_new_folder_.get_active();
-    [[maybe_unused]] const bool new_link = opt_new_link_.get_active();
+    [[maybe_unused]] const bool new_file = opt_new_file_->get_active();
+    [[maybe_unused]] const bool new_folder = opt_new_folder_->get_active();
+    [[maybe_unused]] const bool new_link = opt_new_link_->get_active();
 
     if (new_link || (is_link_ && settings_->dialog.create.target))
     {

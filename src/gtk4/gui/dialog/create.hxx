@@ -87,10 +87,9 @@ class create : public Gtk::ApplicationWindow
     Gtk::TextView input_full_path_;
     Glib::RefPtr<Gtk::TextBuffer> buf_full_path_;
 
-    Gtk::Box radio_button_box_;
-    Gtk::CheckButton opt_new_file_;
-    Gtk::CheckButton opt_new_folder_;
-    Gtk::CheckButton opt_new_link_;
+    Gtk::CheckButton* opt_new_file_;
+    Gtk::CheckButton* opt_new_folder_;
+    Gtk::CheckButton* opt_new_link_;
 
     Gtk::Button* button_options_;
     Gtk::Button* button_revert_;

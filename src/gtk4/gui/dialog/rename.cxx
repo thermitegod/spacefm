@@ -23,6 +23,7 @@
 
 #include "gui/dialog/rename.hxx"
 #include "gui/dialog/widgets/button-box.hxx"
+#include "gui/dialog/widgets/radio-button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -127,22 +128,14 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
             sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), true));
     }
 
-    // Options
-    opt_move_.set_label("Move");
-    opt_copy_.set_label("Copy");
-    opt_link_.set_label("Link");
-    opt_copy_target_.set_label("Copy Target");
-    opt_link_target_.set_label("Link Target");
-    opt_copy_.set_group(opt_move_);
-    opt_link_.set_group(opt_move_);
-    opt_copy_target_.set_group(opt_move_);
-    opt_link_target_.set_group(opt_move_);
-
-    opt_move_.set_focus_on_click(false);
-    opt_copy_.set_focus_on_click(false);
-    opt_link_.set_focus_on_click(false);
-    opt_copy_target_.set_focus_on_click(false);
-    opt_link_target_.set_focus_on_click(false);
+    // Options //
+    auto* radio_buttons = gui::widget::RadioButtonBox::create({
+        {"Link Target", [this] { on_opt_toggled(); }, &opt_link_target_},
+        {"Copy Target", [this] { on_opt_toggled(); }, &opt_copy_target_},
+        {"Link", [this] { on_opt_toggled(); }, &opt_link_},
+        {"Copy", [this] { on_opt_toggled(); }, &opt_copy_},
+        {"Move", [this] { on_opt_toggled(); }, &opt_move_},
+    });
 
     // Options Context Menu
     auto submenu_model = Gio::Menu::create();
@@ -280,26 +273,14 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     hbox_target_.set_margin(3);
     box_.append(hbox_target_);
 
-    radio_button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 4);
-    radio_button_box_.append(opt_move_);
-    radio_button_box_.append(opt_copy_);
-    radio_button_box_.append(opt_link_);
-    radio_button_box_.append(opt_copy_target_);
-    radio_button_box_.append(opt_link_target_);
-    box_.append(radio_button_box_);
+    box_.append(*radio_buttons);
     box_.append(*buttons);
 
     // show
     update();
     set_visible(true);
     on_toggled();
-    opt_move_.set_active(true);
-
-    opt_move_.signal_toggled().connect([this]() { on_opt_toggled(); });
-    opt_copy_.signal_toggled().connect([this]() { on_opt_toggled(); });
-    opt_link_.signal_toggled().connect([this]() { on_opt_toggled(); });
-    opt_copy_target_.signal_toggled().connect([this]() { on_opt_toggled(); });
-    opt_link_target_.signal_toggled().connect([this]() { on_opt_toggled(); });
+    opt_move_->set_active(true);
 
     // init
     on_move_change(true);
@@ -414,8 +395,8 @@ gui::dialog::rename::update() noexcept
     path_entry_->set_text(std::format("{}", new_path_), false);
 
     // Options
-    opt_copy_target_.set_sensitive(is_link_ && !target_missing);
-    opt_link_target_.set_sensitive(is_link_);
+    opt_copy_target_->set_sensitive(is_link_ && !target_missing);
+    opt_link_target_->set_sensitive(is_link_);
 
     // Context Menu
     action_type_->set_enabled(!is_link_);
@@ -482,11 +463,11 @@ gui::dialog::rename::on_button_ok_clicked() noexcept
     }
 
     // determine job
-    // const bool move = opt_move_.get_active();
-    const bool copy = opt_copy_.get_active();
-    const bool link = opt_link_.get_active();
-    const bool copy_target = opt_copy_target_.get_active();
-    const bool link_target = opt_link_target_.get_active();
+    // const bool move = opt_move_->get_active();
+    const bool copy = opt_copy_->get_active();
+    const bool link = opt_link_->get_active();
+    const bool copy_target = opt_copy_target_->get_active();
+    const bool link_target = opt_link_target_->get_active();
 
     if (!std::filesystem::exists(path))
     {
@@ -798,7 +779,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
             path_missing = true;
         }
 
-        if (opt_move_.get_active())
+        if (opt_move_->get_active())
         {
             is_move = path != old_path_;
         }
@@ -830,7 +811,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
 
         if (full_path_same)
         {
-            button_ok_->set_sensitive(opt_move_.get_active());
+            button_ok_->set_sensitive(opt_move_->get_active());
 
             filename_entry_->set_status_text("<i>original</i>");
             parent_entry_->set_status_text("<i>original</i>");
@@ -892,7 +873,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
     if (is_move != is_move_)
     {
         is_move_ = is_move;
-        if (opt_move_.get_active())
+        if (opt_move_->get_active())
         {
             button_ok_->set_label(is_move != 0 ? "_Move" : "_Rename");
         }
@@ -919,11 +900,11 @@ gui::dialog::rename::select_input() noexcept
 void
 gui::dialog::rename::on_opt_toggled() noexcept
 {
-    const bool move = opt_move_.get_active();
-    const bool copy = opt_copy_.get_active();
-    const bool link = opt_link_.get_active();
-    const bool copy_target = opt_copy_target_.get_active();
-    const bool link_target = opt_link_target_.get_active();
+    const bool move = opt_move_->get_active();
+    const bool copy = opt_copy_->get_active();
+    const bool link = opt_link_->get_active();
+    const bool copy_target = opt_copy_target_->get_active();
+    const bool link_target = opt_link_target_->get_active();
 
     std::string action;
     std::string btn_label;
@@ -990,64 +971,64 @@ gui::dialog::rename::on_toggled() noexcept
     // opts
     if (settings_->dialog.rename.copy)
     {
-        opt_copy_.set_visible(true);
+        opt_copy_->set_visible(true);
     }
     else
     {
-        if (opt_copy_.get_active())
+        if (opt_copy_->get_active())
         {
-            opt_move_.set_active(true);
+            opt_move_->set_active(true);
         }
-        opt_copy_.set_visible(false);
+        opt_copy_->set_visible(false);
     }
 
     if (settings_->dialog.rename.link)
     {
-        opt_link_.set_visible(true);
+        opt_link_->set_visible(true);
     }
     else
     {
-        if (opt_link_.get_active())
+        if (opt_link_->get_active())
         {
-            opt_move_.set_active(true);
+            opt_move_->set_active(true);
         }
-        opt_link_.set_visible(false);
+        opt_link_->set_visible(false);
     }
 
     if (settings_->dialog.rename.copyt && is_link_)
     {
-        opt_copy_target_.set_visible(true);
+        opt_copy_target_->set_visible(true);
     }
     else
     {
-        if (opt_copy_target_.get_active())
+        if (opt_copy_target_->get_active())
         {
-            opt_move_.set_active(true);
+            opt_move_->set_active(true);
         }
-        opt_copy_target_.set_visible(false);
+        opt_copy_target_->set_visible(false);
     }
 
     if (settings_->dialog.rename.linkt && is_link_)
     {
-        opt_link_target_.set_visible(true);
+        opt_link_target_->set_visible(true);
     }
     else
     {
-        if (opt_link_target_.get_active())
+        if (opt_link_target_->get_active())
         {
-            opt_move_.set_active(true);
+            opt_move_->set_active(true);
         }
-        opt_link_target_.set_visible(false);
+        opt_link_target_->set_visible(false);
     }
 
-    if (!opt_copy_.get_visible() && !opt_link_.get_visible() && !opt_copy_target_.get_visible() &&
-        !opt_link_target_.get_visible())
+    if (!opt_copy_->get_visible() && !opt_link_->get_visible() &&
+        !opt_copy_target_->get_visible() && !opt_link_target_->get_visible())
     {
-        opt_move_.set_visible(false);
+        opt_move_->set_visible(false);
     }
     else
     {
-        opt_move_.set_visible(true);
+        opt_move_->set_visible(true);
     }
 
     // entries

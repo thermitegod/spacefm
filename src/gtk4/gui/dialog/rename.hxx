@@ -88,12 +88,11 @@ class rename : public Gtk::ApplicationWindow
     gui::widget::TextEntry* path_entry_;
     // gui::widget::TextEntry* target_entry_;
 
-    Gtk::Box radio_button_box_;
-    Gtk::CheckButton opt_move_;
-    Gtk::CheckButton opt_copy_;
-    Gtk::CheckButton opt_link_;
-    Gtk::CheckButton opt_copy_target_;
-    Gtk::CheckButton opt_link_target_;
+    Gtk::CheckButton* opt_move_;
+    Gtk::CheckButton* opt_copy_;
+    Gtk::CheckButton* opt_link_;
+    Gtk::CheckButton* opt_copy_target_;
+    Gtk::CheckButton* opt_link_target_;
 
     Gtk::Button* button_options_;
     Gtk::Button* button_revert_;
