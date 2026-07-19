@@ -16,7 +16,10 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <span>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <gtkmm.h>
@@ -33,4 +36,6 @@ void paste_files(
     std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept;
 
 void set_text(const std::string_view text) noexcept;
+
+[[nodiscard]] std::optional<std::string> get_text() noexcept;
 } // namespace gui::clipboard

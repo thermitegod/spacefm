@@ -14,10 +14,13 @@
  */
 
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
+#include <gdkmm.h>
 #include <giomm.h>
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -180,4 +183,36 @@ gui::clipboard::set_text(const std::string_view text) noexcept
     auto clipboard = display->get_clipboard();
 
     clipboard->set_text(text.data());
+}
+
+std::optional<std::string>
+gui::clipboard::get_text() noexcept
+{
+    // TODO should copy paste_files() api and use a callback
+
+    auto display = Gdk::Display::get_default();
+    auto clipboard = display->get_clipboard();
+
+    std::optional<std::string> text = std::nullopt;
+
+    auto loop = Glib::MainLoop::create();
+
+    clipboard->read_text_async(
+        [clipboard, loop, &text](const Glib::RefPtr<Gio::AsyncResult>& result)
+        {
+            try
+            {
+                text = clipboard->read_text_finish(result);
+            }
+            catch (const Glib::Error& ex)
+            {
+                text = std::nullopt;
+            }
+
+            loop->quit();
+        });
+
+    loop->run();
+
+    return text;
 }
