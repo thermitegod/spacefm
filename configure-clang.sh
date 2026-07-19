@@ -20,7 +20,7 @@ meson setup \
     -Dtests=true \
     -Ddev=true \
     -Dtools=true \
-    -Dgtk3=true \
+    -Dgtk3=false \
     -Dgtk4=true \
     -Dwith-system-glaze=true \
     -Dwith-system-ztd=true \
