@@ -53,8 +53,10 @@ test_suite = build_target(
         doctest_dep,
 
         base_dependencies,
-        gtk4_dependencies,
-        vfs_gtk4_dep,
+        gtk_dependencies,
+        vfs_dep,
+
+        natsort_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )

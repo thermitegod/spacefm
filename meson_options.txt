@@ -20,20 +20,6 @@ option(
 )
 
 option(
-    'gtk3',
-    type : 'boolean',
-    value: true,
-    description : 'Build the Gtk3 version'
-)
-
-option(
-    'gtk4',
-    type : 'boolean',
-    value: false,
-    description : 'Build the experimental Gtk4 version'
-)
-
-option(
     'socket',
     type : 'boolean',
     value: true,

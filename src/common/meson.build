@@ -18,74 +18,7 @@ logger_dep = declare_dependency(
 
 # vfs static library
 
-if get_option('gtk3')
-vfs_gtk3_sources = files(
-    'vfs/app-desktop.cxx',
-    'vfs/bookmarks.cxx',
-    'vfs/clipboard.cxx',
-    'vfs/device.cxx',
-    'vfs/dir.cxx',
-    'vfs/error.cxx',
-    'vfs/file.cxx',
-    'vfs/file-task.cxx',
-    'vfs/mime-type.cxx',
-    'vfs/mime-monitor.cxx',
-    'vfs/terminals.cxx',
-    'vfs/thumbnailer.cxx',
-    'vfs/trash-can.cxx',
-    'vfs/user-dirs.cxx',
-    'vfs/volume.cxx',
-
-    'vfs/utils/editor.cxx',
-    'vfs/utils/icon.cxx',
-    'vfs/utils/permissions.cxx',
-    'vfs/utils/utils.cxx',
-
-    'vfs/thumbnails/thumbnails-legacy.cxx',
-
-    'vfs/libudevpp/udev.cxx',
-    'vfs/libudevpp/udev_device.cxx',
-    'vfs/libudevpp/udev_enumerate.cxx',
-    'vfs/libudevpp/udev_monitor.cxx',
-
-    'vfs/linux/procfs.cxx',
-    'vfs/linux/self.cxx',
-    'vfs/linux/sysfs.cxx',
-
-    'vfs/mime-type/mime-action.cxx',
-    'vfs/mime-type/mime-type.cxx',
-    'vfs/mime-type/chrome/mime-utils.cxx',
-
-    'vfs/notify-cpp/controller.cxx',
-    'vfs/notify-cpp/notify.cxx',
-)
-
-vfs_gtk3_dependencies = [
-    gtk3_dependencies,
-
-    logger_dep,
-    libudev_dep,
-    pugixml_dep,
-    botan_dep,
-]
-
-vfs_gtk3_lib = static_library(
-    'vfs_gtk3',
-    vfs_gtk3_sources,
-    include_directories : include_directories(['.', '../gtk3']),
-    dependencies : vfs_gtk3_dependencies,
-    install: false,
-    cpp_pch: '../../pch/pch.hxx',
-)
-
-vfs_gtk3_dep = declare_dependency(
-    link_with : vfs_gtk3_lib,
-    include_directories : include_directories('.'),
-    dependencies : vfs_gtk3_dependencies,
-)
-endif
-
-vfs_gtk4_sources = files(
+vfs_sources = files(
     'vfs/app-desktop.cxx',
     'vfs/bookmarks.cxx',
     'vfs/device.cxx',
@@ -125,8 +58,8 @@ vfs_gtk4_sources = files(
     'vfs/notify-cpp/notify.cxx',
 )
 
-vfs_gtk4_dependencies = [
-    gtk4_dependencies,
+vfs_dependencies = [
+    gtk_dependencies,
 
     logger_dep,
     libudev_dep,
@@ -134,19 +67,19 @@ vfs_gtk4_dependencies = [
     botan_dep,
 ]
 
-vfs_gtk4_lib = static_library(
-    'vfs_gtk4',
-    vfs_gtk4_sources,
+vfs_lib = static_library(
+    'vfs',
+    vfs_sources,
     include_directories : include_directories('.'),
-    dependencies : vfs_gtk4_dependencies,
+    dependencies : vfs_dependencies,
     install: false,
     cpp_pch: '../../pch/pch.hxx',
 )
 
-vfs_gtk4_dep = declare_dependency(
-    link_with : vfs_gtk4_lib,
+vfs_dep = declare_dependency(
+    link_with : vfs_lib,
     include_directories : include_directories('.'),
-    dependencies : vfs_gtk4_dependencies,
+    dependencies : vfs_dependencies,
 )
 
 # natsort static library

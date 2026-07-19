@@ -13,7 +13,7 @@ spacefm = build_target(
     install_dir: bindir,
     dependencies: [
         cli11_dep,
-        vfs_gtk4_dep,
+        vfs_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )
@@ -33,7 +33,7 @@ spacefm = build_target(
     install_dir: bindir,
     dependencies: [
         cli11_dep,
-        vfs_gtk4_dep,
+        vfs_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )
@@ -76,7 +76,7 @@ spacefm = build_target(
     install: false,
     install_dir: bindir,
     dependencies: [
-        gtk4_dependencies,
+        gtk_dependencies,
     ],
     cpp_pch: '../pch/pch.hxx',
 )

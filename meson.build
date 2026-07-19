@@ -230,37 +230,18 @@ base_dependencies = [
     botan_dep,
 ]
 
+# Gtk
+gtkmm_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
+glibmm_dep = dependency('glibmm-2.68', required: true)
+giomm_dep = dependency('giomm-2.68', required: true)
 sigc_dep = dependency('sigc++-3.0', required: true)
-
-# Gtk3
-if get_option('gtk3')
-gtkmm3_dep = dependency('gtkmm-3.0', required: true, version:  '>=3.24.0')
-glibmm3_dep = dependency('glibmm-2.4', required: true)
-giomm3_dep = dependency('giomm-2.4', required: true)
-exo_dep = dependency('exo-2', required: true)
-
-gtk3_dependencies = [
-    gtkmm3_dep,
-    glibmm3_dep,
-    giomm3_dep,
-    sigc_dep,
-    exo_dep,
-]
-endif
-
-# Gtk4
-gtkmm4_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
-glibmm4_dep = dependency('glibmm-2.68', required: true)
-giomm4_dep = dependency('giomm-2.68', required: true)
-
 glycin_dep = dependency('glycin-gtk4-2', required: true)
 
-gtk4_dependencies = [
-    gtkmm4_dep,
-    glibmm4_dep,
-    giomm4_dep,
+gtk_dependencies = [
+    gtkmm_dep,
+    glibmm_dep,
+    giomm_dep,
     sigc_dep,
-
     glycin_dep,
 ]
 
@@ -273,10 +254,6 @@ preprocessor = [
     '-DPACKAGE_GITHUB="https://www.github.com/thermitegod/spacefm"',
     '-DPACKAGE_BUGREPORT="https://www.github.com/thermitegod/spacefm/issues"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
-
-    # used to run dialogs if they are not installed in the system path
-    '-DPACKAGE_BUILD_ROOT="@0@"'.format(build_root),
-    '-DDIALOG_BUILD_ROOT="@0@/src/gtk3-dialog"'.format(build_root),
 
     # data paths
     '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm'),
@@ -323,17 +300,6 @@ else
     base_dependencies += ztd_dep
 endif
 
-if get_option('gtk3') and get_option('socket')
-    cppzmq_dep = dependency('cppzmq', required: true)
-
-    base_dependencies += [
-        cppzmq_dep,
-    ]
-
-    features += '-DHAVE_SOCKET'
-    features += '-DSOCKET_PORT="@0@"'.format(get_option('zmp_port'))
-endif
-
 media_dependencies = []
 if get_option('media')
     # ffmpeg
@@ -369,7 +335,8 @@ endforeach
 
 # Build
 
-subdir('src')
+subdir('src/common')
+subdir('src/gtk4')
 
 if get_option('tests')
     subdir('tests')
@@ -382,6 +349,4 @@ endif
 ## Install
 install_subdir('data/applications', install_dir: datadir)
 install_subdir('data/icons', install_dir: datadir)
-if get_option('gtk4')
-    install_subdir('data/images', install_dir: datadir / 'spacefm')
-endif
+install_subdir('data/images', install_dir: datadir / 'spacefm')

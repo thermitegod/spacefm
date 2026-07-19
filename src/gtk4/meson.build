@@ -62,10 +62,10 @@ spacefm = build_target(
     install_dir: bindir,
     dependencies: [
         base_dependencies,
-        gtk4_dependencies,
+        gtk_dependencies,
         media_dependencies,
         natsort_dep,
-        vfs_gtk4_dep,
+        vfs_dep,
     ],
     cpp_pch: '../../pch/pch.hxx',
 )
