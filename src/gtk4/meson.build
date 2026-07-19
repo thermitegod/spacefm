@@ -40,6 +40,7 @@ sources = files(
     'gui/dialog/media/image-metadata.cxx',
 
     'gui/dialog/widgets/copy-button.cxx',
+    'gui/dialog/widgets/paste-button.cxx',
 
     'gui/lib/history.cxx',
     'gui/lib/clipboard.cxx',
