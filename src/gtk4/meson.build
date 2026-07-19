@@ -39,6 +39,7 @@ sources = files(
     'gui/dialog/media/audio-video-metadata.cxx',
     'gui/dialog/media/image-metadata.cxx',
 
+    'gui/dialog/widgets/button-box.cxx',
     'gui/dialog/widgets/checksum.cxx',
     'gui/dialog/widgets/copy-button.cxx',
     'gui/dialog/widgets/paste-button.cxx',
