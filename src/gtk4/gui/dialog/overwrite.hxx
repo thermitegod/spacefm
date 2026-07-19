@@ -17,11 +17,12 @@
 
 #include <filesystem>
 #include <memory>
-#include <vector>
 
 #include <glibmm.h>
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
+
+#include "gui/dialog/widgets/text-entry.hxx"
 
 #include "vfs/task-manager.hxx"
 
@@ -44,12 +45,7 @@ class overwrite : public Gtk::ApplicationWindow
 
     Gtk::Label label_file_info_;
 
-    Gtk::Box name_box_;
-    Gtk::Label label_name_;
-    Gtk::Label label_name_state_;
-    Gtk::ScrolledWindow scroll_name_;
-    Gtk::TextView input_name_;
-    Glib::RefPtr<Gtk::TextBuffer> buf_name_;
+    gui::widget::TextEntry* name_entry_;
 
     Gtk::Box button_box1_;
     Gtk::Button button_rename_;
@@ -67,8 +63,6 @@ class overwrite : public Gtk::ApplicationWindow
     bool is_copy_ = false;
     std::filesystem::path source_;
     std::filesystem::path destination_;
-
-    std::vector<sigc::connection> on_filename_update_signals_;
 
     // Signal Handlers
 

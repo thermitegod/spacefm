@@ -92,35 +92,18 @@ gui::dialog::overwrite::overwrite(Gtk::ApplicationWindow& parent,
     label_file_info_.set_halign(Gtk::Align::START);
     label_file_info_.set_valign(Gtk::Align::START);
 
-    // Filename Text Box
-    name_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    label_name_.set_markup(is_dir_ ? "<b>Directory:</b>" : "<b>Filename:</b>");
-    label_name_.set_halign(Gtk::Align::START);
-    label_name_.set_valign(Gtk::Align::START);
-    label_name_.set_margin(4);
-    label_name_.set_mnemonic_widget(input_name_);
-    label_name_.set_selectable(false);
-    label_name_state_.set_margin_start(10);
-    label_name_state_.set_selectable(false);
-    name_box_.append(label_name_);
-    name_box_.append(label_name_state_);
-    buf_name_ = Gtk::TextBuffer::create();
-    buf_name_->set_text(source_.filename().string());
-    input_name_.set_buffer(buf_name_);
-    input_name_.set_wrap_mode(Gtk::WrapMode::CHAR);
-    input_name_.set_monospace(true);
-    scroll_name_.set_child(input_name_);
-    scroll_name_.set_expand(true);
+    name_entry_ = Gtk::make_managed<gui::widget::TextEntry>(is_dir_ ? "<b>Directory:</b>"
+                                                                    : "<b>Filename:</b>");
+    name_entry_->set_text(source_.filename().string());
 
     { // Filename Signals
         auto key_controller = Gtk::EventControllerKey::create();
         key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &overwrite::on_key_press),
                                                      false);
 
-        input_name_.add_controller(key_controller);
+        name_entry_->get_text_view().add_controller(key_controller);
 
-        auto s = buf_name_->signal_changed().connect([this]() { on_filename_update(); });
-        on_filename_update_signals_.push_back(s);
+        name_entry_->signal_changed().connect([this]() { on_filename_update(); });
     }
 
     // Buttons
@@ -179,14 +162,14 @@ gui::dialog::overwrite::overwrite(Gtk::ApplicationWindow& parent,
     box_.append(label_from_);
     box_.append(label_to_);
     box_.append(label_file_info_);
-    box_.append(name_box_);
-    box_.append(scroll_name_);
+    box_.append(*name_entry_);
     box_.append(button_box1_);
     box_.append(button_box2_);
 
     set_visible(true);
     on_filename_update();
-    input_name_.grab_focus();
+
+    name_entry_->grab_focus();
 }
 
 bool
@@ -213,7 +196,7 @@ gui::dialog::overwrite::on_key_press(std::uint32_t keyval, std::uint32_t keycode
 void
 gui::dialog::overwrite::on_button_rename_clicked() noexcept
 {
-    const std::string filename = buf_name_->get_text(false);
+    const std::string filename = name_entry_->get_text();
     const std::filesystem::path new_path = destination_.parent_path() / filename;
 
     collision_->resolved(collision_->task_id, vfs::collision_resolve::rename, new_path);
@@ -286,18 +269,13 @@ gui::dialog::overwrite::on_button_cancel_clicked() noexcept
 void
 gui::dialog::overwrite::on_filename_update() noexcept
 {
-    for (auto& s : on_filename_update_signals_)
-    {
-        s.block();
-    }
-
     // Reset button sensitive
     button_rename_.set_sensitive(true);
     button_overwrite_.set_sensitive(true);
     button_overwrite_all_.set_sensitive(true);
-    label_name_state_.set_text("");
+    name_entry_->set_status_text("");
 
-    const std::string filename = buf_name_->get_text(false);
+    const std::string filename = name_entry_->get_text();
     const std::filesystem::path new_path = destination_.parent_path() / filename;
 
     if (std::filesystem::exists(new_path))
@@ -317,7 +295,7 @@ gui::dialog::overwrite::on_filename_update() noexcept
         button_rename_.set_sensitive(false);
         button_overwrite_.set_sensitive(false);
         button_overwrite_all_.set_sensitive(false);
-        label_name_state_.set_text("<i>filename cannot be empty</i>");
+        name_entry_->set_status_text("<i>filename cannot be empty</i>");
     }
 
     // tests
@@ -348,20 +326,15 @@ gui::dialog::overwrite::on_filename_update() noexcept
 
         if (full_path_exists_dir)
         {
-            label_name_state_.set_markup("<i>exists as directory</i>");
+            name_entry_->set_status_text("<i>exists as directory</i>");
         }
         else if (is_dir_)
         {
-            label_name_state_.set_markup("<i>exists as file</i>");
+            name_entry_->set_status_text("<i>exists as file</i>");
         }
         else
         {
-            label_name_state_.set_markup("<i>* overwrite existing file</i>");
+            name_entry_->set_status_text("<i>* overwrite existing file</i>");
         }
-    }
-
-    for (auto& s : on_filename_update_signals_)
-    {
-        s.unblock();
     }
 }
