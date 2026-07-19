@@ -97,87 +97,50 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     entry_target_.set_editable(false);
 
     { // Target Signals
-        auto s = entry_target_.signal_changed().connect(
-            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), buf_full_path_));
-        on_move_change_signals_.push_back(s);
+        entry_target_.signal_changed().connect(
+            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), false));
     }
 
     // Filename
-    label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
-    label_full_name_.set_halign(Gtk::Align::START);
-    label_full_name_.set_valign(Gtk::Align::START);
-    label_full_name_.set_margin(4);
-    label_full_name_.set_mnemonic_widget(input_full_name_);
-    label_full_name_.set_selectable(true);
-    buf_full_name_ = Gtk::TextBuffer::create();
-    input_full_name_.set_buffer(buf_full_name_);
-    input_full_name_.set_wrap_mode(Gtk::WrapMode::CHAR);
-    input_full_name_.set_monospace(true);
-    scroll_full_name_.set_child(input_full_name_);
-    scroll_full_name_.set_expand(true);
+    filename_entry_ = Gtk::make_managed<gui::widget::TextEntry>("<b>Filename:</b>");
 
     { // Filename Signals
         auto key_controller = Gtk::EventControllerKey::create();
         key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &rename::on_key_press),
                                                      false);
 
-        input_full_name_.add_controller(key_controller);
+        filename_entry_->get_text_view().add_controller(key_controller);
 
-        auto s = buf_full_name_->signal_changed().connect(
-            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), buf_full_name_));
-        on_move_change_signals_.push_back(s);
+        filename_entry_->signal_changed().connect(
+            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), false));
     }
 
     // Parent
-    label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
-    label_path_.set_halign(Gtk::Align::START);
-    label_path_.set_valign(Gtk::Align::START);
-    label_path_.set_margin(4);
-    label_path_.set_mnemonic_widget(input_path_);
-    label_path_.set_selectable(true);
-    buf_path_ = Gtk::TextBuffer::create();
-    input_path_.set_buffer(buf_path_);
-    input_path_.set_wrap_mode(Gtk::WrapMode::CHAR);
-    input_path_.set_monospace(true);
-    scroll_path_.set_child(input_path_);
-    scroll_path_.set_expand(true);
+    parent_entry_ = Gtk::make_managed<gui::widget::TextEntry>("<b>Parent:</b>");
 
     { // Parent Signals
         auto key_controller = Gtk::EventControllerKey::create();
         key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &rename::on_key_press),
                                                      false);
 
-        input_path_.add_controller(key_controller);
+        parent_entry_->get_text_view().add_controller(key_controller);
 
-        auto s = buf_path_->signal_changed().connect(
-            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), buf_path_));
-        on_move_change_signals_.push_back(s);
+        parent_entry_->signal_changed().connect(
+            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), false));
     }
 
     // Path
-    label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>");
-    label_full_path_.set_halign(Gtk::Align::START);
-    label_full_path_.set_valign(Gtk::Align::START);
-    label_full_path_.set_margin(4);
-    label_full_path_.set_mnemonic_widget(input_full_path_);
-    label_full_path_.set_selectable(true);
-    buf_full_path_ = Gtk::TextBuffer::create();
-    input_full_path_.set_buffer(buf_full_path_);
-    input_full_path_.set_wrap_mode(Gtk::WrapMode::CHAR);
-    input_full_path_.set_monospace(true);
-    scroll_full_path_.set_child(input_full_path_);
-    scroll_full_path_.set_expand(true);
+    path_entry_ = Gtk::make_managed<gui::widget::TextEntry>("<b>Path:</b>");
 
     { // Path Signals
         auto key_controller = Gtk::EventControllerKey::create();
         key_controller->signal_key_pressed().connect(sigc::mem_fun(*this, &rename::on_key_press),
                                                      false);
 
-        input_full_path_.add_controller(key_controller);
+        path_entry_->get_text_view().add_controller(key_controller);
 
-        auto s = buf_full_path_->signal_changed().connect(
-            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), buf_full_path_));
-        on_move_change_signals_.push_back(s);
+        path_entry_->signal_changed().connect(
+            sigc::bind(sigc::mem_fun(*this, &rename::on_move_change), true));
     }
 
     // Options
@@ -317,14 +280,9 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     // Pack
     box_.set_margin(5);
 
-    box_.append(label_full_name_);
-    box_.append(scroll_full_name_);
-
-    box_.append(label_path_);
-    box_.append(scroll_path_);
-
-    box_.append(label_full_path_);
-    box_.append(scroll_full_path_);
+    box_.append(*filename_entry_);
+    box_.append(*parent_entry_);
+    box_.append(*path_entry_);
 
     hbox_type_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
     hbox_type_.append(label_type_);
@@ -360,12 +318,12 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     opt_link_target_.signal_toggled().connect([this]() { on_opt_toggled(); });
 
     // init
-    on_move_change(buf_full_path_);
+    on_move_change(true);
     on_opt_toggled();
 
     // select filename text widget
     select_input();
-    input_full_name_.grab_focus();
+    filename_entry_->grab_focus();
 }
 
 gui::dialog::rename::~rename()
@@ -469,7 +427,7 @@ gui::dialog::rename::update() noexcept
     entry_target_.set_text(mime_type_.data());
 
     // Path
-    buf_full_path_->set_text(std::format("{}", new_path_));
+    path_entry_->set_text(std::format("{}", new_path_), false);
 
     // Options
     opt_copy_target_.set_sensitive(is_link_ && !target_missing);
@@ -483,7 +441,7 @@ gui::dialog::rename::update() noexcept
 
     // select filename text widget
     select_input();
-    input_full_name_.grab_focus();
+    filename_entry_->grab_focus();
 }
 
 bool
@@ -510,7 +468,7 @@ gui::dialog::rename::on_key_press(std::uint32_t keyval, std::uint32_t keycode,
 void
 gui::dialog::rename::on_button_ok_clicked() noexcept
 {
-    const std::string text = buf_full_path_->get_text(false);
+    const std::string text = path_entry_->get_text();
     if (text.contains('\n') || text.contains("\\n"))
     {
         auto alert = Gtk::AlertDialog::create("Error");
@@ -738,8 +696,8 @@ gui::dialog::rename::on_button_skip_clicked() noexcept
 void
 gui::dialog::rename::on_button_revert_clicked() noexcept
 {
-    buf_full_path_->set_text(new_path_.c_str());
-    input_full_name_.grab_focus();
+    path_entry_->set_text(std::format("{}", new_path_));
+    filename_entry_->grab_focus();
 }
 
 void
@@ -749,21 +707,16 @@ gui::dialog::rename::on_button_options_clicked() noexcept
 }
 
 void
-gui::dialog::rename::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexcept
+gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
 {
-    for (auto& s : on_move_change_signals_)
-    {
-        s.block();
-    }
-
     std::filesystem::path full_path;
     std::filesystem::path path;
-    if (widget == buf_full_name_ || widget == buf_path_)
+    if (!update_full_path)
     {
-        const std::string full_name = buf_full_name_->get_text(false);
+        const std::string full_name = filename_entry_->get_text();
 
         // update full_path
-        path = buf_path_->get_text(false);
+        path = parent_entry_->get_text();
         if (path == ".")
         {
             path = full_path_.parent_path();
@@ -781,11 +734,11 @@ gui::dialog::rename::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexc
         {
             full_path = full_path_.parent_path() / path / full_name;
         }
-        buf_full_path_->set_text(full_path.c_str());
+        path_entry_->set_text(std::format("{}", full_path), false);
     }
-    else // if (widget == buf_full_path_)
+    else
     {
-        full_path = buf_full_path_->get_text(false);
+        full_path = path_entry_->get_text();
 
         std::string full_name;
         if (!full_path.empty())
@@ -807,10 +760,10 @@ gui::dialog::rename::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexc
             path = full_path_.parent_path() / path;
         }
 
-        buf_full_name_->set_text(full_name.data());
+        filename_entry_->set_text(full_name, false);
 
         // update path
-        buf_path_->set_text(path.c_str());
+        parent_entry_->set_text(std::format("{}", path), false);
 
         if (!full_path.is_absolute())
         {
@@ -895,59 +848,60 @@ gui::dialog::rename::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexc
         {
             button_ok_.set_sensitive(opt_move_.get_active());
 
-            label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>original</i>");
-            label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>   <i>original</i>");
-            label_path_.set_markup_with_mnemonic("<b>_Parent:</b>   <i>original</i>");
+            filename_entry_->set_status_text("<i>original</i>");
+            parent_entry_->set_status_text("<i>original</i>");
+            path_entry_->set_status_text("<i>original</i>");
         }
         else if (full_path_exists_dir)
         {
             button_ok_.set_sensitive(false);
-            label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>exists as directory</i>");
-            label_full_name_.set_markup_with_mnemonic(
-                "<b>_Filename:</b>   <i>exists as directory</i>");
-            label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
+
+            filename_entry_->set_status_text("<i>exists as directory</i>");
+            parent_entry_->set_status_text("");
+            path_entry_->set_status_text("<i>exists as directory</i>");
         }
         else if (full_path_exists)
         {
             if (is_dir_)
             {
                 button_ok_.set_sensitive(false);
-                label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>exists as file</i>");
-                label_full_name_.set_markup_with_mnemonic(
-                    "<b>_Filename:</b>   <i>exists as file</i>");
-                label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
+
+                filename_entry_->set_status_text("<i>exists as file</i>");
+                parent_entry_->set_status_text("");
+                path_entry_->set_status_text("<i>exists as file</i>");
             }
             else
             {
                 button_ok_.set_sensitive(true);
-                label_full_path_.set_markup_with_mnemonic(
-                    "<b>P_ath:</b>   <i>* overwrite existing file</i>");
-                label_full_name_.set_markup_with_mnemonic(
-                    "<b>_Filename:</b>   <i>* overwrite existing file</i>");
-                label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
+
+                filename_entry_->set_status_text("<i>* overwrite existing file</i>");
+                parent_entry_->set_status_text("");
+                path_entry_->set_status_text("<i>* overwrite existing file</i>");
             }
         }
         else if (path_exists_file)
         {
             button_ok_.set_sensitive(false);
-            label_full_path_.set_markup_with_mnemonic(
-                "<b>P_ath:</b>   <i>parent exists as file</i>");
-            label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
-            label_path_.set_markup_with_mnemonic("<b>_Parent:</b>   <i>parent exists as file</i>");
+
+            filename_entry_->set_status_text("");
+            parent_entry_->set_status_text("<i>parent exists as file</i>");
+            path_entry_->set_status_text("<i>parent exists as file</i>");
         }
         else if (path_missing)
         {
             button_ok_.set_sensitive(true);
-            label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>* create parent</i>");
-            label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
-            label_path_.set_markup_with_mnemonic("<b>_Parent:</b>   <i>* create parent</i>");
+
+            filename_entry_->set_status_text("");
+            parent_entry_->set_status_text("<i>* create parent</i>");
+            path_entry_->set_status_text("<i>* create parent</i>");
         }
         else
         {
             button_ok_.set_sensitive(true);
-            label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>");
-            label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
-            label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
+
+            filename_entry_->set_status_text("");
+            parent_entry_->set_status_text("");
+            path_entry_->set_status_text("");
         }
     }
 
@@ -959,29 +913,23 @@ gui::dialog::rename::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexc
             button_ok_.set_label(is_move != 0 ? "_Move" : "_Rename");
         }
     }
-
-    for (auto& s : on_move_change_signals_)
-    {
-        s.unblock();
-    }
 }
 
 void
 gui::dialog::rename::select_input() noexcept
 {
-    auto start_iter = buf_full_name_->begin();
-    auto end_iter = buf_full_name_->end();
-
-    const std::string full_name = buf_full_name_->get_text(false);
+    const std::string full_name = filename_entry_->get_text();
 
     if (file_ && !file_->is_directory())
     {
         const auto [stem, extension] = vfs::utils::filename_stem_and_extension(full_name);
 
-        end_iter = buf_full_name_->get_iter_at_offset(static_cast<std::int32_t>(stem.size()));
+        filename_entry_->select_range(stem.size());
     }
-
-    buf_full_name_->select_range(start_iter, end_iter);
+    else
+    {
+        filename_entry_->select_range();
+    }
 }
 
 void
@@ -997,7 +945,7 @@ gui::dialog::rename::on_opt_toggled() noexcept
     std::string btn_label;
     std::string desc;
 
-    const std::string full_path = buf_full_path_->get_text(false);
+    const std::string full_path = path_entry_->get_text();
     const auto new_path = std::filesystem::path(full_path).parent_path();
 
     const bool rename = (old_path_ == new_path || new_path == ".");
@@ -1047,7 +995,7 @@ gui::dialog::rename::on_opt_toggled() noexcept
 
     full_path_same_ = false;
     mode_change_ = true;
-    on_move_change(buf_full_path_);
+    on_move_change(true);
 }
 
 void
@@ -1123,39 +1071,33 @@ gui::dialog::rename::on_toggled() noexcept
     {
         someone_is_visible = true;
 
-        label_full_name_.set_visible(true);
-        scroll_full_name_.set_visible(true);
+        filename_entry_->set_visible(true);
     }
     else
     {
-        label_full_name_.set_visible(false);
-        scroll_full_name_.set_visible(false);
+        filename_entry_->set_visible(false);
     }
 
     if (settings_->dialog.rename.parent)
     {
         someone_is_visible = true;
 
-        label_path_.set_visible(true);
-        scroll_path_.set_visible(true);
+        parent_entry_->set_visible(true);
     }
     else
     {
-        label_path_.set_visible(false);
-        scroll_path_.set_visible(false);
+        parent_entry_->set_visible(false);
     }
 
     if (settings_->dialog.rename.path)
     {
         someone_is_visible = true;
 
-        label_full_path_.set_visible(true);
-        scroll_full_path_.set_visible(true);
+        path_entry_->set_visible(true);
     }
     else
     {
-        label_full_path_.set_visible(false);
-        scroll_full_path_.set_visible(false);
+        path_entry_->set_visible(false);
     }
 
     if (!is_link_ && settings_->dialog.rename.type)

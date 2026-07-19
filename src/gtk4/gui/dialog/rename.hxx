@@ -27,6 +27,8 @@
 
 #include "settings/settings.hxx"
 
+#include "gui/dialog/widgets/text-entry.hxx"
+
 #include "vfs/file.hxx"
 
 namespace gui::dialog
@@ -81,20 +83,10 @@ class rename : public Gtk::ApplicationWindow
     Gtk::Entry entry_target_;
     Gtk::Box hbox_target_;
 
-    Gtk::Label label_full_name_;
-    Gtk::ScrolledWindow scroll_full_name_;
-    Gtk::TextView input_full_name_;
-    Glib::RefPtr<Gtk::TextBuffer> buf_full_name_;
-
-    Gtk::Label label_path_;
-    Gtk::ScrolledWindow scroll_path_;
-    Gtk::TextView input_path_;
-    Glib::RefPtr<Gtk::TextBuffer> buf_path_;
-
-    Gtk::Label label_full_path_;
-    Gtk::ScrolledWindow scroll_full_path_;
-    Gtk::TextView input_full_path_;
-    Glib::RefPtr<Gtk::TextBuffer> buf_full_path_;
+    gui::widget::TextEntry* filename_entry_;
+    gui::widget::TextEntry* parent_entry_;
+    gui::widget::TextEntry* path_entry_;
+    // gui::widget::TextEntry* target_entry_;
 
     Gtk::Box radio_button_box_;
     Gtk::CheckButton opt_move_;
@@ -137,10 +129,6 @@ class rename : public Gtk::ApplicationWindow
 
     Glib::RefPtr<Gio::SimpleAction> action_confirm_;
 
-    // Signal handlers
-
-    std::vector<sigc::connection> on_move_change_signals_;
-
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,
                       Gdk::ModifierType state) noexcept;
@@ -154,7 +142,7 @@ class rename : public Gtk::ApplicationWindow
     void on_toggled() noexcept;
 
     void select_input() noexcept;
-    void on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget) noexcept;
+    void on_move_change(const bool update_full_path) noexcept;
 
     void next_file() noexcept;
     void update() noexcept;
