@@ -54,7 +54,7 @@ sources = files(
 )
 
 spacefm = build_target(
-    'spacefm4',
+    'spacefm',
     sources,
     target_type: 'executable',
     include_directories : include_directories('.'),

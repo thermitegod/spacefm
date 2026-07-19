@@ -4,15 +4,15 @@ spdlog_dep = dependency('spdlog', required: true)
 
 logger_lib = static_library(
     'logger',
-    files('logger.cxx'),
-    include_directories : include_directories('.'),
+    files('logger/logger.cxx'),
+    include_directories : include_directories('./logger'),
     dependencies : spdlog_dep,
     install: false,
 )
 
 logger_dep = declare_dependency(
     link_with : logger_lib,
-    include_directories : include_directories('.'),
+    include_directories : include_directories('./logger'),
     dependencies : spdlog_dep,
 )
 

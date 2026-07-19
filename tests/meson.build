@@ -6,15 +6,9 @@ doctest_dep = dependency('doctest', required : true)
 
 test_sources_sfm = files()
 
-# Spacefm Source Files, do not need to do vfs source
-# files they get done through the vfs static_library
-# TODO switch to gtk4 gui sources
+# TODO need something better here
 test_sources_sfm += files(
-    # Common
-    '../src/common/natsort/strnatcmp.cxx',
-
-    # GUI
-    '../src/gtk4/gui/lib/history.cxx',
+    '../src/spacefm/gui/lib/history.cxx',
 )
 
 # Test Source Files
@@ -49,7 +43,7 @@ test_suite = build_target(
     'test_suite',
     sources: test_sources_sfm,
     target_type: 'executable',
-    include_directories: include_directories(['./src', '../src/common', '../src/gtk4']),
+    include_directories: include_directories(['./src', '../src/spacefm']),
     install: false,
     dependencies: [
         doctest_dep,

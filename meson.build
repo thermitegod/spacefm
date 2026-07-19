@@ -338,8 +338,8 @@ endforeach
 
 # Build
 
-subdir('src/common')
-subdir('src/gtk4')
+subdir('src/core')
+subdir('src/spacefm')
 
 if get_option('tests')
     subdir('tests')
