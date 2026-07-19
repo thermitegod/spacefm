@@ -24,6 +24,7 @@
 #include <sigc++/sigc++.h>
 
 #include "gui/dialog/donate.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 gui::dialog::donate::page::page() noexcept
 {
@@ -108,15 +109,10 @@ gui::dialog::donate::donate(Gtk::ApplicationWindow& parent) noexcept
     }
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
-    button_close_ = Gtk::Button("_Close", true);
-    button_close_.signal_clicked().connect([this]() { on_button_close_clicked(); });
-
-    box_.append(button_box_);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_close_);
-    button_box_.set_margin(5);
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Close", [this] { on_button_close_clicked(); }, &button_close_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

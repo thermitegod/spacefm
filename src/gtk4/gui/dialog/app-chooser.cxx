@@ -20,6 +20,7 @@
 #include <sigc++/sigc++.h>
 
 #include "gui/dialog/app-chooser.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -88,18 +89,11 @@ gui::dialog::app_chooser::app_chooser(Gtk::ApplicationWindow& parent,
     add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_ok_ = Gtk::Button("_Ok", true);
-    button_close_ = Gtk::Button("_Close", true);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_close_);
-    button_box_.append(button_ok_);
-    box_.append(button_box_);
-
-    button_ok_.signal_clicked().connect(sigc::mem_fun(*this, &app_chooser::on_button_ok_clicked));
-    button_close_.signal_clicked().connect(
-        sigc::mem_fun(*this, &app_chooser::on_button_close_clicked));
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Close", [this] { on_button_close_clicked(); }, &button_close_},
+        {"Ok", [this] { on_button_ok_clicked(); }, &button_ok_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

@@ -22,6 +22,7 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/dialog/action.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -74,26 +75,18 @@ gui::dialog::action::action(Gtk::ApplicationWindow& parent, std::string_view tit
     add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_ok_ = Gtk::Button("Confirm", true);
-    button_cancel_ = Gtk::Button("Cancel", true);
-
-    box_.append(button_box_);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_cancel_);
-    button_box_.append(button_ok_);
-
-    button_ok_.signal_clicked().connect(sigc::mem_fun(*this, &action::on_button_ok_clicked));
-    button_cancel_.signal_clicked().connect(
-        sigc::mem_fun(*this, &action::on_button_cancel_clicked));
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Cancel", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Confirm", [this] { on_button_ok_clicked(); }, &button_ok_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 
     set_visible(true);
 
-    // Set 'Ok' button as default
-    button_ok_.grab_focus();
+    // Set 'Confirm' button as default
+    button_ok_->grab_focus();
 }
 
 bool

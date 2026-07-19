@@ -47,8 +47,7 @@ class donate final : public Gtk::Window
         Gtk::Label label_;
     };
 
-    Gtk::Box button_box_;
-    Gtk::Button button_close_;
+    Gtk::Button* button_close_;
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,

@@ -92,12 +92,11 @@ class create : public Gtk::ApplicationWindow
     Gtk::CheckButton opt_new_folder_;
     Gtk::CheckButton opt_new_link_;
 
-    Gtk::Button button_options_;
-    Gtk::Button button_revert_;
-    Gtk::Button button_cancel_;
-    Gtk::Button button_next_;
-    Gtk::Button button_open_;
-    Gtk::Box button_box_;
+    Gtk::Button* button_options_;
+    Gtk::Button* button_revert_;
+    Gtk::Button* button_cancel_;
+    Gtk::Button* button_next_;
+    Gtk::Button* button_open_;
 
     bool full_path_exists_{false};
     bool full_path_exists_dir_{false};

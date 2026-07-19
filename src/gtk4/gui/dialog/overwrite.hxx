@@ -47,17 +47,15 @@ class overwrite : public Gtk::ApplicationWindow
 
     gui::widget::TextEntry* name_entry_;
 
-    Gtk::Box button_box1_;
-    Gtk::Button button_rename_;
-    Gtk::Button button_rename_auto_;
-    Gtk::Button button_rename_all_;
-    Gtk::Box button_box2_;
-    Gtk::Button button_overwrite_;
-    Gtk::Button button_overwrite_all_;
-    Gtk::Button button_pause_;
-    Gtk::Button button_skip_;
-    Gtk::Button button_skip_all_;
-    Gtk::Button button_cancel_;
+    Gtk::Button* button_rename_;
+    Gtk::Button* button_rename_auto_;
+    Gtk::Button* button_rename_all_;
+    Gtk::Button* button_overwrite_;
+    Gtk::Button* button_overwrite_all_;
+    Gtk::Button* button_pause_;
+    Gtk::Button* button_skip_;
+    Gtk::Button* button_skip_all_;
+    Gtk::Button* button_cancel_;
 
     bool is_dir_ = false;
     bool is_copy_ = false;

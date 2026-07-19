@@ -65,11 +65,10 @@ class bookmarks : public Gtk::ApplicationWindow
     Glib::RefPtr<Gio::ListStore<ModelColumns>> liststore_;
     Glib::RefPtr<Gtk::SingleSelection> selection_model_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_ok_;
-    Gtk::Button button_close_;
-    Gtk::Button button_remove_;
-    Gtk::Button button_remove_all_;
+    Gtk::Button* button_ok_;
+    Gtk::Button* button_close_;
+    Gtk::Button* button_remove_;
+    Gtk::Button* button_remove_all_;
 
     std::shared_ptr<vfs::bookmarks> bookmarks_;
     std::shared_ptr<config::settings> settings_;

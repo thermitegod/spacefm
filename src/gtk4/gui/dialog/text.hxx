@@ -48,10 +48,9 @@ class text final : public Gtk::Window
     Glib::RefPtr<Gtk::TextBuffer> buf_;
     Gtk::ScrolledWindow scroll_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_ok_;
-    Gtk::Button button_cancel_;
-    Gtk::Button button_reset_;
+    Gtk::Button* button_ok_;
+    Gtk::Button* button_cancel_;
+    Gtk::Button* button_reset_;
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);

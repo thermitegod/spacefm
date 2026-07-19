@@ -95,12 +95,11 @@ class rename : public Gtk::ApplicationWindow
     Gtk::CheckButton opt_copy_target_;
     Gtk::CheckButton opt_link_target_;
 
-    Gtk::Button button_options_;
-    Gtk::Button button_revert_;
-    Gtk::Button button_skip_;
-    Gtk::Button button_cancel_;
-    Gtk::Button button_ok_;
-    Gtk::Box button_box_;
+    Gtk::Button* button_options_;
+    Gtk::Button* button_revert_;
+    Gtk::Button* button_skip_;
+    Gtk::Button* button_cancel_;
+    Gtk::Button* button_ok_;
 
     bool full_path_exists_{false};
     bool full_path_exists_dir_{false};

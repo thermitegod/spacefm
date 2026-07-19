@@ -23,6 +23,7 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/dialog/overwrite.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 gui::dialog::overwrite::overwrite(Gtk::ApplicationWindow& parent,
                                   const std::shared_ptr<vfs::task_collision>& collision)
@@ -106,65 +107,29 @@ gui::dialog::overwrite::overwrite(Gtk::ApplicationWindow& parent,
         name_entry_->signal_changed().connect([this]() { on_filename_update(); });
     }
 
-    // Buttons
-    button_rename_ = Gtk::Button("Rename", true);
-    button_rename_.set_focus_on_click(false);
-    button_rename_.signal_clicked().connect([this]() { on_button_rename_clicked(); });
-
-    button_rename_auto_ = Gtk::Button("Rename Auto", true);
-    button_rename_auto_.set_focus_on_click(false);
-    button_rename_auto_.signal_clicked().connect([this]() { on_button_rename_auto_clicked(); });
-
-    button_rename_all_ = Gtk::Button("Rename All", true);
-    button_rename_all_.set_focus_on_click(false);
-    button_rename_all_.signal_clicked().connect([this]() { on_button_rename_all_clicked(); });
-
-    button_box1_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_box1_.set_halign(Gtk::Align::END);
-    button_box1_.append(button_rename_);
-    button_box1_.append(button_rename_auto_);
-    button_box1_.append(button_rename_all_);
-
-    button_overwrite_ = Gtk::Button("Overwrite", true);
-    button_overwrite_.set_focus_on_click(false);
-    button_overwrite_.signal_clicked().connect([this]() { on_button_overwrite_clicked(); });
-
-    button_overwrite_all_ = Gtk::Button("Overwrite All", true);
-    button_overwrite_all_.set_focus_on_click(false);
-    button_overwrite_all_.signal_clicked().connect([this]() { on_button_overwrite_all_clicked(); });
-
-    button_pause_ = Gtk::Button("Pause", true);
-    button_pause_.set_focus_on_click(false);
-    button_pause_.signal_clicked().connect([this]() { on_button_pause_clicked(); });
-
-    button_skip_ = Gtk::Button("Skip", true);
-    button_skip_.set_focus_on_click(false);
-    button_skip_.signal_clicked().connect([this]() { on_button_skip_clicked(); });
-
-    button_skip_all_ = Gtk::Button("Skip All", true);
-    button_skip_all_.set_focus_on_click(false);
-    button_skip_all_.signal_clicked().connect([this]() { on_button_skip_all_clicked(); });
-
-    button_cancel_ = Gtk::Button("Cancel", true);
-    button_cancel_.set_focus_on_click(false);
-    button_cancel_.signal_clicked().connect([this]() { on_button_cancel_clicked(); });
-
-    button_box2_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_box2_.set_halign(Gtk::Align::END);
-    button_box2_.append(button_overwrite_);
-    button_box2_.append(button_overwrite_all_);
-    button_box2_.append(button_pause_);
-    button_box2_.append(button_skip_);
-    button_box2_.append(button_skip_all_);
-    button_box2_.append(button_cancel_);
-
     box_.append(label_message_);
     box_.append(label_from_);
     box_.append(label_to_);
     box_.append(label_file_info_);
     box_.append(*name_entry_);
-    box_.append(button_box1_);
-    box_.append(button_box2_);
+
+    // Buttons //
+    auto* buttons1 = gui::widget::ButtonBox::create({
+        {"Rename All", [this] { on_button_rename_all_clicked(); }, &button_rename_all_},
+        {"Rename Auto", [this] { on_button_rename_auto_clicked(); }, &button_rename_auto_},
+        {"Rename", [this] { on_button_rename_clicked(); }, &button_rename_},
+    });
+    box_.append(*buttons1);
+
+    auto* buttons2 = gui::widget::ButtonBox::create({
+        {"Cancel", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Skip All", [this] { on_button_skip_all_clicked(); }, &button_skip_all_},
+        {"Skip", [this] { on_button_skip_clicked(); }, &button_skip_},
+        {"Pause", [this] { on_button_pause_clicked(); }, &button_pause_},
+        {"Overwrite All", [this] { on_button_overwrite_all_clicked(); }, &button_overwrite_all_},
+        {"Overwrite", [this] { on_button_overwrite_clicked(); }, &button_overwrite_},
+    });
+    box_.append(*buttons2);
 
     set_visible(true);
     on_filename_update();
@@ -180,7 +145,7 @@ gui::dialog::overwrite::on_key_press(std::uint32_t keyval, std::uint32_t keycode
     (void)state;
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
-        if (button_rename_.get_sensitive())
+        if (button_rename_->get_sensitive())
         {
             on_button_rename_clicked();
         }
@@ -270,9 +235,9 @@ void
 gui::dialog::overwrite::on_filename_update() noexcept
 {
     // Reset button sensitive
-    button_rename_.set_sensitive(true);
-    button_overwrite_.set_sensitive(true);
-    button_overwrite_all_.set_sensitive(true);
+    button_rename_->set_sensitive(true);
+    button_overwrite_->set_sensitive(true);
+    button_overwrite_all_->set_sensitive(true);
     name_entry_->set_status_text("");
 
     const std::string filename = name_entry_->get_text();
@@ -280,21 +245,21 @@ gui::dialog::overwrite::on_filename_update() noexcept
 
     if (std::filesystem::exists(new_path))
     {
-        button_rename_.set_sensitive(false);
+        button_rename_->set_sensitive(false);
     }
     else
     {
-        button_overwrite_.set_sensitive(false);
-        button_overwrite_all_.set_sensitive(false);
+        button_overwrite_->set_sensitive(false);
+        button_overwrite_all_->set_sensitive(false);
     }
 
     ///////////////////////
 
     if (filename.empty())
     {
-        button_rename_.set_sensitive(false);
-        button_overwrite_.set_sensitive(false);
-        button_overwrite_all_.set_sensitive(false);
+        button_rename_->set_sensitive(false);
+        button_overwrite_->set_sensitive(false);
+        button_overwrite_all_->set_sensitive(false);
         name_entry_->set_status_text("<i>filename cannot be empty</i>");
     }
 
@@ -320,9 +285,9 @@ gui::dialog::overwrite::on_filename_update() noexcept
     // update display
     if (full_path_exists)
     {
-        // button_rename_.set_sensitive(false);
-        // button_overwrite_.set_sensitive(false);
-        // button_overwrite_all_.set_sensitive(false);
+        // button_rename_->set_sensitive(false);
+        // button_overwrite_->set_sensitive(false);
+        // button_overwrite_all_->set_sensitive(false);
 
         if (full_path_exists_dir)
         {

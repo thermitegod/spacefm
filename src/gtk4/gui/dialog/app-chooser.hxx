@@ -82,9 +82,8 @@ class app_chooser : public Gtk::ApplicationWindow
     Gtk::Label label_all_ = Gtk::Label("All Apps");
     page page_all_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_ok_;
-    Gtk::Button button_close_;
+    Gtk::Button* button_ok_;
+    Gtk::Button* button_close_;
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);

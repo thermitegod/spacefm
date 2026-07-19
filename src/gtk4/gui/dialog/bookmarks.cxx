@@ -22,6 +22,7 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/dialog/bookmarks.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 #include "vfs/bookmarks.hxx"
 
@@ -70,23 +71,13 @@ gui::dialog::bookmarks::bookmarks(Gtk::ApplicationWindow& parent,
     add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_ok_ = Gtk::Button("Open", true);
-    button_ok_.signal_clicked().connect([this]() { on_button_ok_clicked(); });
-    button_close_ = Gtk::Button("Close", true);
-    button_close_.signal_clicked().connect([this]() { on_button_close_clicked(); });
-    button_remove_ = Gtk::Button("Remove", true);
-    button_remove_.signal_clicked().connect([this]() { on_button_remove_clicked(); });
-    button_remove_all_ = Gtk::Button("Remove All", true);
-    button_remove_all_.signal_clicked().connect([this]() { on_button_remove_all_clicked(); });
-
-    box_.append(button_box_);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_remove_all_);
-    button_box_.append(button_remove_);
-    button_box_.append(button_close_);
-    button_box_.append(button_ok_);
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Remove All", [this] { on_button_remove_all_clicked(); }, &button_remove_all_},
+        {"Remove", [this] { on_button_remove_clicked(); }, &button_remove_},
+        {"Close", [this] { on_button_close_clicked(); }, &button_close_},
+        {"Confirm", [this] { on_button_ok_clicked(); }, &button_ok_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

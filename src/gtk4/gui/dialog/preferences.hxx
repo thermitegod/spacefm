@@ -67,8 +67,7 @@ class preferences : public Gtk::ApplicationWindow
     Gtk::Box box_;
     Gtk::Notebook notebook_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_close_;
+    Gtk::Button* button_close_;
 
     std::shared_ptr<config::settings> settings_;
 };

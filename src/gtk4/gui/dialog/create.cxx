@@ -25,6 +25,7 @@
 #include <ztd/ztd.hxx>
 
 #include "gui/dialog/create.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -77,32 +78,13 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     // Dialog
 
     // Buttons
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_next_ = Gtk::Button("Create", true);
-    button_next_.set_focus_on_click(false);
-    button_cancel_ = Gtk::Button("Cancel", true);
-    button_cancel_.set_focus_on_click(false);
-    button_revert_ = Gtk::Button("Re_vert", true);
-    button_revert_.set_focus_on_click(false);
-    button_options_ = Gtk::Button("Opt_ions", true);
-    button_options_.set_focus_on_click(false);
-    button_open_ = Gtk::Button("_Open", true);
-    button_open_.set_focus_on_click(false);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_options_);
-    button_box_.append(button_revert_);
-    button_box_.append(button_cancel_);
-    button_box_.append(button_next_);
-    button_box_.append(button_open_);
-
-    button_next_.signal_clicked().connect(sigc::mem_fun(*this, &create::on_button_ok_clicked));
-    button_cancel_.signal_clicked().connect(
-        sigc::mem_fun(*this, &create::on_button_cancel_clicked));
-    button_revert_.signal_clicked().connect(
-        sigc::mem_fun(*this, &create::on_button_revert_clicked));
-    button_options_.signal_clicked().connect(
-        sigc::mem_fun(*this, &create::on_button_options_clicked));
-    button_open_.signal_clicked().connect(sigc::mem_fun(*this, &create::on_button_open_clicked));
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Open", [this] { on_button_open_clicked(); }, &button_open_},
+        {"Options", [this] { on_button_options_clicked(); }, &button_options_},
+        {"Revert", [this] { on_button_revert_clicked(); }, &button_revert_},
+        {"Cancel", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Create", [this] { on_button_ok_clicked(); }, &button_next_},
+    });
 
     // Entries
 
@@ -224,7 +206,7 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     menu_model->append("Create Parents", "app.confirm");
 
     context_menu_.set_menu_model(menu_model);
-    context_menu_.set_parent(button_options_);
+    context_menu_.set_parent(*button_options_);
 
     context_action_group_ = Gio::SimpleActionGroup::create();
 
@@ -291,7 +273,7 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
     radio_button_box_.append(opt_new_folder_);
     radio_button_box_.append(opt_new_link_);
     box_.append(radio_button_box_);
-    box_.append(button_box_);
+    box_.append(*buttons);
 
     // show
     set_visible(true);
@@ -338,7 +320,7 @@ gui::dialog::create::on_key_press(std::uint32_t keyval, std::uint32_t keycode,
     (void)state;
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
-        if (button_next_.get_sensitive())
+        if (button_next_->get_sensitive())
         {
             on_button_ok_clicked();
         }
@@ -699,7 +681,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         full_path_same_ = full_path_same;
         mode_change_ = false;
 
-        button_revert_.set_sensitive(!full_path_same);
+        button_revert_->set_sensitive(!full_path_same);
 
         if (full_path_same && mode_ == create_mode::link)
         {
@@ -709,7 +691,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         }
         else if (full_path_exists_dir)
         {
-            button_next_.set_sensitive(false);
+            button_next_->set_sensitive(false);
             label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>exists as directory</i>");
             label_full_name_.set_markup_with_mnemonic(
                 "<b>_Filename:</b>   <i>exists as directory</i>");
@@ -719,7 +701,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         {
             if (is_dir_)
             {
-                button_next_.set_sensitive(false);
+                button_next_->set_sensitive(false);
                 label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>exists as file</i>");
                 label_full_name_.set_markup_with_mnemonic(
                     "<b>_Filename:</b>   <i>exists as file</i>");
@@ -727,7 +709,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
             }
             else
             {
-                button_next_.set_sensitive(true);
+                button_next_->set_sensitive(true);
                 label_full_path_.set_markup_with_mnemonic(
                     "<b>P_ath:</b>   <i>* overwrite existing file</i>");
                 label_full_name_.set_markup_with_mnemonic(
@@ -737,7 +719,7 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         }
         else if (path_exists_file)
         {
-            button_next_.set_sensitive(false);
+            button_next_->set_sensitive(false);
             label_full_path_.set_markup_with_mnemonic(
                 "<b>P_ath:</b>   <i>parent exists as file</i>");
             label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
@@ -745,14 +727,14 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
         }
         else if (path_missing)
         {
-            button_next_.set_sensitive(true);
+            button_next_->set_sensitive(true);
             label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>   <i>* create parent</i>");
             label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
             label_path_.set_markup_with_mnemonic("<b>_Parent:</b>   <i>* create parent</i>");
         }
         else
         {
-            button_next_.set_sensitive(true);
+            button_next_->set_sensitive(true);
             label_full_path_.set_markup_with_mnemonic("<b>P_ath:</b>");
             label_full_name_.set_markup_with_mnemonic("<b>_Filename:</b>");
             label_path_.set_markup_with_mnemonic("<b>_Parent:</b>");
@@ -763,10 +745,10 @@ gui::dialog::create::on_move_change(Glib::RefPtr<Gtk::TextBuffer>& widget)
     {
         path = entry_target_.get_text();
 
-        button_next_.set_sensitive(!(full_path_same && full_path_exists) && !full_path_exists_dir);
+        button_next_->set_sensitive(!(full_path_same && full_path_exists) && !full_path_exists_dir);
     }
 
-    button_open_.set_sensitive(button_next_.get_sensitive());
+    button_open_->set_sensitive(button_next_->get_sensitive());
 
     for (auto& s : on_move_change_signals_)
     {

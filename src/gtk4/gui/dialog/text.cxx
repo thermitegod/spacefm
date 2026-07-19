@@ -22,6 +22,7 @@
 #include <sigc++/sigc++.h>
 
 #include "gui/dialog/text.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 gui::dialog::text::text(Gtk::ApplicationWindow& parent, const std::string_view title,
                         const std::string_view message, const std::string_view text,
@@ -62,22 +63,12 @@ gui::dialog::text::text(Gtk::ApplicationWindow& parent, const std::string_view t
     input_.add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_ok_ = Gtk::Button("_Ok", true);
-    button_cancel_ = Gtk::Button("_Close", true);
-    button_reset_ = Gtk::Button("_Default", true);
-    button_reset_.set_visible(!default_text_.empty());
-
-    button_ok_.signal_clicked().connect([this]() { on_button_ok_clicked(); });
-    button_cancel_.signal_clicked().connect([this]() { on_button_cancel_clicked(); });
-    button_reset_.signal_clicked().connect([this]() { on_button_reset_clicked(); });
-
-    box_.append(button_box_);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_reset_);
-    button_box_.append(button_cancel_);
-    button_box_.append(button_ok_);
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Default", [this] { on_button_reset_clicked(); }, &button_reset_},
+        {"Close", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Ok", [this] { on_button_ok_clicked(); }, &button_ok_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

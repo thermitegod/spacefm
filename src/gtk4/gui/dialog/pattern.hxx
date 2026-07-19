@@ -41,10 +41,9 @@ class pattern : public Gtk::ApplicationWindow
     Glib::RefPtr<Gtk::TextBuffer> buf_;
     Gtk::ScrolledWindow scroll_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_select_;
-    Gtk::Button button_cancel_;
-    Gtk::Button button_patterns_;
+    Gtk::Button* button_select_;
+    Gtk::Button* button_cancel_;
+    Gtk::Button* button_patterns_;
 
     // Option button items
     enum class patterns : std::uint8_t

@@ -27,6 +27,7 @@
 
 #include "gui/dialog/media/metadata.hxx"
 #include "gui/dialog/properties.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 #include "gui/dialog/widgets/checksum.hxx"
 #include "gui/dialog/widgets/paste-button.hxx"
 #include "gui/dialog/widgets/validated-entry.hxx"
@@ -160,15 +161,10 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent, std::int32_t
     add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_close_ = Gtk::Button("_Close", true);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_close_);
-    box_.append(button_box_);
-
-    button_close_.signal_clicked().connect(
-        sigc::mem_fun(*this, &properties::on_button_close_clicked));
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Close", [this] { on_button_close_clicked(); }, &button_close_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

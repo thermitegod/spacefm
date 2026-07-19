@@ -23,6 +23,7 @@
 #include "settings/settings.hxx"
 
 #include "gui/dialog/preferences.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 class preference_page : public Gtk::ScrolledWindow
 {
@@ -121,12 +122,11 @@ gui::dialog::preferences::preferences(Gtk::ApplicationWindow& parent,
         false);
     add_controller(key_controller);
 
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_close_ = Gtk::Button("Close", true);
-    button_close_.signal_clicked().connect([this]() { on_button_close_clicked(); });
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_close_);
-    box_.append(button_box_);
+    // Buttons //
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Close", [this] { on_button_close_clicked(); }, &button_close_},
+    });
+    box_.append(*buttons);
 
     set_child(box_);
 

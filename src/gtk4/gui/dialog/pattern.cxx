@@ -20,6 +20,7 @@
 #include <sigc++/sigc++.h>
 
 #include "gui/dialog/pattern.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 // stolen from the fnmatch man page
 inline constexpr auto FNMATCH_HELP =
@@ -80,21 +81,12 @@ gui::dialog::pattern::pattern(Gtk::ApplicationWindow& parent, const std::string_
     input_.add_controller(key_controller);
 
     // Buttons //
-
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_select_ = Gtk::Button("_Select", true);
-    button_cancel_ = Gtk::Button("_Close", true);
-    button_patterns_ = Gtk::Button("_Patterns", true);
-
-    button_select_.signal_clicked().connect([this]() { on_button_select_clicked(); });
-    button_cancel_.signal_clicked().connect([this]() { on_button_cancel_clicked(); });
-    button_patterns_.signal_clicked().connect([this]() { on_button_patterns_clicked(); });
-
-    box_.append(button_box_);
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_patterns_);
-    button_box_.append(button_cancel_);
-    button_box_.append(button_select_);
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Patterns", [this] { on_button_patterns_clicked(); }, &button_patterns_},
+        {"Close", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Select", [this] { on_button_select_clicked(); }, &button_select_},
+    });
+    box_.append(*buttons);
 
     // Pattern button context menu //
     auto submenu_model_image = Gio::Menu::create();
@@ -118,7 +110,7 @@ gui::dialog::pattern::pattern(Gtk::ApplicationWindow& parent, const std::string_
     menu_model->append_submenu("Archive", submenu_model_archive);
 
     context_menu_.set_menu_model(menu_model);
-    context_menu_.set_parent(button_patterns_);
+    context_menu_.set_parent(*button_patterns_);
 
     auto action_group = Gio::SimpleActionGroup::create();
     // Image

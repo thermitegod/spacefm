@@ -41,8 +41,7 @@ class properties : public Gtk::ApplicationWindow
     Gtk::Label size_on_disk_label_;
     Gtk::Label count_label_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_close_;
+    Gtk::Button* button_close_;
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,

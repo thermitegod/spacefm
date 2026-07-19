@@ -62,9 +62,8 @@ class action : public Gtk::ApplicationWindow
 
     Gtk::Label total_size_label_;
 
-    Gtk::Box button_box_;
-    Gtk::Button button_ok_;
-    Gtk::Button button_cancel_;
+    Gtk::Button* button_ok_;
+    Gtk::Button* button_cancel_;
 
     void create_model();
     void add_columns();

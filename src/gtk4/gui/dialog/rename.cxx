@@ -22,6 +22,7 @@
 #include <sigc++/sigc++.h>
 
 #include "gui/dialog/rename.hxx"
+#include "gui/dialog/widgets/button-box.hxx"
 
 #include "vfs/file.hxx"
 
@@ -51,31 +52,14 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
 
     next_file();
 
-    // Buttons
-    button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
-    button_ok_ = Gtk::Button("_Rename", true);
-    button_ok_.set_focus_on_click(false);
-    button_cancel_ = Gtk::Button("Cancel", true);
-    button_cancel_.set_focus_on_click(false);
-    button_skip_ = Gtk::Button("Skip", true);
-    button_skip_.set_focus_on_click(false);
-    button_revert_ = Gtk::Button("Re_vert", true);
-    button_revert_.set_focus_on_click(false);
-    button_options_ = Gtk::Button("Opt_ions", true);
-    button_options_.set_focus_on_click(false);
-
-    button_ok_.signal_clicked().connect([this]() { on_button_ok_clicked(); });
-    button_cancel_.signal_clicked().connect([this]() { on_button_cancel_clicked(); });
-    button_skip_.signal_clicked().connect([this]() { on_button_skip_clicked(); });
-    button_revert_.signal_clicked().connect([this]() { on_button_revert_clicked(); });
-    button_options_.signal_clicked().connect([this]() { on_button_options_clicked(); });
-
-    button_box_.set_halign(Gtk::Align::END);
-    button_box_.append(button_options_);
-    button_box_.append(button_revert_);
-    button_box_.append(button_skip_);
-    button_box_.append(button_cancel_);
-    button_box_.append(button_ok_);
+    // Buttons //
+    auto* buttons = gui::widget::ButtonBox::create({
+        {"Options", [this] { on_button_options_clicked(); }, &button_options_},
+        {"Revert", [this] { on_button_revert_clicked(); }, &button_revert_},
+        {"Skip", [this] { on_button_skip_clicked(); }, &button_skip_},
+        {"Cancel", [this] { on_button_cancel_clicked(); }, &button_cancel_},
+        {"Rename", [this] { on_button_ok_clicked(); }, &button_ok_},
+    });
 
     // Entries
 
@@ -178,7 +162,7 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     menu_model->append("Create Parents", "app.confirm");
 
     context_menu_.set_menu_model(menu_model);
-    context_menu_.set_parent(button_options_);
+    context_menu_.set_parent(*button_options_);
     // context_menu_.unparent();
 
     context_action_group_ = Gio::SimpleActionGroup::create();
@@ -303,7 +287,7 @@ gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
     radio_button_box_.append(opt_copy_target_);
     radio_button_box_.append(opt_link_target_);
     box_.append(radio_button_box_);
-    box_.append(button_box_);
+    box_.append(*buttons);
 
     // show
     update();
@@ -452,7 +436,7 @@ gui::dialog::rename::on_key_press(std::uint32_t keyval, std::uint32_t keycode,
     (void)state;
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
-        if (button_ok_.get_sensitive())
+        if (button_ok_->get_sensitive())
         {
             on_button_ok_clicked();
         }
@@ -842,11 +826,11 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         full_path_same_ = full_path_same;
         mode_change_ = false;
 
-        button_revert_.set_sensitive(!full_path_same);
+        button_revert_->set_sensitive(!full_path_same);
 
         if (full_path_same)
         {
-            button_ok_.set_sensitive(opt_move_.get_active());
+            button_ok_->set_sensitive(opt_move_.get_active());
 
             filename_entry_->set_status_text("<i>original</i>");
             parent_entry_->set_status_text("<i>original</i>");
@@ -854,7 +838,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         }
         else if (full_path_exists_dir)
         {
-            button_ok_.set_sensitive(false);
+            button_ok_->set_sensitive(false);
 
             filename_entry_->set_status_text("<i>exists as directory</i>");
             parent_entry_->set_status_text("");
@@ -864,7 +848,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         {
             if (is_dir_)
             {
-                button_ok_.set_sensitive(false);
+                button_ok_->set_sensitive(false);
 
                 filename_entry_->set_status_text("<i>exists as file</i>");
                 parent_entry_->set_status_text("");
@@ -872,7 +856,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
             }
             else
             {
-                button_ok_.set_sensitive(true);
+                button_ok_->set_sensitive(true);
 
                 filename_entry_->set_status_text("<i>* overwrite existing file</i>");
                 parent_entry_->set_status_text("");
@@ -881,7 +865,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         }
         else if (path_exists_file)
         {
-            button_ok_.set_sensitive(false);
+            button_ok_->set_sensitive(false);
 
             filename_entry_->set_status_text("");
             parent_entry_->set_status_text("<i>parent exists as file</i>");
@@ -889,7 +873,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         }
         else if (path_missing)
         {
-            button_ok_.set_sensitive(true);
+            button_ok_->set_sensitive(true);
 
             filename_entry_->set_status_text("");
             parent_entry_->set_status_text("<i>* create parent</i>");
@@ -897,7 +881,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         }
         else
         {
-            button_ok_.set_sensitive(true);
+            button_ok_->set_sensitive(true);
 
             filename_entry_->set_status_text("");
             parent_entry_->set_status_text("");
@@ -910,7 +894,7 @@ gui::dialog::rename::on_move_change(const bool update_full_path) noexcept
         is_move_ = is_move;
         if (opt_move_.get_active())
         {
-            button_ok_.set_label(is_move != 0 ? "_Move" : "_Rename");
+            button_ok_->set_label(is_move != 0 ? "_Move" : "_Rename");
         }
     }
 }
@@ -990,7 +974,7 @@ gui::dialog::rename::on_opt_toggled() noexcept
 
     if (!btn_label.empty())
     {
-        button_ok_.set_label(btn_label);
+        button_ok_->set_label(btn_label);
     }
 
     full_path_same_ = false;
