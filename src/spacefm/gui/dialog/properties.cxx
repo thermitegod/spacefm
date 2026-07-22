@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <stop_token>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <glibmm.h>
@@ -130,7 +131,8 @@ class properties_page : public Gtk::Box
     }
 };
 
-gui::dialog::properties::properties(Gtk::ApplicationWindow& parent, std::int32_t page,
+gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
+                                    gui::dialog::properties::page page,
                                     const std::filesystem::path& cwd,
                                     const std::span<const std::shared_ptr<vfs::file>>& files)
     : files_(files.begin(), files.end()), cwd_(cwd)
@@ -170,15 +172,7 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent, std::int32_t
 
     set_visible(true);
 
-    if (notebook_.get_n_pages() == 4 && page != 0)
-    {
-        // skip media tab
-        notebook_.set_current_page(page + 1);
-    }
-    else
-    {
-        notebook_.set_current_page(page);
-    }
+    notebook_.set_current_page(std::to_underlying(page));
 }
 
 bool

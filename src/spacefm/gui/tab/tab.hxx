@@ -37,6 +37,7 @@
 #include "gui/tab/toolbar.hxx"
 
 #include "gui/dialog/create.hxx"
+#include "gui/dialog/properties.hxx"
 
 #include "vfs/dir.hxx"
 #include "vfs/task-manager.hxx"
@@ -158,7 +159,7 @@ class tab final : public Gtk::Box
     void show_rename_dialog() noexcept;
     void show_rename_batch_dialog() noexcept;
     void show_pattern_dialog() noexcept;
-    void show_properites_dialog(std::int32_t page) noexcept;
+    void show_properites_dialog(gui::dialog::properties::page page) noexcept;
     void show_create_dialog(dialog::create_mode mode) noexcept;
     void show_app_chooser_dialog() noexcept;
 
@@ -248,6 +249,10 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> trash;
         Glib::RefPtr<Gio::SimpleAction> remove;
         Glib::RefPtr<Gio::SimpleAction> info;
+#if defined(HAVE_MEDIA)
+        Glib::RefPtr<Gio::SimpleAction> media;
+#endif
+        Glib::RefPtr<Gio::SimpleAction> checksums;
         Glib::RefPtr<Gio::SimpleAction> attributes;
         Glib::RefPtr<Gio::SimpleAction> permissions;
         // View

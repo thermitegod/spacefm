@@ -704,11 +704,23 @@ gui::tab::add_actions() noexcept
         },
         list_state_.mtime);
     // Properties
-    actions_.info = action_group_->add_action("info", [this]() { show_properites_dialog(0); });
-    actions_.attributes =
-        action_group_->add_action("attributes", [this]() { show_properites_dialog(1); });
-    actions_.permissions =
-        action_group_->add_action("permissions", [this]() { show_properites_dialog(2); });
+    actions_.info = action_group_->add_action(
+        "info",
+        [this]() { show_properites_dialog(gui::dialog::properties::page::info); });
+#if defined(HAVE_MEDIA)
+    actions_.media = action_group_->add_action(
+        "media",
+        [this]() { show_properites_dialog(gui::dialog::properties::page::media); });
+#endif
+    actions_.checksums = action_group_->add_action(
+        "checksums",
+        [this]() { show_properites_dialog(gui::dialog::properties::page::checksum); });
+    actions_.attributes = action_group_->add_action(
+        "attributes",
+        [this]() { show_properites_dialog(gui::dialog::properties::page::attributes); });
+    actions_.permissions = action_group_->add_action(
+        "permissions",
+        [this]() { show_properites_dialog(gui::dialog::properties::page::permissions); });
 
     insert_action_group("files", action_group_);
 }
@@ -765,6 +777,10 @@ gui::tab::enable_all_actions() noexcept
     actions_.trash->set_enabled(true);
     actions_.remove->set_enabled(true);
     actions_.info->set_enabled(true);
+#if defined(HAVE_MEDIA)
+    actions_.media->set_enabled(true);
+#endif
+    actions_.checksums->set_enabled(true);
     actions_.attributes->set_enabled(true);
     actions_.permissions->set_enabled(true);
 }
@@ -1326,6 +1342,10 @@ gui::tab::create_context_menu_model() noexcept
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Alt>Return"));
             section->append_item(item);
 
+#if defined(HAVE_MEDIA)
+            section->append("Media", "files.media");
+#endif
+            section->append("Checksums", "files.checksums");
             section->append("Attributes", "files.attributes");
 
             item = Gio::MenuItem::create("Permissions", "files.permissions");
@@ -2831,7 +2851,7 @@ gui::tab::archive_open() noexcept
 }
 
 void
-gui::tab::show_properites_dialog(std::int32_t page) noexcept
+gui::tab::show_properites_dialog(gui::dialog::properties::page page) noexcept
 {
     auto selected = selected_files();
     if (selected.empty())

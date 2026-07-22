@@ -30,7 +30,19 @@ namespace gui::dialog
 class properties : public Gtk::ApplicationWindow
 {
   public:
-    properties(Gtk::ApplicationWindow& parent, std::int32_t page, const std::filesystem::path& cwd,
+    enum class page : std::int32_t
+    {
+        info = 0,
+#if defined(HAVE_MEDIA)
+        media,
+#endif
+        checksum,
+        attributes,
+        permissions,
+    };
+
+    properties(Gtk::ApplicationWindow& parent, properties::page page,
+               const std::filesystem::path& cwd,
                const std::span<const std::shared_ptr<vfs::file>>& files);
 
   protected:
