@@ -42,6 +42,7 @@ sources = files(
     'gui/dialog/widgets/button-box.cxx',
     'gui/dialog/widgets/checksum.cxx',
     'gui/dialog/widgets/copy-button.cxx',
+    'gui/dialog/widgets/icon-button.cxx',
     'gui/dialog/widgets/paste-button.cxx',
     'gui/dialog/widgets/radio-button-box.cxx',
     'gui/dialog/widgets/text-entry.cxx',

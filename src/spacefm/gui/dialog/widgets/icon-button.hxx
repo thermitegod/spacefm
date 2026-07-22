@@ -15,28 +15,20 @@
 
 #pragma once
 
-#include <string>
 #include <string_view>
 
 #include <gtkmm.h>
-#include <sigc++/sigc++.h>
-
-#include "gui/dialog/widgets/icon-button.hxx"
-
-#include "icon-button.hxx"
 
 namespace gui::widget
 {
-class CopyButton : public gui::widget::IconButton
+class IconButton : public Gtk::Button
 {
   public:
-    CopyButton();
-
-    void set_copy_text(const std::string_view text) noexcept;
+    IconButton(const std::string_view label, const std::string_view icon_name);
 
   private:
-    std::string text_;
-
-    void on_button_clicked() noexcept;
+    Gtk::Box box_;
+    Gtk::Image icon_;
+    Gtk::Label label_;
 };
 } // namespace gui::widget

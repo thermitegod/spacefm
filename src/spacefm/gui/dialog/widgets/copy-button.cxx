@@ -19,19 +19,8 @@
 
 #include "gui/dialog/widgets/copy-button.hxx"
 
-gui::widget::CopyButton::CopyButton()
+gui::widget::CopyButton::CopyButton() : gui::widget::IconButton("Copy", "edit-copy-symbolic")
 {
-    box_.set_orientation(Gtk::Orientation::HORIZONTAL);
-    box_.set_margin(5);
-
-    label_.set_text("Copy");
-    icon_.set_from_icon_name("edit-copy-symbolic");
-
-    box_.append(icon_);
-    box_.append(label_);
-
-    set_child(box_);
-
     signal_clicked().connect(sigc::mem_fun(*this, &CopyButton::on_button_clicked));
 }
 

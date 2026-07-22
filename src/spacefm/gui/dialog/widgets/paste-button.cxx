@@ -19,19 +19,8 @@
 
 #include "gui/dialog/widgets/paste-button.hxx"
 
-gui::widget::PasteButton::PasteButton()
+gui::widget::PasteButton::PasteButton() : gui::widget::IconButton("Paste", "edit-paste-symbolic")
 {
-    box_.set_orientation(Gtk::Orientation::HORIZONTAL);
-    box_.set_margin(5);
-
-    label_.set_text("Paste");
-    icon_.set_from_icon_name("edit-paste-symbolic");
-
-    box_.append(icon_);
-    box_.append(label_);
-
-    set_child(box_);
-
     signal_clicked().connect(sigc::mem_fun(*this, &PasteButton::on_button_clicked));
 }
 

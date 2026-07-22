@@ -13,30 +13,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <string>
-#include <string_view>
-
 #include <gtkmm.h>
-#include <sigc++/sigc++.h>
 
 #include "gui/dialog/widgets/icon-button.hxx"
 
-#include "icon-button.hxx"
-
-namespace gui::widget
+gui::widget::IconButton::IconButton(const std::string_view label, const std::string_view icon_name)
 {
-class CopyButton : public gui::widget::IconButton
-{
-  public:
-    CopyButton();
+    box_.set_orientation(Gtk::Orientation::HORIZONTAL);
+    box_.set_margin(5);
 
-    void set_copy_text(const std::string_view text) noexcept;
+    label_.set_text(label.data());
+    icon_.set_from_icon_name(icon_name.data());
 
-  private:
-    std::string text_;
+    box_.append(icon_);
+    box_.append(label_);
 
-    void on_button_clicked() noexcept;
-};
-} // namespace gui::widget
+    set_child(box_);
+}

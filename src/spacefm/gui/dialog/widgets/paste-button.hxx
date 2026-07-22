@@ -20,18 +20,16 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
+#include "gui/dialog/widgets/icon-button.hxx"
+
 namespace gui::widget
 {
-class PasteButton : public Gtk::Button
+class PasteButton : public gui::widget::IconButton
 {
   public:
     PasteButton();
 
   private:
-    Gtk::Box box_;
-    Gtk::Image icon_;
-    Gtk::Label label_;
-
     void on_button_clicked() noexcept;
 
   public:
