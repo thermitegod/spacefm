@@ -16,6 +16,20 @@ logger_dep = declare_dependency(
     dependencies : spdlog_dep,
 )
 
+# natsort static library
+
+natsort_lib = static_library(
+    'natsort',
+    files('natsort/natsort.cxx'),
+    include_directories : include_directories('.'),
+    install: false,
+)
+
+natsort_dep = declare_dependency(
+    link_with : natsort_lib,
+    include_directories : include_directories('.'),
+)
+
 # vfs static library
 
 vfs_sources = files(
@@ -80,22 +94,4 @@ vfs_dep = declare_dependency(
     link_with : vfs_lib,
     include_directories : include_directories('.'),
     dependencies : vfs_dependencies,
-)
-
-# natsort static library
-
-natsort_sources = files(
-    'natsort/strnatcmp.cxx',
-)
-
-natsort_lib = static_library(
-    'natsort',
-    natsort_sources,
-    include_directories : include_directories('.'),
-    install: false,
-)
-
-natsort_dep = declare_dependency(
-    link_with : natsort_lib,
-    include_directories : include_directories('.'),
 )

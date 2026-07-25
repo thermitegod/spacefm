@@ -34,7 +34,7 @@
 #include "vfs/task-manager.hxx"
 
 #include "logger.hxx"
-#include "natsort/strnatcmp.hxx"
+#include "natsort/natsort.hxx"
 
 gui::files_base::files_base(const std::shared_ptr<vfs::task_manager>& task_manager,
                             const std::shared_ptr<config::settings>& settings)
@@ -117,7 +117,7 @@ gui::files_base::model_sort(const Glib::RefPtr<const ModelColumns>& a,
         {
             if (sorting_.sort_natural)
             {
-                result = strnatcmp(lhs->name(), rhs->name(), sorting_.sort_case);
+                result = natsort::compare(lhs->name(), rhs->name(), sorting_.sort_case);
             }
             else
             {

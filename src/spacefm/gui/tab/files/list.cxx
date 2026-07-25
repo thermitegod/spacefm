@@ -30,7 +30,6 @@
 #include "vfs/task-manager.hxx"
 
 #include "logger.hxx"
-#include "natsort/strnatcmp.hxx"
 
 gui::list::list(const config::list_state& state,
                 const std::shared_ptr<vfs::task_manager>& task_manager,

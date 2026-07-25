@@ -15,8 +15,9 @@ test_sources_sfm += files(
 test_sources_sfm += files(
     'src/main.cxx',
 
+    'src/natsort/natsort.cxx',
+
     # gui
-    'src/gui/natsort/natsort.cxx',
     'src/gui/utils/history.cxx',
 
     # vfs
@@ -50,9 +51,8 @@ test_suite = build_target(
 
         base_dependencies,
         gtk_dependencies,
-        vfs_dep,
-
         natsort_dep,
+        vfs_dep,
     ],
     cpp_pch: '../pch/pch.hxx',
 )

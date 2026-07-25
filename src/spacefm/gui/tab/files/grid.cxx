@@ -31,7 +31,6 @@
 #include "vfs/task-manager.hxx"
 
 #include "logger.hxx"
-#include "natsort/strnatcmp.hxx"
 
 #define LAYOUT_TESTING
 
