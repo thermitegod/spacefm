@@ -758,7 +758,12 @@ gui::dialog::properties::init_checksum_tab() noexcept
         }
     };
 
-    const std::vector<std::string_view> algo_types = {"MD5", "SHA-1", "SHA-256", "SHA-512"};
+    static constexpr std::array<std::string_view, 4> algo_types = {
+        "MD5",
+        "SHA-1",
+        "SHA-256",
+        "SHA-512",
+    };
     for (const auto type : algo_types)
     {
         auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, selected_file->path());
