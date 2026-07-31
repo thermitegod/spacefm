@@ -31,7 +31,7 @@ namespace gui::widget
 class Checksum : public Gtk::Box
 {
   public:
-    Checksum(const std::string_view type, const std::filesystem::path& path);
+    Checksum(std::string_view type, const std::filesystem::path& path);
     ~Checksum() override;
 
     [[nodiscard]] bool has_checksum() noexcept;
@@ -43,7 +43,7 @@ class Checksum : public Gtk::Box
     void on_button_calculate_clicked() noexcept;
     void on_calculate_hash_finished() noexcept;
     void calculate_hash(const std::stop_token& stoken, const std::filesystem::path& path,
-                        const std::string_view algo) noexcept;
+                        std::string_view algo) noexcept;
 
     std::filesystem::path path_;
     std::string algo_type_;

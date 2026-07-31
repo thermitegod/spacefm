@@ -50,8 +50,7 @@ struct mountinfo_entry final
     mountinfo_entry() = default;
     mountinfo_entry(std::string_view line);
 
-    [[nodiscard]] static std::optional<mountinfo_entry>
-    create(const std::string_view line) noexcept;
+    [[nodiscard]] static std::optional<mountinfo_entry> create(std::string_view line) noexcept;
 
     [[nodiscard]] std::size_t mount_id() const noexcept;
     [[nodiscard]] std::size_t parent_id() const noexcept;

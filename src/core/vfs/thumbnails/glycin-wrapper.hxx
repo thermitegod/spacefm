@@ -128,7 +128,7 @@ class Image
     }
 
     [[nodiscard]] std::optional<std::string>
-    get_metadata_key_value(const std::string_view key) const noexcept
+    get_metadata_key_value(std::string_view key) const noexcept
     {
         char* val = gly_image_get_metadata_key_value(object_, key.data());
         if (!val)

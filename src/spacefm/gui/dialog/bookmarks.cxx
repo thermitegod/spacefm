@@ -168,7 +168,7 @@ gui::dialog::bookmarks::create_model() noexcept
 
 void
 gui::dialog::bookmarks::liststore_add_item(
-    const std::string_view name, const std::filesystem::path& path,
+    std::string_view name, const std::filesystem::path& path,
     const std::chrono::system_clock::time_point created) noexcept
 {
     liststore_->append(ModelColumns::create(name, path, created));

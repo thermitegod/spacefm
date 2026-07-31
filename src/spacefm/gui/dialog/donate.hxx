@@ -40,7 +40,7 @@ class donate final : public Gtk::Window
         page() noexcept;
 
         void set_image(const std::filesystem::path& path) noexcept;
-        void set_label(const std::string_view text) noexcept;
+        void set_label(std::string_view text) noexcept;
 
       private:
         Gtk::Picture img_;

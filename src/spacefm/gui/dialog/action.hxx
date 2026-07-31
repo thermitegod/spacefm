@@ -39,14 +39,14 @@ class action : public Gtk::ApplicationWindow
         bool is_dir_;
 
         static Glib::RefPtr<ModelColumns>
-        create(const std::string_view name, const std::string_view size, const bool is_dir)
+        create(std::string_view name, std::string_view size, const bool is_dir)
         {
             return Glib::make_refptr_for_instance<ModelColumns>(
                 new ModelColumns(name, size, is_dir));
         }
 
       protected:
-        ModelColumns(const std::string_view name, const std::string_view size, const bool is_dir)
+        ModelColumns(std::string_view name, std::string_view size, const bool is_dir)
             : Glib::ObjectBase(typeid(ModelColumns)), name_(name), size_(size), is_dir_(is_dir)
         {
         }
@@ -67,8 +67,7 @@ class action : public Gtk::ApplicationWindow
 
     void create_model();
     void add_columns();
-    void liststore_add_item(const std::string_view name, const std::uint64_t size,
-                            const bool is_dir);
+    void liststore_add_item(std::string_view name, const std::uint64_t size, const bool is_dir);
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);

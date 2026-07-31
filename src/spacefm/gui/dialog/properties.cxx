@@ -50,7 +50,7 @@ class properties_page : public Gtk::Box
     }
 
     void
-    add_row(const std::string_view left_item_name, const std::string_view right_item_name) noexcept
+    add_row(std::string_view left_item_name, std::string_view right_item_name) noexcept
     {
         Gtk::Label left_item(left_item_name.data());
         Gtk::Label right_item(right_item_name.data());
@@ -63,7 +63,7 @@ class properties_page : public Gtk::Box
     }
 
     void
-    add_row(const std::string_view left_item_name, Gtk::Widget& right_item) noexcept
+    add_row(std::string_view left_item_name, Gtk::Widget& right_item) noexcept
     {
         Gtk::Label left_item(left_item_name.data());
 
@@ -91,7 +91,7 @@ class properties_page : public Gtk::Box
     }
 
     void
-    add_entry(const std::string_view left_item_name, const std::string_view text,
+    add_entry(std::string_view left_item_name, std::string_view text,
               const bool selectable = true) noexcept
     {
         Gtk::Label left_item(left_item_name.data());
@@ -727,7 +727,7 @@ gui::dialog::properties::init_checksum_tab() noexcept
     entry_box->set_orientation(Gtk::Orientation::HORIZONTAL);
     auto paste_button = Gtk::make_managed<gui::widget::PasteButton>();
     auto entry = Gtk::make_managed<gui::widget::ValidatedEntry>();
-    paste_button->signal_paste_text().connect([entry](const std::string_view text)
+    paste_button->signal_paste_text().connect([entry](std::string_view text)
                                               { entry->set_text(text.data()); });
     entry_box->append(*entry);
     entry_box->append(*paste_button);
@@ -737,7 +737,7 @@ gui::dialog::properties::init_checksum_tab() noexcept
     auto separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
     box->append(*separator);
 
-    auto entry_validate = [entry](const std::string_view checksum)
+    auto entry_validate = [entry](std::string_view checksum)
     {
         const std::string current_input = entry->get_text();
 
@@ -767,7 +767,7 @@ gui::dialog::properties::init_checksum_tab() noexcept
     for (const auto type : algo_types)
     {
         auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, selected_file->path());
-        checksum->signal_calculated().connect([entry_validate](const std::string_view checksum)
+        checksum->signal_calculated().connect([entry_validate](std::string_view checksum)
                                               { entry_validate(checksum); });
 
         box->append(*checksum);

@@ -783,7 +783,7 @@ vfs::volume_manager::avoid_changes(const std::filesystem::path& dir) const noexc
         "smbfs",
     };
 
-    const auto has_blacklisted = [&fstype](const std::string_view blacklisted)
+    const auto has_blacklisted = [&fstype](std::string_view blacklisted)
     { return fstype->contains(blacklisted); };
 
     const auto is_blacklisted = std::ranges::any_of(blacklisted, has_blacklisted);

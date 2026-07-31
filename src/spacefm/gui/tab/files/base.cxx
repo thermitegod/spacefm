@@ -282,7 +282,7 @@ gui::files_base::unselect_file(const std::filesystem::path& filename) const noex
 }
 
 void
-gui::files_base::select_pattern(const std::string_view search_key) noexcept
+gui::files_base::select_pattern(std::string_view search_key) noexcept
 {
     unselect_all();
 
@@ -380,7 +380,7 @@ gui::files_base::set_thumbnail_size(const config::icon_size size) noexcept
 }
 
 void
-gui::files_base::set_pattern(const std::string_view pattern) noexcept
+gui::files_base::set_pattern(std::string_view pattern) noexcept
 {
     pattern_ = pattern.data();
 }

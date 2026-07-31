@@ -43,7 +43,7 @@ class bookmarks : public Gtk::ApplicationWindow
         std::chrono::system_clock::time_point created_;
 
         static Glib::RefPtr<ModelColumns>
-        create(const std::string_view name, const std::filesystem::path& path,
+        create(std::string_view name, const std::filesystem::path& path,
                const std::chrono::system_clock::time_point created) noexcept
         {
             return Glib::make_refptr_for_instance<ModelColumns>(
@@ -51,7 +51,7 @@ class bookmarks : public Gtk::ApplicationWindow
         }
 
       protected:
-        explicit ModelColumns(const std::string_view name, const std::filesystem::path& path,
+        explicit ModelColumns(std::string_view name, const std::filesystem::path& path,
                               const std::chrono::system_clock::time_point created) noexcept
             : Glib::ObjectBase(typeid(ModelColumns)), name_(name), path_(path), created_(created)
         {
@@ -75,7 +75,7 @@ class bookmarks : public Gtk::ApplicationWindow
 
     void create_model() noexcept;
     void add_columns() noexcept;
-    void liststore_add_item(const std::string_view name, const std::filesystem::path& path,
+    void liststore_add_item(std::string_view name, const std::filesystem::path& path,
                             const std::chrono::system_clock::time_point created) noexcept;
 
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,

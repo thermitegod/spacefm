@@ -33,9 +33,8 @@ struct text_response final
 class text final : public Gtk::Window
 {
   public:
-    text(Gtk::ApplicationWindow& parent, const std::string_view title,
-         const std::string_view message, const std::string_view text,
-         const std::string_view default_text);
+    text(Gtk::ApplicationWindow& parent, std::string_view title, std::string_view message,
+         std::string_view text, std::string_view default_text);
 
   protected:
     std::string default_text_;

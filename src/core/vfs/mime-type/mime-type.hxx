@@ -32,13 +32,13 @@ namespace vfs::detail::mime_type
  */
 [[nodiscard]] std::string get_by_file(const std::filesystem::path& path) noexcept;
 
-[[nodiscard]] bool is_text(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_executable(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_archive(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_video(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_audio(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_image(const std::string_view mime_type) noexcept;
-[[nodiscard]] bool is_unknown(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_text(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_executable(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_archive(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_video(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_audio(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_image(std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_unknown(std::string_view mime_type) noexcept;
 
 /* Get human-readable description and icon name of the mime-type.
  *
@@ -46,5 +46,5 @@ namespace vfs::detail::mime_type
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed.
  */
-[[nodiscard]] std::array<std::string, 2> get_desc_icon(const std::string_view type) noexcept;
+[[nodiscard]] std::array<std::string, 2> get_desc_icon(std::string_view type) noexcept;
 } // namespace vfs::detail::mime_type

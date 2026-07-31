@@ -24,8 +24,7 @@
 #include "vfs/utils/file-ops.hxx"
 
 std::optional<std::string>
-vfs::linux::sysfs::get_string(const std::filesystem::path& dir,
-                              const std::string_view attribute) noexcept
+vfs::linux::sysfs::get_string(const std::filesystem::path& dir, std::string_view attribute) noexcept
 {
     if (std::filesystem::exists(dir / attribute))
     {
@@ -39,8 +38,7 @@ vfs::linux::sysfs::get_string(const std::filesystem::path& dir,
 }
 
 std::optional<i64>
-vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
-                           const std::string_view attribute) noexcept
+vfs::linux::sysfs::get_i64(const std::filesystem::path& dir, std::string_view attribute) noexcept
 {
     const auto buffer = get_string(dir, attribute);
     if (buffer)
@@ -55,8 +53,7 @@ vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
 }
 
 std::optional<u64>
-vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
-                           const std::string_view attribute) noexcept
+vfs::linux::sysfs::get_u64(const std::filesystem::path& dir, std::string_view attribute) noexcept
 {
     const auto buffer = get_string(dir, attribute);
     if (buffer)

@@ -40,13 +40,13 @@ class preferences : public Gtk::ApplicationWindow
         std::uint32_t value_;
 
         static Glib::RefPtr<ListColumns>
-        create(const std::string_view entry, const std::uint32_t value) noexcept
+        create(std::string_view entry, const std::uint32_t value) noexcept
         {
             return Glib::make_refptr_for_instance<ListColumns>(new ListColumns(entry, value));
         }
 
       protected:
-        explicit ListColumns(const std::string_view entry, const std::uint32_t value) noexcept
+        explicit ListColumns(std::string_view entry, const std::uint32_t value) noexcept
             : entry_(entry), value_(value)
         {
         }

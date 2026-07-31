@@ -177,7 +177,7 @@ gui::clipboard::paste_files(
 }
 
 void
-gui::clipboard::set_text(const std::string_view text) noexcept
+gui::clipboard::set_text(std::string_view text) noexcept
 {
     auto display = Gdk::Display::get_default();
     auto clipboard = display->get_clipboard();

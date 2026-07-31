@@ -1708,7 +1708,7 @@ gui::tab::add_shortcuts() noexcept
 }
 
 void
-gui::tab::on_path_bar_activate(const std::string_view text) noexcept
+gui::tab::on_path_bar_activate(std::string_view text) noexcept
 {
     if (text.empty())
     {
@@ -1913,7 +1913,7 @@ gui::tab::on_dir_file_listed() noexcept
 }
 
 void
-gui::tab::update_model(const std::string_view pattern) noexcept
+gui::tab::update_model(std::string_view pattern) noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {
@@ -2112,7 +2112,7 @@ gui::tab::open_selected_files() noexcept
 }
 
 void
-gui::tab::open_selected_files_with_app(const std::string_view app_desktop) noexcept
+gui::tab::open_selected_files_with_app(std::string_view app_desktop) noexcept
 {
     const auto selected = selected_files();
     if (selected.empty())
@@ -2437,7 +2437,7 @@ gui::tab::show_pattern_dialog() noexcept
 }
 
 void
-gui::tab::select_pattern(const std::string_view search_key) noexcept
+gui::tab::select_pattern(std::string_view search_key) noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {

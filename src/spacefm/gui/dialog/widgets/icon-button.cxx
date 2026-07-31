@@ -17,7 +17,7 @@
 
 #include "gui/dialog/widgets/icon-button.hxx"
 
-gui::widget::IconButton::IconButton(const std::string_view label, const std::string_view icon_name)
+gui::widget::IconButton::IconButton(std::string_view label, std::string_view icon_name)
 {
     box_.set_orientation(Gtk::Orientation::HORIZONTAL);
     box_.set_margin(5);

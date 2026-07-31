@@ -28,7 +28,7 @@ struct pattern_response final
 class pattern : public Gtk::ApplicationWindow
 {
   public:
-    pattern(Gtk::ApplicationWindow& parent, const std::string_view pattern);
+    pattern(Gtk::ApplicationWindow& parent, std::string_view pattern);
     ~pattern();
 
   protected:

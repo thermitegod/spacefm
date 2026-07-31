@@ -27,7 +27,7 @@
 #include "vfs/utils/file-ops.hxx"
 
 inline void
-create_file(const std::filesystem::path& path, const std::string_view content = "data") noexcept
+create_file(const std::filesystem::path& path, std::string_view content = "data") noexcept
 {
     std::filesystem::create_directories(path.parent_path());
 

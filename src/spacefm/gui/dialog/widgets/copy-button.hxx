@@ -32,7 +32,7 @@ class CopyButton : public gui::widget::IconButton
   public:
     CopyButton();
 
-    void set_copy_text(const std::string_view text) noexcept;
+    void set_copy_text(std::string_view text) noexcept;
 
   private:
     std::string text_;

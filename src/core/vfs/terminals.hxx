@@ -27,7 +27,7 @@ class terminals final
 {
   public:
     [[nodiscard]] static std::expected<std::string, std::error_code>
-    create_command(const std::string_view terminal, const std::string_view command) noexcept;
+    create_command(std::string_view terminal, std::string_view command) noexcept;
 
     [[nodiscard]] static std::vector<std::string> supported_names() noexcept;
 };

@@ -24,7 +24,7 @@ namespace gui::widget
 class IconButton : public Gtk::Button
 {
   public:
-    IconButton(const std::string_view label, const std::string_view icon_name);
+    IconButton(std::string_view label, std::string_view icon_name);
 
   private:
     Gtk::Box box_;

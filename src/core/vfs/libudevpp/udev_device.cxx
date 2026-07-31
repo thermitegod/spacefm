@@ -183,13 +183,13 @@ libudev::device::get_driver() const noexcept
 }
 
 bool
-libudev::device::has_sysattr(const std::string_view named) const noexcept
+libudev::device::has_sysattr(std::string_view named) const noexcept
 {
     return std::ranges::contains(get_sysattr_keys(), named);
 }
 
 std::optional<std::string>
-libudev::device::get_sysattr(const std::string_view named) const noexcept
+libudev::device::get_sysattr(std::string_view named) const noexcept
 {
     if (has_sysattr(named))
     {
@@ -199,8 +199,7 @@ libudev::device::get_sysattr(const std::string_view named) const noexcept
 }
 
 bool
-libudev::device::set_sysattr(const std::string_view named,
-                             const std::string_view value) const noexcept
+libudev::device::set_sysattr(std::string_view named, std::string_view value) const noexcept
 {
     return udev_device_set_sysattr_value(handle.get(), named.data(), value.data()) >= 0;
 }
@@ -257,13 +256,13 @@ libudev::device::get_devlinks() const noexcept
 }
 
 bool
-libudev::device::has_property(const std::string_view named) const noexcept
+libudev::device::has_property(std::string_view named) const noexcept
 {
     return udev_device_get_property_value(handle.get(), named.data()) != nullptr;
 }
 
 std::optional<std::string>
-libudev::device::get_property(const std::string_view named) const noexcept
+libudev::device::get_property(std::string_view named) const noexcept
 {
     if (has_property(named))
     {
@@ -288,7 +287,7 @@ libudev::device::get_properties() const noexcept
 }
 
 bool
-libudev::device::has_tag(const std::string_view named) const noexcept
+libudev::device::has_tag(std::string_view named) const noexcept
 {
     return udev_device_has_tag(handle.get(), named.data());
 }
@@ -310,7 +309,7 @@ libudev::device::get_tags() const noexcept
 }
 
 bool
-libudev::device::has_current_tag(const std::string_view named) const noexcept
+libudev::device::has_current_tag(std::string_view named) const noexcept
 {
     return udev_device_has_current_tag(handle.get(), named.data());
 }
@@ -354,8 +353,7 @@ libudev::device::get_parent_device() const noexcept
 }
 
 std::optional<libudev::device>
-libudev::device::get_parent_device(const std::string_view subsystem,
-                                   const std::string_view type) const noexcept
+libudev::device::get_parent_device(std::string_view subsystem, std::string_view type) const noexcept
 {
     if (!handle || is_disk())
     {

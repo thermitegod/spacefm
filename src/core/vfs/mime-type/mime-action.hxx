@@ -35,22 +35,21 @@ enum class action : std::uint8_t
 /*
  *  Get a list of applications supporting this mime-type
  */
-[[nodiscard]] std::vector<std::string> get_actions(const std::string_view mime_type) noexcept;
+[[nodiscard]] std::vector<std::string> get_actions(std::string_view mime_type) noexcept;
 
 /*
  * Add an applications used to open this mime-type
  * desktop_id is the name of *.desktop file.
  */
-[[nodiscard]] std::string add_action(const std::string_view mime_type,
-                                     const std::string_view desktop_id) noexcept;
+[[nodiscard]] std::string add_action(std::string_view mime_type,
+                                     std::string_view desktop_id) noexcept;
 
 /*
  * Get default applications used to open this mime-type
  *
  * If std::nullopt is returned, that means a default app is not set for this mime-type.
  */
-[[nodiscard]] std::optional<std::string>
-get_default_action(const std::string_view mime_type) noexcept;
+[[nodiscard]] std::optional<std::string> get_default_action(std::string_view mime_type) noexcept;
 
 /*
  * Set applications used to open or never used to open this mime-type
@@ -62,12 +61,11 @@ get_default_action(const std::string_view mime_type) noexcept;
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void set_default_action(const std::string_view mime_type,
-                        const std::string_view desktop_id) noexcept;
+void set_default_action(std::string_view mime_type, std::string_view desktop_id) noexcept;
 
 /* Locate the file path of desktop file by desktop_id */
 [[nodiscard]] std::optional<std::filesystem::path>
-locate_desktop_file(const std::string_view desktop_id) noexcept;
+locate_desktop_file(std::string_view desktop_id) noexcept;
 [[nodiscard]] std::optional<std::filesystem::path>
-locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id) noexcept;
+locate_desktop_file(const std::filesystem::path& dir, std::string_view desktop_id) noexcept;
 } // namespace vfs::detail::mime_type

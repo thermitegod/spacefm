@@ -422,7 +422,7 @@ vfs::desktop::app_exec_generate_desktop_argv(
 
 void
 vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
-                               const std::string_view command) const noexcept
+                               std::string_view command) const noexcept
 {
     (void)cwd;
     (void)command;

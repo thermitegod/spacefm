@@ -35,7 +35,7 @@ void cut_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcep
 void paste_files(
     std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept;
 
-void set_text(const std::string_view text) noexcept;
+void set_text(std::string_view text) noexcept;
 
 [[nodiscard]] std::optional<std::string> get_text() noexcept;
 } // namespace gui::clipboard

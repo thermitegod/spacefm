@@ -54,7 +54,7 @@ vfs::proc::mountinfo(const std::filesystem::path& path) noexcept
     return mounts;
 }
 
-vfs::proc::mountinfo_entry::mountinfo_entry(const std::string_view line)
+vfs::proc::mountinfo_entry::mountinfo_entry(std::string_view line)
 {
     if (line.empty())
     {

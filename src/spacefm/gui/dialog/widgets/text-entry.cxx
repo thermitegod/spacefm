@@ -23,8 +23,7 @@
 
 #include "gui/dialog/widgets/text-entry.hxx"
 
-gui::widget::TextEntry::TextEntry(const std::string_view label_markup,
-                                  const std::string_view initial_text)
+gui::widget::TextEntry::TextEntry(std::string_view label_markup, std::string_view initial_text)
 {
     set_orientation(Gtk::Orientation::VERTICAL);
     // set_margin(5);
@@ -83,7 +82,7 @@ gui::widget::TextEntry::select_range(const std::size_t selection_length) noexcep
 }
 
 void
-gui::widget::TextEntry::set_text(const std::string_view text, bool emit_signal) noexcept
+gui::widget::TextEntry::set_text(std::string_view text, bool emit_signal) noexcept
 {
     if (!emit_signal)
     {
@@ -104,7 +103,7 @@ gui::widget::TextEntry::get_text() const noexcept
 }
 
 void
-gui::widget::TextEntry::set_status_text(const std::string_view status) noexcept
+gui::widget::TextEntry::set_status_text(std::string_view status) noexcept
 {
     label_status_.set_markup(std::format("{}", status));
 }

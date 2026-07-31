@@ -29,7 +29,7 @@
 #include "gui/dialog/widgets/checksum.hxx"
 #include "gui/dialog/widgets/copy-button.hxx"
 
-gui::widget::Checksum::Checksum(const std::string_view type, const std::filesystem::path& path)
+gui::widget::Checksum::Checksum(std::string_view type, const std::filesystem::path& path)
     : path_(path), algo_type_(type)
 {
     set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -97,7 +97,7 @@ gui::widget::Checksum::on_button_calculate_clicked() noexcept
 void
 gui::widget::Checksum::calculate_hash(const std::stop_token& stoken,
                                       const std::filesystem::path& path,
-                                      const std::string_view algo) noexcept
+                                      std::string_view algo) noexcept
 {
     std::string outcome;
     try

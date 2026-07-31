@@ -133,7 +133,7 @@ gui::dialog::action::create_model()
 }
 
 void
-gui::dialog::action::liststore_add_item(const std::string_view name, const std::uint64_t size,
+gui::dialog::action::liststore_add_item(std::string_view name, const std::uint64_t size,
                                         const bool is_dir)
 {
     liststore_->append(

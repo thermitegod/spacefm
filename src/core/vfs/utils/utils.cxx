@@ -69,7 +69,7 @@ vfs::utils::filename_stem_and_extension(const std::filesystem::path& filename) n
 
 std::filesystem::path
 vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem::path& filename,
-                        const std::string_view tag) noexcept
+                        std::string_view tag) noexcept
 {
     assert(!path.empty());
     assert(!filename.empty());

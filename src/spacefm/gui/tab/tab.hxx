@@ -89,12 +89,12 @@ class tab final : public Gtk::Box
     void add_shortcuts() noexcept;
     void add_actions() noexcept;
     void add_context_menu() noexcept;
-    void update_model(const std::string_view pattern = "") noexcept;
+    void update_model(std::string_view pattern = "") noexcept;
 
     Glib::RefPtr<Gio::Menu> create_context_menu_model() noexcept;
     void enable_all_actions() noexcept;
 
-    void on_path_bar_activate(const std::string_view text) noexcept;
+    void on_path_bar_activate(std::string_view text) noexcept;
     void on_button_back();
     void on_button_forward();
     void on_button_up();
@@ -132,11 +132,11 @@ class tab final : public Gtk::Box
                      const bool unselect_others = true) const noexcept;
     void select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename) const noexcept;
-    void select_pattern(const std::string_view search_key = "") noexcept;
+    void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
     void open_selected_files() noexcept;
-    void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;
+    void open_selected_files_with_app(std::string_view app_desktop = "") noexcept;
     void open_selected_files_execute(const bool in_terminal) noexcept;
 
     void update_selection_history() noexcept;

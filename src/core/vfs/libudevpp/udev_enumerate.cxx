@@ -26,20 +26,20 @@ libudev::enumerate::is_initialized() const noexcept
 }
 
 void
-libudev::enumerate::add_match_subsystem(const std::string_view subsystem) const noexcept
+libudev::enumerate::add_match_subsystem(std::string_view subsystem) const noexcept
 {
     udev_enumerate_add_match_subsystem(handle.get(), subsystem.data());
 }
 
 void
-libudev::enumerate::add_nomatch_subsystem(const std::string_view subsystem) const noexcept
+libudev::enumerate::add_nomatch_subsystem(std::string_view subsystem) const noexcept
 {
     udev_enumerate_add_nomatch_subsystem(handle.get(), subsystem.data());
 }
 
 void
-libudev::enumerate::add_match_sysattr(const std::string_view sysattr,
-                                      const std::string_view value) const noexcept
+libudev::enumerate::add_match_sysattr(std::string_view sysattr,
+                                      std::string_view value) const noexcept
 {
     udev_enumerate_add_match_sysattr(handle.get(),
                                      sysattr.data(),
@@ -47,8 +47,8 @@ libudev::enumerate::add_match_sysattr(const std::string_view sysattr,
 }
 
 void
-libudev::enumerate::add_nomatch_sysattr(const std::string_view sysattr,
-                                        const std::string_view value) const noexcept
+libudev::enumerate::add_nomatch_sysattr(std::string_view sysattr,
+                                        std::string_view value) const noexcept
 {
     udev_enumerate_add_nomatch_sysattr(handle.get(),
                                        sysattr.data(),
@@ -56,20 +56,20 @@ libudev::enumerate::add_nomatch_sysattr(const std::string_view sysattr,
 }
 
 void
-libudev::enumerate::add_match_property(const std::string_view property,
-                                       const std::string_view value) const noexcept
+libudev::enumerate::add_match_property(std::string_view property,
+                                       std::string_view value) const noexcept
 {
     udev_enumerate_add_match_property(handle.get(), property.data(), value.data());
 }
 
 void
-libudev::enumerate::add_match_tag(const std::string_view tag) const noexcept
+libudev::enumerate::add_match_tag(std::string_view tag) const noexcept
 {
     udev_enumerate_add_match_tag(handle.get(), tag.data());
 }
 
 void
-libudev::enumerate::add_match_sysname(const std::string_view sysname) const noexcept
+libudev::enumerate::add_match_sysname(std::string_view sysname) const noexcept
 {
     udev_enumerate_add_match_sysname(handle.get(), sysname.data());
 }

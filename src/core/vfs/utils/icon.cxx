@@ -27,8 +27,8 @@
 #include "logger.hxx"
 
 Glib::RefPtr<Gtk::IconPaintable>
-vfs::utils::load_icon(const std::string_view icon_name, const i32 icon_size,
-                      const std::string_view fallback) noexcept
+vfs::utils::load_icon(std::string_view icon_name, const i32 icon_size,
+                      std::string_view fallback) noexcept
 {
     auto display = Gdk::Display::get_default();
     if (!display)

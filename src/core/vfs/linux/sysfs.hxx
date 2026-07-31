@@ -23,9 +23,7 @@
 namespace vfs::linux::sysfs
 {
 std::optional<std::string> get_string(const std::filesystem::path& dir,
-                                      const std::string_view attribute) noexcept;
-std::optional<i64> get_i64(const std::filesystem::path& dir,
-                           const std::string_view attribute) noexcept;
-std::optional<u64> get_u64(const std::filesystem::path& dir,
-                           const std::string_view attribute) noexcept;
+                                      std::string_view attribute) noexcept;
+std::optional<i64> get_i64(const std::filesystem::path& dir, std::string_view attribute) noexcept;
+std::optional<u64> get_u64(const std::filesystem::path& dir, std::string_view attribute) noexcept;
 } // namespace vfs::linux::sysfs

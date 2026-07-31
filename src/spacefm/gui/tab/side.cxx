@@ -75,8 +75,8 @@ gui::side::side(const std::shared_ptr<config::settings>& settings) : settings_(s
 }
 
 void
-gui::side::add_location(const std::string_view name, const std::filesystem::path& path,
-                        const std::string_view icon_name) noexcept
+gui::side::add_location(std::string_view name, const std::filesystem::path& path,
+                        std::string_view icon_name) noexcept
 {
     auto box = Gtk::make_managed<Gtk::Box>();
     auto icon = Gtk::make_managed<Gtk::Image>();

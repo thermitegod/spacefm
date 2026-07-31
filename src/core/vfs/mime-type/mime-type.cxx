@@ -106,7 +106,7 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
     const auto buffer = read_mime_header(path);
     if (!buffer.empty())
     {
-        constexpr auto is_data_plain_text = [](const std::string_view data)
+        constexpr auto is_data_plain_text = [](std::string_view data)
         {
             if (data.empty())
             {
@@ -184,7 +184,7 @@ parse_xml_file(const std::filesystem::path& path, bool is_local) noexcept
 }
 
 std::array<std::string, 2>
-vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
+vfs::detail::mime_type::get_desc_icon(std::string_view type) noexcept
 {
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
@@ -221,7 +221,7 @@ vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
 }
 
 bool
-vfs::detail::mime_type::is_text(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_text(std::string_view mime_type) noexcept
 {
     if (mime_type == "application/pdf")
     {
@@ -236,7 +236,7 @@ vfs::detail::mime_type::is_text(const std::string_view mime_type) noexcept
 }
 
 bool
-vfs::detail::mime_type::is_executable(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_executable(std::string_view mime_type) noexcept
 {
     /*
      * Only executable types can be executale.
@@ -249,7 +249,7 @@ vfs::detail::mime_type::is_executable(const std::string_view mime_type) noexcept
 }
 
 bool
-vfs::detail::mime_type::is_archive(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_archive(std::string_view mime_type) noexcept
 {
     // Taken from file-roller .desktop file
     static constexpr std::array<std::string_view, 65> archive_mime_types{
@@ -324,25 +324,25 @@ vfs::detail::mime_type::is_archive(const std::string_view mime_type) noexcept
 }
 
 bool
-vfs::detail::mime_type::is_image(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_image(std::string_view mime_type) noexcept
 {
     return mime_type.starts_with("image/");
 }
 
 bool
-vfs::detail::mime_type::is_video(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_video(std::string_view mime_type) noexcept
 {
     return mime_type.starts_with("video/");
 }
 
 bool
-vfs::detail::mime_type::is_audio(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_audio(std::string_view mime_type) noexcept
 {
     return mime_type.starts_with("audio/");
 }
 
 bool
-vfs::detail::mime_type::is_unknown(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_unknown(std::string_view mime_type) noexcept
 {
     return mime_type == vfs::constants::mime_type::unknown;
 }

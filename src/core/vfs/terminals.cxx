@@ -63,8 +63,7 @@ const std::array<TerminalHandler, 22> handlers{
 } // namespace
 
 std::expected<std::string, std::error_code>
-vfs::terminals::create_command(const std::string_view terminal,
-                               const std::string_view command) noexcept
+vfs::terminals::create_command(std::string_view terminal, std::string_view command) noexcept
 {
     const auto* const it =
         std::ranges::find_if(handlers,

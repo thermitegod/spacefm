@@ -27,13 +27,13 @@ namespace gui::widget
 class TextEntry : public Gtk::Box
 {
   public:
-    TextEntry(const std::string_view label_markup, const std::string_view initial_text = "");
+    TextEntry(std::string_view label_markup, std::string_view initial_text = "");
     ~TextEntry() override = default;
 
-    void set_text(const std::string_view text, bool emit_signal = true) noexcept;
+    void set_text(std::string_view text, bool emit_signal = true) noexcept;
     [[nodiscard]] std::string get_text() const noexcept;
 
-    void set_status_text(const std::string_view status) noexcept;
+    void set_status_text(std::string_view status) noexcept;
     void clear_status_text() noexcept;
 
     void select_range(const std::size_t selection_length = std::string::npos) noexcept;

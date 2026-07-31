@@ -57,7 +57,7 @@ update_desktop_database() noexcept
 
 /* Determine removed associations for this type */
 static void
-remove_actions(const std::string_view mime_type, std::vector<std::string>& actions) noexcept
+remove_actions(std::string_view mime_type, std::vector<std::string>& actions) noexcept
 {
     // logger::info<logger::vfs>("remove_actions( {} )", type);
 
@@ -117,17 +117,17 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
  *
  */
 static void
-get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
+get_actions(const std::filesystem::path& dir, std::string_view mime_type,
             std::vector<std::string>& actions) noexcept
 {
     // logger::info<logger::vfs>("get_actions( {}, {} )\n", dir, mime_type);
     std::vector<Glib::ustring> removed;
 
-    static constexpr std::array<const std::string_view, 2> names{
+    static constexpr std::array<std::string_view, 2> names{
         "mimeapps.list",
         "mimeinfo.cache",
     };
-    static constexpr std::array<const std::string_view, 3> groups{
+    static constexpr std::array<std::string_view, 3> groups{
         "Default Applications",
         "Added Associations",
         "MIME Cache",
@@ -217,7 +217,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
 }
 
 std::vector<std::string>
-vfs::detail::mime_type::get_actions(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::get_actions(std::string_view mime_type) noexcept
 {
     std::vector<std::string> actions;
 
@@ -273,7 +273,7 @@ vfs::detail::mime_type::get_actions(const std::string_view mime_type) noexcept
  * desktop_id is the name of *.desktop file.
  */
 [[nodiscard]] static bool
-mime_type_has_action(const std::string_view type, const std::string_view desktop_id) noexcept
+mime_type_has_action(std::string_view type, std::string_view desktop_id) noexcept
 {
     Glib::ustring cmd;
     Glib::ustring name;
@@ -341,7 +341,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         return found;
     }
 
-    for (const std::string_view action : actions)
+    for (std::string_view action : actions)
     {
         /* Try to match directly by desktop_id first */
         if (is_desktop && action == desktop_id)
@@ -395,14 +395,13 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 }
 
 [[nodiscard]] static std::string
-make_custom_desktop_file(const std::string_view desktop_id,
-                         const std::string_view mime_type) noexcept
+make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type) noexcept
 {
     std::string cust_template;
     Glib::ustring file_content;
 
-    static constexpr const std::string_view desktop_ext{".desktop"};
-    static constexpr const std::string_view replace_txt{"<REPLACE_TXT>"};
+    static constexpr std::string_view desktop_ext{".desktop"};
+    static constexpr std::string_view replace_txt{"<REPLACE_TXT>"};
 
     if (desktop_id.ends_with(desktop_ext))
     {
@@ -493,8 +492,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
 std::string
-vfs::detail::mime_type::add_action(const std::string_view type,
-                                   const std::string_view desktop_id) noexcept
+vfs::detail::mime_type::add_action(std::string_view type, std::string_view desktop_id) noexcept
 {
     if (mime_type_has_action(type, desktop_id))
     {
@@ -504,7 +502,7 @@ vfs::detail::mime_type::add_action(const std::string_view type,
 }
 
 [[nodiscard]] static std::optional<std::filesystem::path>
-locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id) noexcept
+locate_desktop_file(const std::filesystem::path& dir, std::string_view desktop_id) noexcept
 {
     auto desktop_path = dir / "applications" / desktop_id;
     if (std::filesystem::is_regular_file(desktop_path))
@@ -535,13 +533,13 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
 
 std::optional<std::filesystem::path>
 vfs::detail::mime_type::locate_desktop_file(const std::filesystem::path& dir,
-                                            const std::string_view desktop_id) noexcept
+                                            std::string_view desktop_id) noexcept
 {
     return ::locate_desktop_file(dir, desktop_id);
 }
 
 std::optional<std::filesystem::path>
-vfs::detail::mime_type::locate_desktop_file(const std::string_view desktop_id) noexcept
+vfs::detail::mime_type::locate_desktop_file(std::string_view desktop_id) noexcept
 {
     const auto data_dir = vfs::user::data();
 
@@ -564,7 +562,7 @@ vfs::detail::mime_type::locate_desktop_file(const std::string_view desktop_id) n
 }
 
 std::optional<std::string>
-vfs::detail::mime_type::get_default_action(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::get_default_action(std::string_view mime_type) noexcept
 {
     assert(mime_type.empty() != true);
 
@@ -578,8 +576,8 @@ vfs::detail::mime_type::get_default_action(const std::string_view mime_type) noe
 }
 
 void
-vfs::detail::mime_type::set_default_action(const std::string_view mime_type,
-                                           const std::string_view desktop_id) noexcept
+vfs::detail::mime_type::set_default_action(std::string_view mime_type,
+                                           std::string_view desktop_id) noexcept
 {
     assert(mime_type.empty() != true);
     assert(desktop_id.empty() != true);

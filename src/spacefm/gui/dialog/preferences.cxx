@@ -39,7 +39,7 @@ class preference_page : public Gtk::ScrolledWindow
     }
 
     void
-    add_section(const std::string_view header) noexcept
+    add_section(std::string_view header) noexcept
     {
         Gtk::Label label;
         label.set_markup(std::format("<b>{}</b>", header.data()));
@@ -48,7 +48,7 @@ class preference_page : public Gtk::ScrolledWindow
     }
 
     void
-    add_row(const std::string_view left_item_name, Gtk::Widget& right_item) noexcept
+    add_row(std::string_view left_item_name, Gtk::Widget& right_item) noexcept
     {
         Gtk::Label left_item(left_item_name.data());
 
@@ -76,7 +76,7 @@ class preference_page : public Gtk::ScrolledWindow
     }
 
     void
-    add_checkbox(const std::string_view label, bool& option) noexcept
+    add_checkbox(std::string_view label, bool& option) noexcept
     {
         auto* button = Gtk::make_managed<Gtk::CheckButton>(std::format("{}", label));
         button->set_active(option);

@@ -42,8 +42,7 @@ libudev::monitor::receive_device() const noexcept
 }
 
 bool
-libudev::monitor::filter_add_match_subsystem_devtype(
-    const std::string_view subsystem) const noexcept
+libudev::monitor::filter_add_match_subsystem_devtype(std::string_view subsystem) const noexcept
 {
     return udev_monitor_filter_add_match_subsystem_devtype(handle.get(),
                                                            subsystem.data(),
@@ -51,8 +50,8 @@ libudev::monitor::filter_add_match_subsystem_devtype(
 }
 
 bool
-libudev::monitor::filter_add_match_subsystem_devtype(const std::string_view subsystem,
-                                                     const std::string_view devtype) const noexcept
+libudev::monitor::filter_add_match_subsystem_devtype(std::string_view subsystem,
+                                                     std::string_view devtype) const noexcept
 {
     return udev_monitor_filter_add_match_subsystem_devtype(handle.get(),
                                                            subsystem.data(),
@@ -60,7 +59,7 @@ libudev::monitor::filter_add_match_subsystem_devtype(const std::string_view subs
 }
 
 bool
-libudev::monitor::filter_add_match_tag(const std::string_view tag) const noexcept
+libudev::monitor::filter_add_match_tag(std::string_view tag) const noexcept
 {
     return udev_monitor_filter_add_match_tag(handle.get(), tag.data()) == 0;
 }

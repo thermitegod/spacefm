@@ -98,7 +98,7 @@ logger::initialize(const std::flat_map<std::string, std::string>& options,
 
 void
 logger::detail::logger(const logger::detail::loglevel level, const domain d,
-                       const std::string_view msg) noexcept
+                       std::string_view msg) noexcept
 {
     auto l = spdlog::get(magic_enum::enum_name(d).data());
     if (!l)

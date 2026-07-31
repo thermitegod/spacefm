@@ -315,7 +315,7 @@ vfs::device::device_get_info() noexcept
 
     // links
     const auto entrys = udevice.get_devlinks();
-    for (const std::string_view entry : entrys)
+    for (std::string_view entry : entrys)
     {
         if (entry.starts_with("/dev/disk/by-id/") || entry.starts_with("/dev/disk/by-uuid/"))
         {

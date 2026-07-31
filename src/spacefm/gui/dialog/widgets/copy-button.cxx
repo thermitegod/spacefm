@@ -25,7 +25,7 @@ gui::widget::CopyButton::CopyButton() : gui::widget::IconButton("Copy", "edit-co
 }
 
 void
-gui::widget::CopyButton::set_copy_text(const std::string_view text) noexcept
+gui::widget::CopyButton::set_copy_text(std::string_view text) noexcept
 {
     text_ = text;
 }

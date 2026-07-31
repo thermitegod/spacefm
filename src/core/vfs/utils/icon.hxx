@@ -21,7 +21,6 @@
 #include <ztd/ztd.hxx>
 namespace vfs::utils
 {
-Glib::RefPtr<Gtk::IconPaintable>
-load_icon(const std::string_view icon_name, const i32 icon_size,
-          const std::string_view fallback = "text-x-generic") noexcept;
+Glib::RefPtr<Gtk::IconPaintable> load_icon(std::string_view icon_name, const i32 icon_size,
+                                           std::string_view fallback = "text-x-generic") noexcept;
 } // namespace vfs::utils

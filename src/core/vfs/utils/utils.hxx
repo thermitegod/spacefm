@@ -51,5 +51,5 @@ filename_stem_and_extension(const std::filesystem::path& filename) noexcept;
  */
 [[nodiscard]] std::filesystem::path unique_path(const std::filesystem::path& path,
                                                 const std::filesystem::path& filename,
-                                                const std::string_view tag = "") noexcept;
+                                                std::string_view tag = "") noexcept;
 } // namespace vfs::utils

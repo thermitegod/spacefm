@@ -55,7 +55,7 @@ gui::dialog::donate::page::set_image(const std::filesystem::path& path) noexcept
 }
 
 void
-gui::dialog::donate::page::set_label(const std::string_view text) noexcept
+gui::dialog::donate::page::set_label(std::string_view text) noexcept
 {
     label_.set_markup(std::format("<big>{}</big>", text));
 }

@@ -33,8 +33,8 @@ class side final : public Gtk::Box
   private:
     std::shared_ptr<config::settings> settings_;
 
-    void add_location(const std::string_view name, const std::filesystem::path& path,
-                      const std::string_view icon_name = "folder-symbolic") noexcept;
+    void add_location(std::string_view name, const std::filesystem::path& path,
+                      std::string_view icon_name = "folder-symbolic") noexcept;
 
     void add_separator() noexcept;
 

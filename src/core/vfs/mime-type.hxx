@@ -45,7 +45,7 @@ class mime_type
 {
   private:
     mime_type() = delete;
-    explicit mime_type(const std::string_view type) noexcept;
+    explicit mime_type(std::string_view type) noexcept;
     ~mime_type() noexcept;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
@@ -57,7 +57,7 @@ class mime_type
     create_from_file(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create_from_type(const std::string_view type) noexcept;
+    create_from_type(std::string_view type) noexcept;
 
     [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) noexcept;
 
@@ -74,10 +74,10 @@ class mime_type
     [[nodiscard]] std::optional<std::string> default_action() const noexcept;
 
     // Set default action (application) for this mime-type
-    void set_default_action(const std::string_view desktop_id) const noexcept;
+    void set_default_action(std::string_view desktop_id) const noexcept;
 
     // If user-custom desktop file is created, it is returned in custom_desktop.
-    [[nodiscard]] std::string add_action(const std::string_view desktop_id) const noexcept;
+    [[nodiscard]] std::string add_action(std::string_view desktop_id) const noexcept;
 
     [[nodiscard]] bool is_archive() const noexcept;
     [[nodiscard]] bool is_executable() const noexcept;
@@ -87,8 +87,7 @@ class mime_type
     [[nodiscard]] bool is_audio() const noexcept;
 
   private:
-    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create(const std::string_view type) noexcept;
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type> create(std::string_view type) noexcept;
 
     std::string type_;
     std::string description_;
@@ -97,8 +96,8 @@ class mime_type
 };
 
 [[nodiscard]] std::optional<std::filesystem::path>
-mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept;
+mime_type_locate_desktop_file(std::string_view desktop_id) noexcept;
 [[nodiscard]] std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                              const std::string_view desktop_id) noexcept;
+                              std::string_view desktop_id) noexcept;
 } // namespace vfs

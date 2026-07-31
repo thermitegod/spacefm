@@ -54,7 +54,7 @@ class files_base
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
                  const config::list_state& state) noexcept;
 
-    void set_pattern(const std::string_view pattern) noexcept;
+    void set_pattern(std::string_view pattern) noexcept;
     void set_thumbnail_size(const config::icon_size size) noexcept;
 
     void set_sorting(const config::sorting& sorting, const bool update_model = false) noexcept;
@@ -69,7 +69,7 @@ class files_base
                      const bool unselect_others = true) const noexcept;
     void select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename) const noexcept;
-    void select_pattern(const std::string_view search_key = "") noexcept;
+    void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
   private:

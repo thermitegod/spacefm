@@ -66,7 +66,7 @@ class desktop final
     app_exec_generate_desktop_argv(const std::span<const std::shared_ptr<vfs::file>> files,
                                    bool quote_file_list) const noexcept;
     void exec_in_terminal(const std::filesystem::path& cwd,
-                          const std::string_view command) const noexcept;
+                          std::string_view command) const noexcept;
     void exec_desktop(const std::filesystem::path& working_dir,
                       const std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
 

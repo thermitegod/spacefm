@@ -31,7 +31,7 @@ namespace gui::action
 // Uses a set app to open files with
 void open_files_with_app(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                         const std::string_view app_desktop,
+                         std::string_view app_desktop,
                          const std::shared_ptr<config::settings>& settings) noexcept;
 
 // Uses default app for each file

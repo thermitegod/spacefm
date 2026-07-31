@@ -44,7 +44,7 @@ static std::mutex mime_map_lock;
 } // namespace global
 
 std::shared_ptr<vfs::mime_type>
-vfs::mime_type::create(const std::string_view type) noexcept
+vfs::mime_type::create(std::string_view type) noexcept
 {
     std::scoped_lock lock(global::mime_map_lock);
     if (global::mime_map.contains(type.data()))
@@ -54,7 +54,7 @@ vfs::mime_type::create(const std::string_view type) noexcept
 
     struct hack : public vfs::mime_type
     {
-        hack(const std::string_view type) : mime_type(type) {}
+        hack(std::string_view type) : mime_type(type) {}
     };
 
     const auto mime_type = std::make_shared<hack>(type);
@@ -69,12 +69,12 @@ vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
 }
 
 std::shared_ptr<vfs::mime_type>
-vfs::mime_type::create_from_type(const std::string_view type) noexcept
+vfs::mime_type::create_from_type(std::string_view type) noexcept
 {
     return vfs::mime_type::create(type);
 }
 
-vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
+vfs::mime_type::mime_type(std::string_view type) noexcept : type_(type)
 {
     const auto icon_data = vfs::detail::mime_type::get_desc_icon(type_);
     description_ = icon_data[1];
@@ -230,7 +230,7 @@ vfs::mime_type::default_action() const noexcept
  * app can be the name of the desktop file or a command line.
  */
 void
-vfs::mime_type::set_default_action(const std::string_view desktop_id) const noexcept
+vfs::mime_type::set_default_action(std::string_view desktop_id) const noexcept
 {
     if (!desktop_id.ends_with(".desktop"))
     {
@@ -247,7 +247,7 @@ vfs::mime_type::set_default_action(const std::string_view desktop_id) const noex
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
 std::string
-vfs::mime_type::add_action(const std::string_view desktop_id) const noexcept
+vfs::mime_type::add_action(std::string_view desktop_id) const noexcept
 {
     // do not create custom desktop file if desktop_id is not a command
     if (!desktop_id.ends_with(".desktop"))
@@ -294,14 +294,14 @@ vfs::mime_type::is_audio() const noexcept
 }
 
 std::optional<std::filesystem::path>
-vfs::mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept
+vfs::mime_type_locate_desktop_file(std::string_view desktop_id) noexcept
 {
     return vfs::detail::mime_type::locate_desktop_file(desktop_id);
 }
 
 std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                                   const std::string_view desktop_id) noexcept
+                                   std::string_view desktop_id) noexcept
 {
     return vfs::detail::mime_type::locate_desktop_file(dir, desktop_id);
 }

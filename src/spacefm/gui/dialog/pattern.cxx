@@ -41,7 +41,7 @@ inline constexpr auto FNMATCH_HELP =
     "The pattern matches if the input string cannot be matched with any of the patterns in the "
     "pattern-list.\n";
 
-gui::dialog::pattern::pattern(Gtk::ApplicationWindow& parent, const std::string_view pattern)
+gui::dialog::pattern::pattern(Gtk::ApplicationWindow& parent, std::string_view pattern)
 {
     set_transient_for(parent);
     set_modal(true);

@@ -22,7 +22,7 @@
 #include "libudevpp.hxx"
 
 std::optional<libudev::monitor>
-libudev::udev::monitor_new_from_netlink(const std::string_view name) const noexcept
+libudev::udev::monitor_new_from_netlink(std::string_view name) const noexcept
 {
     assert(std::string(name) == "udev" || std::string(name) == "kernel");
 

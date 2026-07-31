@@ -56,7 +56,7 @@ class udev final
      * @return A {@link monitor} instance
      */
     [[nodiscard]] std::optional<monitor>
-    monitor_new_from_netlink(const std::string_view name = "udev") const noexcept;
+    monitor_new_from_netlink(std::string_view name = "udev") const noexcept;
     [[nodiscard]] std::optional<monitor>
     monitor_new_from_netlink(const netlink_type name = netlink_type::udev) const noexcept;
 
@@ -107,12 +107,11 @@ class monitor final
     [[nodiscard]] std::optional<device> receive_device() const noexcept;
 
     [[nodiscard]] bool
-    filter_add_match_subsystem_devtype(const std::string_view subsystem) const noexcept;
-    [[nodiscard]] bool
-    filter_add_match_subsystem_devtype(const std::string_view subsystem,
-                                       const std::string_view devtype) const noexcept;
+    filter_add_match_subsystem_devtype(std::string_view subsystem) const noexcept;
+    [[nodiscard]] bool filter_add_match_subsystem_devtype(std::string_view subsystem,
+                                                          std::string_view devtype) const noexcept;
 
-    [[nodiscard]] bool filter_add_match_tag(const std::string_view tag) const noexcept;
+    [[nodiscard]] bool filter_add_match_tag(std::string_view tag) const noexcept;
 
     [[nodiscard]] bool is_initialized() const noexcept;
 
@@ -139,20 +138,17 @@ class enumerate final
 
     [[nodiscard]] bool is_initialized() const noexcept;
 
-    void add_match_subsystem(const std::string_view subsystem) const noexcept;
-    void add_nomatch_subsystem(const std::string_view subsystem) const noexcept;
+    void add_match_subsystem(std::string_view subsystem) const noexcept;
+    void add_nomatch_subsystem(std::string_view subsystem) const noexcept;
 
-    void add_match_sysattr(const std::string_view sysattr,
-                           const std::string_view value = "") const noexcept;
-    void add_nomatch_sysattr(const std::string_view sysattr,
-                             const std::string_view value = "") const noexcept;
+    void add_match_sysattr(std::string_view sysattr, std::string_view value = "") const noexcept;
+    void add_nomatch_sysattr(std::string_view sysattr, std::string_view value = "") const noexcept;
 
-    void add_match_property(const std::string_view property,
-                            const std::string_view value) const noexcept;
+    void add_match_property(std::string_view property, std::string_view value) const noexcept;
 
-    void add_match_tag(const std::string_view tag) const noexcept;
+    void add_match_tag(std::string_view tag) const noexcept;
 
-    void add_match_sysname(const std::string_view sysname) const noexcept;
+    void add_match_sysname(std::string_view sysname) const noexcept;
 
     void add_match_parent(const device& device) const noexcept;
 
@@ -212,30 +208,27 @@ class device final
     [[nodiscard]] bool has_driver() const noexcept;
     [[nodiscard]] std::optional<std::string> get_driver() const noexcept;
 
-    [[nodiscard]] bool has_sysattr(const std::string_view named) const noexcept;
-    [[nodiscard]] std::optional<std::string>
-    get_sysattr(const std::string_view named) const noexcept;
-    [[nodiscard]] bool set_sysattr(const std::string_view named,
-                                   const std::string_view value) const noexcept;
+    [[nodiscard]] bool has_sysattr(std::string_view named) const noexcept;
+    [[nodiscard]] std::optional<std::string> get_sysattr(std::string_view named) const noexcept;
+    [[nodiscard]] bool set_sysattr(std::string_view named, std::string_view value) const noexcept;
     [[nodiscard]] std::vector<std::string> get_sysattr_keys() const noexcept;
     [[nodiscard]] std::flat_map<std::string, std::string> get_sysattr_map() const noexcept;
 
     [[nodiscard]] std::vector<std::string> get_devlinks() const noexcept;
 
-    [[nodiscard]] bool has_property(const std::string_view named) const noexcept;
-    [[nodiscard]] std::optional<std::string>
-    get_property(const std::string_view named) const noexcept;
+    [[nodiscard]] bool has_property(std::string_view named) const noexcept;
+    [[nodiscard]] std::optional<std::string> get_property(std::string_view named) const noexcept;
     [[nodiscard]] std::flat_map<std::string, std::string> get_properties() const noexcept;
 
-    [[nodiscard]] bool has_tag(const std::string_view named) const noexcept;
+    [[nodiscard]] bool has_tag(std::string_view named) const noexcept;
     [[nodiscard]] std::vector<std::string> get_tags() const noexcept;
 
-    [[nodiscard]] bool has_current_tag(const std::string_view named) const noexcept;
+    [[nodiscard]] bool has_current_tag(std::string_view named) const noexcept;
     [[nodiscard]] std::vector<std::string> get_current_tags() const noexcept;
 
     [[nodiscard]] std::optional<device> get_parent_device() const noexcept;
-    [[nodiscard]] std::optional<device>
-    get_parent_device(const std::string_view subsystem, const std::string_view type) const noexcept;
+    [[nodiscard]] std::optional<device> get_parent_device(std::string_view subsystem,
+                                                          std::string_view type) const noexcept;
 
     [[nodiscard]] bool is_disk() const noexcept;
     [[nodiscard]] bool is_partition() const noexcept;

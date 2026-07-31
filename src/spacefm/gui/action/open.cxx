@@ -38,7 +38,7 @@
 static bool
 open_files(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
            const std::span<const std::shared_ptr<vfs::file>> files,
-           const std::string_view app_desktop) noexcept
+           std::string_view app_desktop) noexcept
 {
     if (app_desktop.empty())
     {
@@ -76,7 +76,7 @@ open_files(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
 void
 gui::action::open_files_with_app(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
                                  const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                                 const std::string_view app_desktop,
+                                 std::string_view app_desktop,
                                  const std::shared_ptr<config::settings>& settings) noexcept
 
 {
