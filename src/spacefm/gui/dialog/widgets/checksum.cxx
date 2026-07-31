@@ -40,6 +40,7 @@ gui::widget::Checksum::Checksum(const std::string_view type, const std::filesyst
     checksum_type_.set_text(std::format("{}: ", algo_type_));
     checksum_type_.set_halign(Gtk::Align::START);
 
+    checksum_scrolled_.set_child(checksum_result_);
     checksum_result_.set_hexpand(true);
     checksum_result_.set_vexpand(false);
     checksum_result_.set_halign(Gtk::Align::START);
@@ -57,7 +58,7 @@ gui::widget::Checksum::Checksum(const std::string_view type, const std::filesyst
         sigc::mem_fun(*this, &Checksum::on_button_calculate_clicked));
 
     append(checksum_type_);
-    append(checksum_result_);
+    append(checksum_scrolled_);
     append(calculate_button_);
     append(copy_button_);
 
