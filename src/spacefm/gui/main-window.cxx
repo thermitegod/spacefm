@@ -41,36 +41,36 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
     logger::debug("gui::main_window::main_window({})", get_id());
 
     config_manager_->signal_load_error().connect(
-        [this](const std::string& msg)
+        [this](const std::string_view msg)
         {
             auto dialog = Gtk::AlertDialog::create("Config Load Error");
-            dialog->set_detail(msg);
+            dialog->set_detail(msg.data());
             dialog->set_modal(true);
             dialog->show(*this);
         });
     config_manager_->signal_save_error().connect(
-        [this](const std::string& msg)
+        [this](const std::string_view msg)
         {
             auto dialog = Gtk::AlertDialog::create("Config Save Error");
-            dialog->set_detail(msg);
+            dialog->set_detail(msg.data());
             dialog->set_modal(true);
             dialog->show(*this);
         });
     config_manager_->load();
 
     bookmark_manager_->signal_load_error().connect(
-        [this](const std::string& msg)
+        [this](const std::string_view msg)
         {
             auto dialog = Gtk::AlertDialog::create("Bookmark Load Error");
-            dialog->set_detail(msg);
+            dialog->set_detail(msg.data());
             dialog->set_modal(true);
             dialog->show(*this);
         });
     bookmark_manager_->signal_save_error().connect(
-        [this](const std::string& msg)
+        [this](const std::string_view msg)
         {
             auto dialog = Gtk::AlertDialog::create("Bookmark Save Error");
-            dialog->set_detail(msg);
+            dialog->set_detail(msg.data());
             dialog->set_modal(true);
             dialog->show(*this);
         });

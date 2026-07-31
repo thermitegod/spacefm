@@ -43,7 +43,7 @@ class Checksum : public Gtk::Box
     void on_button_calculate_clicked() noexcept;
     void on_calculate_hash_finished() noexcept;
     void calculate_hash(const std::stop_token& stoken, const std::filesystem::path& path,
-                        const std::string& algo) noexcept;
+                        const std::string_view algo) noexcept;
 
     std::filesystem::path path_;
     std::string algo_type_;

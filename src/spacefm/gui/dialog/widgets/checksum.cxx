@@ -97,7 +97,7 @@ gui::widget::Checksum::on_button_calculate_clicked() noexcept
 void
 gui::widget::Checksum::calculate_hash(const std::stop_token& stoken,
                                       const std::filesystem::path& path,
-                                      const std::string& algo) noexcept
+                                      const std::string_view algo) noexcept
 {
     std::string outcome;
     try
