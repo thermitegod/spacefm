@@ -1458,9 +1458,15 @@ gui::tab::create_context_menu_model() noexcept
             section->append_item(item);
 
 #if defined(HAVE_MEDIA)
-            section->append("Media", "files.media");
+            if (file->is_regular_file() && file->mime_type()->is_media())
+            {
+                section->append("Media", "files.media");
+            }
 #endif
-            section->append("Checksums", "files.checksums");
+            if (file->is_regular_file())
+            {
+                section->append("Checksums", "files.checksums");
+            }
             section->append("Attributes", "files.attributes");
 
             item = Gio::MenuItem::create("Permissions", "files.permissions");

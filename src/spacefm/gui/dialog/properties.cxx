@@ -438,8 +438,7 @@ gui::dialog::properties::init_media_info_tab() noexcept
 #if defined(HAVE_MEDIA)
     const auto& file = files_.front();
     const bool multiple_files = files_.size() > 1;
-
-    if (multiple_files)
+    if (!file->is_regular_file() || multiple_files)
     {
         page->set_visible(false);
         return;
@@ -710,7 +709,13 @@ gui::dialog::properties::init_checksum_tab() noexcept
     auto* page = Gtk::make_managed<properties_page>();
     notebook_.append_page(*page, "Checksums");
 
-    const auto& selected_file = files_.front();
+    const auto& file = files_.front();
+    const bool multiple_files = files_.size() > 1;
+    if (!file->is_regular_file() || multiple_files)
+    {
+        page->set_visible(false);
+        return;
+    }
 
     auto box = Gtk::make_managed<Gtk::Box>();
     box->set_orientation(Gtk::Orientation::VERTICAL);
@@ -763,7 +768,7 @@ gui::dialog::properties::init_checksum_tab() noexcept
     };
     for (const auto type : algo_types)
     {
-        auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, selected_file->path());
+        auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, file->path());
         checksum->signal_calculated().connect([entry_validate](std::string_view checksum)
                                               { entry_validate(checksum); });
 
