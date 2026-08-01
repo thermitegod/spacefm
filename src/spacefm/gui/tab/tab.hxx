@@ -219,7 +219,6 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> new_file;
         Glib::RefPtr<Gio::SimpleAction> new_directory;
         Glib::RefPtr<Gio::SimpleAction> new_symlink;
-        Glib::RefPtr<Gio::SimpleAction> new_hardlink;
         Glib::RefPtr<Gio::SimpleAction> new_archive;
         // Actions
         Glib::RefPtr<Gio::SimpleAction> copy_name;

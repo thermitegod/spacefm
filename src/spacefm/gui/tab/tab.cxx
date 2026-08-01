@@ -211,9 +211,6 @@ gui::tab::add_actions() noexcept
     actions_.new_symlink =
         action_group_->add_action("new_symlink",
                                   [this]() { show_create_dialog(gui::dialog::create_mode::link); });
-    actions_.new_hardlink =
-        action_group_->add_action("new_hardlink",
-                                  [this]() { show_create_dialog(gui::dialog::create_mode::link); });
     actions_.new_archive = action_group_->add_action("new_archive", [this]() { archive_create(); });
     // Actions
     actions_.copy_name = action_group_->add_action("copy_name", [this]() { on_copy_name(); });
@@ -872,7 +869,6 @@ gui::tab::enable_all_actions() noexcept
     actions_.new_file->set_enabled(true);
     actions_.new_directory->set_enabled(true);
     actions_.new_symlink->set_enabled(true);
-    actions_.new_hardlink->set_enabled(true);
     actions_.new_archive->set_enabled(true);
     actions_.copy_name->set_enabled(true);
     actions_.copy_parent->set_enabled(true);
@@ -1070,11 +1066,6 @@ gui::tab::create_context_menu_model() noexcept
             item = Gio::MenuItem::create("Symlink", "files.new_symlink");
             item->set_attribute_value("accel",
                                       Glib::Variant<Glib::ustring>::create("<Shift><Control>L"));
-            section->append_item(item);
-
-            item = Gio::MenuItem::create("Hardlink", "files.new_hardlink");
-            item->set_attribute_value("accel",
-                                      Glib::Variant<Glib::ustring>::create("<Shift><Control>H"));
             section->append_item(item);
 
             section->append("Archive", "files.new_archive");
@@ -1710,17 +1701,6 @@ gui::tab::add_shortcuts() noexcept
                                                       Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
                                                   { return activate_action("files.new_symlink"); });
-        auto shortcut = Gtk::Shortcut::create(trigger, action);
-        controller->add_shortcut(shortcut);
-    }
-
-    { // New Hardlink
-        auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_H,
-                                                  Gdk::ModifierType::SHIFT_MASK |
-                                                      Gdk::ModifierType::CONTROL_MASK);
-        auto action =
-            Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                        { return activate_action("files.new_hardlink"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
