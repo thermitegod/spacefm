@@ -25,6 +25,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 #include <cstdint>
 
@@ -35,6 +36,7 @@ namespace vfs
 struct chmod_task final
 {
     std::filesystem::perms mode;
+    std::filesystem::perm_options opts = std::filesystem::perm_options::replace;
     std::vector<std::filesystem::path> paths;
     // options
     bool recursive = false;

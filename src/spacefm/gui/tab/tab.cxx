@@ -722,6 +722,130 @@ gui::tab::add_actions() noexcept
         "permissions",
         [this]() { show_properites_dialog(gui::dialog::properties::page::permissions); });
 
+    // Properties > Quick
+    actions_.chmod_quick = action_group_->add_action_with_parameter(
+        "chmod_quick",
+        Glib::VariantType("i"), // int
+        [this](const Glib::VariantBase& parameter)
+        {
+            auto perm =
+                Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
+            switch (perm)
+            {
+                case 0:
+                { // r--------
+                    on_chmod(std::filesystem::perms::owner_read);
+                    break;
+                }
+                case 1:
+                { // rw-------
+                    on_chmod(std::filesystem::perms::owner_read |
+                             std::filesystem::perms::owner_write);
+                    break;
+                }
+                case 2:
+                { // rwx------
+                    on_chmod(std::filesystem::perms::owner_all);
+                    break;
+                }
+                case 3:
+                { // r--r-----
+                    on_chmod(std::filesystem::perms::owner_read |
+                             std::filesystem::perms::group_read);
+                    break;
+                }
+                case 4:
+                { // rw-r-----
+                    on_chmod(std::filesystem::perms::owner_read |
+                             std::filesystem::perms::owner_write |
+                             std::filesystem::perms::group_read);
+                    break;
+                }
+                case 5:
+                { // rw-rw----
+                    on_chmod(
+                        std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
+                        std::filesystem::perms::group_read | std::filesystem::perms::group_write);
+                    break;
+                }
+                case 6:
+                { // rwxr-x---
+                    on_chmod(std::filesystem::perms::owner_all |
+                             std::filesystem::perms::group_read |
+                             std::filesystem::perms::group_exec);
+                    break;
+                }
+                case 7:
+                { // rwxrwx---
+                    on_chmod(std::filesystem::perms::owner_all | std::filesystem::perms::group_all);
+                    break;
+                }
+                case 8:
+                { // r--r--r--
+                    on_chmod(std::filesystem::perms::owner_read |
+                             std::filesystem::perms::group_read |
+                             std::filesystem::perms::others_read);
+                    break;
+                }
+                case 9:
+                { // rw-r--r--
+                    on_chmod(
+                        std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
+                        std::filesystem::perms::group_read | std::filesystem::perms::others_read);
+                    break;
+                }
+                case 10:
+                { // rw-rw-rw-
+                    on_chmod(
+                        std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
+                        std::filesystem::perms::group_read | std::filesystem::perms::group_write |
+                        std::filesystem::perms::others_read | std::filesystem::perms::others_write);
+                    break;
+                }
+                case 11:
+                { // rwxr--r--
+                    on_chmod(std::filesystem::perms::owner_all |
+                             std::filesystem::perms::group_read |
+                             std::filesystem::perms::others_read);
+                    break;
+                }
+                case 12:
+                { // rwxr-xr-x
+                    on_chmod(
+                        std::filesystem::perms::owner_all | std::filesystem::perms::group_read |
+                        std::filesystem::perms::group_exec | std::filesystem::perms::others_read |
+                        std::filesystem::perms::others_exec);
+                    break;
+                }
+                case 13:
+                { // rwxrwxrwx
+                    on_chmod(std::filesystem::perms::all);
+                    break;
+                }
+                case 14:
+                { // rwxrwxrwt
+                    on_chmod(std::filesystem::perms::all | std::filesystem::perms::sticky_bit);
+                    break;
+                }
+                case 15:
+                { // -t
+                    on_chmod(std::filesystem::perms::sticky_bit,
+                             std::filesystem::perm_options::remove);
+                    break;
+                }
+                case 16:
+                { // +t
+                    on_chmod(std::filesystem::perms::sticky_bit,
+                             std::filesystem::perm_options::add);
+                    break;
+                }
+                default:
+                {
+                    std::unreachable();
+                }
+            }
+        });
+
     insert_action_group("files", action_group_);
 }
 
@@ -1354,9 +1478,26 @@ gui::tab::create_context_menu_model() noexcept
 
             {
                 auto smenu_quick = Gio::Menu::create();
-                smenu_quick->append("TODO", "app.todo");
-                smenu_quick->append("TODO", "app.todo");
-                smenu_quick->append("TODO", "app.todo");
+                // make sure int values match the switch in "chmod_quick"
+                smenu_quick->append("r--------", "files.chmod_quick(0)");
+                smenu_quick->append("rw-------", "files.chmod_quick(1)");
+                smenu_quick->append("rwx------", "files.chmod_quick(2)");
+                smenu_quick->append("r--r-----", "files.chmod_quick(3)");
+                smenu_quick->append("rw-r-----", "files.chmod_quick(4)");
+                smenu_quick->append("rw-rw----", "files.chmod_quick(5)");
+                smenu_quick->append("rwxr-x---", "files.chmod_quick(6)");
+                smenu_quick->append("rwxrwx---", "files.chmod_quick(7)");
+                smenu_quick->append("r--r--r--", "files.chmod_quick(8)");
+                smenu_quick->append("rw-r--r--", "files.chmod_quick(9)");
+                smenu_quick->append("rw-rw-rw-", "files.chmod_quick(10)");
+                smenu_quick->append("rwxr--r--", "files.chmod_quick(11)");
+                smenu_quick->append("rwxr-xr-x", "files.chmod_quick(12)");
+                smenu_quick->append("rwxrwxrwx", "files.chmod_quick(13)");
+                smenu_quick->append("rwxrwxrwt", "files.chmod_quick(14)");
+                smenu_quick->append("-t", "files.chmod_quick(15)");
+                smenu_quick->append("+t", "files.chmod_quick(16)");
+                // TODO either have recursive be a check box or submenu
+
                 section->append_submenu("Quick", smenu_quick);
             }
 
@@ -2585,6 +2726,24 @@ gui::tab::on_delete() const noexcept
     {
         submit_task();
     }
+}
+
+void
+gui::tab::on_chmod(const std::filesystem::perms perms,
+                   const std::filesystem::perm_options opts) const noexcept
+{
+    const auto selected = selected_files();
+    if (selected.empty())
+    {
+        return;
+    }
+
+    auto task = vfs::chmod_task{
+        .mode = perms,
+        .opts = opts,
+        .paths = selected_paths(),
+    };
+    task_manager_->add(task);
 }
 
 void

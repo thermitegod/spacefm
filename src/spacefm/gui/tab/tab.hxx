@@ -84,6 +84,9 @@ class tab final : public Gtk::Box
     void on_paste() const noexcept;
     void on_trash() const noexcept;
     void on_delete() const noexcept;
+    void on_chmod(const std::filesystem::perms perms,
+                  const std::filesystem::perm_options opts =
+                      std::filesystem::perm_options::replace) const noexcept;
 
   private:
     void add_shortcuts() noexcept;
@@ -281,6 +284,8 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> column_btime;
         Glib::RefPtr<Gio::SimpleAction> column_ctime;
         Glib::RefPtr<Gio::SimpleAction> column_mtime;
+        // Properties > Quick
+        Glib::RefPtr<Gio::SimpleAction> chmod_quick;
     } actions_;
 
     std::optional<std::filesystem::path> last_path_;

@@ -177,7 +177,7 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
 
             if (task.recursive && std::filesystem::is_directory(path))
             {
-                std::filesystem::permissions(path, task.mode);
+                std::filesystem::permissions(path, task.mode, task.opts);
 
                 for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
                 {
@@ -186,12 +186,12 @@ vfs::task_manager::add(const vfs::chmod_task& task) noexcept
                         return;
                     }
 
-                    std::filesystem::permissions(entry.path(), task.mode);
+                    std::filesystem::permissions(entry.path(), task.mode, task.opts);
                 }
             }
             else
             {
-                std::filesystem::permissions(path, task.mode);
+                std::filesystem::permissions(path, task.mode, task.opts);
             }
         };
 
