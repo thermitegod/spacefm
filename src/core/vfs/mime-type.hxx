@@ -85,6 +85,7 @@ class mime_type
     [[nodiscard]] bool is_image() const noexcept;
     [[nodiscard]] bool is_video() const noexcept;
     [[nodiscard]] bool is_audio() const noexcept;
+    [[nodiscard]] bool is_media() const noexcept;
 
   private:
     [[nodiscard]] static std::shared_ptr<vfs::mime_type> create(std::string_view type) noexcept;

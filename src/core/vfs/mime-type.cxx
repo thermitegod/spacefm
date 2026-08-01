@@ -293,6 +293,12 @@ vfs::mime_type::is_audio() const noexcept
     return vfs::detail::mime_type::is_audio(type_);
 }
 
+bool
+vfs::mime_type::is_media() const noexcept
+{
+    return is_image() || is_video() || is_audio();
+}
+
 std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(std::string_view desktop_id) noexcept
 {
