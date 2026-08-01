@@ -448,7 +448,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
         cust_template = std::format("{}-usercreated-{}.desktop", name, replace_txt);
 
         file_content = std::format("[Desktop Entry]\n"
-                                   "Type=Application"
+                                   "Type=Application\n"
                                    "Name={}\n"
                                    "Exec={}\n"
                                    "MimeType={}\n"
