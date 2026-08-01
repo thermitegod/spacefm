@@ -432,15 +432,16 @@ gui::dialog::properties::init_file_info_tab() noexcept
 void
 gui::dialog::properties::init_media_info_tab() noexcept
 {
-#if defined(HAVE_MEDIA)
     auto* page = Gtk::make_managed<properties_page>();
     notebook_.append_page(*page, "Media");
 
+#if defined(HAVE_MEDIA)
     const auto& file = files_.front();
     const bool multiple_files = files_.size() > 1;
 
     if (multiple_files)
     {
+        page->set_visible(false);
         return;
     }
 
@@ -456,6 +457,7 @@ gui::dialog::properties::init_media_info_tab() noexcept
 
     if (metadata.empty())
     {
+        page->set_visible(false);
         return;
     }
 
@@ -469,6 +471,8 @@ gui::dialog::properties::init_media_info_tab() noexcept
 
         page->add_row(description_label, value_label);
     }
+#else
+    page->set_visible(false);
 #endif
 }
 

@@ -33,9 +33,7 @@ class properties : public Gtk::ApplicationWindow
     enum class page : std::int32_t
     {
         info = 0,
-#if defined(HAVE_MEDIA)
         media,
-#endif
         checksum,
         attributes,
         permissions,
