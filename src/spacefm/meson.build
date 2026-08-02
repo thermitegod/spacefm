@@ -66,6 +66,7 @@ spacefm = build_target(
         media_dependencies,
         natsort_dep,
         vfs_dep,
+        glycin_wrapper_dep
     ],
     cpp_pch: '../../pch/pch.hxx',
 )

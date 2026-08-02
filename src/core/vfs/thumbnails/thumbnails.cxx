@@ -38,7 +38,7 @@
 
 #include "vfs/thumbnails/thumbnails.hxx"
 
-#include "glycin-wrapper.hxx"
+#include "glycin/glycin.hxx"
 #include "logger.hxx"
 
 // Based on spec v0.9.0
