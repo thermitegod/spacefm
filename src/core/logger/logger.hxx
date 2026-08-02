@@ -30,7 +30,6 @@ enum domain : std::uint8_t
     dev,
     autosave,
     execute,
-    socket,
     gui,
     vfs,
 };
