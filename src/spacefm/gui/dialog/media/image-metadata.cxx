@@ -42,77 +42,48 @@ image_metadata(const std::filesystem::path& path) noexcept
     struct image_exif_data
     {
         std::string_view description;
-        std::array<std::string_view, 5> tags;
+        std::span<const std::string_view> tags;
     };
+
+    using namespace std::string_view_literals;
+    // clang-format off
+    static constexpr std::array make_tags{"Exif.Image.Make"sv};
+    static constexpr std::array model_tags{"Exif.Image.Model"sv, "Exif.Image.UniqueCameraModel"sv};
+    static constexpr std::array exp_time_tags{"Exif.Photo.ExposureTime"sv};
+    static constexpr std::array exp_prog_tags{"Exif.Photo.ExposureMode"sv};
+    static constexpr std::array aperture_tags{"Exif.Photo.ApertureValue"sv};
+    static constexpr std::array iso_tags{"Exif.Photo.ISOSpeedRatings"sv, "Xmp.exifEX.ISOSpeed"sv};
+    static constexpr std::array flash_tags{"Exif.Photo.Flash"sv};
+    static constexpr std::array metering_tags{"Exif.Photo.MeteringMode"sv};
+    static constexpr std::array focal_tags{"Exif.Photo.FocalLength"sv};
+    static constexpr std::array software_tags{"Exif.Image.Software"sv};
+    static constexpr std::array title_tags{"Xmp.dc.title"sv};
+    static constexpr std::array desc_tags{"Xmp.dc.description"sv, "Exif.Photo.UserComment"sv};
+    static constexpr std::array keywords_tags{"Xmp.dc.subject"sv};
+    static constexpr std::array creator_tags{"Xmp.dc.creator"sv, "Exif.Image.Artist"sv};
+    static constexpr std::array created_tags{"Exif.Photo.DateTimeOriginal"sv, "Xmp.xmp.CreateDate"sv, "Exif.Image.DateTime"sv};
+    static constexpr std::array copyright_tags{"Xmp.dc.rights"sv};
+    static constexpr std::array rating_tags{"Xmp.xmp.Rating"sv};
+    // clang-format on
+
     static constexpr std::array<image_exif_data, 17> image_exif_tags{{
-        {
-            "Camera Brand",
-            {"Exif.Image.Make"},
-        },
-        {
-            "Camera Model",
-            {"Exif.Image.Model", "Exif.Image.UniqueCameraModel"},
-        },
-        {
-            "Exposure Time",
-            {"Exif.Photo.ExposureTime"},
-        },
-        {
-            "Exposure Program",
-            {"Exif.Photo.ExposureMode"},
-        },
-        {
-            "Aperture Value",
-            {"Exif.Photo.ApertureValue"},
-        },
-        {
-            "ISO Speed Rating",
-            {"Exif.Photo.ISOSpeedRatings", "Xmp.exifEX.ISOSpeed"},
-        },
-        {
-            "Flash Fired",
-            {"Exif.Photo.Flash"},
-        },
-        {
-            "Metering Mode",
-            {"Exif.Photo.MeteringMode"},
-        },
-        {
-            "Focal Length",
-            {"Exif.Photo.FocalLength"},
-        },
-        {
-            "Software",
-            {"Exif.Image.Software"},
-        },
-        {
-            "Title",
-            {"Xmp.dc.title"},
-        },
-        {
-            "Description",
-            {"Xmp.dc.description", "Exif.Photo.UserComment"},
-        },
-        {
-            "Keywords",
-            {"Xmp.dc.subject"},
-        },
-        {
-            "Creator",
-            {"Xmp.dc.creator", "Exif.Image.Artist"},
-        },
-        {
-            "Created On",
-            {"Exif.Photo.DateTimeOriginal", "Xmp.xmp.CreateDate", "Exif.Image.DateTime"},
-        },
-        {
-            "Copyright",
-            {"Xmp.dc.rights"},
-        },
-        {
-            "Rating",
-            {"Xmp.xmp.Rating"},
-        },
+        {"Camera Brand", make_tags},
+        {"Camera Model", model_tags},
+        {"Exposure Time", exp_time_tags},
+        {"Exposure Program", exp_prog_tags},
+        {"Aperture Value", aperture_tags},
+        {"ISO Speed Rating", iso_tags},
+        {"Flash Fired", flash_tags},
+        {"Metering Mode", metering_tags},
+        {"Focal Length", focal_tags},
+        {"Software", software_tags},
+        {"Title", title_tags},
+        {"Description", desc_tags},
+        {"Keywords", keywords_tags},
+        {"Creator", creator_tags},
+        {"Created On", created_tags},
+        {"Copyright", copyright_tags},
+        {"Rating", rating_tags},
     }};
 
     std::vector<metadata_data> data;
