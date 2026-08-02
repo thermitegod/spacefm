@@ -23,6 +23,8 @@
 
 #include <gtkmm.h>
 
+#include "gui/dialog/media/metadata.hxx"
+
 #include "vfs/file.hxx"
 
 namespace gui::dialog
@@ -79,5 +81,23 @@ class properties : public Gtk::ApplicationWindow
     u64 total_count_dir_{0};
 
     std::jthread thread_;
+
+#if defined(HAVE_MEDIA)
+    struct metadata_worker
+    {
+        metadata_worker(const std::shared_ptr<vfs::file>& file) : file(std::move(file)) {}
+
+        void extract_metadata(const std::stop_token& stoken) noexcept;
+
+        // private:
+        std::shared_ptr<vfs::file> file;
+
+        std::vector<metadata_data> result;
+
+        Glib::Dispatcher dispatcher;
+        std::jthread thread;
+    };
+    std::unique_ptr<metadata_worker> metadata_worker_;
+#endif
 };
 } // namespace gui::dialog

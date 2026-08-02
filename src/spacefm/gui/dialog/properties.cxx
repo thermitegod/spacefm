@@ -257,6 +257,15 @@ gui::dialog::properties::on_button_close_clicked() noexcept
         thread_.join();
     }
 
+    if (metadata_worker_)
+    {
+        metadata_worker_->thread.request_stop();
+        if (metadata_worker_->thread.joinable())
+        {
+            metadata_worker_->thread.detach();
+        }
+    }
+
     close();
 }
 
@@ -485,6 +494,30 @@ gui::dialog::properties::init_file_info_tab() noexcept
 }
 
 void
+gui::dialog::properties::metadata_worker::extract_metadata(const std::stop_token& stoken) noexcept
+{
+    if (stoken.stop_requested())
+    {
+        return;
+    }
+
+    const auto mime = file->mime_type();
+    if (mime->is_image())
+    {
+        result = image_metadata(file->path());
+    }
+    else if (mime->is_video() || mime->is_audio())
+    {
+        result = audio_video_metadata(file->path());
+    }
+
+    if (!stoken.stop_requested())
+    {
+        dispatcher.emit();
+    }
+}
+
+void
 gui::dialog::properties::init_media_info_tab() noexcept
 {
     auto* page = Gtk::make_managed<properties_grid>();
@@ -493,33 +526,33 @@ gui::dialog::properties::init_media_info_tab() noexcept
 #if defined(HAVE_MEDIA)
     const auto& file = files_.front();
     const bool multiple_files = files_.size() > 1;
-    if (!file->is_regular_file() || multiple_files)
+    if (!file->is_regular_file() || !file->mime_type()->is_media() || multiple_files)
     {
         page->set_visible(false);
         return;
     }
 
-    std::vector<metadata_data> metadata;
-    if (file->mime_type()->is_image())
-    {
-        metadata = image_metadata(file->path());
-    }
-    else if (file->mime_type()->is_video() || file->mime_type()->is_audio())
-    {
-        metadata = audio_video_metadata(file->path());
-    }
+    metadata_worker_ = std::make_unique<metadata_worker>(file);
 
-    if (metadata.empty())
-    {
-        page->set_visible(false);
-        return;
-    }
+    metadata_worker_->dispatcher.connect(
+        [this, page]()
+        {
+            if (!metadata_worker_ || metadata_worker_->result.empty())
+            {
+                page->set_visible(false);
+                return;
+            }
 
-    for (const auto& item : metadata)
-    {
-        // logger::debug<logger::ptk>("description={}   value={}", item.description, item.value);
-        page->add_item(item.description.data(), item.value.data());
-    }
+            for (const auto& item : metadata_worker_->result)
+            {
+                // logger::debug<logger::ptk>("description={}   value={}", item.description, item.value);
+                page->add_media_item(item.description, item.value);
+            }
+        });
+
+    metadata_worker_->thread =
+        std::jthread([worker = metadata_worker_.get()](const std::stop_token& stoken)
+                     { worker->extract_metadata(stoken); });
 #else
     page->set_visible(false);
 #endif
