@@ -1457,14 +1457,14 @@ gui::tab::create_context_menu_model() noexcept
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Alt>Return"));
             section->append_item(item);
 
+            if (file && file->is_regular_file())
+            {
 #if defined(HAVE_MEDIA)
-            if (file->is_regular_file() && file->mime_type()->is_media())
-            {
-                section->append("Media", "files.media");
-            }
+                if (file->mime_type()->is_media())
+                {
+                    section->append("Media", "files.media");
+                }
 #endif
-            if (file->is_regular_file())
-            {
                 section->append("Checksums", "files.checksums");
             }
             section->append("Attributes", "files.attributes");
