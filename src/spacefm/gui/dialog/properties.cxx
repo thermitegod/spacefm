@@ -197,7 +197,7 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
     : files_(files.begin(), files.end()), cwd_(cwd)
 {
     set_transient_for(parent);
-    set_modal(true);
+    set_modal(false);
 
     set_size_request(480, 410);
     set_title("File Properties");
