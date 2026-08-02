@@ -251,10 +251,13 @@ gui::dialog::properties::on_key_press(std::uint32_t keyval, std::uint32_t keycod
 void
 gui::dialog::properties::on_button_close_clicked() noexcept
 {
-    thread_.request_stop();
-    if (thread_.joinable())
+    if (calc_worker_)
     {
-        thread_.join();
+        calc_worker_->thread.request_stop();
+        if (calc_worker_->thread.joinable())
+        {
+            calc_worker_->thread.detach();
+        }
     }
 
     if (metadata_worker_)
@@ -269,14 +272,9 @@ gui::dialog::properties::on_button_close_clicked() noexcept
     close();
 }
 
-// Recursively count total size of all files in the specified directory.
-// If the path specified is a file, the size of the file is directly returned.
-// cancel is used to cancel the operation. This function will check the value
-// pointed by cancel in every iteration. If cancel is set to true, the
-// calculation is cancelled.
 void
-gui::dialog::properties::calc_total_size_of_files(const std::filesystem::path& path,
-                                                  const std::stop_token& stoken) noexcept
+gui::dialog::properties::calc_worker::calc_total_size_of_files(
+    const std::stop_token& stoken, const std::filesystem::path& path) noexcept
 {
     if (stoken.stop_requested())
     {
@@ -290,45 +288,46 @@ gui::dialog::properties::calc_total_size_of_files(const std::filesystem::path& p
         return;
     }
 
-    total_size_ += file_stat.size();
-    size_on_disk_ += file_stat.size_on_disk();
+    total_size += file_stat.size().data();
+    size_on_disk += file_stat.size_on_disk().data();
 
-    if (!std::filesystem::is_directory(path))
+    if (!std::filesystem::is_directory(path) || !vfs::utils::check_directory_permissions(path))
     {
         return;
     }
 
-    if (!vfs::utils::check_directory_permissions(path))
-    {
-        return;
-    }
-
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(path))
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(path, ec))
     {
         if (stoken.stop_requested())
         {
             return;
         }
 
-        const auto stat = ztd::lstat(entry);
+        const auto stat = ztd::lstat(entry, ec);
+        if (ec)
+        {
+            continue;
+        }
 
-        total_size_ += stat.size();
-        size_on_disk_ += stat.size_on_disk();
+        total_size += stat.size().data();
+        size_on_disk += stat.size_on_disk().data();
+
         if (stat.is_directory())
         {
-            total_count_dir_ += 1;
+            total_count_dir += 1;
+            dispatcher.emit();
         }
         else
         {
-            total_count_file_ += 1;
+            total_count_file += 1;
         }
     }
 }
 
 void
-gui::dialog::properties::calc_size(const std::stop_token& stoken) noexcept
+gui::dialog::properties::calc_worker::calc_size(const std::stop_token& stoken) noexcept
 {
-    for (const auto& file : files_)
+    for (const auto& file : files)
     {
         if (stoken.stop_requested())
         {
@@ -337,31 +336,40 @@ gui::dialog::properties::calc_size(const std::stop_token& stoken) noexcept
 
         if (file->is_directory())
         {
-            total_count_dir_ += 1;
+            total_count_dir += 1;
         }
         else
         {
-            total_count_file_ += 1;
+            total_count_file += 1;
         }
 
-        calc_total_size_of_files(file->path(), stoken);
+        calc_total_size_of_files(stoken, file->path());
 
-        on_update_labels();
+        dispatcher.emit();
     }
 }
 
 void
-gui::dialog::properties::on_update_labels() noexcept
+gui::dialog::properties::on_size_update() noexcept
 {
+    if (!calc_worker_)
+    {
+        return;
+    }
+
+    const std::uint64_t total_size = calc_worker_->total_size.load(std::memory_order_relaxed);
+    const std::uint64_t size_on_disk = calc_worker_->size_on_disk.load(std::memory_order_relaxed);
+    const std::uint64_t total_files =
+        calc_worker_->total_count_file.load(std::memory_order_relaxed);
+    const std::uint64_t total_dirs = calc_worker_->total_count_dir.load(std::memory_order_relaxed);
+
     total_size_label_.set_label(
-        std::format("{} ( {:L} bytes )", vfs::utils::format_file_size(total_size_), total_size_));
+        std::format("{} ( {:L} bytes )", vfs::utils::format_file_size(total_size), total_size));
 
-    size_on_disk_label_.set_label(std::format("{} ( {:L} bytes )",
-                                              vfs::utils::format_file_size(size_on_disk_),
-                                              size_on_disk_));
+    size_on_disk_label_.set_label(
+        std::format("{} ( {:L} bytes )", vfs::utils::format_file_size(size_on_disk), size_on_disk));
 
-    count_label_.set_label(
-        std::format("{:L} files, {:L} directories", total_count_file_, total_count_dir_));
+    count_label_.set_label(std::format("{:L} files, {:L} directories", total_files, total_dirs));
 }
 
 void
@@ -468,7 +476,13 @@ gui::dialog::properties::init_file_info_tab() noexcept
 
     if (need_calc_size)
     {
-        thread_ = std::jthread([this](const std::stop_token& stoken) { calc_size(stoken); });
+        calc_worker_ = std::make_unique<calc_worker>(files_);
+
+        calc_worker_->dispatcher.connect(sigc::mem_fun(*this, &properties::on_size_update));
+
+        calc_worker_->thread =
+            std::jthread([worker = calc_worker_.get()](const std::stop_token& stoken)
+                         { worker->calc_size(stoken); });
     }
 
     if (multiple_files)

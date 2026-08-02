@@ -61,26 +61,36 @@ class properties : public Gtk::ApplicationWindow
     void on_button_close_clicked() noexcept;
 
   private:
-    void calc_total_size_of_files(const std::filesystem::path& path,
-                                  const std::stop_token& stoken) noexcept;
-    void calc_size(const std::stop_token& stoken) noexcept;
-    void on_update_labels() noexcept;
-
     void init_file_info_tab() noexcept;
     void init_media_info_tab() noexcept;
     void init_checksum_tab() noexcept;
     void init_attributes_tab() noexcept;
     void init_permissions_tab() noexcept;
 
+    void on_size_update() noexcept;
+
     std::vector<std::shared_ptr<vfs::file>> files_;
     std::filesystem::path cwd_;
 
-    u64 total_size_{0};
-    u64 size_on_disk_{0};
-    u64 total_count_file_{0};
-    u64 total_count_dir_{0};
+    struct calc_worker
+    {
+        calc_worker(std::vector<std::shared_ptr<vfs::file>> targets) : files(std::move(targets)) {}
 
-    std::jthread thread_;
+        void calc_size(const std::stop_token& stoken) noexcept;
+        void calc_total_size_of_files(const std::stop_token& stoken,
+                                      const std::filesystem::path& path) noexcept;
+
+        std::vector<std::shared_ptr<vfs::file>> files;
+
+        std::atomic<std::uint64_t> total_size{0};
+        std::atomic<std::uint64_t> size_on_disk{0};
+        std::atomic<std::uint64_t> total_count_file{0};
+        std::atomic<std::uint64_t> total_count_dir{0};
+
+        Glib::Dispatcher dispatcher;
+        std::jthread thread;
+    };
+    std::unique_ptr<calc_worker> calc_worker_;
 
 #if defined(HAVE_MEDIA)
     struct metadata_worker
@@ -89,7 +99,6 @@ class properties : public Gtk::ApplicationWindow
 
         void extract_metadata(const std::stop_token& stoken) noexcept;
 
-        // private:
         std::shared_ptr<vfs::file> file;
 
         std::vector<metadata_data> result;
