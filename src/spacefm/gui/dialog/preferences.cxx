@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
 #include <string_view>
 #include <utility>
 
@@ -41,32 +42,28 @@ class preference_page : public Gtk::ScrolledWindow
     void
     add_section(std::string_view header) noexcept
     {
-        Gtk::Label label;
-        label.set_markup(std::format("<b>{}</b>", header.data()));
-        label.set_xalign(0.0f);
-        box_.append(label);
+        auto* label = Gtk::make_managed<Gtk::Label>();
+        label->set_markup(std::format("<b>{}</b>", header));
+        label->set_xalign(0.0f);
+        box_.append(*label);
     }
 
     void
     add_row(std::string_view left_item_name, Gtk::Widget& right_item) noexcept
     {
-        Gtk::Label left_item(left_item_name.data());
+        auto* left_item = Gtk::make_managed<Gtk::Label>(std::string(left_item_name));
 
-        Gtk::Box left_box;
-        Gtk::Box right_box;
-        new_split_vboxes(left_box, right_box);
-        left_box.append(left_item);
-        right_box.append(right_item);
+        auto [left_box, right_box] = create_split_vboxes();
+        left_box->append(*left_item);
+        right_box->append(right_item);
     }
 
     void
-    add_row(Gtk::Label& left_item, Gtk::Widget& right_item) noexcept
+    add_row(Gtk::Widget& left_item, Gtk::Widget& right_item) noexcept
     {
-        Gtk::Box left_box;
-        Gtk::Box right_box;
-        new_split_vboxes(left_box, right_box);
-        left_box.append(left_item);
-        right_box.append(right_item);
+        auto [left_box, right_box] = create_split_vboxes();
+        left_box->append(left_item);
+        right_box->append(right_item);
     }
 
     void
@@ -78,7 +75,7 @@ class preference_page : public Gtk::ScrolledWindow
     void
     add_checkbox(std::string_view label, bool& option) noexcept
     {
-        auto* button = Gtk::make_managed<Gtk::CheckButton>(std::format("{}", label));
+        auto* button = Gtk::make_managed<Gtk::CheckButton>(std::string(label));
         button->set_active(option);
         button->set_focus_on_click(false);
 
@@ -88,20 +85,24 @@ class preference_page : public Gtk::ScrolledWindow
     }
 
   private:
-    void
-    new_split_vboxes(Gtk::Box& left_box, Gtk::Box& right_box) noexcept
+    std::array<Gtk::Box*, 2>
+    create_split_vboxes() noexcept
     {
-        left_box.set_spacing(6);
-        left_box.set_homogeneous(false);
+        auto* left_box = Gtk::make_managed<Gtk::Box>();
+        left_box->set_spacing(6);
+        left_box->set_homogeneous(false);
 
-        right_box.set_spacing(6);
-        right_box.set_homogeneous(false);
+        auto* right_box = Gtk::make_managed<Gtk::Box>();
+        right_box->set_spacing(6);
+        right_box->set_homogeneous(false);
 
-        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 12);
-        hbox.append(left_box);
-        hbox.append(right_box);
+        auto* hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 12);
+        hbox->append(*left_box);
+        hbox->append(*right_box);
 
-        box_.append(hbox);
+        box_.append(*hbox);
+
+        return {left_box, right_box};
     }
 
     Gtk::Box box_;
@@ -186,30 +187,29 @@ gui::dialog::preferences::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) 
 void
 gui::dialog::preferences::init_general_tab() noexcept
 {
-    auto page = preference_page();
+    auto* page = Gtk::make_managed<preference_page>();
+    notebook_.append_page(*page, "General");
 
-    page.add_checkbox("Click Can Execute", settings_->general.click_executes);
-    page.add_checkbox("Single Click Execute", settings_->general.single_click_executes);
-    page.add_checkbox("Single Click Activate", settings_->general.single_click_activate);
-    page.add_checkbox("Show Confirm Dialog For Some Tasks", settings_->general.confirm);
-    page.add_checkbox("Show Confirm Dialog Before Delete", settings_->general.confirm_delete);
-    page.add_checkbox("Show Confirm Dialog Before Trash", settings_->general.confirm_trash);
-    page.add_checkbox("Auto Open Mounted Volumes", settings_->general.auto_open_mounted_volumes);
-    page.add_checkbox("Save Tabs", settings_->general.load_saved_tabs);
-    page.add_checkbox("Use SI Units", settings_->general.use_si_prefix);
-
-    auto tab_label = Gtk::Label("General");
-    notebook_.append_page(page, tab_label);
+    page->add_checkbox("Click Can Execute", settings_->general.click_executes);
+    page->add_checkbox("Single Click Execute", settings_->general.single_click_executes);
+    page->add_checkbox("Single Click Activate", settings_->general.single_click_activate);
+    page->add_checkbox("Show Confirm Dialog For Some Tasks", settings_->general.confirm);
+    page->add_checkbox("Show Confirm Dialog Before Delete", settings_->general.confirm_delete);
+    page->add_checkbox("Show Confirm Dialog Before Trash", settings_->general.confirm_trash);
+    page->add_checkbox("Auto Open Mounted Volumes", settings_->general.auto_open_mounted_volumes);
+    page->add_checkbox("Save Tabs", settings_->general.load_saved_tabs);
+    page->add_checkbox("Use SI Units", settings_->general.use_si_prefix);
 }
 
 void
 gui::dialog::preferences::init_interface_tab() noexcept
 {
-    auto page = preference_page();
+    auto* page = Gtk::make_managed<preference_page>();
+    notebook_.append_page(*page, "Interface");
 
-    page.add_section("Sidebar");
+    page->add_section("Sidebar");
 
-    page.add_checkbox("Show Sidebar", settings_->interface.show_sidebar);
+    page->add_checkbox("Show Sidebar", settings_->interface.show_sidebar);
 
     {
         auto& opt = settings_->interface.sidebar_width;
@@ -224,73 +224,69 @@ gui::dialog::preferences::init_interface_tab() noexcept
         button->set_value(opt);
         button->set_adjustment(adjust);
 
-        page.add_row("Sidebar default width", *button);
+        page->add_row("Sidebar default width", *button);
     }
 
-    page.add_checkbox("Show Config, Data, and Cache", settings_->interface.sidebar_show_advanced);
-    page.add_checkbox("Show Desktop", settings_->interface.sidebar_show_desktop);
-    page.add_checkbox("Show Documents", settings_->interface.sidebar_show_documents);
-    page.add_checkbox("Show Download", settings_->interface.sidebar_show_download);
-    page.add_checkbox("Show Music", settings_->interface.sidebar_show_music);
-    page.add_checkbox("Show Pictures", settings_->interface.sidebar_show_pictures);
-    page.add_checkbox("Show Videos", settings_->interface.sidebar_show_videos);
+    page->add_checkbox("Show Config, Data, and Cache", settings_->interface.sidebar_show_advanced);
+    page->add_checkbox("Show Desktop", settings_->interface.sidebar_show_desktop);
+    page->add_checkbox("Show Documents", settings_->interface.sidebar_show_documents);
+    page->add_checkbox("Show Download", settings_->interface.sidebar_show_download);
+    page->add_checkbox("Show Music", settings_->interface.sidebar_show_music);
+    page->add_checkbox("Show Pictures", settings_->interface.sidebar_show_pictures);
+    page->add_checkbox("Show Videos", settings_->interface.sidebar_show_videos);
 
-    page.add_section("Tabs");
+    page->add_section("Tabs");
 
-    page.add_checkbox("Always Show Tabs", settings_->interface.always_show_tabs);
-    page.add_checkbox("Tabs Close Button", settings_->interface.show_tab_close_button);
-    page.add_checkbox("New Tab Here", settings_->interface.new_tab_here);
+    page->add_checkbox("Always Show Tabs", settings_->interface.always_show_tabs);
+    page->add_checkbox("Tabs Close Button", settings_->interface.show_tab_close_button);
+    page->add_checkbox("New Tab Here", settings_->interface.new_tab_here);
 
-    page.add_section("Toolbar");
+    page->add_section("Toolbar");
 
-    page.add_checkbox("Show Home Button", settings_->interface.show_toolbar_home);
-    page.add_checkbox("Show Refresh Button", settings_->interface.show_toolbar_refresh);
-    page.add_checkbox("Show Search Bar", settings_->interface.show_toolbar_search);
-
-    auto tab_label = Gtk::Label("Interface");
-    notebook_.append_page(page, tab_label);
+    page->add_checkbox("Show Home Button", settings_->interface.show_toolbar_home);
+    page->add_checkbox("Show Refresh Button", settings_->interface.show_toolbar_refresh);
+    page->add_checkbox("Show Search Bar", settings_->interface.show_toolbar_search);
 }
 
 void
 gui::dialog::preferences::init_dialog_tab() noexcept
 {
-    auto page = preference_page();
+    auto* page = Gtk::make_managed<preference_page>();
+    notebook_.append_page(*page, "Dialog");
 
-    page.add_section("Create");
+    page->add_section("Create");
 
-    page.add_checkbox("Filename", settings_->dialog.create.filename);
-    page.add_checkbox("Parent", settings_->dialog.create.parent);
-    page.add_checkbox("Path", settings_->dialog.create.path);
-    page.add_checkbox("Target", settings_->dialog.create.target);
-    page.add_checkbox("Confirm", settings_->dialog.create.confirm);
+    page->add_checkbox("Filename", settings_->dialog.create.filename);
+    page->add_checkbox("Parent", settings_->dialog.create.parent);
+    page->add_checkbox("Path", settings_->dialog.create.path);
+    page->add_checkbox("Target", settings_->dialog.create.target);
+    page->add_checkbox("Confirm", settings_->dialog.create.confirm);
 
-    page.add_section("Rename");
+    page->add_section("Rename");
 
-    page.add_checkbox("Copy", settings_->dialog.rename.copy);
-    page.add_checkbox("CopyT", settings_->dialog.rename.copyt);
-    page.add_checkbox("Filename", settings_->dialog.rename.filename);
-    page.add_checkbox("Link", settings_->dialog.rename.link);
-    page.add_checkbox("LinkT", settings_->dialog.rename.linkt);
-    page.add_checkbox("Parent", settings_->dialog.rename.parent);
-    page.add_checkbox("Path", settings_->dialog.rename.path);
-    page.add_checkbox("Target", settings_->dialog.rename.target);
-    page.add_checkbox("Type", settings_->dialog.rename.type);
-    page.add_checkbox("Confirm", settings_->dialog.rename.confirm);
-
-    auto tab_label = Gtk::Label("Dialog");
-    notebook_.append_page(page, tab_label);
+    page->add_checkbox("Copy", settings_->dialog.rename.copy);
+    page->add_checkbox("CopyT", settings_->dialog.rename.copyt);
+    page->add_checkbox("Filename", settings_->dialog.rename.filename);
+    page->add_checkbox("Link", settings_->dialog.rename.link);
+    page->add_checkbox("LinkT", settings_->dialog.rename.linkt);
+    page->add_checkbox("Parent", settings_->dialog.rename.parent);
+    page->add_checkbox("Path", settings_->dialog.rename.path);
+    page->add_checkbox("Target", settings_->dialog.rename.target);
+    page->add_checkbox("Type", settings_->dialog.rename.type);
+    page->add_checkbox("Confirm", settings_->dialog.rename.confirm);
 }
 
 void
 gui::dialog::preferences::init_defaults_tab() noexcept
 {
-    auto page = preference_page();
+    auto* page = Gtk::make_managed<preference_page>();
+    notebook_.append_page(*page, "Defaults");
 
-    page.add_section("Sorting");
+    page->add_section("Sorting");
 
-    page.add_checkbox("Show Hidden Files", settings_->defaults.sorting.show_hidden);
-    page.add_checkbox("Sort Natural", settings_->defaults.sorting.sort_natural);
-    page.add_checkbox("Sort Case Sensitive", settings_->defaults.sorting.sort_case);
+    page->add_checkbox("Show Hidden Files", settings_->defaults.sorting.show_hidden);
+    page->add_checkbox("Sort Natural", settings_->defaults.sorting.sort_natural);
+    page->add_checkbox("Sort Case Sensitive", settings_->defaults.sorting.sort_case);
 
     {
         auto& opt = settings_->defaults.sorting.sort_by;
@@ -323,7 +319,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::sort_by>(drop->get_selected()); });
 
-        page.add_row("Sort By", *drop);
+        page->add_row("Sort By", *drop);
     }
 
     {
@@ -348,7 +344,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::sort_dir>(drop->get_selected()); });
 
-        page.add_row("Sort Directories", *drop);
+        page->add_row("Sort Directories", *drop);
     }
 
     {
@@ -372,7 +368,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::sort_type>(drop->get_selected()); });
 
-        page.add_row("Sort Type", *drop);
+        page->add_row("Sort Type", *drop);
     }
 
     {
@@ -396,10 +392,10 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::sort_hidden>(drop->get_selected()); });
 
-        page.add_row("Sort Hidden", *drop);
+        page->add_row("Sort Hidden", *drop);
     }
 
-    page.add_section("View");
+    page->add_section("View");
 
     {
         auto& opt = settings_->defaults.view;
@@ -422,10 +418,10 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::view_mode>(drop->get_selected()); });
 
-        page.add_row("Type", *drop);
+        page->add_row("Type", *drop);
     }
 
-    page.add_section("Grid");
+    page->add_section("Grid");
 
     {
         auto& opt = settings_->defaults.grid.icon_size;
@@ -466,27 +462,24 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         drop->property_selected_item().signal_changed().connect(
             [&opt, drop]() { opt = static_cast<config::icon_size>(drop->get_selected()); });
 
-        page.add_row("View Mode", *drop);
+        page->add_row("View Mode", *drop);
     }
 
-    page.add_checkbox("Thumbnails", settings_->defaults.grid.thumbnails);
+    page->add_checkbox("Thumbnails", settings_->defaults.grid.thumbnails);
 
-    page.add_section("List");
+    page->add_section("List");
 
-    page.add_checkbox("Compact", settings_->defaults.list.compact);
-    page.add_checkbox("Name", settings_->defaults.list.name);
-    page.add_checkbox("Size", settings_->defaults.list.size);
-    page.add_checkbox("Bytes", settings_->defaults.list.bytes);
-    page.add_checkbox("Type", settings_->defaults.list.type);
-    page.add_checkbox("Mime", settings_->defaults.list.mime);
-    page.add_checkbox("Perm", settings_->defaults.list.perm);
-    page.add_checkbox("Owner", settings_->defaults.list.owner);
-    page.add_checkbox("Group", settings_->defaults.list.group);
-    page.add_checkbox("Date Accessed", settings_->defaults.list.atime);
-    page.add_checkbox("Date Created", settings_->defaults.list.btime);
-    page.add_checkbox("Date Metadata", settings_->defaults.list.ctime);
-    page.add_checkbox("Date Modified", settings_->defaults.list.mtime);
-
-    auto tab_label = Gtk::Label("Defaults");
-    notebook_.append_page(page, tab_label);
+    page->add_checkbox("Compact", settings_->defaults.list.compact);
+    page->add_checkbox("Name", settings_->defaults.list.name);
+    page->add_checkbox("Size", settings_->defaults.list.size);
+    page->add_checkbox("Bytes", settings_->defaults.list.bytes);
+    page->add_checkbox("Type", settings_->defaults.list.type);
+    page->add_checkbox("Mime", settings_->defaults.list.mime);
+    page->add_checkbox("Perm", settings_->defaults.list.perm);
+    page->add_checkbox("Owner", settings_->defaults.list.owner);
+    page->add_checkbox("Group", settings_->defaults.list.group);
+    page->add_checkbox("Date Accessed", settings_->defaults.list.atime);
+    page->add_checkbox("Date Created", settings_->defaults.list.btime);
+    page->add_checkbox("Date Metadata", settings_->defaults.list.ctime);
+    page->add_checkbox("Date Modified", settings_->defaults.list.mtime);
 }
