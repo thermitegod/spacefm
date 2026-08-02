@@ -54,7 +54,6 @@ class Checksum : public Gtk::Box
     Glib::Dispatcher dispatcher_;
     std::jthread thread_;
 
-    Gtk::Label checksum_type_;
     Gtk::ScrolledWindow checksum_scrolled_;
     Gtk::Label checksum_result_;
 

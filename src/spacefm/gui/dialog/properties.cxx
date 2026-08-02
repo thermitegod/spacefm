@@ -32,7 +32,6 @@
 #include "gui/dialog/widgets/button-box.hxx"
 #include "gui/dialog/widgets/checksum.hxx"
 #include "gui/dialog/widgets/paste-button.hxx"
-#include "gui/dialog/widgets/validated-entry.hxx"
 
 #include "vfs/file.hxx"
 
@@ -745,48 +744,80 @@ gui::dialog::properties::init_checksum_tab() noexcept
         return;
     }
 
-    auto box = Gtk::make_managed<Gtk::Box>();
-    box->set_orientation(Gtk::Orientation::VERTICAL);
-    box->set_margin(5);
+    auto* instruction_label = Gtk::make_managed<Gtk::Label>();
+    instruction_label->set_text("Copy and paste a checksum in the field below. A checksum is "
+                                "usually provided by the website you downloaded this file from.");
+    instruction_label->set_wrap(true);
+    instruction_label->set_wrap_mode(Pango::WrapMode::WORD_CHAR);
 
-    auto info_label = Gtk::make_managed<Gtk::Label>();
-    info_label->set_text("Paste a checksum into the entry box below to verify");
-    box->append(*info_label);
+    page->add_row(*instruction_label);
 
-    auto entry_box = Gtk::make_managed<Gtk::Box>();
+    auto* entry_box = Gtk::make_managed<Gtk::Box>();
     entry_box->set_orientation(Gtk::Orientation::HORIZONTAL);
-    auto paste_button = Gtk::make_managed<gui::widget::PasteButton>();
-    auto entry = Gtk::make_managed<gui::widget::ValidatedEntry>();
+    auto* paste_button = Gtk::make_managed<gui::widget::PasteButton>();
+    auto* entry = Gtk::make_managed<Gtk::Entry>();
+    entry->set_hexpand(true);
+    entry->set_placeholder_text("Expected checksum goes here");
+
     paste_button->signal_paste_text().connect([entry](std::string_view text)
                                               { entry->set_text(text.data()); });
+
     entry_box->append(*entry);
     entry_box->append(*paste_button);
 
-    box->append(*entry_box);
+    page->add_row(*entry_box);
 
-    auto separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
-    box->append(*separator);
+    auto* status_label = Gtk::make_managed<Gtk::Label>();
+    status_label->set_xalign(0.0f);
+    status_label->set_margin_top(4);
+    status_label->set_visible(false);
+    page->add_row(*status_label);
 
-    auto entry_validate = [entry](std::string_view checksum)
+    page->add_separator();
+
+    auto calculated_checksums =
+        std::make_shared<std::unordered_map<std::string_view, std::string>>();
+
+    auto validate_input = [entry, status_label, calculated_checksums]()
     {
         const std::string current_input = entry->get_text();
 
-        if (!current_input.empty())
+        if (calculated_checksums->empty() || current_input.empty())
         {
-            if (checksum == current_input)
+            entry->remove_css_class("error");
+            entry->remove_css_class("success");
+
+            status_label->set_visible(false);
+            return;
+        }
+
+        bool matches = false;
+        for (const auto& [algo, hash] : *calculated_checksums)
+        {
+            if (hash == current_input)
             {
-                entry->set_success();
+                matches = true;
+                break;
             }
-            else
-            {
-                entry->set_error();
-            }
+        }
+
+        status_label->set_visible(true);
+        if (matches)
+        {
+            status_label->set_text("Checksums match");
+
+            entry->remove_css_class("error");
+            entry->add_css_class("success");
         }
         else
         {
-            entry->clear_validation();
+            status_label->set_text("Checksums do not match");
+
+            entry->remove_css_class("success");
+            entry->add_css_class("error");
         }
     };
+    entry->signal_changed().connect(validate_input);
 
     static constexpr std::array<std::string_view, 4> algo_types = {
         "MD5",
@@ -794,16 +825,24 @@ gui::dialog::properties::init_checksum_tab() noexcept
         "SHA-256",
         "SHA-512",
     };
+
     for (const auto type : algo_types)
     {
-        auto checksum = Gtk::make_managed<gui::widget::Checksum>(type, file->path());
-        checksum->signal_calculated().connect([entry_validate](std::string_view checksum)
-                                              { entry_validate(checksum); });
+        auto* checksum = Gtk::make_managed<gui::widget::Checksum>(type, file->path());
 
-        box->append(*checksum);
+        checksum->signal_calculated().connect(
+            [type, calculated_checksums, validate_input](std::string_view result)
+            {
+                (*calculated_checksums)[type] = std::string(result);
+                validate_input();
+            });
+
+        auto* label = Gtk::make_managed<Gtk::Label>(std::format("{}:", type));
+        label->set_xalign(0.0f);
+        label->set_halign(Gtk::Align::END);
+
+        page->add_item(*label, *checksum);
     }
-
-    page->add_row(*box);
 }
 
 void
