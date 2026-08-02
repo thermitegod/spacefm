@@ -39,61 +39,138 @@
 #include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
 
-class properties_page : public Gtk::Box
+class properties_grid : public Gtk::ScrolledWindow
 {
   public:
-    properties_page()
+    properties_grid()
     {
-        set_orientation(Gtk::Orientation::VERTICAL);
-        set_margin(5);
-        set_homogeneous(false);
-        set_vexpand(true);
+        set_expand(true);
+
+        box_.set_orientation(Gtk::Orientation::VERTICAL);
+        // box_.set_spacing(5);
+        // box_.set_margin(5);
+
+        set_child(box_);
+
+        new_grid();
     }
 
     void
-    add_row(std::string_view left_item_name, std::string_view right_item_name) noexcept
+    new_grid() noexcept
     {
-        auto* left_item = Gtk::make_managed<Gtk::Label>(std::string(left_item_name));
-        auto* right_item = Gtk::make_managed<Gtk::Label>(std::string(right_item_name));
+        grid_ = Gtk::make_managed<Gtk::Grid>();
+        grid_->set_column_spacing(10);
+        // grid_->set_row_spacing(5);
+        grid_->set_margin(5);
+        grid_->set_hexpand(true);
+        // grid_->set_expand(true);
 
-        auto [left_box, right_box] = create_split_vboxes();
-        left_box->append(*left_item);
-        right_box->append(*right_item);
+        box_.append(*grid_);
+        current_row_ = 0;
     }
 
     void
-    add_row(std::string_view left_item_name, Gtk::Widget& right_item) noexcept
+    add_separator() noexcept
     {
-        auto* left_item = Gtk::make_managed<Gtk::Label>(std::string(left_item_name));
+        auto* separator = Gtk::make_managed<Gtk::Separator>(Gtk::Orientation::HORIZONTAL);
+        separator->set_margin_top(6);
+        separator->set_margin_bottom(6);
 
-        auto [left_box, right_box] = create_split_vboxes();
-        left_box->append(*left_item);
-        right_box->append(right_item);
+        box_.append(*separator);
+
+        new_grid();
     }
 
     void
-    add_row(Gtk::Widget& left_item, Gtk::Widget& right_item) noexcept
+    add_row(Gtk::Widget& widget) noexcept
     {
-        auto [left_box, right_box] = create_split_vboxes();
-        left_box->append(left_item);
-        right_box->append(right_item);
+        grid_->attach(widget, 0, current_row_);
+
+        current_row_ += 1;
     }
 
     void
-    add_row(Gtk::Widget& item) noexcept
+    add_item(std::string_view label, std::string_view description) noexcept
     {
-        append(item);
+        auto* item_label = Gtk::make_managed<Gtk::Label>(std::string(label));
+        item_label->set_xalign(0.0f);
+        item_label->set_valign(Gtk::Align::CENTER);
+
+        auto* description_label = Gtk::make_managed<Gtk::Label>(std::string(description));
+        description_label->set_xalign(0.0f);
+        description_label->set_valign(Gtk::Align::CENTER);
+
+        grid_->attach(*item_label, 0, current_row_);
+        grid_->attach(*description_label, 1, current_row_);
+
+        current_row_ += 1;
     }
 
     void
-    add_entry(std::string_view left_item_name, std::string_view text,
+    add_item(std::string_view label, Gtk::Widget& widget) noexcept
+    {
+        auto* item_label = Gtk::make_managed<Gtk::Label>(std::string(label));
+        item_label->set_xalign(0.0f);
+        item_label->set_valign(Gtk::Align::CENTER);
+
+        grid_->attach(*item_label, 0, current_row_);
+        grid_->attach(widget, 1, current_row_);
+
+        current_row_ += 1;
+    }
+
+    void
+    add_item(Gtk::Widget& label, Gtk::Widget& widget) noexcept
+    {
+        grid_->attach(label, 0, current_row_);
+        grid_->attach(widget, 1, current_row_);
+
+        current_row_ += 1;
+    }
+
+    void
+    add_check_button(std::string_view label, bool active, std::string_view button_text = "",
+                     bool sensitive = false) noexcept
+    {
+        auto* cb = Gtk::make_managed<Gtk::CheckButton>(std::string(button_text));
+        cb->set_sensitive(sensitive);
+        cb->set_active(active);
+
+        add_item(label, *cb);
+    }
+
+    void
+    add_media_item(std::string_view key, std::string_view value) noexcept
+    {
+        auto* key_label = Gtk::make_managed<Gtk::Label>(std::string(key));
+        key_label->set_xalign(0.0f);
+        key_label->set_valign(Gtk::Align::START);
+        key_label->add_css_class("dim-label");
+
+        auto* value_label = Gtk::make_managed<Gtk::Label>(std::string(value));
+        value_label->set_xalign(0.0f);
+        value_label->set_selectable(true);
+        value_label->set_wrap(true);
+        value_label->set_wrap_mode(Pango::WrapMode::WORD_CHAR);
+        value_label->set_hexpand(true);
+
+        grid_->attach(*key_label, 0, current_row_);
+        grid_->attach(*value_label, 1, current_row_);
+
+        current_row_ += 1;
+    }
+
+    void
+    add_entry(std::string_view label, std::string_view entry_text,
               const bool selectable = true) noexcept
     {
-        auto* left_item = Gtk::make_managed<Gtk::Label>(std::string(left_item_name));
+        auto* item_label = Gtk::make_managed<Gtk::Label>(std::string(label));
+        item_label->set_xalign(0.0f);
+        item_label->set_valign(Gtk::Align::CENTER);
 
         auto* entry = Gtk::make_managed<Gtk::Entry>();
         entry->set_margin(2);
-        entry->set_text(std::string(text));
+        entry->set_text(std::string(entry_text));
         entry->set_editable(false);
         entry->set_hexpand(true);
         if (!selectable)
@@ -102,31 +179,16 @@ class properties_page : public Gtk::Box
             entry->set_sensitive(false);
         }
 
-        auto [left_box, right_box] = create_split_vboxes();
-        left_box->append(*left_item);
-        right_box->append(*entry);
+        grid_->attach(*item_label, 0, current_row_);
+        grid_->attach(*entry, 1, current_row_);
+
+        current_row_ += 1;
     }
 
   private:
-    std::array<Gtk::Box*, 2>
-    create_split_vboxes() noexcept
-    {
-        auto* left_box = Gtk::make_managed<Gtk::Box>();
-        left_box->set_spacing(6);
-        left_box->set_homogeneous(false);
-
-        auto* right_box = Gtk::make_managed<Gtk::Box>();
-        right_box->set_spacing(6);
-        right_box->set_homogeneous(false);
-
-        auto* hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 12);
-        hbox->append(*left_box);
-        hbox->append(*right_box);
-
-        append(*hbox);
-
-        return {left_box, right_box};
-    }
+    Gtk::Box box_;
+    Gtk::Grid* grid_{nullptr};
+    std::int32_t current_row_{0};
 };
 
 gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
@@ -138,7 +200,7 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
     set_transient_for(parent);
     set_modal(true);
 
-    set_size_request(470, 400);
+    set_size_request(480, 410);
     set_title("File Properties");
     set_resizable(false);
 
@@ -296,10 +358,7 @@ gui::dialog::properties::on_update_labels() noexcept
 void
 gui::dialog::properties::init_file_info_tab() noexcept
 {
-    // FIXME using spaces to align the right GtkWiget with the label
-    // This works but should be fixed with an alignment solution
-
-    auto* page = Gtk::make_managed<properties_page>();
+    auto* page = Gtk::make_managed<properties_grid>();
     notebook_.append_page(*page, "Info");
 
     const auto& file = files_.front();
@@ -307,25 +366,25 @@ gui::dialog::properties::init_file_info_tab() noexcept
 
     if (multiple_files)
     {
-        page->add_entry("File Name:   ", "( multiple files )", false);
+        page->add_entry("File Name:", "( multiple files )", false);
     }
     else
     {
         if (file->is_symlink())
         {
-            page->add_entry("Link Name:   ", file->name());
+            page->add_entry("Link Name:", file->name());
         }
         else if (file->is_directory())
         {
-            page->add_entry("Directory:   ", file->name());
+            page->add_entry("Directory:", file->name());
         }
         else
         {
-            page->add_entry("File Name:   ", file->name());
+            page->add_entry("File Name:", file->name());
         }
     }
 
-    page->add_entry("Location:    ", std::format("{}", cwd_));
+    page->add_entry("Location:", std::format("{}", cwd_));
 
     if (file->is_symlink())
     {
@@ -343,7 +402,7 @@ gui::dialog::properties::init_file_info_tab() noexcept
             target = "( read link error )";
         }
 
-        page->add_entry("Link Target: ", target);
+        page->add_entry("Link Target:", target);
     }
 
     bool same_type = true;
@@ -357,39 +416,32 @@ gui::dialog::properties::init_file_info_tab() noexcept
             break;
         }
     }
+
     if (same_type)
     {
         const auto mime = file->mime_type();
         const auto file_type = std::format("{}\n{}", mime->description(), mime->type());
-        Gtk::Label type_label(file_type.data());
-        type_label.set_xalign(0.0f);
-        type_label.set_yalign(0.5f);
-
-        page->add_row("Type:        ", type_label);
+        page->add_item("Type:", file_type);
     }
     else
     {
-        Gtk::Label type_label("( multiple types )");
-        type_label.set_xalign(0.0f);
-        type_label.set_yalign(0.5f);
-
-        page->add_row("Type:        ", type_label);
+        page->add_item("Type:", "( multiple types )");
     }
 
     total_size_label_.set_label("Calculating...");
     total_size_label_.set_xalign(0.0f);
     total_size_label_.set_yalign(0.5f);
-    page->add_row("Total Size:  ", total_size_label_);
+    page->add_item("Total Size:", total_size_label_);
 
     size_on_disk_label_.set_label("Calculating...");
     size_on_disk_label_.set_xalign(0.0f);
     size_on_disk_label_.set_yalign(0.5f);
-    page->add_row("Size On Disk:", size_on_disk_label_);
+    page->add_item("Size On Disk:", size_on_disk_label_);
 
     count_label_.set_label("Calculating...");
     count_label_.set_xalign(0.0f);
     count_label_.set_yalign(0.5f);
-    page->add_row("Count:       ", count_label_);
+    page->add_item("Count:", count_label_);
 
     bool need_calc_size = true;
     if (!multiple_files && !file->is_directory())
@@ -404,6 +456,7 @@ gui::dialog::properties::init_file_info_tab() noexcept
 
         count_label_.set_text("1 file");
     }
+
     if (need_calc_size)
     {
         thread_ = std::jthread([this](const std::stop_token& stoken) { calc_size(stoken); });
@@ -411,20 +464,22 @@ gui::dialog::properties::init_file_info_tab() noexcept
 
     if (multiple_files)
     {
-        page->add_entry("Accessed:    ", "( multiple timestamps )", false);
-        page->add_entry("Created:     ", "( multiple timestamps )", false);
-        page->add_entry("Metadata:    ", "( multiple timestamps )", false);
-        page->add_entry("Modified:    ", "( multiple timestamps )", false);
+        static constexpr std::string_view multiple_timestamps = "( multiple timestamps )";
+
+        page->add_entry("Accessed:", multiple_timestamps);
+        page->add_entry("Created:", multiple_timestamps);
+        page->add_entry("Metadata:", multiple_timestamps);
+        page->add_entry("Modified:", multiple_timestamps);
     }
     else
     {
-        page->add_entry("Accessed:    ",
+        page->add_entry("Accessed:",
                         std::format("{}", std::chrono::floor<std::chrono::seconds>(file->atime())));
-        page->add_entry("Created:     ",
+        page->add_entry("Created:",
                         std::format("{}", std::chrono::floor<std::chrono::seconds>(file->btime())));
-        page->add_entry("Metadata:    ",
+        page->add_entry("Metadata:",
                         std::format("{}", std::chrono::floor<std::chrono::seconds>(file->ctime())));
-        page->add_entry("Modified:    ",
+        page->add_entry("Modified:",
                         std::format("{}", std::chrono::floor<std::chrono::seconds>(file->mtime())));
     }
 }
@@ -432,7 +487,7 @@ gui::dialog::properties::init_file_info_tab() noexcept
 void
 gui::dialog::properties::init_media_info_tab() noexcept
 {
-    auto* page = Gtk::make_managed<properties_page>();
+    auto* page = Gtk::make_managed<properties_grid>();
     notebook_.append_page(*page, "Media");
 
 #if defined(HAVE_MEDIA)
@@ -463,25 +518,19 @@ gui::dialog::properties::init_media_info_tab() noexcept
     for (const auto& item : metadata)
     {
         // logger::debug<logger::ptk>("description={}   value={}", item.description, item.value);
-        Gtk::Label description_label(item.description.data());
-        Gtk::Label value_label(item.value.data());
-        value_label.set_xalign(1.0f);
-        value_label.set_yalign(0.5f);
-
-        page->add_row(description_label, value_label);
+        page->add_item(item.description.data(), item.value.data());
     }
 #else
     page->set_visible(false);
 #endif
 }
-
 void
 gui::dialog::properties::init_attributes_tab() noexcept
 {
-    auto* page = Gtk::make_managed<properties_page>();
+    auto* page = Gtk::make_managed<properties_grid>();
     notebook_.append_page(*page, "Attributes");
 
-    const auto& selected_file = files_.front();
+    const auto& file = files_.front();
     const bool multiple_files = files_.size() > 1;
 
     if (multiple_files)
@@ -497,216 +546,148 @@ gui::dialog::properties::init_attributes_tab() noexcept
         bool is_same_value_dax = true;
 
         // The first file will get checked against itself
-        for (const auto& file : files_)
+        for (const auto& f : files_)
         {
             if (is_same_value_compressed)
             {
-                is_same_value_compressed = selected_file->is_compressed() == file->is_compressed();
+                is_same_value_compressed = file->is_compressed() == f->is_compressed();
             }
             if (is_same_value_immutable)
             {
-                is_same_value_immutable = selected_file->is_immutable() == file->is_immutable();
+                is_same_value_immutable = file->is_immutable() == f->is_immutable();
             }
             if (is_same_value_append)
             {
-                is_same_value_append = selected_file->is_append() == file->is_append();
+                is_same_value_append = file->is_append() == f->is_append();
             }
             if (is_same_value_nodump)
             {
-                is_same_value_nodump = selected_file->is_nodump() == file->is_nodump();
+                is_same_value_nodump = file->is_nodump() == f->is_nodump();
             }
             if (is_same_value_encrypted)
             {
-                is_same_value_encrypted = selected_file->is_encrypted() == file->is_encrypted();
+                is_same_value_encrypted = file->is_encrypted() == f->is_encrypted();
             }
             if (is_same_value_automount)
             {
-                is_same_value_automount = selected_file->is_automount() == file->is_automount();
+                is_same_value_automount = file->is_automount() == f->is_automount();
             }
             if (is_same_value_mount_root)
             {
-                is_same_value_mount_root = selected_file->is_mount_root() == file->is_mount_root();
+                is_same_value_mount_root = file->is_mount_root() == f->is_mount_root();
             }
             if (is_same_value_verity)
             {
-                is_same_value_verity = selected_file->is_verity() == file->is_verity();
+                is_same_value_verity = file->is_verity() == f->is_verity();
             }
             if (is_same_value_dax)
             {
-                is_same_value_dax = selected_file->is_dax() == file->is_dax();
+                is_same_value_dax = file->is_dax() == f->is_dax();
             }
         }
 
+        static constexpr std::string_view selected_same_value = "( All Selected Files )";
+        static constexpr std::string_view multiple_values = "( Multiple Values )";
+
         if (is_same_value_compressed)
         {
-            Gtk::CheckButton cb_compressed(" ( All Selected Files ) ");
-            cb_compressed.set_sensitive(false);
-            cb_compressed.set_active(selected_file->is_compressed());
-
-            page->add_row("Compressed: ", cb_compressed);
+            page->add_check_button("Compressed:", file->is_compressed(), selected_same_value);
         }
         else
         {
-            page->add_row("Compressed: ", " ( Multiple Values ) ");
+            page->add_item("Compressed:", multiple_values);
         }
 
         if (is_same_value_immutable)
         {
-            Gtk::CheckButton cb_immutable(" ( All Selected Files ) ");
-            cb_immutable.set_sensitive(false);
-            cb_immutable.set_active(selected_file->is_immutable());
-
-            page->add_row("Immutable:  ", cb_immutable);
+            page->add_check_button("Immutable:", file->is_immutable(), selected_same_value);
         }
         else
         {
-            page->add_row("Immutable:  ", " ( Multiple Values ) ");
+            page->add_item("Immutable:", multiple_values);
         }
 
         if (is_same_value_append)
         {
-            Gtk::CheckButton cb_append(" ( All Selected Files ) ");
-            cb_append.set_sensitive(false);
-            cb_append.set_active(selected_file->is_append());
-
-            page->add_row("Append:     ", cb_append);
+            page->add_check_button("Append:", file->is_append(), selected_same_value);
         }
         else
         {
-            page->add_row("Append:     ", " ( Multiple Values ) ");
+            page->add_item("Append:", multiple_values);
         }
 
         if (is_same_value_nodump)
         {
-            Gtk::CheckButton cb_nodump(" ( All Selected Files ) ");
-            cb_nodump.set_sensitive(false);
-            cb_nodump.set_active(selected_file->is_nodump());
-
-            page->add_row("Nodump:     ", cb_nodump);
+            page->add_check_button("Nodump:", file->is_nodump(), selected_same_value);
         }
         else
         {
-            page->add_row("Nodump:     ", " ( Multiple Values ) ");
+            page->add_item("Nodump:", multiple_values);
         }
 
         if (is_same_value_encrypted)
         {
-            Gtk::CheckButton cb_encrypted(" ( All Selected Files ) ");
-            cb_encrypted.set_sensitive(false);
-            cb_encrypted.set_active(selected_file->is_encrypted());
-
-            page->add_row("Encrypted:  ", cb_encrypted);
+            page->add_check_button("Encrypted:", file->is_encrypted(), selected_same_value);
         }
         else
         {
-            page->add_row("Encrypted:  ", " ( Multiple Values ) ");
+            page->add_item("Encrypted:", multiple_values);
         }
 
         if (is_same_value_automount)
         {
-            Gtk::CheckButton cb_automount(" ( All Selected Files ) ");
-            cb_automount.set_sensitive(false);
-            cb_automount.set_active(selected_file->is_automount());
-
-            page->add_row("Automount:  ", cb_automount);
+            page->add_check_button("Automount:", file->is_automount(), selected_same_value);
         }
         else
         {
-            page->add_row("Automount:  ", " ( Multiple Values ) ");
+            page->add_item("Automount:", multiple_values);
         }
 
         if (is_same_value_mount_root)
         {
-            Gtk::CheckButton cb_mount_root(" ( All Selected Files ) ");
-            cb_mount_root.set_sensitive(false);
-            cb_mount_root.set_active(selected_file->is_mount_root());
-
-            page->add_row("Mount Root: ", cb_mount_root);
+            page->add_check_button("Mount Root:", file->is_mount_root(), selected_same_value);
         }
         else
         {
-            page->add_row("Mount Root: ", " ( Multiple Values ) ");
+            page->add_item("Mount Root:", multiple_values);
         }
 
         if (is_same_value_verity)
         {
-            Gtk::CheckButton cb_verity(" ( All Selected Files ) ");
-            cb_verity.set_sensitive(false);
-            cb_verity.set_active(selected_file->is_verity());
-
-            page->add_row("Verity:     ", cb_verity);
+            page->add_check_button("Verity:", file->is_verity(), selected_same_value);
         }
         else
         {
-            page->add_row("Verity:     ", " ( Multiple Values ) ");
+            page->add_item("Verity:", multiple_values);
         }
 
         if (is_same_value_dax)
         {
-            Gtk::CheckButton cb_dax(" ( All Selected Files ) ");
-            cb_dax.set_sensitive(false);
-            cb_dax.set_active(selected_file->is_dax());
-
-            page->add_row("Dax:        ", cb_dax);
+            page->add_check_button("Dax:", file->is_dax(), selected_same_value);
         }
         else
         {
-            page->add_row("Dax:        ", " ( Multiple Values ) ");
+            page->add_item("Dax:", multiple_values);
         }
     }
     else
     {
-        Gtk::CheckButton cb_compressed;
-        cb_compressed.set_sensitive(false);
-        cb_compressed.set_active(selected_file->is_compressed());
-        page->add_row("Compressed: ", cb_compressed);
-
-        Gtk::CheckButton cb_immutable;
-        cb_immutable.set_sensitive(false);
-        cb_immutable.set_active(selected_file->is_immutable());
-        page->add_row("Immutable:  ", cb_immutable);
-
-        Gtk::CheckButton cb_append;
-        cb_append.set_sensitive(false);
-        cb_append.set_active(selected_file->is_append());
-        page->add_row("Append:     ", cb_append);
-
-        Gtk::CheckButton cb_nodump;
-        cb_nodump.set_sensitive(false);
-        cb_nodump.set_active(selected_file->is_nodump());
-        page->add_row("Nodump:     ", cb_nodump);
-
-        Gtk::CheckButton cb_encrypted;
-        cb_encrypted.set_sensitive(false);
-        cb_encrypted.set_active(selected_file->is_encrypted());
-        page->add_row("Encrypted:  ", cb_encrypted);
-
-        Gtk::CheckButton cb_automount;
-        cb_automount.set_sensitive(false);
-        cb_automount.set_active(selected_file->is_automount());
-        page->add_row("Automount:  ", cb_automount);
-
-        Gtk::CheckButton cb_mount_root;
-        cb_mount_root.set_sensitive(false);
-        cb_mount_root.set_active(selected_file->is_mount_root());
-        page->add_row("Mount Root: ", cb_mount_root);
-
-        Gtk::CheckButton cb_verity;
-        cb_verity.set_sensitive(false);
-        cb_verity.set_active(selected_file->is_verity());
-        page->add_row("Verity:     ", cb_verity);
-
-        Gtk::CheckButton cb_dax;
-        cb_dax.set_sensitive(false);
-        cb_dax.set_active(selected_file->is_dax());
-        page->add_row("Dax:        ", cb_dax);
+        page->add_check_button("Compressed:", file->is_compressed());
+        page->add_check_button("Immutable:", file->is_immutable());
+        page->add_check_button("Append:", file->is_append());
+        page->add_check_button("Nodump:", file->is_nodump());
+        page->add_check_button("Encrypted:", file->is_encrypted());
+        page->add_check_button("Automount:", file->is_automount());
+        page->add_check_button("Mount Root:", file->is_mount_root());
+        page->add_check_button("Verity:", file->is_verity());
+        page->add_check_button("Dax:", file->is_dax());
     }
 }
 
 void
 gui::dialog::properties::init_checksum_tab() noexcept
 {
-    auto* page = Gtk::make_managed<properties_page>();
+    auto* page = Gtk::make_managed<properties_grid>();
     notebook_.append_page(*page, "Checksums");
 
     const auto& file = files_.front();
@@ -781,137 +762,71 @@ gui::dialog::properties::init_checksum_tab() noexcept
 void
 gui::dialog::properties::init_permissions_tab() noexcept
 {
-    auto* page = Gtk::make_managed<properties_page>();
+    auto* page = Gtk::make_managed<properties_grid>();
     notebook_.append_page(*page, "Permissions");
 
-    const auto& selected_file = files_.front();
+    const auto& file = files_.front();
 
-    // Owner
-    page->add_entry("Owner:", selected_file->display_owner());
+    page->add_entry("Owner:", file->display_owner());
+    page->add_entry("Group:", file->display_group());
 
-    // Group
-    page->add_entry("Group:", selected_file->display_group());
+    page->add_separator();
 
-    // Permissions
+    auto* permission_grid = Gtk::make_managed<Gtk::Grid>();
+    permission_grid->set_row_spacing(6);
+    permission_grid->set_column_spacing(12);
+    permission_grid->set_hexpand(true);
 
-    Gtk::Grid grid;
-    grid.set_row_spacing(5);
-    grid.set_column_spacing(5);
-
-    // Create the labels for the first column
-    Gtk::Label label_perm_owner("Owner:");
-    Gtk::Label label_perm_group("Group:");
-    Gtk::Label label_perm_other("Other:");
-
-    grid.attach(label_perm_owner, 0, 0, 1, 1);
-    grid.attach(label_perm_group, 0, 1, 1, 1);
-    grid.attach(label_perm_other, 0, 2, 1, 1);
-
-    // Create the permissions checked buttons
-
-    // Owner
-    Gtk::CheckButton check_button_owner_read("Read");
-    Gtk::CheckButton check_button_owner_write("Write");
-    Gtk::CheckButton check_button_owner_exec("Execute");
-    check_button_owner_read.set_sensitive(false);
-    check_button_owner_write.set_sensitive(false);
-    check_button_owner_exec.set_sensitive(false);
-    grid.attach(check_button_owner_read, 1, 0, 1, 1);
-    grid.attach(check_button_owner_write, 2, 0, 1, 1);
-    grid.attach(check_button_owner_exec, 3, 0, 1, 1);
-
-    // Group
-    Gtk::CheckButton check_button_group_read("Read");
-    Gtk::CheckButton check_button_group_write("Write");
-    Gtk::CheckButton check_button_group_exec("Execute");
-    check_button_group_read.set_sensitive(false);
-    check_button_group_write.set_sensitive(false);
-    check_button_group_exec.set_sensitive(false);
-    grid.attach(check_button_group_read, 1, 1, 1, 1);
-    grid.attach(check_button_group_write, 2, 1, 1, 1);
-    grid.attach(check_button_group_exec, 3, 1, 1, 1);
-
-    // Other
-    Gtk::CheckButton check_button_others_read("Read");
-    Gtk::CheckButton check_button_others_write("Write");
-    Gtk::CheckButton check_button_others_exec("Execute");
-    check_button_others_read.set_sensitive(false);
-    check_button_others_write.set_sensitive(false);
-    check_button_others_exec.set_sensitive(false);
-    grid.attach(check_button_others_read, 1, 2, 1, 1);
-    grid.attach(check_button_others_write, 2, 2, 1, 1);
-    grid.attach(check_button_others_exec, 3, 2, 1, 1);
-
-    // Special - added at the end of the above
-    Gtk::CheckButton check_button_set_uid("Set UID");
-    Gtk::CheckButton check_button_set_gid("Set GID");
-    Gtk::CheckButton check_button_sticky_bit("Sticky Bit");
-    check_button_set_uid.set_sensitive(false);
-    check_button_set_gid.set_sensitive(false);
-    check_button_sticky_bit.set_sensitive(false);
-    grid.attach(check_button_set_uid, 4, 0, 1, 1);
-    grid.attach(check_button_set_gid, 4, 1, 1, 1);
-    grid.attach(check_button_sticky_bit, 4, 2, 1, 1);
-
-    // Set/unset the permission
-
-    const auto permissions = std::filesystem::symlink_status(selected_file->path()).permissions();
-
-    // Owner
-    if ((permissions & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
+    auto permission_check = [&](std::string_view label, std::filesystem::perms mask)
     {
-        check_button_owner_read.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::owner_write) != std::filesystem::perms::none)
-    {
-        check_button_owner_write.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
-    {
-        check_button_owner_exec.set_active(true);
-    }
+        auto* cb = Gtk::make_managed<Gtk::CheckButton>(std::string(label));
+        cb->set_sensitive(false);
+        cb->set_active(file->has_permissions(mask));
+        return cb;
+    };
 
-    // Group
-    if ((permissions & std::filesystem::perms::group_read) != std::filesystem::perms::none)
+    auto add_permission_row = [&](std::int32_t row,
+                                  std::string_view label_text,
+                                  std::filesystem::perms read_mask,
+                                  std::filesystem::perms write_mask,
+                                  std::filesystem::perms exec_mask,
+                                  std::filesystem::perms special_mask,
+                                  std::string_view special_label)
     {
-        check_button_group_read.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::group_write) != std::filesystem::perms::none)
-    {
-        check_button_group_write.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
-    {
-        check_button_group_exec.set_active(true);
-    }
+        auto* row_label = Gtk::make_managed<Gtk::Label>(std::string(label_text));
+        row_label->set_xalign(0.0f);
+        row_label->set_valign(Gtk::Align::CENTER);
 
-    // Other
-    if ((permissions & std::filesystem::perms::others_read) != std::filesystem::perms::none)
-    {
-        check_button_others_read.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::others_write) != std::filesystem::perms::none)
-    {
-        check_button_others_write.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
-    {
-        check_button_others_exec.set_active(true);
-    }
+        permission_grid->attach(*row_label, 0, row);
+        permission_grid->attach(*permission_check("Read", read_mask), 1, row);
+        permission_grid->attach(*permission_check("Write", write_mask), 2, row);
+        permission_grid->attach(*permission_check("Execute", exec_mask), 3, row);
+        permission_grid->attach(*permission_check(special_label, special_mask), 4, row);
+    };
 
-    // Special
-    if ((permissions & std::filesystem::perms::set_uid) != std::filesystem::perms::none)
-    {
-        check_button_set_uid.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::set_gid) != std::filesystem::perms::none)
-    {
-        check_button_set_gid.set_active(true);
-    }
-    if ((permissions & std::filesystem::perms::sticky_bit) != std::filesystem::perms::none)
-    {
-        check_button_sticky_bit.set_active(true);
-    }
+    add_permission_row(0,
+                       "Owner:",
+                       std::filesystem::perms::owner_read,
+                       std::filesystem::perms::owner_write,
+                       std::filesystem::perms::owner_exec,
+                       std::filesystem::perms::set_uid,
+                       "Set UID");
 
-    page->add_row(grid);
+    add_permission_row(1,
+                       "Group:",
+                       std::filesystem::perms::group_read,
+                       std::filesystem::perms::group_write,
+                       std::filesystem::perms::group_exec,
+                       std::filesystem::perms::set_gid,
+                       "Set GID");
+
+    add_permission_row(2,
+                       "Other:",
+                       std::filesystem::perms::others_read,
+                       std::filesystem::perms::others_write,
+                       std::filesystem::perms::others_exec,
+                       std::filesystem::perms::sticky_bit,
+                       "Sticky Bit");
+
+    page->add_row(*permission_grid);
 }
