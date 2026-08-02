@@ -18,6 +18,7 @@
 #include <array>
 #include <filesystem>
 #include <format>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -34,6 +35,7 @@
 
 #include "gui/dialog/media/metadata.hxx"
 
+#include "glycin/glycin.hxx"
 #include "logger.hxx"
 
 std::vector<metadata_data>
@@ -88,44 +90,36 @@ image_metadata(const std::filesystem::path& path) noexcept
 
     std::vector<metadata_data> data;
 
-    GdkPixbufFormat* format = gdk_pixbuf_get_file_info(path.c_str(), nullptr, nullptr);
-    g_autofree char* name = gdk_pixbuf_format_get_name(format);
-    g_autofree char* desc = gdk_pixbuf_format_get_description(format);
+    Glib::RefPtr<Gly::Image> image;
+    try
+    {
+        auto loader = Gly::Loader::create(Gio::File::create_for_path(path));
+        image = loader->load();
+    }
+    catch (const Glib::Error& ex)
+    {
+        logger::error<logger::gui>("failed to load image metadata {}", ex.what());
+        return data;
+    }
 
-    data.push_back({"Image Type", std::format("{} ({})", name, desc)});
+    const auto mime_type = image->get_mime_type();
+    if (!mime_type.empty())
+    {
+        data.push_back({"Image Type", mime_type});
+    }
+
+    data.push_back({"Width", std::format("{} pixels", image->get_width())});
+    data.push_back({"Height", std::format("{} pixels", image->get_height())});
 
     // Load EXIF/XMP image metadata
     GError* error = nullptr;
     GExiv2Metadata* metadata = gexiv2_metadata_new();
     if (!gexiv2_metadata_open_path(metadata, path.c_str(), &error))
     {
-        logger::error<logger::vfs>("Error opening metadata: {}", error->message);
+        logger::error<logger::gui>("Error opening metadata: {}", error->message);
         g_error_free(error);
         return data;
     }
-
-    GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(path.c_str(), &error);
-    if (pixbuf == nullptr)
-    {
-        logger::error<logger::vfs>("Failed to load image: {}", error->message);
-        g_error_free(error);
-        return data;
-    }
-    auto width = gdk_pixbuf_get_width(pixbuf);
-    auto height = gdk_pixbuf_get_height(pixbuf);
-
-    GExiv2Orientation orientation = gexiv2_metadata_try_get_orientation(metadata, nullptr);
-    if (orientation == GEXIV2_ORIENTATION_ROT_90 || orientation == GEXIV2_ORIENTATION_ROT_270 ||
-        orientation == GEXIV2_ORIENTATION_ROT_90_HFLIP ||
-        orientation == GEXIV2_ORIENTATION_ROT_90_VFLIP)
-    {
-        auto temp = width;
-        width = height;
-        height = temp;
-    }
-
-    data.push_back({"Width", std::format("{} pixels", width)});
-    data.push_back({"Height", std::format("{} pixels", height)});
 
     for (const auto& tag_data : image_exif_tags)
     {
