@@ -91,6 +91,9 @@ class file : public std::enable_shared_from_this<file>
     [[nodiscard]] bool is_character_file() const noexcept;
     [[nodiscard]] bool is_other() const noexcept;
 
+    [[nodiscard]] std::filesystem::perms perms() const noexcept;
+    [[nodiscard]] bool has_permissions(const std::filesystem::perms& mask) const noexcept;
+
     [[nodiscard]] bool is_readable() const noexcept;
     [[nodiscard]] bool is_writable() const noexcept;
     [[nodiscard]] bool is_executable() const noexcept;

@@ -359,22 +359,39 @@ vfs::file::is_other() const noexcept
     return (!is_directory() && !is_regular_file() && !is_symlink());
 }
 
+std::filesystem::perms
+vfs::file::perms() const noexcept
+{
+    return stat_.perms();
+}
+
+bool
+vfs::file::has_permissions(const std::filesystem::perms& mask) const noexcept
+{
+    return (stat_.perms() & mask) != std::filesystem::perms::none;
+}
+
 bool
 vfs::file::is_readable() const noexcept
 {
-    return vfs::utils::has_read_permission(path_);
+    return has_permissions(std::filesystem::perms::owner_read | std::filesystem::perms::group_read |
+                           std::filesystem::perms::others_read);
 }
 
 bool
 vfs::file::is_writable() const noexcept
 {
-    return vfs::utils::has_write_permission(path_);
+    return has_permissions(std::filesystem::perms::owner_write |
+                           std::filesystem::perms::group_write |
+                           std::filesystem::perms::others_write);
 }
 
 bool
 vfs::file::is_executable() const noexcept
 {
-    return mime_type()->is_executable() && vfs::utils::has_execute_permission(path());
+    return mime_type()->is_executable() &&
+           has_permissions(std::filesystem::perms::owner_exec | std::filesystem::perms::group_exec |
+                           std::filesystem::perms::others_exec);
 }
 
 bool
