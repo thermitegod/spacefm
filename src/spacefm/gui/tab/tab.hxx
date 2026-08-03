@@ -87,6 +87,9 @@ class tab final : public Gtk::Box
     void on_chmod(const std::filesystem::perms perms,
                   const std::filesystem::perm_options opts =
                       std::filesystem::perm_options::replace) const noexcept;
+    void on_chmod_recursive(const std::filesystem::perms perms,
+                            const std::filesystem::perm_options opts =
+                                std::filesystem::perm_options::replace) const noexcept;
 
   private:
     void add_shortcuts() noexcept;
@@ -285,6 +288,7 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> column_mtime;
         // Properties > Quick
         Glib::RefPtr<Gio::SimpleAction> chmod_quick;
+        Glib::RefPtr<Gio::SimpleAction> chmod_recursive;
     } actions_;
 
     std::optional<std::filesystem::path> last_path_;

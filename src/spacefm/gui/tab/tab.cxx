@@ -842,6 +842,72 @@ gui::tab::add_actions() noexcept
                 }
             }
         });
+    actions_.chmod_recursive = action_group_->add_action_with_parameter(
+        "chmod_recursive",
+        Glib::VariantType("i"), // int
+        [this](const Glib::VariantBase& parameter)
+        {
+            auto perm =
+                Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
+            switch (perm)
+            {
+                case 0:
+                { // go-w
+                    on_chmod_recursive(std::filesystem::perms::group_write |
+                                           std::filesystem::perms::others_write,
+                                       std::filesystem::perm_options::remove);
+                    break;
+                }
+                case 1:
+                { // go-rwx
+                    on_chmod_recursive(std::filesystem::perms::group_read |
+                                           std::filesystem::perms::group_write |
+                                           std::filesystem::perms::group_exec |
+                                           std::filesystem::perms::others_read |
+                                           std::filesystem::perms::others_write |
+                                           std::filesystem::perms::others_exec,
+                                       std::filesystem::perm_options::remove);
+                    break;
+                }
+                case 2:
+                { // ugo+w
+                    on_chmod_recursive(std::filesystem::perms::owner_write |
+                                           std::filesystem::perms::group_write |
+                                           std::filesystem::perms::others_write,
+                                       std::filesystem::perm_options::add);
+                    break;
+                }
+                case 3:
+                { // ugo+rx
+                    on_chmod_recursive(std::filesystem::perms::owner_read |
+                                           std::filesystem::perms::owner_exec |
+                                           std::filesystem::perms::group_read |
+                                           std::filesystem::perms::group_exec |
+                                           std::filesystem::perms::others_read |
+                                           std::filesystem::perms::others_exec,
+                                       std::filesystem::perm_options::add);
+                    break;
+                }
+                case 4:
+                { // ugo+rwx
+                    on_chmod_recursive(std::filesystem::perms::owner_read |
+                                           std::filesystem::perms::owner_write |
+                                           std::filesystem::perms::owner_exec |
+                                           std::filesystem::perms::group_read |
+                                           std::filesystem::perms::group_write |
+                                           std::filesystem::perms::group_exec |
+                                           std::filesystem::perms::others_read |
+                                           std::filesystem::perms::others_write |
+                                           std::filesystem::perms::others_exec,
+                                       std::filesystem::perm_options::add);
+                    break;
+                }
+                default:
+                {
+                    std::unreachable();
+                }
+            }
+        });
 
     insert_action_group("files", action_group_);
 }
@@ -1473,6 +1539,7 @@ gui::tab::create_context_menu_model() noexcept
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Control>P"));
             section->append_item(item);
 
+            if (!selected.empty())
             {
                 auto smenu_quick = Gio::Menu::create();
                 // make sure int values match the switch in "chmod_quick"
@@ -1493,7 +1560,17 @@ gui::tab::create_context_menu_model() noexcept
                 smenu_quick->append("rwxrwxrwt", "files.chmod_quick(14)");
                 smenu_quick->append("-t", "files.chmod_quick(15)");
                 smenu_quick->append("+t", "files.chmod_quick(16)");
-                // TODO either have recursive be a check box or submenu
+
+                {
+                    auto smenu_recursive = Gio::Menu::create();
+                    smenu_recursive->append("go-w", "files.chmod_recursive(0)");
+                    smenu_recursive->append("go-rwx", "files.chmod_recursive(1)");
+                    smenu_recursive->append("ugo+w", "files.chmod_recursive(2)");
+                    smenu_recursive->append("ugo+rx", "files.chmod_recursive(3)");
+                    smenu_recursive->append("ugo+rwx", "files.chmod_recursive(4)");
+
+                    smenu_quick->append_submenu("Recursive", smenu_recursive);
+                }
 
                 section->append_submenu("Quick", smenu_quick);
             }
@@ -2728,6 +2805,25 @@ gui::tab::on_chmod(const std::filesystem::perms perms,
         .mode = perms,
         .opts = opts,
         .paths = selected_paths(),
+    };
+    task_manager_->add(task);
+}
+
+void
+gui::tab::on_chmod_recursive(const std::filesystem::perms perms,
+                             const std::filesystem::perm_options opts) const noexcept
+{
+    const auto selected = selected_files();
+    if (selected.empty())
+    {
+        return;
+    }
+
+    auto task = vfs::chmod_task{
+        .mode = perms,
+        .opts = opts,
+        .paths = selected_paths(),
+        .recursive = true,
     };
     task_manager_->add(task);
 }
