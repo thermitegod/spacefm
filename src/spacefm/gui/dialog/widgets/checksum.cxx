@@ -29,6 +29,9 @@
 #include "gui/dialog/widgets/checksum.hxx"
 #include "gui/dialog/widgets/copy-button.hxx"
 
+// Boton hash API
+// https://botan.randombit.net/handbook/api_ref/hash.html
+
 gui::widget::Checksum::Checksum(std::string_view type, const std::filesystem::path& path)
     : path_(path), algo_type_(type)
 {
@@ -106,7 +109,7 @@ gui::widget::Checksum::calculate_hash(const std::stop_token& stoken,
             throw std::runtime_error("Could not open file");
         }
 
-        std::vector<uint8_t> buffer(4096);
+        std::vector<std::uint8_t> buffer(4096);
         while (file.good())
         {
             if (stoken.stop_requested())
@@ -119,7 +122,7 @@ gui::widget::Checksum::calculate_hash(const std::stop_token& stoken,
             auto bytes_read = file.gcount();
             if (bytes_read > 0)
             {
-                hash_obj->update(buffer.data(), static_cast<std::size_t>(bytes_read));
+                hash_obj->update(std::span{buffer}.first(static_cast<std::size_t>(bytes_read)));
             }
         }
 

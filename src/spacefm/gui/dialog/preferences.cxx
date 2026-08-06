@@ -274,6 +274,19 @@ gui::dialog::preferences::init_dialog_tab() noexcept
     page->add_checkbox("Target", settings_->dialog.rename.target);
     page->add_checkbox("Type", settings_->dialog.rename.type);
     page->add_checkbox("Confirm", settings_->dialog.rename.confirm);
+
+    page->add_section("Properties Checksums");
+
+    page->add_checkbox("MD5", settings_->dialog.properties.hash_md5);
+    page->add_checkbox("SHA-1", settings_->dialog.properties.hash_sha1);
+    page->add_checkbox("SHA-256", settings_->dialog.properties.hash_sha256);
+    page->add_checkbox("SHA-512", settings_->dialog.properties.hash_sha512);
+    page->add_checkbox("SHA-3(256)", settings_->dialog.properties.hash_sha_3_256);
+    page->add_checkbox("SHA-3(512)", settings_->dialog.properties.hash_sha_3_512);
+    page->add_checkbox("BLAKE2b(256)", settings_->dialog.properties.hash_blake2b_256);
+    page->add_checkbox("BLAKE2b(512)", settings_->dialog.properties.hash_blake2b_512);
+    page->add_checkbox("Whirlpool", settings_->dialog.properties.hash_whirlpool);
+    page->add_checkbox("CRC32", settings_->dialog.properties.hash_crc32);
 }
 
 void

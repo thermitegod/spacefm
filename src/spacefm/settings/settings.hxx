@@ -245,6 +245,21 @@ struct settings_on_disk
             bool confirm{true};
         };
         rename rename;
+
+        struct properties final
+        {
+            bool hash_md5{true};
+            bool hash_sha1{true};
+            bool hash_sha256{true};
+            bool hash_sha512{true};
+            bool hash_sha_3_256{false};
+            bool hash_sha_3_512{false};
+            bool hash_blake2b_256{false};
+            bool hash_blake2b_512{false};
+            bool hash_whirlpool{false};
+            bool hash_crc32{false};
+        };
+        properties properties;
     };
     dialog dialog;
 

@@ -23,6 +23,8 @@
 
 #include <gtkmm.h>
 
+#include "settings/settings.hxx"
+
 #include "gui/dialog/media/metadata.hxx"
 
 #include "vfs/file.hxx"
@@ -43,9 +45,12 @@ class properties : public Gtk::ApplicationWindow
 
     properties(Gtk::ApplicationWindow& parent, properties::page page,
                const std::filesystem::path& cwd,
-               const std::span<const std::shared_ptr<vfs::file>>& files);
+               const std::span<const std::shared_ptr<vfs::file>>& files,
+               const std::shared_ptr<config::settings>& settings) noexcept;
 
   protected:
+    std::shared_ptr<config::settings> settings_;
+
     Gtk::Box box_;
     Gtk::Notebook notebook_;
 

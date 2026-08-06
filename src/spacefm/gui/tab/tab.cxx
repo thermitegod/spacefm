@@ -3100,7 +3100,7 @@ gui::tab::show_properites_dialog(gui::dialog::properties::page page) noexcept
         selected = {vfs::file::create(cwd())};
     }
 
-    Gtk::make_managed<gui::dialog::properties>(parent_, page, cwd(), selected);
+    Gtk::make_managed<gui::dialog::properties>(parent_, page, cwd(), selected, settings_);
 }
 
 void

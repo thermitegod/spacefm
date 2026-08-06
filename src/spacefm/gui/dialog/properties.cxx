@@ -193,8 +193,9 @@ class properties_grid : public Gtk::ScrolledWindow
 gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
                                     gui::dialog::properties::page page,
                                     const std::filesystem::path& cwd,
-                                    const std::span<const std::shared_ptr<vfs::file>>& files)
-    : files_(files.begin(), files.end()), cwd_(cwd)
+                                    const std::span<const std::shared_ptr<vfs::file>>& files,
+                                    const std::shared_ptr<config::settings>& settings) noexcept
+    : settings_(settings), files_(files.begin(), files.end()), cwd_(cwd)
 {
     set_transient_for(parent);
     set_modal(false);
@@ -819,29 +820,63 @@ gui::dialog::properties::init_checksum_tab() noexcept
     };
     entry->signal_changed().connect(validate_input);
 
-    static constexpr std::array<std::string_view, 4> algo_types = {
-        "MD5",
-        "SHA-1",
-        "SHA-256",
-        "SHA-512",
-    };
-
-    for (const auto type : algo_types)
+    auto add_checksum = [page, calculated_checksums, validate_input, file](std::string_view algo)
     {
-        auto* checksum = Gtk::make_managed<gui::widget::Checksum>(type, file->path());
+        auto* checksum = Gtk::make_managed<gui::widget::Checksum>(algo, file->path());
 
         checksum->signal_calculated().connect(
-            [type, calculated_checksums, validate_input](std::string_view result)
+            [algo, calculated_checksums, validate_input](std::string_view result)
             {
-                (*calculated_checksums)[type] = std::string(result);
+                (*calculated_checksums)[algo] = std::string(result);
                 validate_input();
             });
 
-        auto* label = Gtk::make_managed<Gtk::Label>(std::format("{}:", type));
+        auto* label = Gtk::make_managed<Gtk::Label>(std::format("{}:", algo));
         label->set_xalign(0.0f);
         label->set_halign(Gtk::Align::END);
 
         page->add_item(*label, *checksum);
+    };
+
+    if (settings_->dialog.properties.hash_md5)
+    {
+        add_checksum("MD5");
+    }
+    if (settings_->dialog.properties.hash_sha1)
+    {
+        add_checksum("SHA-1");
+    }
+    if (settings_->dialog.properties.hash_sha256)
+    {
+        add_checksum("SHA-256");
+    }
+    if (settings_->dialog.properties.hash_sha512)
+    {
+        add_checksum("SHA-512");
+    }
+    if (settings_->dialog.properties.hash_sha_3_256)
+    {
+        add_checksum("SHA-3(256)");
+    }
+    if (settings_->dialog.properties.hash_sha_3_512)
+    {
+        add_checksum("SHA-3(512)");
+    }
+    if (settings_->dialog.properties.hash_blake2b_256)
+    {
+        add_checksum("BLAKE2b(256)");
+    }
+    if (settings_->dialog.properties.hash_blake2b_512)
+    {
+        add_checksum("BLAKE2b(512)");
+    }
+    if (settings_->dialog.properties.hash_whirlpool)
+    {
+        add_checksum("Whirlpool");
+    }
+    if (settings_->dialog.properties.hash_crc32)
+    {
+        add_checksum("CRC32");
     }
 }
 
