@@ -350,6 +350,7 @@ if get_option('tools')
 endif
 
 ## Install
-install_subdir('data/applications', install_dir: datadir)
-install_subdir('data/icons', install_dir: datadir)
-install_subdir('data/images', install_dir: datadir / 'spacefm')
+
+install_subdir('share/applications', install_dir: datadir)
+install_subdir('share/icons', install_dir: datadir)
+install_subdir('share/spacefm', install_dir: datadir)
