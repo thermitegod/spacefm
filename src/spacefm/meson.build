@@ -53,11 +53,10 @@ sources = files(
     'settings/config.cxx',
 )
 
-spacefm = build_target(
+spacefm_exe = executable(
     'spacefm',
     sources,
-    target_type: 'executable',
-    include_directories : include_directories('.'),
+    include_directories: include_directories('.'),
     install: true,
     install_dir: bindir,
     dependencies: [

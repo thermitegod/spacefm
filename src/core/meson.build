@@ -5,15 +5,15 @@ spdlog_dep = dependency('spdlog', required: true)
 logger_lib = static_library(
     'logger',
     files('logger/logger.cxx'),
-    include_directories : include_directories('./logger'),
-    dependencies : spdlog_dep,
+    include_directories: include_directories('./logger'),
+    dependencies: spdlog_dep,
     install: false,
 )
 
 logger_dep = declare_dependency(
-    link_with : logger_lib,
-    include_directories : include_directories('./logger'),
-    dependencies : spdlog_dep,
+    link_with: logger_lib,
+    include_directories: include_directories('./logger'),
+    dependencies: spdlog_dep,
 )
 
 # natsort static library
@@ -21,13 +21,13 @@ logger_dep = declare_dependency(
 natsort_lib = static_library(
     'natsort',
     files('natsort/natsort.cxx'),
-    include_directories : include_directories('.'),
+    include_directories: include_directories('.'),
     install: false,
 )
 
 natsort_dep = declare_dependency(
-    link_with : natsort_lib,
-    include_directories : include_directories('.'),
+    link_with: natsort_lib,
+    include_directories: include_directories('.'),
 )
 
 # glycin wrapper static library
@@ -35,16 +35,17 @@ natsort_dep = declare_dependency(
 glycin_wrapper_lib = static_library(
     'glycin_wrapper',
     files('glycin/glycin.cxx'),
-    include_directories : include_directories('.'),
-    dependencies : gtk_dependencies,
+    include_directories: include_directories('.'),
+    dependencies: gtk_dependencies,
     install: false,
 )
 
 glycin_wrapper_dep = declare_dependency(
-    link_with : glycin_wrapper_lib,
-    include_directories : include_directories('.'),
-    dependencies : gtk_dependencies,
+    link_with: glycin_wrapper_lib,
+    include_directories: include_directories('.'),
+    dependencies: gtk_dependencies,
 )
+
 
 # vfs static library
 
@@ -101,14 +102,14 @@ vfs_dependencies = [
 vfs_lib = static_library(
     'vfs',
     vfs_sources,
-    include_directories : include_directories('.'),
-    dependencies : vfs_dependencies,
+    include_directories: include_directories('.'),
+    dependencies: vfs_dependencies,
     install: false,
     cpp_pch: '../../pch/pch.hxx',
 )
 
 vfs_dep = declare_dependency(
-    link_with : vfs_lib,
-    include_directories : include_directories('.'),
-    dependencies : vfs_dependencies,
+    link_with: vfs_lib,
+    include_directories: include_directories('.'),
+    dependencies: vfs_dependencies,
 )

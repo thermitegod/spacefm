@@ -6,6 +6,8 @@ project(
     default_options: [
         'c_std=c23',
         'cpp_std=c++26',
+        # 'cpp_debugstl=true',
+        # 'cpp_importstd=true',
         'buildtype=debugoptimized',
         'warning_level=3',
         'optimization=2',
@@ -24,14 +26,14 @@ source_root = meson.project_source_root()
 package = meson.project_name()
 version = meson.project_version()
 prefix = get_option('prefix')
-bindir = join_paths(prefix, get_option('bindir'))
-datadir = join_paths(prefix, get_option('datadir'))
-libdir = join_paths(prefix, get_option('libdir'), package)
+bindir = prefix / get_option('bindir')
+datadir = prefix / get_option('datadir')
+libdir = prefix / get_option('libdir') / package
 sysconfdir = get_option('sysconfdir')
-localedir = join_paths(prefix, get_option('localedir'))
-mandir = join_paths(prefix, get_option('mandir'))
+localedir = prefix / get_option('localedir')
+mandir = prefix / get_option('mandir')
 
-## compiler stuff
+## Compiler stuff
 
 cc = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
@@ -40,7 +42,12 @@ cpp = meson.get_compiler('cpp')
 # message(cpp.get_id())
 
 flags = [
-    # '-freflection', # very slow builds
+    # modules still dont work
+    # '-fmodules',
+    # '--compile-std-module',
+
+    # very slow builds
+    # '-freflection',
 ]
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
@@ -211,10 +218,10 @@ link_flags += cpp.get_supported_link_arguments([
     '-Wl,-z,defs',
 ])
 
-add_global_arguments(flags, language: ['c', 'cpp'])
-add_global_link_arguments(link_flags, language: ['c', 'cpp'])
+add_project_arguments(flags, language: ['c', 'cpp'])
+add_project_link_arguments(link_flags, language: ['c', 'cpp'])
 
-## system dependencies
+## Dependencies
 
 cli11_dep = dependency('CLI11', required: true)
 magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
@@ -230,7 +237,6 @@ base_dependencies = [
     botan_dep,
 ]
 
-# Gtk
 gtkmm_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
 glibmm_dep = dependency('glibmm-2.68', required: true)
 giomm_dep = dependency('giomm-2.68', required: true)
@@ -245,7 +251,20 @@ gtk_dependencies = [
     glycin_dep,
 ]
 
-## preprocessor static
+if get_option('with-system-glaze')
+    base_dependencies += dependency('glaze', required: true, version: '>=6.3.0')
+else
+    incdir += include_directories('subprojects/glaze/include')
+endif
+
+if get_option('with-system-ztd')
+    base_dependencies += dependency('ztd', required: true)
+else
+    ztd_proj = subproject('ztd', required: true)
+    base_dependencies += ztd_proj.get_variable('ztd_dep')
+endif
+
+## Preprocessor / Features
 
 preprocessor = [
     '-DPACKAGE_NAME="spacefm"',
@@ -256,17 +275,15 @@ preprocessor = [
     '-DPACKAGE_ONLINE_DOCS="TODO"',
 
     # data paths
-    '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm'),
-    '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(join_paths(meson.current_source_dir(), 'data/images')),
+    '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm' / 'images'),
+    '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(meson.current_source_dir() / 'data/images'),
 
     # test data
-    '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data')),
+    '-DTEST_DATA_PATH="@0@"'.format(meson.current_source_dir() / 'tests/test_data'),
 ]
 
 if get_option('dev')
     preprocessor += [
-        '-DDEV_SCRIPTS_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tools/scripts')),
-
         # GTKMM
         '-DGTKMM_DISABLE_DEPRECATED',
         '-DGDKMM_DISABLE_DEPRECATED',
@@ -275,32 +292,8 @@ if get_option('dev')
     ]
 endif
 
-foreach a: preprocessor
-    add_project_arguments(a, language: ['c', 'cpp'])
-endforeach
-
-## preprocessor features
-features = []
-
 if get_option('dev')
-    features += '-DDEV_MODE'
-endif
-
-if get_option('with-system-glaze')
-    glaze_dep = dependency('glaze', required: true, version: '>=6.3.0')
-    base_dependencies += glaze_dep
-else
-    # TODO meson deprecated doing this
-    # incdir += include_directories('subprojects/glaze/include')
-endif
-
-if get_option('with-system-ztd')
-    ztd_dep = dependency('ztd', required: true)
-    base_dependencies += ztd_dep
-else
-    ztd_proj = subproject('ztd', required: true)
-    ztd_dep = ztd_proj.get_variable('ztd_dep')
-    base_dependencies += ztd_dep
+    preprocessor += '-DDEV_MODE'
 endif
 
 media_dependencies = []
@@ -315,7 +308,6 @@ if get_option('media')
     # libswscale_dep = dependency('libswscale')
 
     gexiv_dep = dependency('gexiv2')
-    gdkpixbuf_dep = dependency('gdk-pixbuf-2.0')
 
     media_dependencies += [
         libavcodec_dep,
@@ -326,17 +318,14 @@ if get_option('media')
         # libswresample_dep,
         # libswscale_dep,
         gexiv_dep,
-        gdkpixbuf_dep,
     ]
 
-    features += '-DHAVE_MEDIA'
+    preprocessor += '-DHAVE_MEDIA'
 endif
 
-foreach a: features
-    add_project_arguments(a, language: ['c', 'cpp'])
-endforeach
+add_project_arguments(preprocessor, language: ['c', 'cpp'])
 
-# Build
+## Build
 
 subdir('src/core')
 subdir('src/spacefm')

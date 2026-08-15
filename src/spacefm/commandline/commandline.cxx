@@ -86,7 +86,6 @@ run_commandline(const std::shared_ptr<opts_data>& opt) noexcept
         std::println("PACKAGE_ONLINE_DOCS   = {}", PACKAGE_ONLINE_DOCS);
         std::println("PACKAGE_IMAGES        = {}", PACKAGE_IMAGES);
         std::println("PACKAGE_IMAGES_LOCAL  = {}", PACKAGE_IMAGES_LOCAL);
-        std::println("DEV_SCRIPTS_PATH      = {}", DEV_SCRIPTS_PATH);
         std::exit(EXIT_SUCCESS);
     }
 #endif

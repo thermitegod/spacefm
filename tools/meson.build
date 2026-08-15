@@ -1,16 +1,13 @@
 # Create Thumbnails
-incdir = include_directories(['thumbnails', '../src'])
 sources = files(
     'thumbnails/thumbnails-create.cxx',
 )
 
-spacefm = build_target(
+thumbnails_exe = executable(
     'spacefm-tools-create-thumbnails',
     sources,
-    target_type: 'executable',
-    include_directories: incdir,
+    include_directories: include_directories('thumbnails'),
     install: false,
-    install_dir: bindir,
     dependencies: [
         cli11_dep,
         vfs_dep,
@@ -19,18 +16,15 @@ spacefm = build_target(
 )
 
 # Validate Thumbnails
-incdir = include_directories(['thumbnails', '../src'])
 sources = files(
     'thumbnails/thumbnails-validate.cxx',
 )
 
-spacefm = build_target(
+validate_exe = executable(
     'spacefm-tools-validate-thumbnails',
     sources,
-    target_type: 'executable',
-    include_directories: incdir,
+    include_directories: include_directories('thumbnails'),
     install: false,
-    install_dir: bindir,
     dependencies: [
         cli11_dep,
         vfs_dep,
@@ -38,43 +32,34 @@ spacefm = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
-
 # Stress Testing Tools
-
-incdir = include_directories('stress')
 sources = files(
     'stress/fs-events.cxx',
 )
 
-spacefm = build_target(
+stress_exe = executable(
     'stress-fs-events',
     sources,
-    target_type: 'executable',
-    include_directories: incdir,
+    include_directories: include_directories('stress'),
     install: false,
-    install_dir: bindir,
     dependencies: [
         cli11_dep,
-        logger_dep,
+        vfs_dep,
     ],
     # cpp_pch: '../pch/pch.hxx',
 )
 
 # Dev Dialog Template
-
-incdir = include_directories('template')
 sources = files(
     'template/main.cxx',
     'template/window.cxx',
 )
 
-spacefm = build_target(
-    'template-dialog',
+template_exe = executable(
+    'template',
     sources,
-    target_type: 'executable',
-    include_directories: incdir,
+    include_directories: include_directories('template'),
     install: false,
-    install_dir: bindir,
     dependencies: [
         gtk_dependencies,
     ],

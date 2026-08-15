@@ -1,18 +1,18 @@
 ## Test only dependencies
 
-doctest_dep = dependency('doctest', required : true)
+doctest_dep = dependency('doctest', required: true)
 
 ## Spacefm Test Source files
 
-test_sources_sfm = files()
+sources = files()
 
 # TODO need something better here
-test_sources_sfm += files(
+sources += files(
     '../src/spacefm/gui/lib/history.cxx',
 )
 
 # Test Source Files
-test_sources_sfm += files(
+sources += files(
     'src/main.cxx',
 
     'src/natsort/natsort.cxx',
@@ -38,12 +38,9 @@ test_sources_sfm += files(
     'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
 
-## Build
-
-test_suite = build_target(
+test_suite_exe = executable(
     'test_suite',
-    sources: test_sources_sfm,
-    target_type: 'executable',
+    sources,
     include_directories: include_directories(['./src', '../src/spacefm']),
     install: false,
     dependencies: [
@@ -57,4 +54,4 @@ test_suite = build_target(
     cpp_pch: '../pch/pch.hxx',
 )
 
-test('Test Suite', test_suite)
+test('Test Suite', test_suite_exe)

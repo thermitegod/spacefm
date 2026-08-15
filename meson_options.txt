@@ -1,55 +1,48 @@
 option(
     'tests',
-    type : 'boolean',
-    value : false,
-    description : 'Build the test suite'
+    type: 'boolean',
+    value: false,
+    description: 'Build the test suite'
 )
 
 option(
     'dev',
-    type : 'boolean',
+    type: 'boolean',
     value: false,
-    description : 'enable development features'
+    description: 'enable development features'
 )
 
 option(
     'tools',
-    type : 'boolean',
+    type: 'boolean',
     value: false,
-    description : 'Build additional tools'
+    description: 'Build additional tools'
 )
 
 option(
     'socket',
-    type : 'boolean',
+    type: 'boolean',
     value: true,
-    description : 'Enable socket commands'
+    description: 'Enable socket commands'
 )
 
 option(
     'media',
-    type : 'boolean',
+    type: 'boolean',
     value: true,
-    description : 'Enable extra Audio, Video, and Image support'
+    description: 'Enable extra Audio, Video, and Image support'
 )
 
 option(
     'with-system-glaze',
-    type : 'boolean',
+    type: 'boolean',
     value: false,
-    description : 'Use system glaze instead of bundled version'
+    description: 'Use system glaze instead of bundled version'
 )
 
 option(
     'with-system-ztd',
-    type : 'boolean',
+    type: 'boolean',
     value: false,
-    description : 'Use system ztd instead of bundled version'
-)
-
-option(
-    'zmp_port',
-    type : 'integer',
-    value: 59172,
-    description : 'Port number to use for socket commands'
+    description: 'Use system ztd instead of bundled version'
 )
