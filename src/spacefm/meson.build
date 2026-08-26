@@ -50,6 +50,8 @@ sources = files(
     'gui/dialog/widgets/radio-button-box.cxx',
     'gui/dialog/widgets/text-entry.cxx',
 
+    'gui/utils/write-texture.cxx',
+
     'settings/config.cxx',
 )
 

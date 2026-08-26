@@ -32,15 +32,42 @@
 #include "glycin/glycin.hxx"
 #include "logger.hxx"
 
-[[nodiscard]] bool
-gui::clipboard::is_valid() noexcept
+gui::clipboard::clipboard_content
+gui::clipboard::get_content_type() noexcept
 {
     auto display = Gdk::Display::get_default();
     auto clipboard = display->get_clipboard();
+    auto formats = clipboard->get_formats();
+    if (!formats)
+    {
+        return clipboard_content::invalid;
+    }
 
-    const auto formats = clipboard->get_formats();
+    if (formats->contain_mime_type("x-special/gnome-copied-files"))
+    {
+        return clipboard_content::files;
+    }
 
-    return formats->contain_mime_type("x-special/gnome-copied-files");
+    if (formats->contain_gtype(Gdk::Texture::get_type()) ||
+        formats->contain_mime_type("image/png") || formats->contain_mime_type("image/jpeg") ||
+        formats->contain_mime_type("image/tiff"))
+    {
+        return clipboard_content::image;
+    }
+
+    if (formats->contain_mime_type("text/plain;charset=utf-8") ||
+        formats->contain_mime_type("text/plain"))
+    {
+        return clipboard_content::text;
+    }
+
+    return clipboard_content::invalid;
+}
+
+bool
+gui::clipboard::is_valid() noexcept
+{
+    return get_content_type() != clipboard_content::invalid;
 }
 
 static void
@@ -216,4 +243,71 @@ gui::clipboard::get_text() noexcept
     loop->run();
 
     return text;
+}
+
+void
+gui::clipboard::set_image(const std::shared_ptr<vfs::file>& file) noexcept
+{
+    auto get_texture = [](const std::shared_ptr<vfs::file>& f) -> Glib::RefPtr<Gdk::Texture>
+    {
+        auto file = Gio::File::create_for_path(f->path());
+
+        try
+        {
+            auto loader = Gly::Loader::create(file);
+            auto image = loader->load();
+            auto frame = image->next_frame();
+            auto texture = frame->get_texture();
+
+            return texture;
+        }
+        catch (const Glib::Error& e)
+        {
+            logger::error<logger::vfs>("Loading '{}' failed with: {}", file->get_path(), e.what());
+            return nullptr;
+        }
+    };
+
+    auto texture = get_texture(file);
+    if (texture)
+    {
+        set_image(texture);
+    }
+}
+
+void
+gui::clipboard::set_image(const Glib::RefPtr<Gdk::Texture>& texture) noexcept
+{
+    if (!texture)
+    {
+        return;
+    }
+
+    auto display = Gdk::Display::get_default();
+    auto clipboard = display->get_clipboard();
+
+    clipboard->set_texture(texture);
+}
+
+void
+gui::clipboard::get_image(
+    std::copyable_function<void(const Glib::RefPtr<Gdk::Texture>&) const> callback) noexcept
+{
+    auto display = Gdk::Display::get_default();
+    auto clipboard = display->get_clipboard();
+
+    clipboard->read_texture_async(
+        [clipboard, callback](const Glib::RefPtr<Gio::AsyncResult>& result)
+        {
+            try
+            {
+                auto texture = clipboard->read_texture_finish(result);
+                callback(texture);
+            }
+            catch (const Glib::Error& ex)
+            {
+                logger::warn<logger::gui>("clipboard get image: {}", ex.what());
+                callback(nullptr);
+            }
+        });
 }

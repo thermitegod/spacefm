@@ -37,6 +37,7 @@
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/tab.hxx"
 #include "gui/tab/utils/history.hxx"
+#include "gui/utils/write-texture.hxx"
 
 #include "gui/action/open.hxx"
 
@@ -52,6 +53,7 @@
 #include "vfs/task-manager.hxx"
 
 #include "vfs/utils/permissions.hxx"
+#include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 
@@ -2701,6 +2703,23 @@ gui::tab::on_cut() const noexcept
 void
 gui::tab::on_paste() const noexcept
 {
+    auto content = clipboard::get_content_type();
+    if (content == clipboard::clipboard_content::files)
+    {
+        paste_files();
+    }
+    else if (content == clipboard::clipboard_content::image)
+    {
+        paste_image();
+    }
+    else if (content == clipboard::clipboard_content::text)
+    { // TODO?
+    }
+}
+
+void
+gui::tab::paste_files() const noexcept
+{
     auto callback = [this](const std::vector<std::string>& uris, bool is_cut)
     {
         // logger::trace("is_cut: {}", is_cut);
@@ -2731,6 +2750,26 @@ gui::tab::on_paste() const noexcept
     };
 
     gui::clipboard::paste_files(callback);
+}
+
+void
+gui::tab::paste_image() const noexcept
+{
+    // TODO
+    // create dialog to ask for filename and save type, png or jpg.
+    // setting option to set default action or ask for each.
+
+    auto callback = [this](const Glib::RefPtr<Gdk::Texture>& texture)
+    {
+        if (!texture)
+        {
+            return;
+        }
+
+        gui::utils::write_texture_to_disk(texture, dir_->path());
+    };
+
+    gui::clipboard::get_image(callback);
 }
 
 void

@@ -119,6 +119,9 @@ class tab final : public Gtk::Box
     void on_paste_target() const noexcept;
     void on_paste_as() const noexcept;
 
+    void paste_files() const noexcept;
+    void paste_image() const noexcept;
+
     void on_hide_files() const noexcept;
 
     void set_files_view(const config::view_mode view_mode) noexcept;
