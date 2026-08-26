@@ -15,7 +15,7 @@
 
 #include <gtkmm.h>
 
-#include "gui/lib/clipboard.hxx"
+#include "gui/clipboard.hxx"
 
 #include "gui/dialog/widgets/copy-button.hxx"
 

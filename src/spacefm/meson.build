@@ -5,6 +5,7 @@ sources = files(
 
     'gui/archiver.cxx',
     'gui/browser.cxx',
+    'gui/clipboard.cxx',
     'gui/layout.cxx',
     'gui/main-window.cxx',
     'gui/menubar.cxx',
@@ -48,7 +49,6 @@ sources = files(
     'gui/dialog/widgets/text-entry.cxx',
 
     'gui/lib/history.cxx',
-    'gui/lib/clipboard.cxx',
 
     'settings/config.cxx',
 )

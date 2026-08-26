@@ -27,8 +27,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "gui/lib/clipboard.hxx"
+#include "gui/clipboard.hxx"
 
+#include "glycin/glycin.hxx"
 #include "logger.hxx"
 
 [[nodiscard]] bool

@@ -33,7 +33,7 @@
 #include "settings/settings.hxx"
 
 #include "gui/archiver.hxx"
-#include "gui/lib/clipboard.hxx"
+#include "gui/clipboard.hxx"
 #include "gui/lib/history.hxx"
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/tab.hxx"
