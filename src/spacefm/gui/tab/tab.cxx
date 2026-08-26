@@ -34,9 +34,9 @@
 
 #include "gui/archiver.hxx"
 #include "gui/clipboard.hxx"
-#include "gui/lib/history.hxx"
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/tab.hxx"
+#include "gui/tab/utils/history.hxx"
 
 #include "gui/action/open.hxx"
 
@@ -1988,7 +1988,7 @@ gui::tab::on_button_back()
 {
     if (history_.has_back())
     {
-        const auto mode = gui::lib::history::mode::back;
+        const auto mode = gui::utils::history::mode::back;
         chdir(history_.path(mode), mode);
     }
 }
@@ -1998,7 +1998,7 @@ gui::tab::on_button_forward()
 {
     if (history_.has_forward())
     {
-        const auto mode = gui::lib::history::mode::forward;
+        const auto mode = gui::utils::history::mode::forward;
         chdir(history_.path(mode), mode);
     }
 }
@@ -2148,7 +2148,7 @@ gui::tab::cwd() const noexcept
 }
 
 void
-gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode mode) noexcept
+gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mode mode) noexcept
 {
     // TODO needs to be investigated
     // make a copy of the path to fix ocasional: Assertion '!empty()' failed
@@ -2193,16 +2193,16 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::lib::history::mode
 
     switch (mode)
     {
-        case gui::lib::history::mode::normal:
+        case gui::utils::history::mode::normal:
             if (history_.path() != path)
             {
                 history_.new_forward(path);
             }
             break;
-        case gui::lib::history::mode::back:
+        case gui::utils::history::mode::back:
             history_.go_back();
             break;
-        case gui::lib::history::mode::forward:
+        case gui::utils::history::mode::forward:
             history_.go_forward();
             break;
     }

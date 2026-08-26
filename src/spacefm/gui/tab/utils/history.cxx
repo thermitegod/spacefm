@@ -19,10 +19,10 @@
 #include <utility>
 #include <vector>
 
-#include "gui/lib/history.hxx"
+#include "gui/tab/utils/history.hxx"
 
 void
-gui::lib::history::go_back() noexcept
+gui::utils::history::go_back() noexcept
 {
     if (!has_back())
     {
@@ -34,7 +34,7 @@ gui::lib::history::go_back() noexcept
 }
 
 bool
-gui::lib::history::has_back() const noexcept
+gui::utils::history::has_back() const noexcept
 {
     if (back_.size() == 1)
     {
@@ -48,7 +48,7 @@ gui::lib::history::has_back() const noexcept
 }
 
 void
-gui::lib::history::go_forward() noexcept
+gui::utils::history::go_forward() noexcept
 {
     if (!has_forward())
     {
@@ -60,13 +60,13 @@ gui::lib::history::go_forward() noexcept
 }
 
 bool
-gui::lib::history::has_forward() const noexcept
+gui::utils::history::has_forward() const noexcept
 {
     return !forward_.empty();
 }
 
 void
-gui::lib::history::new_forward(const std::filesystem::path& path) noexcept
+gui::utils::history::new_forward(const std::filesystem::path& path) noexcept
 {
     if (current_ == path)
     {
@@ -78,7 +78,7 @@ gui::lib::history::new_forward(const std::filesystem::path& path) noexcept
 }
 
 std::filesystem::path
-gui::lib::history::path(const mode mode) const noexcept
+gui::utils::history::path(const mode mode) const noexcept
 {
     switch (mode)
     {
@@ -107,7 +107,7 @@ gui::lib::history::path(const mode mode) const noexcept
 }
 
 std::optional<std::vector<std::filesystem::path>>
-gui::lib::history::get_selection(const std::filesystem::path& path) const noexcept
+gui::utils::history::get_selection(const std::filesystem::path& path) const noexcept
 {
     if (!selection_.contains(path))
     {
@@ -117,8 +117,8 @@ gui::lib::history::get_selection(const std::filesystem::path& path) const noexce
 }
 
 void
-gui::lib::history::set_selection(const std::filesystem::path& path,
-                                 const std::vector<std::filesystem::path>& files) noexcept
+gui::utils::history::set_selection(const std::filesystem::path& path,
+                                   const std::vector<std::filesystem::path>& files) noexcept
 {
     if (selection_.contains(path))
     {
@@ -128,7 +128,7 @@ gui::lib::history::set_selection(const std::filesystem::path& path,
 }
 
 void
-gui::lib::history::clear_selection(const std::filesystem::path& path) noexcept
+gui::utils::history::clear_selection(const std::filesystem::path& path) noexcept
 {
     if (selection_.contains(path))
     {

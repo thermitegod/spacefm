@@ -22,7 +22,7 @@
 
 #include "vfs/user-dirs.hxx"
 
-namespace gui::lib
+namespace gui::utils
 {
 struct history
 {
@@ -55,4 +55,4 @@ struct history
     std::vector<std::filesystem::path> back_;
     std::flat_map<std::filesystem::path, std::vector<std::filesystem::path>> selection_;
 };
-} // namespace gui::lib
+} // namespace gui::utils

@@ -22,6 +22,8 @@ sources = files(
     'gui/tab/files/grid.cxx',
     'gui/tab/files/list.cxx',
 
+    'gui/tab/utils/history.cxx',
+
     'gui/action/open.cxx',
 
     'gui/dialog/about.cxx',
@@ -47,8 +49,6 @@ sources = files(
     'gui/dialog/widgets/paste-button.cxx',
     'gui/dialog/widgets/radio-button-box.cxx',
     'gui/dialog/widgets/text-entry.cxx',
-
-    'gui/lib/history.cxx',
 
     'settings/config.cxx',
 )

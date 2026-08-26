@@ -29,12 +29,12 @@
 
 #include "settings/settings.hxx"
 
-#include "gui/lib/history.hxx"
 #include "gui/tab/files/grid.hxx"
 #include "gui/tab/files/list.hxx"
 #include "gui/tab/side.hxx"
 #include "gui/tab/statusbar.hxx"
 #include "gui/tab/toolbar.hxx"
+#include "gui/tab/utils/history.hxx"
 
 #include "gui/dialog/create.hxx"
 #include "gui/dialog/properties.hxx"
@@ -74,7 +74,7 @@ class tab final : public Gtk::Box
     config::tab_state get_tab_state() const noexcept;
 
     void chdir(const std::filesystem::path& path,
-               const gui::lib::history::mode mode = gui::lib::history::mode::normal) noexcept;
+               const gui::utils::history::mode mode = gui::utils::history::mode::normal) noexcept;
     void canon(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] std::filesystem::path cwd() const noexcept;
@@ -178,7 +178,7 @@ class tab final : public Gtk::Box
     config::list_state list_state_;
     gui::side side_;
 
-    gui::lib::history history_;
+    gui::utils::history history_;
 
     std::shared_ptr<vfs::dir> dir_;
 

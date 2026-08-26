@@ -8,7 +8,7 @@ sources = files()
 
 # TODO need something better here
 sources += files(
-    '../src/spacefm/gui/lib/history.cxx',
+    '../src/spacefm/gui/tab/utils/history.cxx',
 )
 
 # Test Source Files
