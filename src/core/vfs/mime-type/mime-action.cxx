@@ -37,6 +37,8 @@
 #include <string_view>
 #include <vector>
 
+#include <cassert>
+
 #include <glibmm.h>
 #include <gtkmm.h>
 

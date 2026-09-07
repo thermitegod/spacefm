@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <cassert>
+
 #include <ztd/ztd.hxx>
 
 #if 0 // TODO
