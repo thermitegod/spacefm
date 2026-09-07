@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <span>
 #include <stop_token>
 #include <thread>
 #include <vector>
@@ -78,13 +79,13 @@ class properties : public Gtk::ApplicationWindow
 
     struct calc_worker
     {
-        calc_worker(std::vector<std::shared_ptr<vfs::file>> targets) : files(std::move(targets)) {}
+        calc_worker(std::span<const std::shared_ptr<vfs::file>> targets) : files(targets) {}
 
         void calc_size(const std::stop_token& stoken) noexcept;
         void calc_total_size_of_files(const std::stop_token& stoken,
                                       const std::filesystem::path& path) noexcept;
 
-        std::vector<std::shared_ptr<vfs::file>> files;
+        std::span<const std::shared_ptr<vfs::file>> files;
 
         std::atomic<std::uint64_t> total_size{0};
         std::atomic<std::uint64_t> size_on_disk{0};

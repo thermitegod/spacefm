@@ -21,7 +21,6 @@
 #include <span>
 #include <string>
 #include <string_view>
-#include <vector>
 
 #include <cstdint>
 
@@ -45,7 +44,7 @@ enum class clipboard_content : std::int32_t
 void copy_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 void cut_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 void paste_files(
-    std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept;
+    std::copyable_function<void(std::span<const std::string>, bool) const> callback) noexcept;
 
 void set_text(std::string_view text) noexcept;
 [[nodiscard]] std::optional<std::string> get_text() noexcept;

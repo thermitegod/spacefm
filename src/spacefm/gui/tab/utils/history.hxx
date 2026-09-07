@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <flat_map>
 #include <optional>
+#include <span>
 #include <vector>
 
 #include "vfs/user-dirs.hxx"
@@ -46,7 +47,7 @@ struct history
     [[nodiscard]] std::optional<std::vector<std::filesystem::path>>
     get_selection(const std::filesystem::path& path) const noexcept;
     void set_selection(const std::filesystem::path& path,
-                       const std::vector<std::filesystem::path>& files) noexcept;
+                       std::span<const std::filesystem::path> files) noexcept;
     void clear_selection(const std::filesystem::path& path) noexcept;
 
   private:

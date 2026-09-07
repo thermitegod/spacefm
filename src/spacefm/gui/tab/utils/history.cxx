@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <flat_map>
 #include <optional>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -118,13 +119,13 @@ gui::utils::history::get_selection(const std::filesystem::path& path) const noex
 
 void
 gui::utils::history::set_selection(const std::filesystem::path& path,
-                                   const std::vector<std::filesystem::path>& files) noexcept
+                                   std::span<const std::filesystem::path> files) noexcept
 {
     if (selection_.contains(path))
     {
         selection_.erase(path);
     }
-    selection_.insert({path, files});
+    selection_.insert({path, {files.begin(), files.end()}});
 }
 
 void

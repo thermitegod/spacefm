@@ -2720,7 +2720,7 @@ gui::tab::on_paste() const noexcept
 void
 gui::tab::paste_files() const noexcept
 {
-    auto callback = [this](const std::vector<std::string>& uris, bool is_cut)
+    auto callback = [this](std::span<const std::string> uris, bool is_cut)
     {
         // logger::trace("is_cut: {}", is_cut);
         std::vector<std::filesystem::path> files;

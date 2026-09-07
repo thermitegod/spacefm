@@ -124,7 +124,7 @@ gui::clipboard::cut_files(std::span<const std::shared_ptr<vfs::file>> files) noe
 
 void
 gui::clipboard::paste_files(
-    std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept
+    std::copyable_function<void(std::span<const std::string>, bool) const> callback) noexcept
 {
     if (!is_valid())
     {

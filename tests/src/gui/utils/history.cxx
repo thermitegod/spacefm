@@ -55,22 +55,22 @@ TEST_SUITE("navigation/selection history" * doctest::description(""))
         gui::utils::history history;
 
         history.new_forward(p1);
-        history.set_selection(p1, {p1});
+        history.set_selection(p1, std::vector{p1});
         CHECK_EQ(history.path(), p1);
         CHECK_EQ(history.get_selection(p1).value(), std::vector{p1});
 
         history.new_forward(p2);
-        history.set_selection(p2, {p2});
+        history.set_selection(p2, std::vector{p2});
         CHECK_EQ(history.path(), p2);
         CHECK_EQ(history.get_selection(p2).value(), std::vector{p2});
 
         history.new_forward(p3);
-        history.set_selection(p3, {p3});
+        history.set_selection(p3, std::vector{p3});
         CHECK_EQ(history.path(), p3);
         CHECK_EQ(history.get_selection(p3).value(), std::vector{p3});
 
         history.new_forward(p4);
-        history.set_selection(p4, {p4});
+        history.set_selection(p4, std::vector{p4});
         CHECK_EQ(history.path(), p4);
         CHECK_EQ(history.get_selection(p4).value(), std::vector{p4});
 
