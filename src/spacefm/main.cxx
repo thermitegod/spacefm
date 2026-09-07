@@ -13,14 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <print>
-
-#include <cstdlib>
-
 #include <glibmm.h>
 #include <gtkmm.h>
-
-#include <CLI/CLI.hpp>
 
 #include "commandline/commandline.hxx"
 
@@ -32,7 +26,6 @@ main(int argc, char* argv[])
     const auto opts = commandline::run(argc, argv);
     if (!opts)
     {
-        std::println(stderr, "{}", opts.error());
         return EXIT_FAILURE;
     }
 

@@ -15,9 +15,8 @@
 
 #pragma once
 
-#include <expected>
 #include <filesystem>
-#include <string>
+#include <optional>
 #include <vector>
 
 namespace commandline
@@ -32,5 +31,5 @@ struct opts final
     std::int32_t panel{0};
 };
 
-std::expected<opts, std::string> run(int argc, char* argv[]) noexcept;
+std::optional<opts> run(int argc, char* argv[]) noexcept;
 } // namespace commandline
