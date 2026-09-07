@@ -36,6 +36,8 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    Glib::set_prgname(PACKAGE_NAME);
+
     auto app = Gtk::Application::create("org.thermitegod.experimental.spacefm");
     return app->make_window_and_run<gui::main_window>(0, nullptr, app);
 }
