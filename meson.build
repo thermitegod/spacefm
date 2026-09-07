@@ -276,7 +276,7 @@ preprocessor = [
 
     # data paths
     '-DPACKAGE_IMAGES="@0@"'.format(datadir / 'spacefm' / 'images'),
-    '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(meson.current_source_dir() / 'data/images'),
+    '-DPACKAGE_IMAGES_LOCAL="@0@"'.format(meson.current_source_dir() / 'share/spacefm/images'),
 
     # test data
     '-DTEST_DATA_PATH="@0@"'.format(meson.current_source_dir() / 'tests/test_data'),
