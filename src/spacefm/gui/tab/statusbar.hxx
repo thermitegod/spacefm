@@ -34,7 +34,7 @@ class statusbar final : public Gtk::Box
     statusbar(const std::shared_ptr<config::settings>& settings);
 
     void update(const std::shared_ptr<vfs::dir>& dir,
-                const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                std::span<const std::shared_ptr<vfs::file>> selected_files,
                 const bool show_hidden_files) noexcept;
 
   private:

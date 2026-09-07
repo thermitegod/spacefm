@@ -28,7 +28,7 @@ class action : public Gtk::ApplicationWindow
 {
   public:
     action(Gtk::ApplicationWindow& parent, std::string_view title,
-           const std::span<const std::shared_ptr<vfs::file>>& files);
+           std::span<const std::shared_ptr<vfs::file>> files);
 
   protected:
     class ModelColumns : public Glib::Object

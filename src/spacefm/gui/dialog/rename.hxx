@@ -53,8 +53,7 @@ class rename : public Gtk::ApplicationWindow
 {
   public:
     rename(Gtk::ApplicationWindow& parent, const std::shared_ptr<config::settings>& settings,
-           const std::filesystem::path& cwd,
-           const std::span<const std::shared_ptr<vfs::file>>& files);
+           const std::filesystem::path& cwd, std::span<const std::shared_ptr<vfs::file>> files);
     ~rename();
 
   private:

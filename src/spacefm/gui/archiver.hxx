@@ -26,15 +26,15 @@
 namespace gui::archiver
 {
 void create(Gtk::ApplicationWindow& parent,
-            const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
+            std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 
 void extract(Gtk::ApplicationWindow& parent,
-             const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
+             std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 
 void extract_to(Gtk::ApplicationWindow& parent,
-                const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                std::span<const std::shared_ptr<vfs::file>> selected_files,
                 const std::filesystem::path& dest_dir) noexcept;
 
 void open(Gtk::ApplicationWindow& parent,
-          const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
+          std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 } // namespace gui::archiver

@@ -193,7 +193,7 @@ class properties_grid : public Gtk::ScrolledWindow
 gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
                                     gui::dialog::properties::page page,
                                     const std::filesystem::path& cwd,
-                                    const std::span<const std::shared_ptr<vfs::file>>& files,
+                                    std::span<const std::shared_ptr<vfs::file>> files,
                                     const std::shared_ptr<config::settings>& settings) noexcept
     : settings_(settings), files_(files.begin(), files.end()), cwd_(cwd)
 {

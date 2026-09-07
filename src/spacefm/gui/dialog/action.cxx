@@ -27,7 +27,7 @@
 #include "vfs/file.hxx"
 
 gui::dialog::action::action(Gtk::ApplicationWindow& parent, std::string_view title,
-                            const std::span<const std::shared_ptr<vfs::file>>& files)
+                            std::span<const std::shared_ptr<vfs::file>> files)
     : files_(files.begin(), files.end())
 {
     set_transient_for(parent);

@@ -41,8 +41,7 @@ is_archiver_installed(Gtk::ApplicationWindow& parent) noexcept
 }
 
 static std::string
-archiver_create_shell_file_list(
-    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+archiver_create_shell_file_list(std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     std::string file_list;
     for (const auto& file : selected_files)
@@ -55,7 +54,7 @@ archiver_create_shell_file_list(
 
 void
 gui::archiver::create(Gtk::ApplicationWindow& parent,
-                      const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+                      std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     if (!is_archiver_installed(parent) || selected_files.empty())
     {
@@ -68,7 +67,7 @@ gui::archiver::create(Gtk::ApplicationWindow& parent,
 
 void
 gui::archiver::extract(Gtk::ApplicationWindow& parent,
-                       const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+                       std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     if (!is_archiver_installed(parent) || selected_files.empty())
     {
@@ -84,7 +83,7 @@ gui::archiver::extract(Gtk::ApplicationWindow& parent,
 
 void
 gui::archiver::extract_to(Gtk::ApplicationWindow& parent,
-                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                          std::span<const std::shared_ptr<vfs::file>> selected_files,
                           const std::filesystem::path& dest_dir) noexcept
 {
     if (!is_archiver_installed(parent) || selected_files.empty())
@@ -101,7 +100,7 @@ gui::archiver::extract_to(Gtk::ApplicationWindow& parent,
 
 void
 gui::archiver::open(Gtk::ApplicationWindow& parent,
-                    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+                    std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     if (!is_archiver_installed(parent) || selected_files.empty())
     {

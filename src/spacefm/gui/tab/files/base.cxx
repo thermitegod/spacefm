@@ -250,7 +250,7 @@ gui::files_base::select_file(const std::filesystem::path& filename,
 
 void
 gui::files_base::select_files(
-    const std::span<const std::filesystem::path> select_filenames) const noexcept
+    std::span<const std::filesystem::path> select_filenames) const noexcept
 {
     unselect_all();
 
@@ -474,7 +474,7 @@ gui::files_base::find_file(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 void
-gui::files_base::on_files_created(const std::span<const std::shared_ptr<vfs::file>> files) noexcept
+gui::files_base::on_files_created(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     // logger::debug("gui::grid::on_files_created({})", files.size());
 
@@ -511,7 +511,7 @@ gui::files_base::on_files_created(const std::span<const std::shared_ptr<vfs::fil
 }
 
 void
-gui::files_base::on_files_deleted(const std::span<const std::shared_ptr<vfs::file>> files) noexcept
+gui::files_base::on_files_deleted(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     // logger::debug("gui::grid::on_files_deleted({})", files.size());
 
@@ -539,7 +539,7 @@ gui::files_base::on_files_deleted(const std::span<const std::shared_ptr<vfs::fil
 }
 
 void
-gui::files_base::on_files_changed(const std::span<const std::shared_ptr<vfs::file>> files) noexcept
+gui::files_base::on_files_changed(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     // logger::debug("gui::grid::on_files_changed({})", files.size());
 

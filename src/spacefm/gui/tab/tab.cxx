@@ -2601,7 +2601,7 @@ gui::tab::select_file(const std::filesystem::path& filename,
 }
 
 void
-gui::tab::select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept
+gui::tab::select_files(std::span<const std::filesystem::path> select_filenames) const noexcept
 {
     if (view_mode_ == config::view_mode::grid)
     {

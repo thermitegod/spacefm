@@ -30,7 +30,7 @@ namespace gui::action
 {
 // Uses a set app to open files with
 void open_files_with_app(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
-                         const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                         std::span<const std::shared_ptr<vfs::file>> selected_files,
                          std::string_view app_desktop,
                          const std::shared_ptr<config::settings>& settings) noexcept;
 
@@ -38,12 +38,11 @@ void open_files_with_app(Gtk::ApplicationWindow& parent, const std::filesystem::
 // if xforce, force execute of executable ignoring settings::click_executes
 // if xnever, never execute an executable
 void open_files_auto(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
-                     const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                     const bool xforce, const bool xnever,
-                     const std::shared_ptr<config::settings>& settings) noexcept;
+                     std::span<const std::shared_ptr<vfs::file>> selected_files, const bool xforce,
+                     const bool xnever, const std::shared_ptr<config::settings>& settings) noexcept;
 
 // Execute files
 void open_files_execute(Gtk::ApplicationWindow& parent, const std::filesystem::path& cwd,
-                        const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                        std::span<const std::shared_ptr<vfs::file>> selected_files,
                         const std::shared_ptr<config::settings>& settings) noexcept;
 } // namespace gui::action

@@ -139,7 +139,7 @@ class tab final : public Gtk::Box
     void select_last() const noexcept;
     void select_file(const std::filesystem::path& filename,
                      const bool unselect_others = true) const noexcept;
-    void select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept;
+    void select_files(std::span<const std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename) const noexcept;
     void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;

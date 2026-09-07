@@ -42,8 +42,8 @@ enum class clipboard_content : std::int32_t
 
 [[nodiscard]] bool is_valid() noexcept;
 
-void copy_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
-void cut_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept;
+void copy_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+void cut_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 void paste_files(
     std::copyable_function<void(const std::vector<std::string>&, bool) const> callback) noexcept;
 

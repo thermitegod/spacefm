@@ -67,7 +67,7 @@ class files_base
     void unselect_all() const noexcept;
     void select_file(const std::filesystem::path& filename,
                      const bool unselect_others = true) const noexcept;
-    void select_files(const std::span<const std::filesystem::path> select_filenames) const noexcept;
+    void select_files(std::span<const std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename) const noexcept;
     void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
@@ -140,9 +140,9 @@ class files_base
 
     std::pair<bool, std::uint32_t> find_file(const std::shared_ptr<vfs::file>& file) noexcept;
 
-    void on_files_created(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
-    void on_files_deleted(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
-    void on_files_changed(const std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+    void on_files_created(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+    void on_files_deleted(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
+    void on_files_changed(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
     void on_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
   public:

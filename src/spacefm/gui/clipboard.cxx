@@ -71,7 +71,7 @@ gui::clipboard::is_valid() noexcept
 }
 
 static void
-set_clipboard(const std::span<const std::shared_ptr<vfs::file>>& files, bool is_cut) noexcept
+set_clipboard(std::span<const std::shared_ptr<vfs::file>> files, bool is_cut) noexcept
 {
     auto display = Gdk::Display::get_default();
     auto clipboard = display->get_clipboard();
@@ -111,13 +111,13 @@ set_clipboard(const std::span<const std::shared_ptr<vfs::file>>& files, bool is_
 }
 
 void
-gui::clipboard::copy_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept
+gui::clipboard::copy_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     set_clipboard(files, false);
 }
 
 void
-gui::clipboard::cut_files(const std::span<const std::shared_ptr<vfs::file>>& files) noexcept
+gui::clipboard::cut_files(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     set_clipboard(files, true);
 }

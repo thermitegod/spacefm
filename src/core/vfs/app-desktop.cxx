@@ -296,8 +296,8 @@ vfs::desktop::open_multiple_files() const noexcept
 }
 
 std::optional<std::vector<std::vector<std::string>>>
-vfs::desktop::app_exec_generate_desktop_argv(
-    const std::span<const std::shared_ptr<vfs::file>> files, bool quote_file_list) const noexcept
+vfs::desktop::app_exec_generate_desktop_argv(std::span<const std::shared_ptr<vfs::file>> files,
+                                             bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -450,7 +450,7 @@ vfs::desktop::open_file(const std::filesystem::path& working_dir,
 
 bool
 vfs::desktop::open_files(const std::filesystem::path& working_dir,
-                         const std::span<const std::shared_ptr<vfs::file>> files) const
+                         std::span<const std::shared_ptr<vfs::file>> files) const
 {
     if (desktop_entry_.exec.empty())
     {
@@ -478,7 +478,7 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
 
 void
 vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
-                           const std::span<const std::shared_ptr<vfs::file>> files) const noexcept
+                           std::span<const std::shared_ptr<vfs::file>> files) const noexcept
 {
     const auto desktop_commands = app_exec_generate_desktop_argv(files, use_terminal());
     if (!desktop_commands)

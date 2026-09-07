@@ -34,7 +34,7 @@
 gui::dialog::rename::rename(Gtk::ApplicationWindow& parent,
                             const std::shared_ptr<config::settings>& settings,
                             const std::filesystem::path& cwd,
-                            const std::span<const std::shared_ptr<vfs::file>>& files)
+                            std::span<const std::shared_ptr<vfs::file>> files)
     : settings_(settings), files_(files.begin(), files.end()), cwd_(cwd)
 {
     set_transient_for(parent);
