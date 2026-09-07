@@ -34,7 +34,7 @@ config::manager::manager(const std::shared_ptr<config::settings>& settings) : se
     settings_->signal_autosave_request().connect([this]() { request_add(); });
     settings_->signal_autosave_cancel().connect([this]() { request_cancel(); });
 
-    autosave_thread_ = std::jthread([&](const std::stop_token& stoken) { run(stoken); });
+    autosave_thread_ = std::jthread([&](std::stop_token stoken) { run(stoken); });
     pthread_setname_np(autosave_thread_.native_handle(), "autosave");
 }
 
@@ -109,7 +109,7 @@ config::manager::save() noexcept
 }
 
 void
-config::manager::run(const std::stop_token& stoken) noexcept
+config::manager::run(std::stop_token stoken) noexcept
 {
     while (!stoken.stop_requested())
     {
@@ -118,7 +118,7 @@ config::manager::run(const std::stop_token& stoken) noexcept
 }
 
 void
-config::manager::run_once(const std::stop_token& stoken) noexcept
+config::manager::run_once(std::stop_token stoken) noexcept
 {
     {
         std::unique_lock lock(mutex_);

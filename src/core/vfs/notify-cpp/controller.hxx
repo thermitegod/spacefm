@@ -38,8 +38,8 @@ class controller
   public:
     controller(const std::filesystem::path& path, std::set<event> events = {event::all});
 
-    void run(const std::stop_token& stoken) noexcept;
-    void run_once(const std::stop_token& stoken) noexcept;
+    void run(std::stop_token stoken) noexcept;
+    void run_once(std::stop_token stoken) noexcept;
 
   private:
     inotify notify_;

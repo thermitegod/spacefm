@@ -71,20 +71,19 @@ vfs::dir::dir(const std::filesystem::path& path) noexcept
     notifier_.signal_delete_self().connect([this](const auto& p) { on_self_deleted(p); });
     notifier_.signal_umount().connect([this](const auto& p) { on_self_deleted(p); });
 
-    notifier_thread_ =
-        std::jthread([this](const std::stop_token& stoken) { notifier_.run(stoken); });
+    notifier_thread_ = std::jthread([this](std::stop_token stoken) { notifier_.run(stoken); });
     pthread_setname_np(notifier_thread_.native_handle(), "notifier");
 
     thumbnailer_.signal_thumbnail_created().connect([this](auto f)
                                                     { signal_thumbnail_loaded().emit(f); });
 
     thumbnailer_thread_ =
-        std::jthread([this](const std::stop_token& stoken) { thumbnailer_.run(stoken); });
+        std::jthread([this](std::stop_token stoken) { thumbnailer_.run(stoken); });
     pthread_setname_np(thumbnailer_thread_.native_handle(), "thumbnailer");
 
     update_avoid_changes();
 
-    loader_thread_ = std::jthread([this](const std::stop_token& stoken) { load_thread(stoken); });
+    loader_thread_ = std::jthread([this](std::stop_token stoken) { load_thread(stoken); });
     pthread_setname_np(loader_thread_.native_handle(), "loader");
 }
 
@@ -212,7 +211,7 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
 }
 
 void
-vfs::dir::load_thread(const std::stop_token& stoken) noexcept
+vfs::dir::load_thread(std::stop_token stoken) noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), path_);
 
@@ -261,14 +260,13 @@ vfs::dir::refresh() noexcept
         loader_thread_.request_stop();
         loader_thread_.join();
 
-        loader_thread_ =
-            std::jthread([this](const std::stop_token& stoken) { refresh_thread(stoken); });
+        loader_thread_ = std::jthread([this](std::stop_token stoken) { refresh_thread(stoken); });
         pthread_setname_np(loader_thread_.native_handle(), "loader");
     }
 }
 
 void
-vfs::dir::refresh_thread(const std::stop_token& stoken) noexcept
+vfs::dir::refresh_thread(std::stop_token stoken) noexcept
 {
     std::scoped_lock lock(loader_mutex_);
 

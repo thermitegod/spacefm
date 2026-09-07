@@ -79,8 +79,8 @@ class dir : public std::enable_shared_from_this<dir>
     void enable_thumbnails(const bool enabled) noexcept;
 
   private:
-    void load_thread(const std::stop_token& stoken) noexcept;
-    void refresh_thread(const std::stop_token& stoken) noexcept;
+    void load_thread(std::stop_token stoken) noexcept;
+    void refresh_thread(std::stop_token stoken) noexcept;
 
     [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;

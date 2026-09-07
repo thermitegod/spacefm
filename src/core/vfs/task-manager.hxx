@@ -181,8 +181,7 @@ class task_manager
         std::uint64_t id;
         std::stop_source stop_source;
         std::atomic<status> state{status::pending};
-        std::copyable_function<void(const std::stop_token&, const std::shared_ptr<task_item>&)
-                                   const>
+        std::copyable_function<void(std::stop_token, const std::shared_ptr<task_item>&) const>
             action;
 
         // pause/stop handling
@@ -190,7 +189,7 @@ class task_manager
         std::condition_variable_any pause_cv;
 
         [[nodiscard]] bool
-        check_pause(const std::stop_token& stoken) noexcept
+        check_pause(std::stop_token stoken) noexcept
         {
             if (stoken.stop_requested() || stop_source.stop_requested())
             {
@@ -219,7 +218,7 @@ class task_manager
         std::condition_variable_any collision_cv;
 
         void
-        wait_for_resolve(const std::stop_token& stoken) noexcept
+        wait_for_resolve(std::stop_token stoken) noexcept
         {
             std::unique_lock c_lock(collision_mutex);
             collision_cv.wait(c_lock,
@@ -240,8 +239,8 @@ class task_manager
     std::uint64_t next_task_id_ = 0;
     std::uint64_t active_task_id_ = 0;
 
-    void run(const std::stop_token& stoken) noexcept;
-    void run_once(const std::stop_token& stoken) noexcept;
+    void run(std::stop_token stoken) noexcept;
+    void run_once(std::stop_token stoken) noexcept;
 
     [[nodiscard]] std::uint64_t
     create_task_id() noexcept
@@ -251,9 +250,9 @@ class task_manager
         return next_task_id_;
     }
 
-    void queue_task(std::copyable_function<void(const std::stop_token&,
-                                                const std::shared_ptr<task_item>&) const>
-                        slot) noexcept;
+    void queue_task(
+        std::copyable_function<void(std::stop_token, const std::shared_ptr<task_item>&) const>
+            slot) noexcept;
 
     struct collision_result final
     {
@@ -261,7 +260,7 @@ class task_manager
         std::filesystem::path destination;
     };
     [[nodiscard]] collision_result
-    handle_collision(const std::stop_token& stoken, const std::shared_ptr<task_item>& item,
+    handle_collision(std::stop_token stoken, const std::shared_ptr<task_item>& item,
                      const std::filesystem::path& source, const std::filesystem::path& destination,
                      const vfs::collision_resolve default_action) noexcept;
 

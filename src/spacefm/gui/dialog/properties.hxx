@@ -81,8 +81,8 @@ class properties : public Gtk::ApplicationWindow
     {
         calc_worker(std::span<const std::shared_ptr<vfs::file>> targets) : files(targets) {}
 
-        void calc_size(const std::stop_token& stoken) noexcept;
-        void calc_total_size_of_files(const std::stop_token& stoken,
+        void calc_size(std::stop_token stoken) noexcept;
+        void calc_total_size_of_files(std::stop_token stoken,
                                       const std::filesystem::path& path) noexcept;
 
         std::span<const std::shared_ptr<vfs::file>> files;
@@ -102,7 +102,7 @@ class properties : public Gtk::ApplicationWindow
     {
         metadata_worker(const std::shared_ptr<vfs::file>& file) : file(std::move(file)) {}
 
-        void extract_metadata(const std::stop_token& stoken) noexcept;
+        void extract_metadata(std::stop_token stoken) noexcept;
 
         std::shared_ptr<vfs::file> file;
 

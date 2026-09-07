@@ -58,7 +58,7 @@ vfs::mime_monitor_init() noexcept
     notifier.signal_create().connect(slot);
     notifier.signal_delete().connect(slot);
 
-    thread = std::jthread([&](const std::stop_token& stoken) { notifier.run(stoken); });
+    thread = std::jthread([&](std::stop_token stoken) { notifier.run(stoken); });
     pthread_setname_np(thread.native_handle(), "mime notifier");
 }
 

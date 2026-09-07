@@ -88,7 +88,7 @@ class inotify
      *        loop.
      * @return A new file_system_event
      */
-    [[nodiscard]] std::optional<file_system_event> get_next_event(const std::stop_token& stoken);
+    [[nodiscard]] std::optional<file_system_event> get_next_event(std::stop_token stoken);
 
     void stop() const noexcept;
 

@@ -138,7 +138,7 @@ notify::inotify::get_next_event_from_queue() noexcept
 }
 
 std::optional<notify::inotify::file_system_event>
-notify::inotify::get_next_event(const std::stop_token& stoken)
+notify::inotify::get_next_event(std::stop_token stoken)
 {
     static constexpr std::size_t MAX_EVENTS = 4096;
     static constexpr std::size_t EVENT_SIZE = (sizeof(inotify_event));

@@ -42,8 +42,8 @@ class thumbnailer
 
     void request(const request_data& request) noexcept;
 
-    void run(const std::stop_token& stoken) noexcept;
-    void run_once(const std::stop_token& stoken) noexcept;
+    void run(std::stop_token stoken) noexcept;
+    void run_once(std::stop_token stoken) noexcept;
 
     [[nodiscard]] auto
     signal_thumbnail_created() noexcept

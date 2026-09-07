@@ -89,13 +89,12 @@ gui::widget::Checksum::on_button_calculate_clicked() noexcept
     calculate_button_.set_sensitive(false);
     checksum_result_.set_text("Calculating...");
 
-    thread_ = std::jthread([this](const std::stop_token& stoken)
-                           { calculate_hash(stoken, path_, algo_type_); });
+    thread_ =
+        std::jthread([this](std::stop_token stoken) { calculate_hash(stoken, path_, algo_type_); });
 }
 
 void
-gui::widget::Checksum::calculate_hash(const std::stop_token& stoken,
-                                      const std::filesystem::path& path,
+gui::widget::Checksum::calculate_hash(std::stop_token stoken, const std::filesystem::path& path,
                                       std::string_view algo) noexcept
 {
     std::string outcome;

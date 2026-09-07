@@ -135,7 +135,7 @@ main(std::int32_t argc, char** argv)
     for (const auto i : std::views::iota(0u, thread_count))
     {
         workers.emplace_back(std::jthread(
-            [i, file_count](const std::stop_token& stoken)
+            [i, file_count](std::stop_token stoken)
             {
                 //
                 worker(stoken, i, file_count);

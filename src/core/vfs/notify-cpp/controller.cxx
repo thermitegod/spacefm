@@ -33,7 +33,7 @@ notify::controller::controller(const std::filesystem::path& path, std::set<event
 }
 
 void
-notify::controller::run(const std::stop_token& stoken) noexcept
+notify::controller::run(std::stop_token stoken) noexcept
 {
     // std::stop_callback cb(stoken, [this]() { notify_.stop(); });
 
@@ -44,7 +44,7 @@ notify::controller::run(const std::stop_token& stoken) noexcept
 }
 
 void
-notify::controller::run_once(const std::stop_token& stoken) noexcept
+notify::controller::run_once(std::stop_token stoken) noexcept
 {
     std::stop_callback cb(stoken, [this]() { notify_.stop(); });
 

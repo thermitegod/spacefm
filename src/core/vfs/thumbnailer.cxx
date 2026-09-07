@@ -36,7 +36,7 @@ vfs::thumbnailer::request(const request_data& request) noexcept
 }
 
 void
-vfs::thumbnailer::run(const std::stop_token& stoken) noexcept
+vfs::thumbnailer::run(std::stop_token stoken) noexcept
 {
     while (!stoken.stop_requested())
     {
@@ -45,7 +45,7 @@ vfs::thumbnailer::run(const std::stop_token& stoken) noexcept
 }
 
 void
-vfs::thumbnailer::run_once(const std::stop_token& stoken) noexcept
+vfs::thumbnailer::run_once(std::stop_token stoken) noexcept
 {
     request_data request;
     {

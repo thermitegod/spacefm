@@ -120,7 +120,7 @@ TEST_SUITE("notify-cpp" * doctest::description(""))
         notifier.signal_move().connect([&](const auto&) { counter.move++; });
         // clang-format on
 
-        std::jthread thread([&notifier](const std::stop_token& stoken) { notifier.run(stoken); });
+        std::jthread thread([&notifier](std::stop_token stoken) { notifier.run(stoken); });
 
         REQUIRE_EQ(counter.access, 0);
         REQUIRE_EQ(counter.modify, 0);

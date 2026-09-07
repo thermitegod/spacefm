@@ -274,7 +274,7 @@ gui::dialog::properties::on_button_close_clicked() noexcept
 
 void
 gui::dialog::properties::calc_worker::calc_total_size_of_files(
-    const std::stop_token& stoken, const std::filesystem::path& path) noexcept
+    std::stop_token stoken, const std::filesystem::path& path) noexcept
 {
     if (stoken.stop_requested())
     {
@@ -325,7 +325,7 @@ gui::dialog::properties::calc_worker::calc_total_size_of_files(
 }
 
 void
-gui::dialog::properties::calc_worker::calc_size(const std::stop_token& stoken) noexcept
+gui::dialog::properties::calc_worker::calc_size(std::stop_token stoken) noexcept
 {
     for (const auto& file : files)
     {
@@ -479,9 +479,8 @@ gui::dialog::properties::init_file_info_tab() noexcept
 
         calc_worker_->dispatcher.connect(sigc::mem_fun(*this, &properties::on_size_update));
 
-        calc_worker_->thread =
-            std::jthread([worker = calc_worker_.get()](const std::stop_token& stoken)
-                         { worker->calc_size(stoken); });
+        calc_worker_->thread = std::jthread([worker = calc_worker_.get()](std::stop_token stoken)
+                                            { worker->calc_size(stoken); });
     }
 
     if (multiple_files)
@@ -507,7 +506,7 @@ gui::dialog::properties::init_file_info_tab() noexcept
 }
 
 void
-gui::dialog::properties::metadata_worker::extract_metadata(const std::stop_token& stoken) noexcept
+gui::dialog::properties::metadata_worker::extract_metadata(std::stop_token stoken) noexcept
 {
     if (stoken.stop_requested())
     {
@@ -564,7 +563,7 @@ gui::dialog::properties::init_media_info_tab() noexcept
         });
 
     metadata_worker_->thread =
-        std::jthread([worker = metadata_worker_.get()](const std::stop_token& stoken)
+        std::jthread([worker = metadata_worker_.get()](std::stop_token stoken)
                      { worker->extract_metadata(stoken); });
 #else
     page->set_visible(false);
