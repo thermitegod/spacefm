@@ -357,11 +357,10 @@ gui::dialog::properties::on_size_update() noexcept
         return;
     }
 
-    const std::uint64_t total_size = calc_worker_->total_size.load(std::memory_order_relaxed);
-    const std::uint64_t size_on_disk = calc_worker_->size_on_disk.load(std::memory_order_relaxed);
-    const std::uint64_t total_files =
-        calc_worker_->total_count_file.load(std::memory_order_relaxed);
-    const std::uint64_t total_dirs = calc_worker_->total_count_dir.load(std::memory_order_relaxed);
+    const std::uint64_t total_size = calc_worker_->total_size;
+    const std::uint64_t size_on_disk = calc_worker_->size_on_disk;
+    const std::uint64_t total_files = calc_worker_->total_count_file;
+    const std::uint64_t total_dirs = calc_worker_->total_count_dir;
 
     total_size_label_.set_label(
         std::format("{} ( {:L} bytes )", vfs::utils::format_file_size(total_size), total_size));

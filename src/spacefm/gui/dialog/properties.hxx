@@ -87,10 +87,10 @@ class properties : public Gtk::ApplicationWindow
 
         std::span<const std::shared_ptr<vfs::file>> files;
 
-        std::atomic<std::uint64_t> total_size{0};
-        std::atomic<std::uint64_t> size_on_disk{0};
-        std::atomic<std::uint64_t> total_count_file{0};
-        std::atomic<std::uint64_t> total_count_dir{0};
+        std::uint64_t total_size{0};
+        std::uint64_t size_on_disk{0};
+        std::uint64_t total_count_file{0};
+        std::uint64_t total_count_dir{0};
 
         Glib::Dispatcher dispatcher;
         std::jthread thread;
