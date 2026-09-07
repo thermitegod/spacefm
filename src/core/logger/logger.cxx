@@ -17,8 +17,6 @@
 #include <flat_map>
 #include <memory>
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
@@ -26,6 +24,7 @@
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
+#include "reflection/enum.hxx"
 
 void
 logger::initialize() noexcept
@@ -45,7 +44,7 @@ logger::initialize(const std::flat_map<std::string, std::string>& options,
 
     static constexpr ztd::static_map<logger::domain,
                                      default_logger_options_data,
-                                     magic_enum::enum_count<logger::domain>()>
+                                     reflection::enum_count<logger::domain>()>
         default_logger_options{{
 #if defined(DEV_MODE)
             {logger::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
@@ -70,7 +69,7 @@ logger::initialize(const std::flat_map<std::string, std::string>& options,
         file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logfile, true);
     }
 
-    for (const auto domain_name : magic_enum::enum_names<logger::domain>())
+    for (const auto domain_name : reflection::enum_names<logger::domain>())
     {
         std::vector<spdlog::sink_ptr> sinks;
         if (file_sink)
@@ -83,12 +82,12 @@ logger::initialize(const std::flat_map<std::string, std::string>& options,
         const auto logger =
             std::make_shared<spdlog::logger>(domain_name.data(), sinks.cbegin(), sinks.cend());
 
-        const auto domain_enum = magic_enum::enum_cast<logger::domain>(domain_name).value();
+        const auto domain_enum = reflection::enum_cast<logger::domain>(domain_name).value();
 
         if (options.contains(domain_name.data()))
         {
             const auto level = options.at(domain_name.data());
-            logger->set_level(magic_enum::enum_cast<spdlog::level::level_enum>(level).value());
+            logger->set_level(reflection::enum_cast<spdlog::level::level_enum>(level).value());
         }
         else
         { // use default loglevel
@@ -106,7 +105,7 @@ void
 logger::detail::logger(const logger::detail::loglevel level, const domain d,
                        std::string_view msg) noexcept
 {
-    auto l = spdlog::get(magic_enum::enum_name(d).data());
+    auto l = spdlog::get(reflection::enum_name(d).data());
     if (!l)
     {
         return;

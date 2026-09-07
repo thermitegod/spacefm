@@ -46,8 +46,7 @@ flags = [
     # '-fmodules',
     # '--compile-std-module',
 
-    # very slow builds
-    # '-freflection',
+    '-freflection',
 ]
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
@@ -224,14 +223,12 @@ add_project_link_arguments(link_flags, language: ['c', 'cpp'])
 ## Dependencies
 
 cli11_dep = dependency('CLI11', required: true)
-magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
 libudev_dep = dependency('libudev', required: true)
 botan_dep = dependency('botan-3', required: true)
 pugixml_dep = dependency('pugixml', required: true)
 
 base_dependencies = [
     cli11_dep,
-    magic_enum_dep,
     libudev_dep,
     pugixml_dep,
     botan_dep,

@@ -30,6 +30,12 @@ natsort_dep = declare_dependency(
     include_directories: include_directories('.'),
 )
 
+# reflections
+
+reflection_dep = declare_dependency(
+    include_directories: include_directories('.'),
+)
+
 # glycin wrapper static library
 
 glycin_wrapper_lib = static_library(
@@ -96,7 +102,8 @@ vfs_dependencies = [
     libudev_dep,
     pugixml_dep,
     botan_dep,
-    glycin_wrapper_dep
+    reflection_dep,
+    glycin_wrapper_dep,
 ]
 
 vfs_lib = static_library(

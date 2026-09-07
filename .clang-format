@@ -159,11 +159,8 @@ IncludeCategories:
   - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h|giomm.h|glycin.h|glycin-gtk4.h|sigc\+\+/sigc\+\+\.h)>'
     Priority: 10
   # Third Party
-  # - Regex: '^<(glaze/.*|magic_enum/.*|ztd/.*)>'
   - Regex: '^<(glaze/.*)>'
     Priority: 11
-  - Regex: '^<(magic_enum/.*)>'
-    Priority: 12
   - Regex: '^<(botan/.*)>'
     Priority: 13
   - Regex: '^<(CLI/.*)>'

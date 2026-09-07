@@ -16,11 +16,11 @@
 #include <string>
 #include <system_error>
 
-#include <magic_enum/magic_enum.hpp>
-
 #include <ztd/ztd.hxx>
 
 #include "vfs/error.hxx"
+
+#include "reflection/enum.hxx"
 
 const std::error_category&
 vfs::error_category() noexcept
@@ -36,7 +36,7 @@ vfs::error_category() noexcept
         std::string
         message(int c) const override final
         {
-            return ztd::replace(magic_enum::enum_name(static_cast<vfs::error_code>(c)), "_", " ");
+            return ztd::replace(reflection::enum_name(static_cast<vfs::error_code>(c)), "_", " ");
         }
     };
     static const category instance{};

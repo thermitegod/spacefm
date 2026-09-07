@@ -16,6 +16,7 @@ sources += files(
     'src/main.cxx',
 
     'src/natsort/natsort.cxx',
+    'src/reflection/enum.cxx',
 
     # gui
     'src/gui/utils/history.cxx',
