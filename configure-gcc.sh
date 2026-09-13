@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-CC=gcc
-CXX=g++
-LD=ld.bfd
+export CC=gcc
+export CXX=g++
+export LD=ld.bfd
 # binutils
-AR=ar
-AS=as
-CPP=cpp
-NM=nm
-STRIP=strip
-RANLIB=ranlib
-OBJCOPY=objcopy
-STRINGS=strings
-OBJDUMP=objdump
-READELF=readelf
-ADDR2LINE=addr2line
+export AR=ar
+export AS=as
+export CPP=cpp
+export NM=nm
+export STRIP=strip
+export RANLIB=ranlib
+export OBJCOPY=objcopy
+export STRINGS=strings
+export OBJDUMP=objdump
+export READELF=readelf
+export ADDR2LINE=addr2line
 
 meson setup \
     -Dtests=true \
