@@ -32,7 +32,7 @@
 
 #include "logger.hxx"
 
-#define LAYOUT_TESTING
+// #define LAYOUT_TESTING
 
 gui::grid::grid(const config::grid_state& state,
                 const std::shared_ptr<vfs::task_manager>& task_manager,
