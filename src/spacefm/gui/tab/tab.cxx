@@ -137,6 +137,7 @@ gui::tab::~tab()
     is_shutdown_ = true;
 
     connection_focus_.disconnect();
+    connection_statusbar_.disconnect();
 
     popover_.unparent();
 }
@@ -2103,7 +2104,18 @@ gui::tab::on_file_list_item_activated(std::uint32_t position) noexcept
 void
 gui::tab::on_update_statusbar() noexcept
 {
-    statusbar_.update(dir_, selected_files(), sorting_.show_hidden);
+    if (is_shutdown_)
+    {
+        return;
+    }
+
+    connection_statusbar_ = Glib::signal_idle().connect(
+        [this]()
+        {
+            statusbar_.update(dir_, selected_files(), sorting_.show_hidden);
+
+            return false;
+        });
 }
 
 void

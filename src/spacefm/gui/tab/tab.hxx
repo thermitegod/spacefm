@@ -397,5 +397,6 @@ class tab final : public Gtk::Box
     sigc::connection signal_self_deleted_;
 
     sigc::scoped_connection connection_focus_;
+    sigc::scoped_connection connection_statusbar_;
 };
 } // namespace gui
