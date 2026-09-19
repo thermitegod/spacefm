@@ -123,6 +123,11 @@ gui::grid::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     box->set_can_target(true);
     box->set_focusable(true);
 
+#if defined(LAYOUT_TESTING)
+    picture_box->set_halign(Gtk::Align::CENTER);
+    picture_box->set_valign(Gtk::Align::CENTER);
+#endif
+
     picture->set_size_request(size, size);
     picture->set_content_fit(Gtk::ContentFit::SCALE_DOWN);
     picture->set_can_shrink(false);
@@ -132,6 +137,7 @@ gui::grid::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
     picture->set_vexpand(false);
 
     label->set_attributes(attrs_);
+    label->set_width_chars(10);
     label->set_wrap(true);
     label->set_wrap_mode(Pango::WrapMode::WORD_CHAR);
     label->set_justify(Gtk::Justification::CENTER);
