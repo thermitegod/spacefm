@@ -134,6 +134,10 @@ gui::tab::~tab()
 {
     logger::debug("gui::tab::~tab()");
 
+    is_shutdown_ = true;
+
+    connection_focus_.disconnect();
+
     popover_.unparent();
 }
 
@@ -2138,6 +2142,8 @@ gui::tab::on_dir_file_listed() noexcept
     signal_change_selection().emit();
 
     on_update_statusbar();
+
+    files_grab_focus();
 }
 
 void
@@ -2266,8 +2272,6 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mo
     }
 
     toolbar_.update(cwd(), history_.has_back(), history_.has_forward(), cwd() != "/");
-
-    files_grab_focus();
 }
 
 void
@@ -2441,20 +2445,37 @@ gui::tab::set_files_view(const config::view_mode view_mode) noexcept
 }
 
 void
-gui::tab::files_grab_focus() const noexcept
+gui::tab::files_grab_focus() noexcept
 {
-    if (view_mode_ == config::view_mode::grid)
+    if (is_shutdown_)
     {
-        view_grid_->grab_focus();
+        return;
     }
-    else if (view_mode_ == config::view_mode::list)
-    {
-        view_list_->grab_focus();
-    }
-    else
-    {
-        std::unreachable();
-    }
+
+    connection_focus_ = Glib::signal_idle().connect(
+        [this]()
+        {
+            if (view_mode_ == config::view_mode::grid)
+            {
+                if (view_grid_)
+                {
+                    view_grid_->grab_focus();
+                }
+            }
+            else if (view_mode_ == config::view_mode::list)
+            {
+                if (view_list_)
+                {
+                    view_list_->grab_focus();
+                }
+            }
+            else
+            {
+                std::unreachable();
+            }
+
+            return false;
+        });
 }
 
 void
@@ -2562,13 +2583,15 @@ gui::tab::unselect_all() const noexcept
 }
 
 void
-gui::tab::select_last() const noexcept
+gui::tab::select_last() noexcept
 {
     auto selected = history_.get_selection(cwd());
     if (selected && !selected->empty())
     {
         select_files(*selected);
     }
+
+    files_grab_focus();
 }
 
 void

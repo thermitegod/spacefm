@@ -90,6 +90,8 @@ class tab final : public Gtk::Box
                             const std::filesystem::perm_options opts =
                                 std::filesystem::perm_options::replace) const noexcept;
 
+    void files_grab_focus() noexcept;
+
   private:
     void add_shortcuts() noexcept;
     void add_actions() noexcept;
@@ -124,7 +126,6 @@ class tab final : public Gtk::Box
     void on_hide_files() const noexcept;
 
     void set_files_view(const config::view_mode view_mode) noexcept;
-    void files_grab_focus() const noexcept;
 
     void set_sorting(const config::sorting& sorting, bool full_update = false) noexcept;
     void set_state(const config::grid_state& state, const bool update_model = false) noexcept;
@@ -135,7 +136,7 @@ class tab final : public Gtk::Box
 
     void select_all() const noexcept;
     void unselect_all() const noexcept;
-    void select_last() const noexcept;
+    void select_last() noexcept;
     void select_file(const std::filesystem::path& filename,
                      const bool unselect_others = true) const noexcept;
     void select_files(std::span<const std::filesystem::path> select_filenames) const noexcept;
@@ -201,6 +202,8 @@ class tab final : public Gtk::Box
 
     gui::grid* view_grid_;
     gui::list* view_list_;
+
+    bool is_shutdown_ = false;
 
     struct
     {
@@ -392,5 +395,7 @@ class tab final : public Gtk::Box
     sigc::connection signal_directory_loaded_;
     sigc::connection signal_directory_refresh_;
     sigc::connection signal_self_deleted_;
+
+    sigc::scoped_connection connection_focus_;
 };
 } // namespace gui

@@ -85,7 +85,17 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     signal_page_removed_ = signal_page_removed().connect([this](auto, auto) { save_tab_state(); });
     signal_page_reordered_ =
         signal_page_reordered().connect([this](auto, auto) { save_tab_state(); });
-    signal_switch_page_ = signal_switch_page().connect([this](auto, auto) { save_tab_state(); });
+    signal_switch_page_ = signal_switch_page().connect(
+        [this](auto* page, auto)
+        {
+            save_tab_state();
+
+            if (auto* tab = dynamic_cast<gui::tab*>(page))
+            {
+                Glib::signal_idle().connect_once([tab]() { tab->files_grab_focus(); },
+                                                 Glib::PRIORITY_DEFAULT);
+            }
+        });
 
     volume_manager_->signal_mounted().connect(
         [this](const auto& path)
