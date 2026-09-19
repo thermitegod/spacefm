@@ -75,6 +75,7 @@ class browser final : public Gtk::Notebook
     std::queue<config::tab_state> restore_tabs_;
 
     bool state_frozen_ = false;
+    gui::tab* context_menu_tab_ = nullptr;
 
     // Signals we connect to
     sigc::connection signal_page_added_;

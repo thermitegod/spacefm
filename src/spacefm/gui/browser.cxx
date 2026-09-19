@@ -373,8 +373,9 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
     auto gesture = Gtk::GestureClick::create();
     gesture->set_button(GDK_BUTTON_SECONDARY);
     gesture->signal_pressed().connect(
-        [this, popover](std::int32_t, double x, double y)
+        [this, tab, popover](std::int32_t, double x, double y)
         {
+            context_menu_tab_ = tab;
             action_restore_->set_enabled(!restore_tabs_.empty());
 
             popover->set_pointing_to(
@@ -390,22 +391,41 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
 void
 gui::browser::new_tab_here() noexcept
 {
-    gui::browser::new_tab(current_tab()->cwd());
+    auto* tab = context_menu_tab_ ? context_menu_tab_ : current_tab();
+    context_menu_tab_ = nullptr;
+
+    if (tab)
+    {
+        new_tab(tab->cwd());
+    }
 }
 
 void
 gui::browser::close_tab() noexcept
 {
-    const auto* tab = current_tab();
+    auto* tab = context_menu_tab_ ? context_menu_tab_ : current_tab();
+    context_menu_tab_ = nullptr;
+
+    if (!tab)
+    {
+        return;
+    }
+
     restore_tabs_.push(tab->get_tab_state());
+
+    const auto page = page_num(*tab);
+    if (page == -1)
+    {
+        return;
+    }
 
     if (get_n_pages() == 1)
     {
-        current_tab()->chdir(vfs::user::home());
+        tab->chdir(vfs::user::home());
     }
     else
     {
-        remove_page(get_current_page());
+        remove_page(page);
     }
 }
 
