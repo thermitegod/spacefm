@@ -75,7 +75,6 @@ class tab final : public Gtk::Box
 
     void chdir(const std::filesystem::path& path,
                const gui::utils::history::mode mode = gui::utils::history::mode::normal) noexcept;
-    void canon(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] std::filesystem::path cwd() const noexcept;
 

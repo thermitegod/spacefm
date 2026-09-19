@@ -2249,39 +2249,6 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mo
 }
 
 void
-gui::tab::canon(const std::filesystem::path& path) noexcept
-{
-    const auto canon = std::filesystem::canonical(path);
-    if (std::filesystem::equivalent(canon, cwd()) || std::filesystem::equivalent(canon, path))
-    {
-        return;
-    }
-
-    if (std::filesystem::is_directory(canon))
-    {
-        // open dir
-        chdir(canon);
-
-        files_grab_focus();
-    }
-    else if (std::filesystem::exists(canon))
-    {
-        // open dir and select file
-        const auto dir_path = canon.parent_path();
-        if (!std::filesystem::equivalent(dir_path, cwd()))
-        {
-            chdir(dir_path);
-        }
-        else
-        {
-            select_file(canon);
-        }
-
-        files_grab_focus();
-    }
-}
-
-void
 gui::tab::open_selected_files() noexcept
 {
     const auto selected = selected_files();
