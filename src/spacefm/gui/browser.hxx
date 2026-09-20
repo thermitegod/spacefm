@@ -78,9 +78,9 @@ class browser final : public Gtk::Notebook
     gui::tab* context_menu_tab_ = nullptr;
 
     // Signals we connect to
-    sigc::connection signal_page_added_;
-    sigc::connection signal_page_removed_;
-    sigc::connection signal_page_reordered_;
-    sigc::connection signal_switch_page_;
+    sigc::scoped_connection signal_page_added_;
+    sigc::scoped_connection signal_page_removed_;
+    sigc::scoped_connection signal_page_reordered_;
+    sigc::scoped_connection signal_switch_page_;
 };
 } // namespace gui

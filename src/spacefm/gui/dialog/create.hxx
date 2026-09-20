@@ -116,7 +116,7 @@ class create : public Gtk::ApplicationWindow
 
     // Signal handlers
 
-    std::vector<sigc::connection> on_move_change_signals_;
+    std::vector<sigc::scoped_connection> on_move_change_signals_;
 
     // Signal Handlers
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state);

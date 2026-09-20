@@ -389,12 +389,12 @@ class tab final : public Gtk::Box
     sigc::signal<void(std::int32_t)> signal_switch_tab_with_paste_;
 
     // Signals we connect to
-    sigc::connection signal_file_created_;
-    sigc::connection signal_file_deleted_;
-    sigc::connection signal_file_changed_;
-    sigc::connection signal_directory_loaded_;
-    sigc::connection signal_directory_refresh_;
-    sigc::connection signal_self_deleted_;
+    sigc::scoped_connection signal_file_created_;
+    sigc::scoped_connection signal_file_deleted_;
+    sigc::scoped_connection signal_file_changed_;
+    sigc::scoped_connection signal_directory_loaded_;
+    sigc::scoped_connection signal_directory_refresh_;
+    sigc::scoped_connection signal_self_deleted_;
 
     sigc::scoped_connection connection_focus_;
     sigc::scoped_connection connection_statusbar_;

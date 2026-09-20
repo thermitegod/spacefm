@@ -176,10 +176,10 @@ class files_base
     sigc::signal<void()> signal_update_view_state_;
 
     // Signals we connect to
-    sigc::connection signal_files_created;
-    sigc::connection signal_files_deleted;
-    sigc::connection signal_files_changed;
-    sigc::connection signal_thumbnail_loaded;
-    sigc::connection signal_icon_size_changed;
+    sigc::scoped_connection signal_files_created;
+    sigc::scoped_connection signal_files_deleted;
+    sigc::scoped_connection signal_files_changed;
+    sigc::scoped_connection signal_thumbnail_loaded;
+    sigc::scoped_connection signal_icon_size_changed;
 };
 } // namespace gui

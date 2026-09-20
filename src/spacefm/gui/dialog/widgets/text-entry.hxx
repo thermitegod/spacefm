@@ -55,7 +55,7 @@ class TextEntry : public Gtk::Box
     Gtk::TextView input_widget_;
     Glib::RefPtr<Gtk::TextBuffer> text_buffer_;
 
-    sigc::connection buffer_connection_;
+    sigc::scoped_connection buffer_connection_;
 
   public:
     [[nodiscard]] auto
