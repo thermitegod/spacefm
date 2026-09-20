@@ -55,20 +55,30 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     set_visible(true);
 
     // load saved tabs, do this before connecting to notebook signals
-    if (settings_->window.state[panel].tabs.empty())
+    const auto panel_state = settings_->window.state[panel];
+    for (const auto& state : panel_state.tabs)
+    {
+        try
+        {
+            if (std::filesystem::exists(state.path))
+            {
+                new_tab(state);
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            logger::error<logger::gui>("{}", e.what());
+        }
+    }
+
+    if (get_n_pages() == 0)
     {
         new_tab(vfs::user::home());
     }
     else
     {
-        for (const auto& state : settings_->window.state[panel].tabs)
-        {
-            if (std::filesystem::exists(state.path))
-            {
-                new_tab(state);
-                set_current_page(settings_->window.state[panel].active_tab);
-            }
-        }
+        const auto active_tab = panel_state.active_tab;
+        set_current_page((active_tab >= 0 && active_tab < get_n_pages()) ? active_tab : 0);
     }
 
     signal_page_added_ = signal_page_added().connect([this](auto, auto) { save_tab_state(); });
