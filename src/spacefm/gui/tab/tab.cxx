@@ -82,6 +82,28 @@ gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
     add_actions();
     add_context_menu();
 
+    auto controller = Gtk::GestureClick::create();
+    controller->set_button(0);
+    controller->signal_pressed().connect(
+        [this, controller](std::int32_t n_press, double x, double y)
+        {
+            (void)n_press;
+            (void)x;
+            (void)y;
+
+            const auto button = controller->get_current_button();
+
+            if (button == 8)
+            {
+                on_button_back();
+            }
+            else if (button == 9)
+            {
+                on_button_forward();
+            }
+        });
+    add_controller(controller);
+
     // sidebar
     side_.signal_chdir().connect([this](auto path) { chdir(path); });
 
