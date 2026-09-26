@@ -78,7 +78,7 @@ enum class sort_hidden : std::uint8_t
     last,
 };
 
-enum class icon_size : std::uint8_t // std::int32_t
+enum class icon_size : std::uint8_t
 {
     xxx_small = 22,
     xx_small = 24,

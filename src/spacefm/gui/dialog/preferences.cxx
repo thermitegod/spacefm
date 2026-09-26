@@ -84,7 +84,75 @@ class preference_page : public Gtk::ScrolledWindow
         add_row(*button);
     }
 
+    template<typename Enum, std::size_t N>
+    void
+    add_dropdown(std::string_view label,
+                 const std::array<std::pair<Enum, std::string_view>, N>& data, Enum& opt) noexcept
+    {
+        auto factory = Gtk::SignalListItemFactory::create();
+        factory->signal_setup().connect(sigc::mem_fun(*this, &preference_page::on_setup_item));
+        factory->signal_bind().connect(sigc::mem_fun(*this, &preference_page::on_bind_item));
+
+        auto store = Gio::ListStore<ListColumns>::create();
+        for (const auto& [value, label] : data)
+        {
+            store->append(
+                ListColumns::create(label, static_cast<std::uint32_t>(std::to_underlying(value))));
+        }
+
+        auto it = std::ranges::find_if(data, [opt](const auto& pair) { return pair.first == opt; });
+        const auto index = it != data.end() ? std::distance(data.begin(), it) : 0;
+
+        auto drop = Gtk::make_managed<Gtk::DropDown>();
+        drop->set_model(store);
+        drop->set_factory(factory);
+        drop->set_selected(static_cast<std::uint32_t>(index));
+
+        drop->property_selected_item().signal_changed().connect(
+            [&opt, data, drop]() { opt = data[drop->get_selected()].first; });
+
+        add_row(label, *drop);
+    }
+
   private:
+    class ListColumns : public Glib::Object
+    {
+      public:
+        std::string entry_;
+        std::uint32_t value_;
+
+        static Glib::RefPtr<ListColumns>
+        create(std::string_view entry, const std::uint32_t value) noexcept
+        {
+            return Glib::make_refptr_for_instance<ListColumns>(new ListColumns(entry, value));
+        }
+
+      protected:
+        explicit ListColumns(std::string_view entry, const std::uint32_t value) noexcept
+            : entry_(entry), value_(value)
+        {
+        }
+    };
+
+    void
+    on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+    {
+        auto* label = Gtk::make_managed<Gtk::Label>();
+        item->set_child(*label);
+    }
+
+    void
+    on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
+    {
+        if (auto* label = dynamic_cast<Gtk::Label*>(item->get_child()))
+        {
+            if (auto info = std::dynamic_pointer_cast<ListColumns>(item->get_item()))
+            {
+                label->set_label(info->entry_);
+            }
+        }
+    }
+
     std::array<Gtk::Box*, 2>
     create_split_vboxes() noexcept
     {
@@ -163,25 +231,6 @@ void
 gui::dialog::preferences::on_button_close_clicked() noexcept
 {
     close();
-}
-
-void
-gui::dialog::preferences::on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
-{
-    auto* label = Gtk::make_managed<Gtk::Label>();
-    item->set_child(*label);
-}
-
-void
-gui::dialog::preferences::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
-{
-    if (auto* label = dynamic_cast<Gtk::Label*>(item->get_child()))
-    {
-        if (auto info = std::dynamic_pointer_cast<ListColumns>(item->get_item()))
-        {
-            label->set_label(info->entry_);
-        }
-    }
 }
 
 void
@@ -302,180 +351,73 @@ gui::dialog::preferences::init_defaults_tab() noexcept
     page->add_checkbox("Sort Case Sensitive", settings_->defaults.sorting.sort_case);
 
     {
-        auto& opt = settings_->defaults.sorting.sort_by;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("Name", std::to_underlying(config::sort_by::name)));
-        store->append(ListColumns::create("Size", std::to_underlying(config::sort_by::size)));
-        store->append(ListColumns::create("Bytes", std::to_underlying(config::sort_by::bytes)));
-        store->append(ListColumns::create("Type", std::to_underlying(config::sort_by::type)));
-        store->append(ListColumns::create("MIME Type", std::to_underlying(config::sort_by::mime)));
-        store->append(ListColumns::create("Permissions", std::to_underlying(config::sort_by::perm)));
-        store->append(ListColumns::create("Owner", std::to_underlying(config::sort_by::owner)));
-        store->append(ListColumns::create("Group", std::to_underlying(config::sort_by::group)));
-        store->append(ListColumns::create("Date Accessed", std::to_underlying(config::sort_by::atime)));
-        store->append(ListColumns::create("Date Created", std::to_underlying(config::sort_by::btime)));
-        store->append(ListColumns::create("Date Metadata", std::to_underlying(config::sort_by::ctime)));
-        store->append(ListColumns::create("Date Modified", std::to_underlying(config::sort_by::mtime)));
-        // clang-format on
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(std::to_underlying(opt));
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::sort_by>(drop->get_selected()); });
-
-        page->add_row("Sort By", *drop);
+        constexpr std::array<std::pair<config::sort_by, std::string_view>, 12> data = {{
+            {config::sort_by::name, "Name"},
+            {config::sort_by::size, "Size"},
+            {config::sort_by::bytes, "Bytes"},
+            {config::sort_by::type, "Type"},
+            {config::sort_by::mime, "MIME Type"},
+            {config::sort_by::perm, "Permissions"},
+            {config::sort_by::owner, "Owner"},
+            {config::sort_by::group, "Group"},
+            {config::sort_by::atime, "Date Accessed"},
+            {config::sort_by::btime, "Date Created"},
+            {config::sort_by::ctime, "Date Metadata"},
+            {config::sort_by::mtime, "Date Modified"},
+        }};
+        page->add_dropdown("Sort By", data, settings_->defaults.sorting.sort_by);
     }
 
     {
-        auto& opt = settings_->defaults.sorting.sort_dir;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("Directories First", std::to_underlying(config::sort_dir::first)));
-        store->append(ListColumns::create("Files First", std::to_underlying(config::sort_dir::mixed)));
-        store->append(ListColumns::create("Mixed", std::to_underlying(config::sort_dir::last)));
-        // clang-format on
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(std::to_underlying(opt));
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::sort_dir>(drop->get_selected()); });
-
-        page->add_row("Sort Directories", *drop);
+        constexpr std::array<std::pair<config::sort_dir, std::string_view>, 3> data = {{
+            {config::sort_dir::first, "Directories First"},
+            {config::sort_dir::mixed, "Files First"},
+            {config::sort_dir::last, "Mixed"},
+        }};
+        page->add_dropdown("Sort Directories", data, settings_->defaults.sorting.sort_dir);
     }
 
     {
-        auto& opt = settings_->defaults.sorting.sort_type;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("Ascending", std::to_underlying(config::sort_type::ascending)));
-        store->append(ListColumns::create("Descending", std::to_underlying(config::sort_type::descending)));
-        // clang-format on
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(std::to_underlying(opt));
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::sort_type>(drop->get_selected()); });
-
-        page->add_row("Sort Type", *drop);
+        constexpr std::array<std::pair<config::sort_type, std::string_view>, 2> data = {{
+            {config::sort_type::ascending, "Ascending"},
+            {config::sort_type::descending, "Descending"},
+        }};
+        page->add_dropdown("Sort Type", data, settings_->defaults.sorting.sort_type);
     }
 
     {
-        auto& opt = settings_->defaults.sorting.sort_hidden;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("First", std::to_underlying(config::sort_hidden::first)));
-        store->append(ListColumns::create("Last", std::to_underlying(config::sort_hidden::last)));
-        // clang-format on
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(std::to_underlying(opt));
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::sort_hidden>(drop->get_selected()); });
-
-        page->add_row("Sort Hidden", *drop);
+        constexpr std::array<std::pair<config::sort_hidden, std::string_view>, 2> data = {{
+            {config::sort_hidden::first, "First"},
+            {config::sort_hidden::last, "Last"},
+        }};
+        page->add_dropdown("Sort Hidden", data, settings_->defaults.sorting.sort_hidden);
     }
 
     page->add_section("View");
 
     {
-        auto& opt = settings_->defaults.view;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("Grid", std::to_underlying(config::view_mode::grid)));
-        store->append(ListColumns::create("List", std::to_underlying(config::view_mode::list)));
-        // clang-format on
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(std::to_underlying(opt));
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::view_mode>(drop->get_selected()); });
-
-        page->add_row("Type", *drop);
+        constexpr std::array<std::pair<config::view_mode, std::string_view>, 2> data = {{
+            {config::view_mode::grid, "Grid"},
+            {config::view_mode::list, "List"},
+        }};
+        page->add_dropdown("View Mode", data, settings_->defaults.view);
     }
 
     page->add_section("Grid");
 
     {
-        auto& opt = settings_->defaults.grid.icon_size;
-
-        auto factory = Gtk::SignalListItemFactory::create();
-        factory->signal_setup().connect(sigc::mem_fun(*this, &preferences::on_setup_item));
-        factory->signal_bind().connect(sigc::mem_fun(*this, &preferences::on_bind_item));
-
-        auto store = Gio::ListStore<ListColumns>::create();
-        // clang-format off
-        store->append(ListColumns::create("XXX Small Icons", std::to_underlying(config::icon_size::xxx_small)));
-        store->append(ListColumns::create("XX Small Icons", std::to_underlying(config::icon_size::xx_small)));
-        store->append(ListColumns::create("X Small Icons", std::to_underlying(config::icon_size::x_small)));
-        store->append(ListColumns::create("Small Icons", std::to_underlying(config::icon_size::small)));
-        store->append(ListColumns::create("Normal Icons", std::to_underlying(config::icon_size::normal)));
-        store->append(ListColumns::create("Large Icons", std::to_underlying(config::icon_size::large)));
-        store->append(ListColumns::create("X Large Icons", std::to_underlying(config::icon_size::x_large)));
-        store->append(ListColumns::create("XX Large Icons", std::to_underlying(config::icon_size::xx_large)));
-        store->append(ListColumns::create("XXX Large Icons", std::to_underlying(config::icon_size::xxx_large)));
-        // clang-format on
-
-        std::uint32_t index = 0;
-        for (const auto i : std::views::iota(0u, store->get_n_items()))
-        {
-            const auto item = store->get_item(i);
-            if (item->value_ == std::to_underlying(opt))
-            {
-                index = i;
-                break;
-            }
-        }
-
-        auto drop = Gtk::make_managed<Gtk::DropDown>();
-        drop->set_model(store);
-        drop->set_factory(factory);
-        drop->set_selected(index);
-
-        drop->property_selected_item().signal_changed().connect(
-            [&opt, drop]() { opt = static_cast<config::icon_size>(drop->get_selected()); });
-
-        page->add_row("View Mode", *drop);
+        constexpr std::array<std::pair<config::icon_size, std::string_view>, 9> data = {{
+            {config::icon_size::xxx_small, "XXX Small Icons"},
+            {config::icon_size::xx_small, "XX Small Icons"},
+            {config::icon_size::x_small, "X Small Icons"},
+            {config::icon_size::small, "Small Icons"},
+            {config::icon_size::normal, "Normal Icons"},
+            {config::icon_size::large, "Large Icons"},
+            {config::icon_size::x_large, "X Large Icons"},
+            {config::icon_size::xx_large, "XX Large Icons"},
+            {config::icon_size::xxx_large, "XXX Large Icons"},
+        }};
+        page->add_dropdown("Icon Size", data, settings_->defaults.grid.icon_size);
     }
 
     page->add_checkbox("Thumbnails", settings_->defaults.grid.thumbnails);

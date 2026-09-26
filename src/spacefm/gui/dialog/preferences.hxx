@@ -33,25 +33,6 @@ class preferences : public Gtk::ApplicationWindow
                          const std::shared_ptr<config::settings>& settings) noexcept;
 
   private:
-    class ListColumns : public Glib::Object
-    {
-      public:
-        std::string entry_;
-        std::uint32_t value_;
-
-        static Glib::RefPtr<ListColumns>
-        create(std::string_view entry, const std::uint32_t value) noexcept
-        {
-            return Glib::make_refptr_for_instance<ListColumns>(new ListColumns(entry, value));
-        }
-
-      protected:
-        explicit ListColumns(std::string_view entry, const std::uint32_t value) noexcept
-            : entry_(entry), value_(value)
-        {
-        }
-    };
-
     bool on_key_press(std::uint32_t keyval, std::uint32_t keycode,
                       Gdk::ModifierType state) noexcept;
     void on_button_close_clicked() noexcept;
@@ -60,9 +41,6 @@ class preferences : public Gtk::ApplicationWindow
     void init_interface_tab() noexcept;
     void init_dialog_tab() noexcept;
     void init_defaults_tab() noexcept;
-
-    void on_setup_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
-    void on_bind_item(const Glib::RefPtr<Gtk::ListItem>& item) noexcept;
 
     Gtk::Box box_;
     Gtk::Notebook notebook_;
