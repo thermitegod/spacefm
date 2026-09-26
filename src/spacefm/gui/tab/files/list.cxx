@@ -867,3 +867,75 @@ gui::list::update_list_visibility() noexcept
     column_ctime_->set_visible(list_state_.ctime);
     column_mtime_->set_visible(list_state_.mtime);
 }
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_name() const noexcept
+{
+    return column_name_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_size() const noexcept
+{
+    return column_size_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_bytes() const noexcept
+{
+    return column_bytes_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_type() const noexcept
+{
+    return column_type_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_mime() const noexcept
+{
+    return column_mime_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_perm() const noexcept
+{
+    return column_perm_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_owner() const noexcept
+{
+    return column_owner_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_group() const noexcept
+{
+    return column_group_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_atime() const noexcept
+{
+    return column_atime_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_btime() const noexcept
+{
+    return column_btime_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_ctime() const noexcept
+{
+    return column_ctime_;
+}
+
+const Glib::RefPtr<Gtk::ColumnViewColumn>&
+gui::list::column_mtime() const noexcept
+{
+    return column_mtime_;
+}

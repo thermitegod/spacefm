@@ -40,6 +40,19 @@ class list final : public Gtk::ColumnView, public files_base
     list(list&&) = delete;
     list& operator=(list&&) = delete;
 
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_name() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_size() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_bytes() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_type() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_mime() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_perm() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_owner() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_group() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_atime() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_btime() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_ctime() const noexcept;
+    [[nodiscard]] const Glib::RefPtr<Gtk::ColumnViewColumn>& column_mtime() const noexcept;
+
   private:
     void add_columns() noexcept;
 
