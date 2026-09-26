@@ -15,6 +15,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <ranges>
 #include <utility>
 
 #include <gdkmm.h>
@@ -56,13 +57,14 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
 
     // load saved tabs, do this before connecting to notebook signals
     const auto panel_state = settings_->window.state[panel];
-    for (const auto& state : panel_state.tabs)
+    for (const auto [idx, state] : std::views::enumerate(panel_state.tabs))
     {
         try
         {
             if (std::filesystem::exists(state.path))
             {
-                new_tab(state);
+                // logger::info("set active {}, {}", idx, get_n_pages() == panel_state.active_tab);
+                new_tab(state, get_n_pages() == panel_state.active_tab);
             }
         }
         catch (const std::filesystem::filesystem_error& e)
@@ -74,11 +76,6 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     if (get_n_pages() == 0)
     {
         new_tab(vfs::user::home());
-    }
-    else
-    {
-        const auto active_tab = panel_state.active_tab;
-        set_current_page((active_tab >= 0 && active_tab < get_n_pages()) ? active_tab : 0);
     }
 
     signal_page_added_ = signal_page_added().connect([this](auto, auto) { save_tab_state(); });
@@ -291,19 +288,21 @@ gui::browser::display_filename(const std::filesystem::path& path) noexcept
 }
 
 void
-gui::browser::new_tab(const std::filesystem::path& path) noexcept
+gui::browser::new_tab(const std::filesystem::path& path, const bool set_active) noexcept
 {
-    new_tab({
-        .path = path,
-        .sorting = settings_->defaults.sorting,
-        .view = settings_->defaults.view,
-        .grid = settings_->defaults.grid,
-        .list = settings_->defaults.list,
-    });
+    new_tab(
+        {
+            .path = path,
+            .sorting = settings_->defaults.sorting,
+            .view = settings_->defaults.view,
+            .grid = settings_->defaults.grid,
+            .list = settings_->defaults.list,
+        },
+        set_active);
 }
 
 void
-gui::browser::new_tab(const config::tab_state& state) noexcept
+gui::browser::new_tab(const config::tab_state& state, const bool set_active) noexcept
 {
     auto* label = Gtk::make_managed<Gtk::Label>();
     label->set_label(display_filename(state.path));
@@ -384,8 +383,13 @@ gui::browser::new_tab(const config::tab_state& state) noexcept
         });
     label->add_controller(gesture);
 
-    append_page(*tab, *label);
+    auto tab_idx = append_page(*tab, *label);
     set_tab_reorderable(*tab, true);
+
+    if (set_active)
+    {
+        set_current_page(tab_idx);
+    }
 }
 
 void
@@ -437,7 +441,7 @@ gui::browser::restore_tab() noexcept
         const auto state = restore_tabs_.back();
         restore_tabs_.pop();
 
-        new_tab(state);
+        new_tab(state, true);
     }
 }
 

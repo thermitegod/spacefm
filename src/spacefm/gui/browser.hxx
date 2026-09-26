@@ -40,8 +40,8 @@ class browser final : public Gtk::Notebook
             const std::shared_ptr<config::settings>& settings);
     ~browser();
 
-    void new_tab(const std::filesystem::path& path) noexcept;
-    void new_tab(const config::tab_state& state) noexcept;
+    void new_tab(const std::filesystem::path& path, const bool set_active = false) noexcept;
+    void new_tab(const config::tab_state& state, const bool set_active = false) noexcept;
     void new_tab_here() noexcept;
     void close_tab() noexcept;
     void restore_tab() noexcept;
