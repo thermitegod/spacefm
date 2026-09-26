@@ -2597,10 +2597,11 @@ gui::tab::unselect_all() const noexcept
 void
 gui::tab::select_last() noexcept
 {
-    auto selected = history_.get_selection(cwd());
+    const auto selected = history_.get_selection(cwd());
     if (selected && !selected->empty())
     {
         select_files(*selected);
+        focus_file(selected->front());
     }
 
     files_grab_focus();
@@ -2693,6 +2694,35 @@ gui::tab::invert_selection() noexcept
     else if (view_mode_ == config::view_mode::list)
     {
         view_list_->invert_selection();
+    }
+    else
+    {
+        std::unreachable();
+    }
+}
+
+void
+gui::tab::focus_file(const std::filesystem::path& filename) noexcept
+{
+    if (view_mode_ == config::view_mode::grid)
+    {
+        const auto position = view_grid_->find_file_position(filename);
+        if (!position)
+        {
+            return;
+        }
+
+        view_grid_->scroll_to(*position, Gtk::ListScrollFlags::FOCUS);
+    }
+    else if (view_mode_ == config::view_mode::list)
+    {
+        const auto position = view_list_->find_file_position(filename);
+        if (!position)
+        {
+            return;
+        }
+
+        view_list_->scroll_to(*position, view_list_->column_name(), Gtk::ListScrollFlags::FOCUS);
     }
     else
     {

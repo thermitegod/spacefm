@@ -72,6 +72,9 @@ class files_base
     void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
+    [[nodiscard]] std::optional<std::uint32_t>
+    find_file_position(const std::filesystem::path& filename) const noexcept;
+
   private:
     void set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
                  const std::optional<config::grid_state>& grid_state,

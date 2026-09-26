@@ -315,6 +315,20 @@ gui::files_base::invert_selection() noexcept
     }
 }
 
+std::optional<std::uint32_t>
+gui::files_base::find_file_position(const std::filesystem::path& filename) const noexcept
+{
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
+    {
+        const auto file = get_item(i);
+        if (file && file->name() == filename)
+        {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+
 void
 gui::files_base::set_dir(const std::shared_ptr<vfs::dir>& dir, const config::sorting& sorting,
                          const config::grid_state& state) noexcept

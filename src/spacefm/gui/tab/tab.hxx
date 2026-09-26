@@ -144,6 +144,8 @@ class tab final : public Gtk::Box
     void select_pattern(std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
+    void focus_file(const std::filesystem::path& filename) noexcept;
+
     void open_selected_files() noexcept;
     void open_selected_files_with_app(std::string_view app_desktop = "") noexcept;
     void open_selected_files_execute(const bool in_terminal) noexcept;
@@ -195,10 +197,6 @@ class tab final : public Gtk::Box
 
     gui::toolbar toolbar_ = gui::toolbar(settings_);
     gui::statusbar statusbar_ = gui::statusbar(settings_);
-
-    // gui::grid file_list_ = gui::grid(settings_);
-    // gui::list file_list_ = gui::list(settings_);
-    // Gtk::Widget* file_list_;
 
     gui::grid* view_grid_;
     gui::list* view_list_;
