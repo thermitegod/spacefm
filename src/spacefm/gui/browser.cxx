@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <ranges>
@@ -217,14 +218,26 @@ gui::browser::add_shortcuts() noexcept
     }
 
     { // Switch Tab
-        for (std::uint32_t i = 0; i < 9; ++i)
+        constexpr std::array<std::uint32_t, 10> keys{
+            GDK_KEY_1,
+            GDK_KEY_2,
+            GDK_KEY_3,
+            GDK_KEY_4,
+            GDK_KEY_5,
+            GDK_KEY_6,
+            GDK_KEY_7,
+            GDK_KEY_8,
+            GDK_KEY_9,
+            GDK_KEY_0,
+        };
+        for (const auto [idx, key] : std::views::enumerate(keys))
         {
-            auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_1 + i, Gdk::ModifierType::ALT_MASK);
+            auto trigger = Gtk::KeyvalTrigger::create(key, Gdk::ModifierType::ALT_MASK);
 
             auto action = Gtk::CallbackAction::create(
-                [this, i](Gtk::Widget&, const Glib::VariantBase&)
+                [this, idx](Gtk::Widget&, const Glib::VariantBase&)
                 {
-                    set_current_page(static_cast<std::int32_t>(i));
+                    set_current_page(static_cast<std::int32_t>(idx));
                     return true;
                 });
 
