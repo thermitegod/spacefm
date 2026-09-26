@@ -18,6 +18,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <string>
 
@@ -73,8 +74,7 @@ gui::files_base::selected_files() const noexcept
     }
 
     std::vector<std::shared_ptr<vfs::file>> selected;
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         if (selection_model_->is_selected(i))
         {
@@ -236,8 +236,7 @@ gui::files_base::select_file(const std::filesystem::path& filename,
         unselect_all();
     }
 
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         const auto file = get_item(i);
         if (file->name() == filename)
@@ -254,8 +253,7 @@ gui::files_base::select_files(
 {
     unselect_all();
 
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         const auto file = get_item(i);
         if (std::ranges::contains(select_filenames, file->name()))
@@ -268,8 +266,7 @@ gui::files_base::select_files(
 void
 gui::files_base::unselect_file(const std::filesystem::path& filename) const noexcept
 {
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         const auto file = get_item(i);
         if (file->name() == filename)
@@ -291,8 +288,7 @@ gui::files_base::select_pattern(std::string_view search_key) noexcept
         return;
     }
 
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         const auto file = get_item(i);
         const bool select = (fnmatch(search_key.data(), file->name().data(), 0) == 0);
@@ -306,8 +302,7 @@ gui::files_base::select_pattern(std::string_view search_key) noexcept
 void
 gui::files_base::invert_selection() noexcept
 {
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         if (selection_model_->is_selected(i))
         {
@@ -460,8 +455,7 @@ gui::files_base::find_file(const std::shared_ptr<vfs::file>& file) noexcept
         return {false, std::numeric_limits<std::uint32_t>::max()};
     }
 
-    const auto n_items = dir_model_->get_n_items();
-    for (std::uint32_t i = 0; i < n_items; ++i)
+    for (const auto i : std::views::iota(0u, dir_model_->get_n_items()))
     {
         auto item = dir_model_->get_item(i);
         if (item && item->file == file)

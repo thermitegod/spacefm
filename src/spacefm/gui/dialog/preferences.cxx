@@ -457,7 +457,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
         // clang-format on
 
         std::uint32_t index = 0;
-        for (std::uint32_t i = 0; i < store->get_n_items(); ++i)
+        for (const auto i : std::views::iota(0u, store->get_n_items()))
         {
             const auto item = store->get_item(i);
             if (item->value_ == std::to_underlying(opt))

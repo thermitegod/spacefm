@@ -18,6 +18,7 @@
 #include <chrono>
 #include <filesystem>
 #include <format>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -78,7 +79,7 @@ audio_video_metadata(const std::filesystem::path& path) noexcept
     data.push_back({"Duration", duration_dsp});
 
     // TODO - label multiple video/audio streams
-    for (std::uint32_t i = 0; i < format_context->nb_streams; ++i)
+    for (const auto i : std::views::iota(0u, format_context->nb_streams))
     {
         const AVCodecParameters* codec_parameters = format_context->streams[i]->codecpar;
 

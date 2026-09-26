@@ -481,7 +481,7 @@ gui::browser::save_tab_state() noexcept
     std::vector<config::tab_state> tabs;
     tabs.reserve(static_cast<std::size_t>(n_tabs));
 
-    for (std::int32_t i = 0; i < n_tabs; ++i)
+    for (const auto i : std::views::iota(0, n_tabs))
     {
         auto* tab = dynamic_cast<gui::tab*>(get_nth_page(i));
         tabs.push_back(tab->get_tab_state());

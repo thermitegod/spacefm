@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <memory>
+#include <ranges>
 #include <utility>
 
 #include <fnmatch.h>
@@ -418,7 +419,7 @@ gui::grid::on_drag_motion(double x, double y) noexcept
     while (current && current != this)
     {
         auto controllers = current->observe_controllers();
-        for (std::uint32_t i = 0; i < g_list_model_get_n_items(controllers->gobj()); ++i)
+        for (const auto i : std::views::iota(0u, g_list_model_get_n_items(controllers->gobj())))
         {
             auto* controller = GTK_EVENT_CONTROLLER(g_list_model_get_item(controllers->gobj(), i));
             if (GTK_IS_DROP_TARGET(controller))
