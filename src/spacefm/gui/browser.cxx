@@ -87,7 +87,13 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     signal_page_removed_ = signal_page_removed().connect(
         [this](auto, auto)
         { //
-            save_tab_state();
+            // do not save state here because closing a tab will
+            // also emit signal_switch_page(). this also gets emited
+            // when the Gtk::Notebook widget gets destroyed which is
+            // fine when shuting down because the config has already been
+            // saved but will result in all saved tabs getting removed
+            // when closing a panel.
+            // save_tab_state();
         });
     signal_page_reordered_ = signal_page_reordered().connect(
         [this](auto, auto)
@@ -114,11 +120,22 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
                 new_tab(path);
             }
         });
+
+    // need to do it this way to stop every loaded tabs signal_chdir_after() from causing unneeded save requests
+    Glib::signal_idle().connect_once([this]() { enable_state_ = false; }, Glib::PRIORITY_DEFAULT);
 }
 
 gui::browser::~browser()
 {
     logger::debug("gui::browser::~browser({})", std::to_underlying(panel_));
+
+    shutdown();
+}
+
+void
+gui::browser::shutdown() noexcept
+{
+    enable_state_ = false;
 
     signal_page_added_.disconnect();
     signal_page_removed_.disconnect();
@@ -488,21 +505,9 @@ gui::browser::open_in_tab(const std::filesystem::path& path, std::int32_t tab) n
 }
 
 void
-gui::browser::freeze_state() noexcept
-{
-    state_frozen_ = true;
-}
-
-void
-gui::browser::unfreeze_state() noexcept
-{
-    state_frozen_ = false;
-}
-
-void
 gui::browser::save_tab_state() noexcept
 {
-    if (state_frozen_)
+    if (enable_state_)
     {
         return;
     }

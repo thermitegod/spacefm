@@ -52,17 +52,21 @@ gui::layout::layout(Gtk::ApplicationWindow& parent,
 bool
 gui::layout::is_visible(config::panel_id id) const noexcept
 {
-    return browsers_.at(id) != nullptr;
+    const auto* const browser = get_browser(id);
+
+    return browser != nullptr;
 }
 
 void
 gui::layout::set_pane_visible(config::panel_id id, bool visible) noexcept
 {
-    if (visible && !browsers_.at(id))
+    const auto* const browser = get_browser(id);
+
+    if (visible && !browser)
     {
         create_browser(id);
     }
-    else if (!visible && browsers_.at(id))
+    else if (!visible && browser)
     {
         destroy_browser(id);
     }
@@ -97,7 +101,8 @@ gui::layout::create_browser(config::panel_id id) noexcept
 void
 gui::layout::destroy_browser(config::panel_id id) noexcept
 {
-    freeze_browsers();
+    auto* browser = get_browser(id);
+    browser->shutdown();
 
     switch (id)
     {
@@ -115,8 +120,6 @@ gui::layout::destroy_browser(config::panel_id id) noexcept
             break;
     }
     browsers_.at(id) = nullptr;
-
-    unfreeze_browsers();
 }
 
 gui::browser*
@@ -137,28 +140,4 @@ gui::layout::update_container_visibility() noexcept
 
     top_.set_visible(top_visible);
     bottom_.set_visible(bot_visible);
-}
-
-void
-gui::layout::freeze_browsers() noexcept
-{
-    for (const auto [_, browser] : browsers_)
-    {
-        if (browser)
-        {
-            browser->freeze_state();
-        }
-    }
-}
-
-void
-gui::layout::unfreeze_browsers() noexcept
-{
-    for (const auto [_, browser] : browsers_)
-    {
-        if (browser)
-        {
-            browser->unfreeze_state();
-        }
-    }
 }

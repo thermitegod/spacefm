@@ -49,8 +49,7 @@ class browser final : public Gtk::Notebook
 
     [[nodiscard]] bool set_active_tab(std::int32_t tab) noexcept;
 
-    void freeze_state() noexcept;
-    void unfreeze_state() noexcept;
+    void shutdown() noexcept;
 
   private:
     void add_shortcuts() noexcept;
@@ -74,7 +73,7 @@ class browser final : public Gtk::Notebook
 
     std::queue<config::tab_state> restore_tabs_;
 
-    bool state_frozen_ = false;
+    bool enable_state_ = true;
     gui::tab* context_menu_tab_ = nullptr;
 
     // Signals we connect to
