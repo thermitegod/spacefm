@@ -79,13 +79,24 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
         new_tab(vfs::user::home());
     }
 
-    signal_page_added_ = signal_page_added().connect([this](auto, auto) { save_tab_state(); });
-    signal_page_removed_ = signal_page_removed().connect([this](auto, auto) { save_tab_state(); });
-    signal_page_reordered_ =
-        signal_page_reordered().connect([this](auto, auto) { save_tab_state(); });
+    signal_page_added_ = signal_page_added().connect(
+        [this](auto, auto)
+        { //
+            save_tab_state();
+        });
+    signal_page_removed_ = signal_page_removed().connect(
+        [this](auto, auto)
+        { //
+            save_tab_state();
+        });
+    signal_page_reordered_ = signal_page_reordered().connect(
+        [this](auto, auto)
+        { //
+            save_tab_state();
+        });
     signal_switch_page_ = signal_switch_page().connect(
         [this](auto* page, auto)
-        {
+        { //
             save_tab_state();
 
             if (auto* tab = dynamic_cast<gui::tab*>(page))
@@ -309,20 +320,40 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
     label->set_label(display_filename(state.path));
 
     auto* tab = Gtk::make_managed<gui::tab>(parent_, state, task_manager_, settings_);
-    tab->signal_state_changed().connect([this]() { save_tab_state(); });
-    tab->signal_chdir_before().connect([]() { /* TODO */ });
+    tab->signal_state_changed().connect(
+        [this]()
+        { //
+            save_tab_state();
+        });
+    tab->signal_chdir_before().connect(
+        [this]()
+        { //
+            /* TODO */
+        });
     tab->signal_chdir_begin().connect(
         [this, tab, label]()
-        {
+        { //
             label->set_label(display_filename(tab->cwd()));
             label->set_tooltip_text(std::format("{}", tab->cwd()));
         });
-    tab->signal_chdir_after().connect([this]() { save_tab_state(); });
-    tab->signal_close_tab().connect([this]() { close_tab(); });
-    tab->signal_new_tab().connect([this](const std::filesystem::path& path) { new_tab(path); });
+    tab->signal_chdir_after().connect(
+        [this]()
+        { //
+            save_tab_state();
+        });
+    tab->signal_close_tab().connect(
+        [this]()
+        { //
+            close_tab();
+        });
+    tab->signal_new_tab().connect(
+        [this](const std::filesystem::path& path)
+        { //
+            new_tab(path);
+        });
     tab->signal_switch_tab_with_paste().connect(
         [this](std::int32_t tab)
-        {
+        { //
             const auto switched = set_active_tab(tab);
             if (switched)
             {
