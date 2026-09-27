@@ -129,8 +129,7 @@ struct list_state final
 
 struct tab_state final
 {
-    // std::filesystem::path path = vfs::user::home();
-    std::string path = vfs::user::home();
+    std::filesystem::path path = vfs::user::home();
     sorting sorting{};
     view_mode view = view_mode::grid;
     std::optional<grid_state> grid = std::nullopt; // only used for view_mode::grid
