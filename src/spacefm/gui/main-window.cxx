@@ -92,6 +92,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
     app->add_action("preferences", [this]() { on_open_preferences(); });
     app->add_action("donate", [this]() { on_open_donate(); });
     app->add_action("about", [this]() { on_open_about(); });
+    app->add_action("bookmark_add", [this]() { on_bookmark_add(); });
     app->add_action("bookmark_manager", [this]() { on_open_bookmark_manager(); });
 
     const std::vector<std::pair<config::panel_id, Glib::ustring>> panel_map = {
@@ -400,6 +401,11 @@ void
 gui::main_window::on_open_donate() noexcept
 {
     Gtk::make_managed<gui::dialog::donate>(*this);
+}
+
+void
+gui::main_window::on_bookmark_add() noexcept
+{
 }
 
 void

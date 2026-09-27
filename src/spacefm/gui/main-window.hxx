@@ -67,6 +67,7 @@ class main_window : public Gtk::ApplicationWindow
     void on_fullscreen() noexcept;
     void on_open_keybindings() noexcept;
     void on_open_preferences() noexcept;
+    void on_bookmark_add() noexcept;
     void on_open_bookmark_manager() noexcept;
     void on_open_about() noexcept;
     void on_open_donate() noexcept;
