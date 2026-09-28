@@ -18,6 +18,9 @@
 
 #include "commandline/commandline.hxx"
 
+#include "settings/config.hxx"
+#include "settings/settings.hxx"
+
 #include "gui/main-window.hxx"
 
 int
@@ -29,8 +32,25 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    Glib::set_prgname(PACKAGE_NAME);
-
     auto app = Gtk::Application::create("org.thermitegod.experimental.spacefm");
-    return app->make_window_and_run<gui::main_window>(0, nullptr, app);
+
+    auto settings = std::make_shared<config::settings>();
+    config::manager config_manager(settings);
+    config_manager.load();
+
+    app->signal_startup().connect(
+        [&]()
+        {
+            for (const auto& [window_id, _] : settings->windows)
+            {
+                auto* window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
+                window->present();
+            }
+        });
+
+    const auto status = app->run(0, nullptr);
+
+    config_manager.save();
+
+    return status;
 }

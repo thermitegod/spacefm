@@ -34,7 +34,8 @@ namespace gui
 class browser final : public Gtk::Notebook
 {
   public:
-    browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
+    browser(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
+            const config::panel_id panel,
             const std::shared_ptr<vfs::volume_manager>& volume_manager,
             const std::shared_ptr<vfs::task_manager>& task_manager,
             const std::shared_ptr<config::settings>& settings);
@@ -49,8 +50,6 @@ class browser final : public Gtk::Notebook
 
     [[nodiscard]] bool set_active_tab(std::int32_t tab) noexcept;
 
-    void shutdown() noexcept;
-
   private:
     void add_shortcuts() noexcept;
     gui::tab* current_tab() noexcept;
@@ -59,7 +58,8 @@ class browser final : public Gtk::Notebook
     void save_tab_state() noexcept;
 
     Gtk::ApplicationWindow& parent_;
-    config::panel_id panel_; // which panel the browser is in
+    std::uint32_t window_id_;
+    config::panel_id panel_id_;
     std::shared_ptr<vfs::volume_manager> volume_manager_;
     std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;
@@ -73,7 +73,7 @@ class browser final : public Gtk::Notebook
 
     std::queue<config::tab_state> restore_tabs_;
 
-    bool enable_state_ = true;
+    bool enable_state_ = false;
     gui::tab* context_menu_tab_ = nullptr;
 
     // Signals we connect to

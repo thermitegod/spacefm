@@ -33,30 +33,15 @@
 
 #include "logger.hxx"
 
-gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
+gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
+                              const std::uint32_t window_id,
+                              const std::shared_ptr<config::settings>& settings)
+    : window_id_(window_id), settings_(settings)
 {
+    logger::debug("gui::main_window::main_window({})", window_id_);
+
     set_application(app);
     assert(get_application() != nullptr);
-
-    logger::debug("gui::main_window::main_window({})", get_id());
-
-    config_manager_->signal_load_error().connect(
-        [this](std::string_view msg)
-        {
-            auto dialog = Gtk::AlertDialog::create("Config Load Error");
-            dialog->set_detail(msg.data());
-            dialog->set_modal(true);
-            dialog->show(*this);
-        });
-    config_manager_->signal_save_error().connect(
-        [this](std::string_view msg)
-        {
-            auto dialog = Gtk::AlertDialog::create("Config Save Error");
-            dialog->set_detail(msg.data());
-            dialog->set_modal(true);
-            dialog->show(*this);
-        });
-    config_manager_->load();
 
     bookmark_manager_->signal_load_error().connect(
         [this](std::string_view msg)
@@ -114,17 +99,19 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
         {config::panel_id::panel_2, "panel_2"},
         {config::panel_id::panel_3, "panel_3"},
         {config::panel_id::panel_4, "panel_4"}};
-    for (const auto& [id, name] : panel_map)
+    for (const auto& [panel_id, name] : panel_map)
     {
         app->add_action_bool(
             name,
-            [this, app, id, name]()
+            [this, app, panel_id, name]()
             {
-                const bool state = !settings_->window.state[id].is_visible;
-                settings_->window.state[id].is_visible = state;
+                auto& window = settings_->windows[window_id_];
+
+                const bool state = !window.panels[panel_id].is_visible;
+                window.panels[panel_id].is_visible = state;
                 settings_->signal_autosave_request().emit();
 
-                layout_.set_pane_visible(id, state);
+                layout_.set_pane_visible(panel_id, state);
 
                 auto action = app->lookup_action(name);
                 auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
@@ -133,7 +120,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
                     simple_action->set_state(Glib::Variant<bool>::create(state));
                 }
             },
-            settings_->window.state[id].is_visible);
+            settings_->windows[window_id_].panels[panel_id].is_visible);
     }
 
     app->add_action("todo",
@@ -146,7 +133,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
                     });
 
     // Load panels / tabs
-    for (const auto [id, state] : settings_->window.state)
+    for (const auto [id, state] : settings_->windows[window_id_].panels)
     {
         if (state.is_visible)
         {
@@ -154,12 +141,28 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app)
         }
     }
 
+    signal_close_request().connect(
+        [this, app]()
+        {
+            auto windows = app->get_windows();
+
+            // remove a windows state when it is closed
+            // but do not remove state if there is only one window
+            // to save all windows state use quit
+            if (windows.size() > 1 && !keep_state_)
+            {
+                settings_->windows.erase(window_id_);
+            }
+            return false;
+        },
+        false);
+
     set_visible(true);
 }
 
 gui::main_window::~main_window()
 {
-    config_manager_->save();
+    logger::debug("gui::main_window::~main_window({})", window_id_);
 }
 
 void
@@ -272,19 +275,24 @@ gui::main_window::add_shortcuts() noexcept
 void
 gui::main_window::on_close() noexcept
 {
-    // TODO only close current window if multiple windows are open, otherwise quit.
-
-    // config_manager_->save();
-
     close();
 }
 
 void
 gui::main_window::on_quit() noexcept
 {
-    // config_manager_->save();
+    // save all open windows on quit
+    keep_state_ = true;
 
-    close();
+    auto app = get_application();
+    if (app)
+    {
+        auto windows = app->get_windows();
+        for (auto* window : windows)
+        {
+            window->close();
+        }
+    }
 }
 
 void
@@ -317,10 +325,23 @@ gui::main_window::on_open_terminal() noexcept
 void
 gui::main_window::on_open_new_window() noexcept
 {
-    auto alert = Gtk::AlertDialog::create("Not Implemented");
-    alert->set_detail("gui::main_window::on_open_new_window()");
-    alert->set_modal(true);
-    alert->show(*this);
+    std::uint32_t new_window_id = 0;
+    for (const auto& [window_id, _] : settings_->windows)
+    {
+        if (window_id > new_window_id)
+        {
+            break;
+        }
+        if (window_id == new_window_id)
+        {
+            new_window_id++;
+        }
+    }
+
+    settings_->windows.emplace(new_window_id, config::window_state{});
+
+    auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
+    window->present();
 }
 
 void

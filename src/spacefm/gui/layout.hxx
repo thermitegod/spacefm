@@ -31,22 +31,23 @@ namespace gui
 class layout : public Gtk::Paned
 {
   public:
-    layout(Gtk::ApplicationWindow& parent,
+    layout(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
            const std::shared_ptr<vfs::volume_manager>& volume_manager,
            const std::shared_ptr<vfs::task_manager>& task_manager,
            const std::shared_ptr<config::settings>& settings);
 
-    [[nodiscard]] bool is_visible(config::panel_id id) const noexcept;
+    [[nodiscard]] bool is_visible(config::panel_id panel_id) const noexcept;
 
-    void set_pane_visible(config::panel_id id, bool visible) noexcept;
-    gui::browser* get_browser(config::panel_id id) const noexcept;
+    void set_pane_visible(config::panel_id panel_id, bool visible) noexcept;
+    gui::browser* get_browser(config::panel_id panel_id) const noexcept;
 
   private:
-    void create_browser(config::panel_id id) noexcept;
-    void destroy_browser(config::panel_id id) noexcept;
+    void create_browser(config::panel_id panel_id) noexcept;
+    void destroy_browser(config::panel_id panel_id) noexcept;
     void update_container_visibility() noexcept;
 
     Gtk::ApplicationWindow& parent_;
+    std::uint32_t window_id_;
     std::shared_ptr<vfs::volume_manager> volume_manager_;
     std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;

@@ -26,13 +26,15 @@
 
 #include "logger.hxx"
 
-gui::layout::layout(Gtk::ApplicationWindow& parent,
+gui::layout::layout(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
                     const std::shared_ptr<vfs::volume_manager>& volume_manager,
                     const std::shared_ptr<vfs::task_manager>& task_manager,
                     const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), volume_manager_(volume_manager), task_manager_(task_manager),
-      settings_(settings)
+    : parent_(parent), window_id_(window_id), volume_manager_(volume_manager),
+      task_manager_(task_manager), settings_(settings)
 {
+    logger::debug("gui::layout::layout({})", window_id_);
+
     set_orientation(Gtk::Orientation::VERTICAL);
     top_.set_orientation(Gtk::Orientation::HORIZONTAL);
     bottom_.set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -50,38 +52,42 @@ gui::layout::layout(Gtk::ApplicationWindow& parent,
 }
 
 bool
-gui::layout::is_visible(config::panel_id id) const noexcept
+gui::layout::is_visible(config::panel_id panel_id) const noexcept
 {
-    const auto* const browser = get_browser(id);
+    const auto* const browser = get_browser(panel_id);
 
     return browser != nullptr;
 }
 
 void
-gui::layout::set_pane_visible(config::panel_id id, bool visible) noexcept
+gui::layout::set_pane_visible(config::panel_id panel_id, bool visible) noexcept
 {
-    const auto* const browser = get_browser(id);
+    const auto* const browser = get_browser(panel_id);
 
     if (visible && !browser)
     {
-        create_browser(id);
+        create_browser(panel_id);
     }
     else if (!visible && browser)
     {
-        destroy_browser(id);
+        destroy_browser(panel_id);
     }
 
     update_container_visibility();
 }
 
 void
-gui::layout::create_browser(config::panel_id id) noexcept
+gui::layout::create_browser(config::panel_id panel_id) noexcept
 {
-    auto* browser =
-        Gtk::make_managed<gui::browser>(parent_, id, volume_manager_, task_manager_, settings_);
-    browsers_.at(id) = browser;
+    auto* browser = Gtk::make_managed<gui::browser>(parent_,
+                                                    window_id_,
+                                                    panel_id,
+                                                    volume_manager_,
+                                                    task_manager_,
+                                                    settings_);
+    browsers_.at(panel_id) = browser;
 
-    switch (id)
+    switch (panel_id)
     {
         case config::panel_id::panel_1:
             top_.set_start_child(*browser);
@@ -99,12 +105,9 @@ gui::layout::create_browser(config::panel_id id) noexcept
 }
 
 void
-gui::layout::destroy_browser(config::panel_id id) noexcept
+gui::layout::destroy_browser(config::panel_id panel_id) noexcept
 {
-    auto* browser = get_browser(id);
-    browser->shutdown();
-
-    switch (id)
+    switch (panel_id)
     {
         case config::panel_id::panel_1:
             top_.unset_start_child();
@@ -119,13 +122,13 @@ gui::layout::destroy_browser(config::panel_id id) noexcept
             bottom_.unset_end_child();
             break;
     }
-    browsers_.at(id) = nullptr;
+    browsers_.at(panel_id) = nullptr;
 }
 
 gui::browser*
-gui::layout::get_browser(config::panel_id id) const noexcept
+gui::layout::get_browser(config::panel_id panel_id) const noexcept
 {
-    return browsers_.at(id);
+    return browsers_.at(panel_id);
 }
 
 void

@@ -36,14 +36,15 @@
 
 #include "logger.hxx"
 
-gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
+gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
+                      const config::panel_id panel_id,
                       const std::shared_ptr<vfs::volume_manager>& volume_manager,
                       const std::shared_ptr<vfs::task_manager>& task_manager,
                       const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), panel_(panel), volume_manager_(volume_manager), task_manager_(task_manager),
-      settings_(settings)
+    : parent_(parent), window_id_(window_id), panel_id_(panel_id), volume_manager_(volume_manager),
+      task_manager_(task_manager), settings_(settings)
 {
-    logger::debug("gui::browser::browser({})", std::to_underlying(panel_));
+    logger::debug("gui::browser::browser({},{})", window_id, std::to_underlying(panel_id_));
 
     action_group_ = Gio::SimpleActionGroup::create();
     action_close_ = action_group_->add_action("close", [this]() { close_tab(); });
@@ -55,11 +56,24 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
 
     set_group_name("browser-group");
 
+    signal_unrealize().connect(
+        [this]()
+        {
+            save_tab_state();
+            // do not want the tab state to get updated during browser shutdown
+            enable_state_ = false;
+
+            signal_page_added_.disconnect();
+            signal_page_removed_.disconnect();
+            signal_page_reordered_.disconnect();
+            signal_switch_page_.disconnect();
+        });
+
     add_shortcuts();
     set_visible(true);
 
     // load saved tabs, do this before connecting to notebook signals
-    const auto panel_state = settings_->window.state[panel];
+    const auto panel_state = settings_->windows[window_id_].panels[panel_id_];
     for (const auto [idx, state] : std::views::enumerate(panel_state.tabs))
     {
         try
@@ -89,13 +103,7 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     signal_page_removed_ = signal_page_removed().connect(
         [this](auto, auto)
         { //
-            // do not save state here because closing a tab will
-            // also emit signal_switch_page(). this also gets emited
-            // when the Gtk::Notebook widget gets destroyed which is
-            // fine when shuting down because the config has already been
-            // saved but will result in all saved tabs getting removed
-            // when closing a panel.
-            // save_tab_state();
+            save_tab_state();
         });
     signal_page_reordered_ = signal_page_reordered().connect(
         [this](auto, auto)
@@ -124,25 +132,12 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
         });
 
     // need to do it this way to stop every loaded tabs signal_chdir_after() from causing unneeded save requests
-    Glib::signal_idle().connect_once([this]() { enable_state_ = false; }, Glib::PRIORITY_DEFAULT);
+    Glib::signal_idle().connect_once([this]() { enable_state_ = true; }, Glib::PRIORITY_DEFAULT);
 }
 
 gui::browser::~browser()
 {
-    logger::debug("gui::browser::~browser({})", std::to_underlying(panel_));
-
-    shutdown();
-}
-
-void
-gui::browser::shutdown() noexcept
-{
-    enable_state_ = false;
-
-    signal_page_added_.disconnect();
-    signal_page_removed_.disconnect();
-    signal_page_reordered_.disconnect();
-    signal_switch_page_.disconnect();
+    logger::debug("gui::browser::~browser({})", std::to_underlying(panel_id_));
 }
 
 void
@@ -510,7 +505,7 @@ gui::browser::open_in_tab(const std::filesystem::path& path, std::int32_t tab) n
 void
 gui::browser::save_tab_state() noexcept
 {
-    if (enable_state_)
+    if (!enable_state_)
     {
         return;
     }
@@ -527,7 +522,7 @@ gui::browser::save_tab_state() noexcept
         tabs.push_back(tab->get_tab_state());
     }
 
-    settings_->window.state[panel_].tabs = tabs;
-    settings_->window.state[panel_].active_tab = current_page;
+    settings_->windows[window_id_].panels[panel_id_].tabs = tabs;
+    settings_->windows[window_id_].panels[panel_id_].active_tab = current_page;
     settings_->signal_autosave_request().emit();
 }

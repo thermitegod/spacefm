@@ -145,7 +145,7 @@ struct panel_state final
 
 struct window_state final
 {
-    std::flat_map<panel_id, panel_state> state = {
+    std::flat_map<panel_id, panel_state> panels = {
         {panel_id::panel_1,
          {.is_visible = true,
           .active_tab = 0,
@@ -271,9 +271,9 @@ struct settings_on_disk
     };
     defaults defaults;
 
-    // TODO multi window state support
-    // std::flat_map<std::uint32_t, window_state> window;
-    window_state window;
+    std::flat_map<std::uint32_t, window_state> windows = {
+        {0, {}},
+    };
 };
 
 // TODO use getters and setters for settings?

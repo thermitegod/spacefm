@@ -19,7 +19,6 @@
 
 #include <gtkmm.h>
 
-#include "settings/config.hxx"
 #include "settings/settings.hxx"
 
 #include "gui/layout.hxx"
@@ -35,12 +34,13 @@ namespace gui
 class main_window : public Gtk::ApplicationWindow
 {
   public:
-    main_window(const Glib::RefPtr<Gtk::Application>& app);
+    main_window(const Glib::RefPtr<Gtk::Application>& app, const std::uint32_t window_id,
+                const std::shared_ptr<config::settings>& settings);
     ~main_window();
 
   private:
-    std::shared_ptr<config::settings> settings_ = std::make_shared<config::settings>();
-    std::shared_ptr<config::manager> config_manager_ = std::make_shared<config::manager>(settings_);
+    std::uint32_t window_id_;
+    std::shared_ptr<config::settings> settings_;
     std::shared_ptr<vfs::bookmarks> bookmark_manager_ = std::make_shared<vfs::bookmarks>();
     std::shared_ptr<vfs::task_manager> task_manager_ = vfs::task_manager::create();
     std::shared_ptr<vfs::volume_manager> volume_manager_ = vfs::volume_manager::create();
@@ -48,10 +48,12 @@ class main_window : public Gtk::ApplicationWindow
     Gtk::Box box_;
     gui::menubar menubar_;
 
-    gui::layout layout_ = gui::layout(*this, volume_manager_, task_manager_, settings_);
+    gui::layout layout_ = gui::layout(*this, window_id_, volume_manager_, task_manager_, settings_);
 
     Gtk::ScrolledWindow task_scroll_;
     gui::task tasks_ = gui::task(*this, task_manager_);
+
+    bool keep_state_ = false;
 
     void add_shortcuts() noexcept;
 
