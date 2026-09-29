@@ -17,8 +17,10 @@
 
 // GTKMM
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wextra-semi"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 #if !defined(__clang__)
 #pragma GCC diagnostic ignored "-Walloc-zero"
 #endif

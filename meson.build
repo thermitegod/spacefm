@@ -127,7 +127,7 @@ flags += cpp.get_supported_arguments([
     '-Wdouble-promotion',
     '-Wduplicated-branches',
     '-Wduplicated-cond',
-    # '-Wextra-semi', // TODO warnings from glibmm
+    '-Wextra-semi',
     '-Wfloat-equal',
     '-Wignored-qualifiers',
     '-Wimplicit-fallthrough',
@@ -140,7 +140,7 @@ flags += cpp.get_supported_arguments([
     '-Wmissing-noreturn',
     '-Wnon-virtual-dtor',
     '-Wnull-dereference',
-    # '-Wold-style-cast', // TODO warnings from glibmm
+    # '-Wold-style-cast',
     '-Woverloaded-virtual',
     '-Wparentheses',
     '-Wpointer-arith',
@@ -176,21 +176,13 @@ flags += cpp.get_supported_arguments([
 
 # Disabled Warnings
 flags += cpp.get_supported_arguments([
-    '-Wno-cast-align',
     '-Wno-double-promotion', # warns when using NAN
-    '-Wno-cast-function-type-mismatch',
-
-    # '-Wno-deprecated-declarations',
 ])
 
 # Disabled GCC Warnings
 if cpp.get_id() == 'gcc'
     flags += cpp.get_supported_arguments([
-        '-Wno-changes-meaning', # TODO
-
-        '-Wno-cast-function-type',
-        '-Wno-cast-qual',
-        '-Wno-maybe-uninitialized',
+        '-Wno-changes-meaning',
         '-Wno-shadow',  # gcc is a lot stricter than clang
     ])
 endif
@@ -199,7 +191,6 @@ endif
 if cpp.get_id() == 'clang'
     flags += cpp.get_supported_arguments([
         '-Wno-c2y-extensions', # doctest.h
-        '-Wno-cast-qual',
     ])
 endif
 
