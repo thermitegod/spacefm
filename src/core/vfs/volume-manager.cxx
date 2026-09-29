@@ -421,9 +421,9 @@ vfs::volume_manager::volume_manager()
 
     uchannel_ = Glib::IOChannel::create_from_fd(ufd);
     uchannel_->set_flags(Glib::IOFlags::NONBLOCK);
-    uchannel_->set_close_on_unref(true);
+    uchannel_->set_close_on_unref(false);
 
-    Glib::signal_io().connect(
+    signal_uchannel_ = Glib::signal_io().connect(
         [this](const Glib::IOCondition condition)
         {
             if (condition == Glib::IOCondition::IO_NVAL)
@@ -518,7 +518,7 @@ vfs::volume_manager::volume_manager()
     mchannel_ = Glib::IOChannel::create_from_file(vfs::proc::MOUNTINFO, "r");
     mchannel_->set_close_on_unref(true);
 
-    Glib::signal_io().connect(
+    signal_mchannel_ = Glib::signal_io().connect(
         [this](const Glib::IOCondition condition)
         {
             if (condition == Glib::IOCondition::IO_ERR)
@@ -533,6 +533,27 @@ vfs::volume_manager::volume_manager()
         },
         mchannel_,
         Glib::IOCondition::IO_ERR);
+}
+
+vfs::volume_manager::~volume_manager()
+{
+    signal_uchannel_.disconnect();
+    signal_mchannel_.disconnect();
+
+    uchannel_.reset();
+
+    if (mchannel_)
+    {
+        try
+        {
+            mchannel_->close();
+        }
+        catch (const Glib::Error& ex)
+        {
+            logger::warn<logger::vfs>("Failed to close mchannel: {}", ex.what());
+        }
+        mchannel_.reset();
+    }
 }
 
 std::shared_ptr<vfs::volume_manager>

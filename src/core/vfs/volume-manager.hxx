@@ -135,6 +135,7 @@ class volume_manager
 {
   private:
     volume_manager();
+    ~volume_manager();
 
   public:
     [[nodiscard]] static std::shared_ptr<vfs::volume_manager> create() noexcept;
@@ -179,6 +180,8 @@ class volume_manager
 
     Glib::RefPtr<Glib::IOChannel> uchannel_ = nullptr;
     Glib::RefPtr<Glib::IOChannel> mchannel_ = nullptr;
+    sigc::scoped_connection signal_uchannel_;
+    sigc::scoped_connection signal_mchannel_;
 
     std::vector<std::shared_ptr<device_mount>> devmounts_;
 
