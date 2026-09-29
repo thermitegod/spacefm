@@ -664,7 +664,11 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
         if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
         {
             // logger::debug<logger::vfs>("    prepended");
-            devmount->mounts.push_back(mount.mount_point());
+            if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
+            {
+                devmount->mounts.push_back(mount.mount_point());
+                devmount->mount_points = ztd::join(devmount->mounts, ",");
+            }
         }
     }
 
