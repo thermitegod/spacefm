@@ -222,21 +222,21 @@ namespace utils
 template<typename T>
 const void*
 ptr(T p) noexcept
+    requires(std::is_pointer_v<T>)
 {
-    static_assert(std::is_pointer_v<T>);
-    return (void*)p;
+    return static_cast<void*>(p);
 }
 template<typename T>
 const void*
 ptr(const std::unique_ptr<T>& p) noexcept
 {
-    return (void*)p.get();
+    return static_cast<void*>(p.get());
 }
 template<typename T>
 const void*
 ptr(const std::shared_ptr<T>& p) noexcept
 {
-    return (void*)p.get();
+    return static_cast<void*>(p.get());
 }
 } // namespace utils
 } // namespace logger
