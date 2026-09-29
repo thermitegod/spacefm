@@ -4,7 +4,7 @@
 
 #include <chrono>
 #include <filesystem>
-#include <flat_map>
+#include <map>
 #include <mutex>
 #include <stack>
 #include <string>
@@ -129,7 +129,7 @@ struct WeightedMime final
 };
 
 // Map of file extension to weighted mime type.
-using MimeTypeMap = std::flat_map<std::string, WeightedMime>;
+using MimeTypeMap = std::map<std::string, WeightedMime, std::less<>>;
 
 // Parses a file at `file_path` which should be in the same format as the
 // /usr/share/mime/mime.cache file on Linux.
@@ -344,13 +344,16 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
                     weight = static_cast<uint8_t>(buf[p + 3]);
                 }
                 p += 4;
-                if (!n.ext.empty() && n.ext[0] == '.')
+                if (n.ext.size() > 0 && n.ext[0] == '.')
                 {
-                    const std::string ext = n.ext.substr(1);
+                    std::string_view ext = std::string_view(n.ext).substr(1u);
                     auto it = out_mime_types.find(ext);
-                    if (it == out_mime_types.cend() || weight > it->second.weight)
+                    if (it == out_mime_types.end() || weight > it->second.weight)
                     {
-                        out_mime_types[ext] = {std::string(buf.c_str() + mime_type_offset), weight};
+                        // Use the mime type string from `buf` up to the first NUL.
+                        auto mime_type = std::string_view(buf).substr(mime_type_offset);
+                        mime_type = mime_type.substr(0u, mime_type.find('\0'));
+                        out_mime_types[std::string(ext)] = {std::string(mime_type), weight};
                     }
                 }
                 continue;
