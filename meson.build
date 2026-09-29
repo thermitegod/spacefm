@@ -293,6 +293,10 @@ if get_option('dev')
     preprocessor += '-DDEV_MODE'
 endif
 
+if get_option('deprecated')
+    preprocessor += '-DHAVE_DEPRECATED'
+endif
+
 media_dependencies = []
 if get_option('media')
     # ffmpeg

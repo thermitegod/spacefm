@@ -13,6 +13,13 @@ option(
 )
 
 option(
+    'deprecated',
+    type: 'boolean',
+    value: true,
+    description: 'enable deprecated features'
+)
+
+option(
     'tools',
     type: 'boolean',
     value: false,
