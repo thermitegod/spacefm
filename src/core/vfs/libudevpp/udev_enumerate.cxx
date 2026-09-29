@@ -19,6 +19,32 @@
 
 #include "libudevpp.hxx"
 
+libudev::enumerate::enumerate(struct ::udev_enumerate* enumerate) noexcept
+    : handle(enumerate, &udev_enumerate_unref)
+{
+}
+
+libudev::enumerate::enumerate(const enumerate& other) noexcept
+    : handle(other.handle ? std::shared_ptr<struct ::udev_enumerate>(
+                                udev_enumerate_ref(other.handle.get()), &udev_enumerate_unref)
+                          : nullptr)
+{
+}
+
+libudev::enumerate&
+libudev::enumerate::operator=(const enumerate& other) noexcept
+{
+    if (this != &other)
+    {
+        handle =
+            other.handle
+                ? std::shared_ptr<struct ::udev_enumerate>(udev_enumerate_ref(other.handle.get()),
+                                                           &udev_enumerate_unref)
+                : nullptr;
+    }
+    return *this;
+}
+
 bool
 libudev::enumerate::is_initialized() const noexcept
 {

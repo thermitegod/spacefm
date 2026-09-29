@@ -26,6 +26,30 @@
 
 #include "libudevpp.hxx"
 
+libudev::device::device(struct ::udev_device* device) noexcept : handle(device, &udev_device_unref)
+{
+}
+
+libudev::device::device(const device& other) noexcept
+    : handle(other.handle ? std::shared_ptr<struct ::udev_device>(
+                                udev_device_ref(other.handle.get()), &udev_device_unref)
+                          : nullptr)
+{
+}
+
+libudev::device&
+libudev::device::operator=(const device& other) noexcept
+{
+    if (this != &other)
+    {
+        handle = other.handle
+                     ? std::shared_ptr<struct ::udev_device>(udev_device_ref(other.handle.get()),
+                                                             &udev_device_unref)
+                     : nullptr;
+    }
+    return *this;
+}
+
 bool
 libudev::device::is_initialized() const noexcept
 {

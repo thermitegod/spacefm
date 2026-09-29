@@ -37,11 +37,11 @@ class enumerate;
 class udev final
 {
   public:
-    explicit udev() noexcept : handle(udev_new(), &udev_unref) {}
-    udev(const udev& other) = default;
-    udev(udev&& other) noexcept : handle(std::move(other.handle)) {}
-    udev& operator=(const udev& other) = default;
-    udev& operator=(udev&& other) = default;
+    explicit udev() noexcept;
+    udev(const udev& other) noexcept;
+    udev(udev&& other) noexcept = default;
+    udev& operator=(const udev& other) noexcept;
+    udev& operator=(udev&& other) noexcept = default;
     ~udev() = default;
 
     enum class netlink_type : std::uint8_t
@@ -94,11 +94,11 @@ class monitor final
 {
   public:
     monitor() = default;
-    monitor(struct ::udev_monitor* device) noexcept : handle(device, &udev_monitor_unref) {}
-    monitor(const monitor& other) = default;
-    monitor(monitor&& other) noexcept : handle(std::move(other.handle)) {}
-    monitor& operator=(const monitor& other) = default;
-    monitor& operator=(monitor&& other) = default;
+    explicit monitor(struct ::udev_monitor* device) noexcept;
+    monitor(const monitor& other) noexcept;
+    monitor(monitor&& other) noexcept = default;
+    monitor& operator=(const monitor& other) noexcept;
+    monitor& operator=(monitor&& other) noexcept = default;
     ~monitor() = default;
 
     [[nodiscard]] bool enable_receiving() const noexcept;
@@ -126,14 +126,11 @@ class enumerate final
 {
   public:
     enumerate() = default;
-    enumerate(struct ::udev_enumerate* enumerate) noexcept
-        : handle(enumerate, &udev_enumerate_unref)
-    {
-    }
-    enumerate(const enumerate& other) = default;
-    enumerate(enumerate&& other) noexcept : handle(std::move(other.handle)) {}
-    enumerate& operator=(const enumerate& other) = default;
-    enumerate& operator=(enumerate&& other) = default;
+    explicit enumerate(struct ::udev_enumerate* enumerate) noexcept;
+    enumerate(const enumerate& other) noexcept;
+    enumerate(enumerate&& other) noexcept = default;
+    enumerate& operator=(const enumerate& other) noexcept;
+    enumerate& operator=(enumerate&& other) noexcept = default;
     ~enumerate() = default;
 
     [[nodiscard]] bool is_initialized() const noexcept;
@@ -170,11 +167,11 @@ class device final
 {
   public:
     device() = default;
-    device(struct ::udev_device* device) noexcept : handle(device, &udev_device_unref) {}
-    device(const device& other) = default;
-    device(device&& other) noexcept : handle(std::move(other.handle)) {}
-    device& operator=(const device& other) = default;
-    device& operator=(device&& other) = default;
+    explicit device(struct ::udev_device* device) noexcept;
+    device(const device& other) noexcept;
+    device(device&& other) noexcept = default;
+    device& operator=(const device& other) noexcept;
+    device& operator=(device&& other) noexcept = default;
     ~device() = default;
 
     [[nodiscard]] bool is_initialized() const noexcept;

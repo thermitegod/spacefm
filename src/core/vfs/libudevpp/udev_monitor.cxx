@@ -18,6 +18,31 @@
 
 #include "libudevpp.hxx"
 
+libudev::monitor::monitor(struct ::udev_monitor* device) noexcept
+    : handle(device, &udev_monitor_unref)
+{
+}
+
+libudev::monitor::monitor(const monitor& other) noexcept
+    : handle(other.handle ? std::shared_ptr<struct ::udev_monitor>(
+                                udev_monitor_ref(other.handle.get()), &udev_monitor_unref)
+                          : nullptr)
+{
+}
+
+libudev::monitor&
+libudev::monitor::operator=(const monitor& other) noexcept
+{
+    if (this != &other)
+    {
+        handle = other.handle
+                     ? std::shared_ptr<struct ::udev_monitor>(udev_monitor_ref(other.handle.get()),
+                                                              &udev_monitor_unref)
+                     : nullptr;
+    }
+    return *this;
+}
+
 bool
 libudev::monitor::enable_receiving() const noexcept
 {

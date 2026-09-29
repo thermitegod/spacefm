@@ -21,6 +21,27 @@
 
 #include "libudevpp.hxx"
 
+libudev::udev::udev() noexcept : handle(udev_new(), &udev_unref) {}
+
+libudev::udev::udev(const udev& other) noexcept
+    : handle(other.handle
+                 ? std::shared_ptr<struct ::udev>(udev_ref(other.handle.get()), &udev_unref)
+                 : nullptr)
+{
+}
+
+libudev::udev&
+libudev::udev::operator=(const udev& other) noexcept
+{
+    if (this != &other)
+    {
+        handle = other.handle
+                     ? std::shared_ptr<struct ::udev>(udev_ref(other.handle.get()), &udev_unref)
+                     : nullptr;
+    }
+    return *this;
+}
+
 std::optional<libudev::monitor>
 libudev::udev::monitor_new_from_netlink(std::string_view name) const noexcept
 {
@@ -104,7 +125,7 @@ libudev::udev::device_from_devnum(const device_type type, const dev_t devnum) co
 libudev::enumerate
 libudev::udev::enumerate_new() const noexcept
 {
-    return {udev_enumerate_new(handle.get())};
+    return enumerate{udev_enumerate_new(handle.get())};
 }
 
 bool
