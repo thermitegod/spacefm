@@ -20,6 +20,10 @@
 
 #include <ztd/ztd.hxx>
 
+#undef major
+#undef minor
+#undef makedev
+
 namespace vfs::proc
 {
 inline const std::filesystem::path MOUNTINFO = "/proc/self/mountinfo";

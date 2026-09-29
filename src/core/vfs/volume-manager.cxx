@@ -41,6 +41,10 @@
 #include "libudevpp/libudevpp.hxx"
 #include "logger.hxx"
 
+#undef major
+#undef minor
+#undef makedev
+
 vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
 {
     // logger::debug<logger::vfs>("vfs::volume::volume({})", logger::utils::ptr(this));
@@ -626,8 +630,8 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
         }
 
         // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.major(), mount.minor(), mount.mount_point());
-        const dev_t devnum = makedev(static_cast<std::uint32_t>(mount.major()),
-                                     static_cast<std::uint32_t>(mount.minor()));
+        const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(mount.major()),
+                                             static_cast<std::uint32_t>(mount.minor()));
 
         auto& devmount = device_map[devnum];
 
@@ -724,8 +728,8 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
     {
         for (const auto& devmount : changed)
         {
-            const dev_t devnum = makedev(static_cast<std::uint32_t>(devmount->major),
-                                         static_cast<std::uint32_t>(devmount->minor));
+            const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(devmount->major),
+                                                 static_cast<std::uint32_t>(devmount->minor));
             const auto udevice = udev_.device_from_devnum('b', devnum);
 
             if (!udevice || !udevice->is_initialized())
@@ -817,10 +821,8 @@ vfs::volume_manager::avoid_changes(const std::filesystem::path& dir) const noexc
 ///////////////////////////////////////////
 
 vfs::volume_manager::device_mount::device_mount(dev_t major, dev_t minor) noexcept
+    : major(major), minor(minor)
 {
-    major = major;
-    minor = minor;
-
     mount_points = ztd::join(mounts, ",");
 
     // logger::debug<logger::vfs>("device {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
