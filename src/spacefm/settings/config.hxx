@@ -54,7 +54,7 @@ class manager
 
   private:
     std::shared_ptr<config::settings> settings_;
-    std::filesystem::path file_ = vfs::program::config() / "experimental-config.json";
+    std::filesystem::path file_ = vfs::program::config() / "config.json";
     std::uint64_t version_ = 400; // 4.0.0
 
     // Autosave

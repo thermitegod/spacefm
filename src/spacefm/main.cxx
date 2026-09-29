@@ -32,7 +32,7 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    auto app = Gtk::Application::create("org.thermitegod.experimental.spacefm");
+    auto app = Gtk::Application::create("org.thermitegod.spacefm");
 
     auto settings = std::make_shared<config::settings>();
     config::manager config_manager(settings);
