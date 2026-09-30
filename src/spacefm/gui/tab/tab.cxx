@@ -178,6 +178,16 @@ gui::tab::add_actions() noexcept
 
             open_selected_files_with_app(app);
         });
+    actions_.open_in_new_tab = action_group_->add_action_with_parameter(
+        "open_in_new_tab",
+        Glib::VariantType("s"), // string
+        [this](const Glib::VariantBase& parameter)
+        {
+            auto path =
+                Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(parameter).get();
+
+            signal_new_tab().emit(path);
+        });
     actions_.open_in_tab = action_group_->add_action_with_parameter(
         "open_in_tab",
         Glib::VariantType("(is)"), // int, string
@@ -1087,6 +1097,9 @@ gui::tab::create_context_menu_model() noexcept
 
             { // Tab
                 auto smenu_tab = Gio::Menu::create();
+
+                smenu_tab->append("New Tab",
+                                  std::format("files.open_in_new_tab('{}')", file->path()));
 
                 smenu_tab->append("Tab 1",
                                   std::format("files.open_in_tab((0,'{}'))", file->path()));

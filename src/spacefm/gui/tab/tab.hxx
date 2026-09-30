@@ -208,6 +208,7 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> execute;
         Glib::RefPtr<Gio::SimpleAction> execute_in_terminal;
         Glib::RefPtr<Gio::SimpleAction> open_with;
+        Glib::RefPtr<Gio::SimpleAction> open_in_new_tab;
         Glib::RefPtr<Gio::SimpleAction> open_in_tab;
         Glib::RefPtr<Gio::SimpleAction> open_in_panel;
         Glib::RefPtr<Gio::SimpleAction> archive_extract;
