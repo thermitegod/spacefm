@@ -420,17 +420,6 @@ vfs::desktop::app_exec_generate_desktop_argv(std::span<const std::shared_ptr<vfs
     return commands;
 }
 
-void
-vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
-                               std::string_view command) const noexcept
-{
-    (void)cwd;
-    (void)command;
-
-    // TODO
-    ztd::panic("Not Implemented");
-}
-
 bool
 vfs::desktop::open_file(const std::filesystem::path& working_dir,
                         const std::shared_ptr<vfs::file>& file) const
@@ -486,30 +475,29 @@ vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
         return;
     }
 
-    if (use_terminal())
+    const auto cwd = !desktop_entry_.path.empty() ? desktop_entry_.path : working_dir.string();
+
+    for (auto& args : desktop_commands.value())
     {
-        for (const auto& argv : desktop_commands.value())
+        if (use_terminal())
         {
-            const std::string command = ztd::join(argv, " ");
-            exec_in_terminal(!desktop_entry_.path.empty() ? desktop_entry_.path
-                                                          : working_dir.string(),
-                             command);
+            // TODO, prepend terminal exec args
+            logger::warn<logger::vfs>("desktop terminal exec is not implemented");
+            continue;
         }
-    }
-    else
-    {
-        for (const auto& argv : desktop_commands.value())
+
+        try
         {
-            Glib::spawn_async_with_pipes(
-                !desktop_entry_.path.empty() ? desktop_entry_.path : working_dir.string(),
-                argv,
-                Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
-                    Glib::SpawnFlags::STDERR_TO_DEV_NULL,
-                Glib::SlotSpawnChildSetup(),
-                nullptr,
-                nullptr,
-                nullptr,
-                nullptr);
+            Glib::spawn_async(cwd,
+                              args,
+                              Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
+                                  Glib::SpawnFlags::STDERR_TO_DEV_NULL);
+        }
+        catch (const Glib::Error& ex)
+        {
+            logger::error<logger::vfs>("failed to spawn process for desktop file {}: {}",
+                                       path_,
+                                       ex.what());
         }
     }
 }
