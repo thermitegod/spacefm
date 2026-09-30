@@ -192,10 +192,7 @@ gui::tab::add_actions() noexcept
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(tuple.get_child(1))
                     .get();
 
-            logger::info("open_in_tab: {} | {}", tab, path);
-
-            // TODO
-            (void)this;
+            signal_open_in_tab().emit(tab, path);
         });
     actions_.open_in_panel = action_group_->add_action_with_parameter(
         "open_in_panel",
@@ -2993,12 +2990,6 @@ gui::tab::on_hide_files() const noexcept
 
     // TODO show error?
     auto _ = dir_->add_hidden(selected);
-}
-
-void
-gui::tab::on_open_in_tab(std::int32_t tab, const std::filesystem::path& path) noexcept
-{
-    signal_open_in_tab().emit(tab, path);
 }
 
 void

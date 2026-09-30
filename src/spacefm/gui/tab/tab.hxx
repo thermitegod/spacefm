@@ -152,7 +152,6 @@ class tab final : public Gtk::Box
 
     void update_selection_history() noexcept;
 
-    void on_open_in_tab(std::int32_t tab, const std::filesystem::path& path) noexcept;
     void on_copy_to_tab(std::int32_t tab) noexcept;
     void on_move_to_tab(std::int32_t tab) noexcept;
 

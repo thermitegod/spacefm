@@ -274,12 +274,17 @@ gui::browser::add_shortcuts() noexcept
 }
 
 gui::tab*
-gui::browser::current_tab() noexcept
+gui::browser::get_tab(const std::int32_t page) noexcept
 {
-    auto current_page = get_current_page();
-    auto* tab = dynamic_cast<gui::tab*>(get_nth_page(current_page));
+    auto* tab = dynamic_cast<gui::tab*>(get_nth_page(page));
 
     return tab;
+}
+
+gui::tab*
+gui::browser::current_tab() noexcept
+{
+    return get_tab(get_current_page());
 }
 
 bool
@@ -380,6 +385,20 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
                 alert->set_modal(true);
                 alert->show(parent_);
             }
+        });
+    tab->signal_open_in_tab().connect(
+        [this](std::int32_t tab, const std::filesystem::path& path)
+        {
+            if (tab >= get_n_pages())
+            {
+                auto alert = Gtk::AlertDialog::create("Open Path in Tab Failed");
+                alert->set_detail(std::format("Tab '{}' is not open", tab));
+                alert->set_modal(true);
+                alert->show(parent_);
+
+                return;
+            }
+            get_tab(tab)->chdir(path);
         });
 
     auto menu = Gio::Menu::create();
@@ -498,7 +517,7 @@ gui::browser::open_in_tab(const std::filesystem::path& path, std::int32_t tab) n
     const auto switched = set_active_tab(tab);
     if (switched)
     {
-        gui::browser::current_tab()->chdir(path);
+        current_tab()->chdir(path);
     }
 }
 
@@ -518,7 +537,7 @@ gui::browser::save_tab_state() noexcept
 
     for (const auto i : std::views::iota(0, n_tabs))
     {
-        auto* tab = dynamic_cast<gui::tab*>(get_nth_page(i));
+        auto* tab = get_tab(i);
         tabs.push_back(tab->get_tab_state());
     }
 

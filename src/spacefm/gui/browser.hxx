@@ -52,6 +52,7 @@ class browser final : public Gtk::Notebook
 
   private:
     void add_shortcuts() noexcept;
+    gui::tab* get_tab(const std::int32_t page) noexcept;
     gui::tab* current_tab() noexcept;
     [[nodiscard]] std::string display_filename(const std::filesystem::path& path) noexcept;
 
