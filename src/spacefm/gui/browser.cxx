@@ -53,6 +53,8 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, config::panel_id panel,
     action_tab_here_ = action_group_->add_action("new_tab_here", [this]() { new_tab_here(); });
     insert_action_group("browser", action_group_);
 
+    set_group_name("browser-group");
+
     add_shortcuts();
     set_visible(true);
 
@@ -434,6 +436,7 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
 
     auto tab_idx = append_page(*tab, *label);
     set_tab_reorderable(*tab, true);
+    set_tab_detachable(*tab, true);
 
     if (set_active)
     {
