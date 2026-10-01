@@ -22,7 +22,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/libudevpp/libudevpp.hxx"
+#include "libudevpp/libudevpp.hxx"
 
 namespace vfs
 {

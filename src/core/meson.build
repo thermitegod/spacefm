@@ -52,6 +52,26 @@ glycin_wrapper_dep = declare_dependency(
     dependencies: gtk_dependencies,
 )
 
+# libudevpp static library
+
+libudevpp_lib = static_library(
+    'libudevpp',
+    files(
+        'libudevpp/udev.cxx',
+        'libudevpp/udev_device.cxx',
+        'libudevpp/udev_enumerate.cxx',
+        'libudevpp/udev_monitor.cxx',
+    ),
+    include_directories: include_directories('.'),
+    dependencies: libudev_dep,
+    install: false,
+)
+
+libudevpp_dep = declare_dependency(
+    link_with: libudevpp_lib,
+    include_directories: include_directories('.'),
+    dependencies: libudev_dep,
+)
 
 # vfs static library
 
@@ -78,11 +98,6 @@ vfs_sources = files(
 
     'vfs/thumbnails/thumbnails.cxx',
 
-    'vfs/libudevpp/udev.cxx',
-    'vfs/libudevpp/udev_device.cxx',
-    'vfs/libudevpp/udev_enumerate.cxx',
-    'vfs/libudevpp/udev_monitor.cxx',
-
     'vfs/linux/mountinfo.cxx',
     'vfs/linux/self.cxx',
     'vfs/linux/sysfs.cxx',
@@ -99,11 +114,11 @@ vfs_dependencies = [
     gtk_dependencies,
 
     logger_dep,
-    libudev_dep,
     pugixml_dep,
     botan_dep,
     reflection_dep,
     glycin_wrapper_dep,
+    libudevpp_dep,
 ]
 
 vfs_lib = static_library(

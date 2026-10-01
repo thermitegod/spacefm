@@ -24,9 +24,10 @@
 
 #include "vfs/device.hxx"
 
-#include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
+
+#include "libudevpp/libudevpp.hxx"
 
 std::shared_ptr<vfs::device>
 vfs::device::create(const libudev::device& udevice) noexcept

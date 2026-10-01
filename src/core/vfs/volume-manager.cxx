@@ -34,11 +34,11 @@
 #include "vfs/execute.hxx"
 #include "vfs/volume-manager.hxx"
 
-#include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 #include "vfs/utils/utils.hxx"
 
+#include "libudevpp/libudevpp.hxx"
 #include "logger.hxx"
 
 vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
