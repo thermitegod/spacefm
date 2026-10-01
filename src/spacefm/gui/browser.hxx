@@ -77,6 +77,16 @@ class browser final : public Gtk::Notebook
     bool enable_state_ = false;
     gui::tab* context_menu_tab_ = nullptr;
 
+  public:
+    [[nodiscard]] auto
+    signal_new_tab_in_panel() noexcept
+    {
+        return signal_new_tab_in_panel_;
+    }
+
+  private:
+    sigc::signal<void(config::panel_id, const std::filesystem::path&)> signal_new_tab_in_panel_;
+
     // Signals we connect to
     sigc::scoped_connection signal_page_added_;
     sigc::scoped_connection signal_page_removed_;

@@ -85,7 +85,7 @@ gui::layout::create_browser(config::panel_id panel_id) noexcept
                                                     volume_manager_,
                                                     task_manager_,
                                                     settings_);
-    browsers_.at(panel_id) = browser;
+    browsers_[panel_id] = browser;
 
     switch (panel_id)
     {
@@ -102,6 +102,21 @@ gui::layout::create_browser(config::panel_id panel_id) noexcept
             bottom_.set_end_child(*browser);
             break;
     }
+
+    browser->signal_new_tab_in_panel().connect(
+        [this](const config::panel_id panel, const std::filesystem::path& path)
+        {
+            auto* browser = get_browser(panel);
+            if (!browser)
+            {
+                auto alert = Gtk::AlertDialog::create("New Tab in Panel Failed");
+                alert->set_detail(std::format("Panel '{}' is not open", std::to_underlying(panel)));
+                alert->set_modal(true);
+                alert->show(parent_);
+                return;
+            }
+            browser->new_tab(path);
+        });
 }
 
 void
@@ -122,7 +137,7 @@ gui::layout::destroy_browser(config::panel_id panel_id) noexcept
             bottom_.unset_end_child();
             break;
     }
-    browsers_.at(panel_id) = nullptr;
+    browsers_[panel_id] = nullptr;
 }
 
 gui::browser*
@@ -135,9 +150,9 @@ void
 gui::layout::update_container_visibility() noexcept
 {
     const auto top_visible =
-        (browsers_.at(config::panel_id::panel_1) || browsers_.at(config::panel_id::panel_2));
+        (browsers_[config::panel_id::panel_1] || browsers_[config::panel_id::panel_2]);
     const auto bot_visible =
-        (browsers_.at(config::panel_id::panel_3) || browsers_.at(config::panel_id::panel_4));
+        (browsers_[config::panel_id::panel_3] || browsers_[config::panel_id::panel_4]);
 
     logger::debug("top_visible = {} | bot_visible = {}", top_visible, bot_visible);
 

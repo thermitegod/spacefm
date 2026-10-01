@@ -400,6 +400,11 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
             }
             get_tab(tab)->chdir(path);
         });
+    tab->signal_new_tab_in_panel().connect(
+        [this](const config::panel_id panel, const std::filesystem::path& path)
+        { //
+            signal_new_tab_in_panel().emit(panel, path);
+        });
 
     auto menu = Gio::Menu::create();
     Glib::RefPtr<Gio::MenuItem> item;

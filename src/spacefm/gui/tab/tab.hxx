@@ -346,6 +346,12 @@ class tab final : public Gtk::Box
     }
 
     [[nodiscard]] auto
+    signal_new_tab_in_panel() noexcept
+    {
+        return signal_new_tab_in_panel_;
+    }
+
+    [[nodiscard]] auto
     signal_close_tab() noexcept
     {
         return signal_close_tab_;
@@ -382,6 +388,7 @@ class tab final : public Gtk::Box
 
     sigc::signal<void()> signal_close_tab_;
     sigc::signal<void(const std::filesystem::path&)> signal_new_tab_;
+    sigc::signal<void(config::panel_id, const std::filesystem::path&)> signal_new_tab_in_panel_;
 
     sigc::signal<void(std::int32_t, const std::filesystem::path&)> signal_open_in_tab_;
     sigc::signal<void(std::int32_t)> signal_switch_tab_with_paste_;

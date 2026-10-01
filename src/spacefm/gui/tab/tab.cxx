@@ -218,10 +218,7 @@ gui::tab::add_actions() noexcept
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(tuple.get_child(1))
                     .get();
 
-            logger::info("open_in_panel: {} | {}", panel, path);
-
-            // TODO
-            (void)this;
+            signal_new_tab_in_panel().emit(static_cast<config::panel_id>(panel), path);
         });
     actions_.archive_extract =
         action_group_->add_action("archive_extract", [this]() { archive_extract(); });
