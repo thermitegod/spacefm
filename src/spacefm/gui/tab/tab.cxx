@@ -2192,11 +2192,6 @@ gui::tab::cwd() const noexcept
 void
 gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mode mode) noexcept
 {
-    // TODO needs to be investigated
-    // make a copy of the path to fix ocasional: Assertion '!empty()' failed
-    // only seems to happen with root path "/"
-    // const auto path = new_path;
-
     logger::debug<logger::gui>("gui::tab::chdir({})", path);
 
     if (!std::filesystem::exists(path))
