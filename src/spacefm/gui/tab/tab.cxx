@@ -276,23 +276,23 @@ gui::tab::add_actions() noexcept
 
             signal_paste_in_tab().emit(tab);
         });
-    actions_.copy_panel = action_group_->add_action_with_parameter(
-        "copy_panel",
+    actions_.copy_to_panel = action_group_->add_action_with_parameter(
+        "copy_to_panel",
         Glib::VariantType("i"), // int
         [this](const Glib::VariantBase& parameter)
         {
             auto panel =
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
 
-            // TODO
-            (void)this;
-            (void)panel;
+            on_copy();
+
+            signal_paste_in_panel().emit(static_cast<config::panel_id>(panel));
         });
     // Actions > Move To
     actions_.move_to = action_group_->add_action("move_to", [this]() { on_move_to_select_path(); });
     actions_.move_to_last =
         action_group_->add_action("move_to_last", [this]() { on_move_to_last_path(); });
-    actions_.move_tab = action_group_->add_action_with_parameter(
+    actions_.move_to_tab = action_group_->add_action_with_parameter(
         "move_to_tab",
         Glib::VariantType("i"), // int
         [this](const Glib::VariantBase& parameter)
@@ -304,17 +304,17 @@ gui::tab::add_actions() noexcept
 
             signal_paste_in_tab().emit(tab);
         });
-    actions_.move_panel = action_group_->add_action_with_parameter(
-        "move_panel",
+    actions_.move_to_panel = action_group_->add_action_with_parameter(
+        "move_to_panel",
         Glib::VariantType("i"), // int
         [this](const Glib::VariantBase& parameter)
         {
             auto panel =
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
 
-            // TODO
-            (void)this;
-            (void)panel;
+            on_cut();
+
+            signal_paste_in_panel().emit(static_cast<config::panel_id>(panel));
         });
     // Other
     actions_.cut = action_group_->add_action("cut", [this]() { on_cut(); });
@@ -987,11 +987,11 @@ gui::tab::enable_all_actions() noexcept
     actions_.copy_to->set_enabled(true);
     actions_.copy_to_last->set_enabled(true);
     actions_.copy_to_tab->set_enabled(true);
-    actions_.copy_panel->set_enabled(true);
+    actions_.copy_to_panel->set_enabled(true);
     actions_.move_to->set_enabled(true);
     actions_.move_to_last->set_enabled(true);
     actions_.move_to_tab->set_enabled(true);
-    actions_.move_panel->set_enabled(true);
+    actions_.move_to_panel->set_enabled(true);
     actions_.cut->set_enabled(true);
     actions_.copy->set_enabled(true);
     actions_.paste->set_enabled(true);
@@ -1249,10 +1249,10 @@ gui::tab::create_context_menu_model() noexcept
 
                 {
                     auto smenu_panel = Gio::Menu::create();
-                    smenu_panel->append("Panel 1", "files.copy_panel(0)");
-                    smenu_panel->append("Panel 2", "files.copy_panel(1)");
-                    smenu_panel->append("Panel 3", "files.copy_panel(2)");
-                    smenu_panel->append("Panel 4", "files.copy_panel(3)");
+                    smenu_panel->append("Panel 1", "files.copy_to_panel(0)");
+                    smenu_panel->append("Panel 2", "files.copy_to_panel(1)");
+                    smenu_panel->append("Panel 3", "files.copy_to_panel(2)");
+                    smenu_panel->append("Panel 4", "files.copy_to_panel(3)");
                     // Name padded with 1 space to prevent GtkStack warning about duplicate child names
                     section_copy->append_submenu("Panel ", smenu_panel);
                 }
@@ -1283,10 +1283,10 @@ gui::tab::create_context_menu_model() noexcept
 
                 {
                     auto smenu_panel = Gio::Menu::create();
-                    smenu_panel->append("Panel 1", "files.move_panel(0)");
-                    smenu_panel->append("Panel 2", "files.move_panel(1)");
-                    smenu_panel->append("Panel 3", "files.move_panel(2)");
-                    smenu_panel->append("Panel 4", "files.move_panel(3)");
+                    smenu_panel->append("Panel 1", "files.move_to_panel(0)");
+                    smenu_panel->append("Panel 2", "files.move_to_panel(1)");
+                    smenu_panel->append("Panel 3", "files.move_to_panel(2)");
+                    smenu_panel->append("Panel 4", "files.move_to_panel(3)");
                     // Name padded with 2 spaces to prevent GtkStack warning about duplicate child names
                     section_move->append_submenu("Panel  ", smenu_panel);
                 }
@@ -1649,11 +1649,11 @@ gui::tab::create_context_menu_model() noexcept
         actions_.copy_to->set_enabled(is_selected);
         actions_.copy_to_last->set_enabled(is_selected && last_path_);
         actions_.copy_to_tab->set_enabled(is_selected);
-        actions_.copy_panel->set_enabled(is_selected);
+        actions_.copy_to_panel->set_enabled(is_selected);
         actions_.move_to->set_enabled(is_selected);
         actions_.move_to_last->set_enabled(is_selected && last_path_);
         actions_.move_to_tab->set_enabled(is_selected);
-        actions_.move_panel->set_enabled(is_selected);
+        actions_.move_to_panel->set_enabled(is_selected);
         actions_.cut->set_enabled(is_selected);
         actions_.copy->set_enabled(is_selected);
         actions_.paste->set_enabled(is_clip);

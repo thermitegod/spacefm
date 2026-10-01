@@ -50,10 +50,11 @@ class browser final : public Gtk::Notebook
 
     [[nodiscard]] bool set_active_tab(std::int32_t tab) noexcept;
 
+    [[nodiscard]] gui::tab* get_tab(const std::int32_t page) noexcept;
+    [[nodiscard]] gui::tab* current_tab() noexcept;
+
   private:
     void add_shortcuts() noexcept;
-    gui::tab* get_tab(const std::int32_t page) noexcept;
-    gui::tab* current_tab() noexcept;
     [[nodiscard]] std::string display_filename(const std::filesystem::path& path) noexcept;
 
     void save_tab_state() noexcept;
@@ -84,8 +85,15 @@ class browser final : public Gtk::Notebook
         return signal_new_tab_in_panel_;
     }
 
+    [[nodiscard]] auto
+    signal_paste_in_panel() noexcept
+    {
+        return signal_paste_in_panel_;
+    }
+
   private:
     sigc::signal<void(config::panel_id, const std::filesystem::path&)> signal_new_tab_in_panel_;
+    sigc::signal<void(config::panel_id)> signal_paste_in_panel_;
 
     // Signals we connect to
     sigc::scoped_connection signal_page_added_;

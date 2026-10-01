@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <utility>
+
 #include <glibmm.h>
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
@@ -25,6 +27,7 @@
 #include "vfs/task-manager.hxx"
 
 #include "logger.hxx"
+#include "reflection/enum.hxx"
 
 gui::layout::layout(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
                     const std::shared_ptr<vfs::volume_manager>& volume_manager,
@@ -110,12 +113,28 @@ gui::layout::create_browser(config::panel_id panel_id) noexcept
             if (!browser)
             {
                 auto alert = Gtk::AlertDialog::create("New Tab in Panel Failed");
-                alert->set_detail(std::format("Panel '{}' is not open", std::to_underlying(panel)));
+                alert->set_detail(
+                    std::format("Panel '{}' is not open", reflection::enum_name(panel)));
                 alert->set_modal(true);
                 alert->show(parent_);
                 return;
             }
             browser->new_tab(path);
+        });
+    browser->signal_paste_in_panel().connect(
+        [this](const config::panel_id panel)
+        {
+            auto* browser = get_browser(panel);
+            if (!browser)
+            {
+                auto alert = Gtk::AlertDialog::create("Paste in Panel Failed");
+                alert->set_detail(
+                    std::format("Panel '{}' is not open", reflection::enum_name(panel)));
+                alert->set_modal(true);
+                alert->show(parent_);
+                return;
+            }
+            browser->current_tab()->on_paste();
         });
 }
 

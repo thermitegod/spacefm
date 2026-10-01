@@ -391,7 +391,19 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
             }
 
             get_tab(tab)->on_paste();
-
+        });
+    tab->signal_paste_in_panel().connect(
+        [this](const config::panel_id panel)
+        {
+            if (panel == panel_id_)
+            {
+                auto alert = Gtk::AlertDialog::create("Paste in Panel Failed");
+                alert->set_detail("Cannot paste into the current panel");
+                alert->set_modal(true);
+                alert->show(parent_);
+                return;
+            }
+            signal_paste_in_panel().emit(panel);
         });
     tab->signal_open_in_tab().connect(
         [this](std::int32_t tab, const std::filesystem::path& path)

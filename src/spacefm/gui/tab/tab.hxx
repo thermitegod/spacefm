@@ -239,12 +239,12 @@ class tab final : public Gtk::Box
         Glib::RefPtr<Gio::SimpleAction> copy_to;
         Glib::RefPtr<Gio::SimpleAction> copy_to_last;
         Glib::RefPtr<Gio::SimpleAction> copy_to_tab;
-        Glib::RefPtr<Gio::SimpleAction> copy_panel;
+        Glib::RefPtr<Gio::SimpleAction> copy_to_panel;
         // Actions > Move To
         Glib::RefPtr<Gio::SimpleAction> move_to;
         Glib::RefPtr<Gio::SimpleAction> move_to_last;
         Glib::RefPtr<Gio::SimpleAction> move_to_tab;
-        Glib::RefPtr<Gio::SimpleAction> move_panel;
+        Glib::RefPtr<Gio::SimpleAction> move_to_panel;
         // Other
         Glib::RefPtr<Gio::SimpleAction> cut;
         Glib::RefPtr<Gio::SimpleAction> copy;
@@ -367,6 +367,12 @@ class tab final : public Gtk::Box
     }
 
     [[nodiscard]] auto
+    signal_paste_in_panel() noexcept
+    {
+        return signal_paste_in_panel_;
+    }
+
+    [[nodiscard]] auto
     signal_state_changed() noexcept
     {
         return signal_state_changed_;
@@ -389,6 +395,7 @@ class tab final : public Gtk::Box
 
     sigc::signal<void(std::int32_t, const std::filesystem::path&)> signal_open_in_tab_;
     sigc::signal<void(std::int32_t)> signal_paste_in_tab_;
+    sigc::signal<void(config::panel_id)> signal_paste_in_panel_;
 
     // Signals we connect to
     sigc::scoped_connection signal_file_created_;
