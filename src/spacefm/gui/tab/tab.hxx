@@ -152,9 +152,6 @@ class tab final : public Gtk::Box
 
     void update_selection_history() noexcept;
 
-    void on_copy_to_tab(std::int32_t tab) noexcept;
-    void on_move_to_tab(std::int32_t tab) noexcept;
-
     void on_copy_to_select_path() noexcept;
     void on_move_to_select_path() noexcept;
 
@@ -241,12 +238,12 @@ class tab final : public Gtk::Box
         // Actions > Copy To
         Glib::RefPtr<Gio::SimpleAction> copy_to;
         Glib::RefPtr<Gio::SimpleAction> copy_to_last;
-        Glib::RefPtr<Gio::SimpleAction> copy_tab;
+        Glib::RefPtr<Gio::SimpleAction> copy_to_tab;
         Glib::RefPtr<Gio::SimpleAction> copy_panel;
         // Actions > Move To
         Glib::RefPtr<Gio::SimpleAction> move_to;
         Glib::RefPtr<Gio::SimpleAction> move_to_last;
-        Glib::RefPtr<Gio::SimpleAction> move_tab;
+        Glib::RefPtr<Gio::SimpleAction> move_to_tab;
         Glib::RefPtr<Gio::SimpleAction> move_panel;
         // Other
         Glib::RefPtr<Gio::SimpleAction> cut;
@@ -364,9 +361,9 @@ class tab final : public Gtk::Box
     }
 
     [[nodiscard]] auto
-    signal_switch_tab_with_paste() noexcept
+    signal_paste_in_tab() noexcept
     {
-        return signal_switch_tab_with_paste_;
+        return signal_paste_in_tab_;
     }
 
     [[nodiscard]] auto
@@ -391,7 +388,7 @@ class tab final : public Gtk::Box
     sigc::signal<void(config::panel_id, const std::filesystem::path&)> signal_new_tab_in_panel_;
 
     sigc::signal<void(std::int32_t, const std::filesystem::path&)> signal_open_in_tab_;
-    sigc::signal<void(std::int32_t)> signal_switch_tab_with_paste_;
+    sigc::signal<void(std::int32_t)> signal_paste_in_tab_;
 
     // Signals we connect to
     sigc::scoped_connection signal_file_created_;

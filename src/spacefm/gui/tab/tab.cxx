@@ -264,15 +264,17 @@ gui::tab::add_actions() noexcept
     actions_.copy_to = action_group_->add_action("copy_to", [this]() { on_copy_to_select_path(); });
     actions_.copy_to_last =
         action_group_->add_action("copy_to_last", [this]() { on_copy_to_last_path(); });
-    actions_.copy_tab = action_group_->add_action_with_parameter(
-        "copy_tab",
+    actions_.copy_to_tab = action_group_->add_action_with_parameter(
+        "copy_to_tab",
         Glib::VariantType("i"), // int
         [this](const Glib::VariantBase& parameter)
         {
             auto tab =
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
 
-            on_copy_to_tab(tab);
+            on_copy();
+
+            signal_paste_in_tab().emit(tab);
         });
     actions_.copy_panel = action_group_->add_action_with_parameter(
         "copy_panel",
@@ -291,14 +293,16 @@ gui::tab::add_actions() noexcept
     actions_.move_to_last =
         action_group_->add_action("move_to_last", [this]() { on_move_to_last_path(); });
     actions_.move_tab = action_group_->add_action_with_parameter(
-        "move_tab",
+        "move_to_tab",
         Glib::VariantType("i"), // int
         [this](const Glib::VariantBase& parameter)
         {
             auto tab =
                 Glib::VariantBase::cast_dynamic<Glib::Variant<std::int32_t>>(parameter).get();
 
-            on_move_to_tab(tab);
+            on_cut();
+
+            signal_paste_in_tab().emit(tab);
         });
     actions_.move_panel = action_group_->add_action_with_parameter(
         "move_panel",
@@ -982,11 +986,11 @@ gui::tab::enable_all_actions() noexcept
     actions_.unselect_all->set_enabled(true);
     actions_.copy_to->set_enabled(true);
     actions_.copy_to_last->set_enabled(true);
-    actions_.copy_tab->set_enabled(true);
+    actions_.copy_to_tab->set_enabled(true);
     actions_.copy_panel->set_enabled(true);
     actions_.move_to->set_enabled(true);
     actions_.move_to_last->set_enabled(true);
-    actions_.move_tab->set_enabled(true);
+    actions_.move_to_tab->set_enabled(true);
     actions_.move_panel->set_enabled(true);
     actions_.cut->set_enabled(true);
     actions_.copy->set_enabled(true);
@@ -1229,16 +1233,16 @@ gui::tab::create_context_menu_model() noexcept
 
                 {
                     auto smenu_tab = Gio::Menu::create();
-                    smenu_tab->append("Tab 1", "files.copy_tab(0)");
-                    smenu_tab->append("Tab 2", "files.copy_tab(1)");
-                    smenu_tab->append("Tab 3", "files.copy_tab(2)");
-                    smenu_tab->append("Tab 4", "files.copy_tab(3)");
-                    smenu_tab->append("Tab 5", "files.copy_tab(4)");
-                    smenu_tab->append("Tab 6", "files.copy_tab(5)");
-                    smenu_tab->append("Tab 7", "files.copy_tab(6)");
-                    smenu_tab->append("Tab 8", "files.copy_tab(7)");
-                    smenu_tab->append("Tab 9", "files.copy_tab(8)");
-                    smenu_tab->append("Tab 10", "files.copy_tab(9)");
+                    smenu_tab->append("Tab 1", "files.copy_to_tab(0)");
+                    smenu_tab->append("Tab 2", "files.copy_to_tab(1)");
+                    smenu_tab->append("Tab 3", "files.copy_to_tab(2)");
+                    smenu_tab->append("Tab 4", "files.copy_to_tab(3)");
+                    smenu_tab->append("Tab 5", "files.copy_to_tab(4)");
+                    smenu_tab->append("Tab 6", "files.copy_to_tab(5)");
+                    smenu_tab->append("Tab 7", "files.copy_to_tab(6)");
+                    smenu_tab->append("Tab 8", "files.copy_to_tab(7)");
+                    smenu_tab->append("Tab 9", "files.copy_to_tab(8)");
+                    smenu_tab->append("Tab 10", "files.copy_to_tab(9)");
                     // Name padded with 1 space to prevent GtkStack warning about duplicate child names
                     section_copy->append_submenu("Tab ", smenu_tab);
                 }
@@ -1263,16 +1267,16 @@ gui::tab::create_context_menu_model() noexcept
 
                 {
                     auto smenu_tab = Gio::Menu::create();
-                    smenu_tab->append("Tab 1", "files.move_tab(0)");
-                    smenu_tab->append("Tab 2", "files.move_tab(1)");
-                    smenu_tab->append("Tab 3", "files.move_tab(2)");
-                    smenu_tab->append("Tab 4", "files.move_tab(3)");
-                    smenu_tab->append("Tab 5", "files.move_tab(4)");
-                    smenu_tab->append("Tab 6", "files.move_tab(5)");
-                    smenu_tab->append("Tab 7", "files.move_tab(6)");
-                    smenu_tab->append("Tab 8", "files.move_tab(7)");
-                    smenu_tab->append("Tab 9", "files.move_tab(8)");
-                    smenu_tab->append("Tab 10", "files.move_tab(9)");
+                    smenu_tab->append("Tab 1", "files.move_to_tab(0)");
+                    smenu_tab->append("Tab 2", "files.move_to_tab(1)");
+                    smenu_tab->append("Tab 3", "files.move_to_tab(2)");
+                    smenu_tab->append("Tab 4", "files.move_to_tab(3)");
+                    smenu_tab->append("Tab 5", "files.move_to_tab(4)");
+                    smenu_tab->append("Tab 6", "files.move_to_tab(5)");
+                    smenu_tab->append("Tab 7", "files.move_to_tab(6)");
+                    smenu_tab->append("Tab 8", "files.move_to_tab(7)");
+                    smenu_tab->append("Tab 9", "files.move_to_tab(8)");
+                    smenu_tab->append("Tab 10", "files.move_to_tab(9)");
                     // Name padded with 2 spaces to prevent GtkStack warning about duplicate child names
                     section_move->append_submenu("Tab  ", smenu_tab);
                 }
@@ -1644,11 +1648,11 @@ gui::tab::create_context_menu_model() noexcept
         actions_.unselect_all->set_enabled(is_selected);
         actions_.copy_to->set_enabled(is_selected);
         actions_.copy_to_last->set_enabled(is_selected && last_path_);
-        actions_.copy_tab->set_enabled(is_selected);
+        actions_.copy_to_tab->set_enabled(is_selected);
         actions_.copy_panel->set_enabled(is_selected);
         actions_.move_to->set_enabled(is_selected);
         actions_.move_to_last->set_enabled(is_selected && last_path_);
-        actions_.move_tab->set_enabled(is_selected);
+        actions_.move_to_tab->set_enabled(is_selected);
         actions_.move_panel->set_enabled(is_selected);
         actions_.cut->set_enabled(is_selected);
         actions_.copy->set_enabled(is_selected);
@@ -3000,22 +3004,6 @@ gui::tab::on_hide_files() const noexcept
 
     // TODO show error?
     auto _ = dir_->add_hidden(selected);
-}
-
-void
-gui::tab::on_copy_to_tab(std::int32_t tab) noexcept
-{
-    on_copy();
-
-    signal_switch_tab_with_paste().emit(tab);
-}
-
-void
-gui::tab::on_move_to_tab(std::int32_t tab) noexcept
-{
-    on_cut();
-
-    signal_switch_tab_with_paste().emit(tab);
 }
 
 void

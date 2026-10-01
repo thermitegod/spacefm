@@ -370,21 +370,28 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
         { //
             new_tab(path);
         });
-    tab->signal_switch_tab_with_paste().connect(
+    tab->signal_paste_in_tab().connect(
         [this](std::int32_t tab)
-        { //
-            const auto switched = set_active_tab(tab);
-            if (switched)
+        {
+            if (tab >= get_n_pages())
             {
-                current_tab()->on_paste();
-            }
-            else
-            {
-                auto alert = Gtk::AlertDialog::create("Tab Switch Failed");
-                alert->set_detail(std::format("Failed to change to tab {}", tab));
+                auto alert = Gtk::AlertDialog::create("Paste in Tab Failed");
+                alert->set_detail(std::format("Tab '{}' is not open", tab));
                 alert->set_modal(true);
                 alert->show(parent_);
+                return;
             }
+            if (tab == get_current_page())
+            {
+                auto alert = Gtk::AlertDialog::create("Paste in Tab Failed");
+                alert->set_detail("Cannot paste into the current tab");
+                alert->set_modal(true);
+                alert->show(parent_);
+                return;
+            }
+
+            get_tab(tab)->on_paste();
+
         });
     tab->signal_open_in_tab().connect(
         [this](std::int32_t tab, const std::filesystem::path& path)
@@ -395,7 +402,6 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
                 alert->set_detail(std::format("Tab '{}' is not open", tab));
                 alert->set_modal(true);
                 alert->show(parent_);
-
                 return;
             }
             get_tab(tab)->chdir(path);
