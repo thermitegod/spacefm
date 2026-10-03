@@ -89,9 +89,14 @@ gui::grid::grid(const config::grid_state& state,
 
                     if (dir_model_->get_n_items() > 0)
                     {
+                        // only focus the first file when nothing else is focusd,
+                        // otherwise will break select_last()
+                        auto flags = !is_selected() ? Gtk::ListScrollFlags::FOCUS
+                                                    : Gtk::ListScrollFlags::NONE;
+
                         // Start at the top of the view,
                         // otherwise will be at the bottom of the view
-                        scroll_to(0);
+                        scroll_to(0, flags);
                     }
                 },
                 Glib::PRIORITY_DEFAULT);
