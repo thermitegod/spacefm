@@ -35,7 +35,8 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/thumbnail_manager.hxx"
+
+#include "vfs/thumbnails/manager.hxx"
 
 #include "notify-cpp/controller.hxx"
 

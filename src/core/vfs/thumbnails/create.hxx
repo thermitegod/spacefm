@@ -25,10 +25,11 @@
 
 #include "vfs/file.hxx"
 
-namespace vfs::detail::thumbnail
+#include "vfs/thumbnails/thumbnailer.hxx"
+
+namespace vfs::thumbnail
 {
-Glib::RefPtr<Gdk::Texture> image(const std::shared_ptr<vfs::file>& file,
-                                 const std::int32_t thumb_size) noexcept;
-Glib::RefPtr<Gdk::Texture> video(const std::shared_ptr<vfs::file>& file,
-                                 const std::int32_t thumb_size) noexcept;
-} // namespace vfs::detail::thumbnail
+Glib::RefPtr<Gdk::Texture> create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
+                                  const std::shared_ptr<vfs::file>& file,
+                                  const std::int32_t thumb_size) noexcept;
+} // namespace vfs::thumbnail

@@ -336,7 +336,7 @@ vfs::desktop::expand_list(std::vector<std::string>& commands,
                         url_list += ' ';
                     }
 
-                    url_list += file->uri();
+                    url_list += vfs::execute::quote(file->uri());
                 }
 
                 command.replace(pos, 2, url_list);
@@ -370,7 +370,7 @@ vfs::desktop::expand_single(std::vector<std::string>& commands,
                 const auto pos = result.find("%u");
                 if (pos != std::string::npos)
                 {
-                    result.replace(pos, 2, file->uri());
+                    result.replace(pos, 2, vfs::execute::quote(file->uri()));
                 }
             }
 

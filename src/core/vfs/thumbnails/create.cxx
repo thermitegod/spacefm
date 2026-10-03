@@ -36,7 +36,8 @@
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
 
-#include "vfs/thumbnails/thumbnails.hxx"
+#include "vfs/thumbnails/create.hxx"
+#include "vfs/thumbnails/thumbnailer.hxx"
 
 #include "glycin/glycin.hxx"
 #include "logger.hxx"
@@ -83,12 +84,6 @@ enum class thumbnail_size : std::int32_t
     large = 256,
     x_large = 512,
     xx_large = 1024,
-};
-
-enum class thumbnail_mode : std::uint8_t
-{
-    image,
-    video,
 };
 
 [[nodiscard]] static bool
@@ -144,9 +139,94 @@ is_metadata_valid(Glib::RefPtr<Gly::Image> image, const std::shared_ptr<vfs::fil
 #endif
 }
 
-static Glib::RefPtr<Gdk::Texture>
-thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
-                 const thumbnail_mode mode) noexcept
+static std::string
+thumbnailer_exec(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
+                 const std::shared_ptr<vfs::file>& file,
+                 const std::filesystem::path& thumbnail_file,
+                 const std::int32_t thumb_size) noexcept
+{
+    // Code   Description
+    // ------------------
+    // %i     input path
+    // %u     input URI
+    // %o     output path
+    // %s     size
+
+    const std::string_view exec = thumbnailer->exec();
+
+    std::string result;
+    bool skip_next = false;
+
+    for (const auto pos : std::views::iota(0uz, exec.size()))
+    {
+        if (skip_next)
+        {
+            skip_next = false;
+            continue;
+        }
+
+        if (exec[pos] != '%')
+        {
+            result += exec[pos];
+            continue;
+        }
+
+        if (pos + 1 == exec.size())
+        {
+            result += '%';
+            break;
+        }
+
+        skip_next = true;
+
+        const auto key = exec[pos + 1];
+        switch (key)
+        {
+            case 'i':
+            {
+                result += vfs::execute::quote(file->path());
+                break;
+            }
+            case 'u':
+            {
+                result += vfs::execute::quote(file->uri());
+                break;
+            }
+            case 'o':
+            {
+                result += vfs::execute::quote(thumbnail_file);
+                break;
+            }
+            case 's':
+            {
+                // max 4 digits
+                std::array<char, 4> buffer{};
+                std::to_chars(buffer.data(), buffer.data() + buffer.size(), thumb_size);
+
+                result += buffer.data();
+                break;
+            }
+            case '%':
+            {
+                result += '%';
+                break;
+            }
+            default:
+            {
+                result += '%';
+                result += key;
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
+Glib::RefPtr<Gdk::Texture>
+vfs::thumbnail::create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
+                       const std::shared_ptr<vfs::file>& file,
+                       const std::int32_t thumb_size) noexcept
 {
     static thread_local auto cache_dirs = vfs::user::thumbnail_cache();
 
@@ -265,27 +345,9 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
             std::filesystem::create_directories(thumbnail_cache);
         }
 
-        // create new thumbnail
-        std::string command;
-        switch (mode)
-        {
-            case thumbnail_mode::image:
-            {
-                command = std::format("glycin-thumbnailer -s {} -i {} -o {}",
-                                      thumbnail_create_size,
-                                      vfs::execute::quote(file->uri()),
-                                      vfs::execute::quote(thumbnail_file));
-                break;
-            }
-            case thumbnail_mode::video:
-            {
-                command = std::format("ffmpegthumbnailer -f -s {} -i {} -o {}",
-                                      thumbnail_create_size,
-                                      vfs::execute::quote(file->path()),
-                                      vfs::execute::quote(thumbnail_file));
-                break;
-            }
-        }
+        const auto command =
+            thumbnailer_exec(thumbnailer, file, thumbnail_file, thumbnail_create_size);
+
         const auto result = vfs::execute::command_line_sync(command);
 
         if (result.exit_status != 0 || !std::filesystem::exists(thumbnail_file))
@@ -305,18 +367,4 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const i32 thumb_size,
     }
 
     return glycin_get_texture(thumbnail);
-}
-
-Glib::RefPtr<Gdk::Texture>
-vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file,
-                              const std::int32_t thumb_size) noexcept
-{
-    return thumbnail_create(file, thumb_size, thumbnail_mode::image);
-}
-
-Glib::RefPtr<Gdk::Texture>
-vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file,
-                              const std::int32_t thumb_size) noexcept
-{
-    return thumbnail_create(file, thumb_size, thumbnail_mode::video);
 }

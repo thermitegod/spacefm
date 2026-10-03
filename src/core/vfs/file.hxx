@@ -28,6 +28,8 @@
 
 #include "vfs/mime-type.hxx"
 
+#include "vfs/thumbnails/thumbnailer.hxx"
+
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 
 namespace vfs
@@ -78,7 +80,8 @@ class file : public std::enable_shared_from_this<file>
 
     Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) const noexcept;
     Glib::RefPtr<Gdk::Paintable> thumbnail(const std::int32_t size) const noexcept;
-    void load_thumbnail(const std::int32_t size, bool force_reload = false) noexcept;
+    void load_thumbnail(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
+                        const std::int32_t size, bool force_reload = false) noexcept;
     // void unload_thumbnail(const std::int32_t size) noexcept;
     [[nodiscard]] bool is_thumbnail_loaded(const std::int32_t size) const noexcept;
 

@@ -19,6 +19,7 @@
 #include <memory>
 #include <print>
 #include <string>
+#include <unordered_map>
 
 #include <gdkmm.h>
 #include <glibmm.h>
@@ -28,6 +29,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
+#include "vfs/user-dirs.hxx"
 
 #include "logger.hxx"
 
@@ -94,8 +96,49 @@ main(int argc, char** argv)
         files.push_back(vfs::file::create(dfile.path()));
     }
 
+    std::unordered_map<std::string, std::shared_ptr<vfs::thumbnail::thumbnailer>> thumbnailers;
+
+    std::array<std::filesystem::path, 2> dirs;
+    dirs[0] = "/usr/share/thumbnailers";
+    dirs[1] = vfs::user::data() / "thumbnailers";
+
+    for (const auto& dir : dirs)
+    {
+        if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir))
+        {
+            continue;
+        }
+
+        for (const auto& entry : std::filesystem::directory_iterator(dir))
+        {
+            if (entry.is_regular_file() && entry.path().extension() == ".thumbnailer")
+            {
+                auto thumbnailer = vfs::thumbnail::thumbnailer::create(entry.path());
+                if (thumbnailer)
+                {
+                    for (const auto& mime_type : thumbnailer->mime_types())
+                    {
+                        // logger::debug<logger::vfs>("Registered thumbnailer for MIME type: {} -> {}", mime_type, thumbnailer->try_exec());
+                        thumbnailers[mime_type] = thumbnailer;
+                    }
+                }
+            }
+        }
+    }
+
     std::ranges::for_each(files,
-                          [thumbnail_size](auto& file) { file->load_thumbnail(thumbnail_size); });
+                          [&](auto& file)
+                          {
+                              const auto mime_type = file->mime_type()->type().data();
+                              if (!thumbnailers.contains(mime_type))
+                              {
+                                  // logger::debug<logger::vfs>("No registered thumbnailer for MIME type: {}", mime_type);
+                                  return;
+                              }
+                              auto thumbnailer = thumbnailers[mime_type];
+
+                              file->load_thumbnail(thumbnailer, thumbnail_size);
+                          });
 
     return EXIT_SUCCESS;
 }

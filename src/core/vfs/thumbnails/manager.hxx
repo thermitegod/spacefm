@@ -22,6 +22,8 @@
 #include <mutex>
 #include <queue>
 #include <stop_token>
+#include <string>
+#include <unordered_map>
 
 #include <cstdint>
 
@@ -30,6 +32,8 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
+
+#include "vfs/thumbnails/thumbnailer.hxx"
 
 namespace vfs::thumbnail
 {
@@ -42,22 +46,27 @@ class manager final
         std::int32_t size;
     };
 
+    manager() noexcept;
+
     void request(const request_data& request) noexcept;
 
     void run(std::stop_token stoken) noexcept;
     void run_once(std::stop_token stoken) noexcept;
-
-    [[nodiscard]] auto
-    signal_thumbnail_created() noexcept
-    {
-        return signal_thumbnail_created_;
-    }
 
   private:
     std::queue<request_data> queue_;
 
     std::mutex mutex_;
     std::condition_variable_any cv_;
+
+    std::unordered_map<std::string, std::shared_ptr<vfs::thumbnail::thumbnailer>> thumbnailers_;
+
+  public:
+    [[nodiscard]] auto
+    signal_thumbnail_created() noexcept
+    {
+        return signal_thumbnail_created_;
+    }
 
     // Signals
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_thumbnail_created_;

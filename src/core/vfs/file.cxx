@@ -32,7 +32,8 @@
 #include "vfs/mime-type.hxx"
 #include "vfs/user-dirs.hxx"
 
-#include "vfs/thumbnails/thumbnails.hxx"
+#include "vfs/thumbnails/create.hxx"
+#include "vfs/thumbnails/thumbnailer.hxx"
 #include "vfs/utils/icon.hxx"
 #include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
@@ -482,7 +483,8 @@ vfs::file::thumbnail(const std::int32_t size) const noexcept
 }
 
 void
-vfs::file::load_thumbnail(const std::int32_t size, bool force_reload) noexcept
+vfs::file::load_thumbnail(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
+                          const std::int32_t size, bool force_reload) noexcept
 {
     static const auto thumbnail_cache = vfs::user::thumbnail_cache();
     if (std::ranges::starts_with(path_, thumbnail_cache.parent))
@@ -499,16 +501,8 @@ vfs::file::load_thumbnail(const std::int32_t size, bool force_reload) noexcept
 
     const auto raw = thumbnail_data::get_raw_size(size);
 
-    Glib::RefPtr<Gdk::Texture> thumbnail;
-    if (mime_type_->is_image())
-    {
-        thumbnail = vfs::detail::thumbnail::image(shared_from_this(), std::to_underlying(raw));
-    }
-    else if (mime_type_->is_video())
-    {
-        thumbnail = vfs::detail::thumbnail::video(shared_from_this(), std::to_underlying(raw));
-    }
-
+    auto thumbnail =
+        vfs::thumbnail::create(thumbnailer, shared_from_this(), std::to_underlying(raw));
     if (thumbnail)
     {
         thumbnail_.set(raw, thumbnail);

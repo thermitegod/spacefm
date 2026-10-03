@@ -32,9 +32,9 @@
 
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
-#include "vfs/thumbnail_manager.hxx"
 #include "vfs/volume-manager.hxx"
 
+#include "vfs/thumbnails/manager.hxx"
 #include "vfs/utils/file-ops.hxx"
 
 #include "logger.hxx"
