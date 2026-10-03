@@ -1302,7 +1302,7 @@ gui::tab::create_context_menu_model() noexcept
             auto section = Gio::Menu::create();
             Glib::RefPtr<Gio::MenuItem> item;
 
-            item = Gio::MenuItem::create("Sellect All", "files.paste_link");
+            item = Gio::MenuItem::create("Select All", "files.select_all");
             item->set_attribute_value("accel", Glib::Variant<Glib::ustring>::create("<Control>A"));
             section->append_item(item);
 
