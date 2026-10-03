@@ -92,23 +92,23 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 vfs::error_code
 vfs::desktop::parse_desktop_file() noexcept
 {
-    static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
+    static constexpr auto DESKTOP_ENTRY_GROUP = "Desktop Entry";
 
-    static constexpr std::string DESKTOP_ENTRY_KEY_TYPE = "Type";
-    static constexpr std::string DESKTOP_ENTRY_KEY_NAME = "Name";
-    static constexpr std::string DESKTOP_ENTRY_KEY_GENERICNAME = "GenericName";
-    static constexpr std::string DESKTOP_ENTRY_KEY_NODISPLAY = "NoDisplay";
-    static constexpr std::string DESKTOP_ENTRY_KEY_COMMENT = "Comment";
-    static constexpr std::string DESKTOP_ENTRY_KEY_ICON = "Icon";
-    static constexpr std::string DESKTOP_ENTRY_KEY_TRYEXEC = "TryExec";
-    static constexpr std::string DESKTOP_ENTRY_KEY_EXEC = "Exec";
-    static constexpr std::string DESKTOP_ENTRY_KEY_PATH = "Path";
-    static constexpr std::string DESKTOP_ENTRY_KEY_TERMINAL = "Terminal";
-    static constexpr std::string DESKTOP_ENTRY_KEY_ACTIONS = "Actions";
-    static constexpr std::string DESKTOP_ENTRY_KEY_MIMETYPE = "MimeType";
-    static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
-    static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
-    static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
+    static constexpr auto DESKTOP_ENTRY_KEY_TYPE = "Type";
+    static constexpr auto DESKTOP_ENTRY_KEY_NAME = "Name";
+    static constexpr auto DESKTOP_ENTRY_KEY_GENERICNAME = "GenericName";
+    static constexpr auto DESKTOP_ENTRY_KEY_NODISPLAY = "NoDisplay";
+    static constexpr auto DESKTOP_ENTRY_KEY_COMMENT = "Comment";
+    static constexpr auto DESKTOP_ENTRY_KEY_ICON = "Icon";
+    static constexpr auto DESKTOP_ENTRY_KEY_TRYEXEC = "TryExec";
+    static constexpr auto DESKTOP_ENTRY_KEY_EXEC = "Exec";
+    static constexpr auto DESKTOP_ENTRY_KEY_PATH = "Path";
+    static constexpr auto DESKTOP_ENTRY_KEY_TERMINAL = "Terminal";
+    static constexpr auto DESKTOP_ENTRY_KEY_ACTIONS = "Actions";
+    static constexpr auto DESKTOP_ENTRY_KEY_MIMETYPE = "MimeType";
+    static constexpr auto DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
+    static constexpr auto DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
+    static constexpr auto DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 
     bool loaded = false;
 
