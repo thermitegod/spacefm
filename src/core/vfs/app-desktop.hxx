@@ -59,12 +59,18 @@ class desktop final
 
   private:
     desktop(const std::filesystem::path& desktop_file) noexcept;
+
     [[nodiscard]] vfs::error_code parse_desktop_file() noexcept;
 
-    [[nodiscard]] bool open_multiple_files() const noexcept;
-    [[nodiscard]] std::optional<std::vector<std::vector<std::string>>>
-    app_exec_generate_desktop_argv(std::span<const std::shared_ptr<vfs::file>> files,
-                                   bool quote_file_list) const noexcept;
+    [[nodiscard]] bool is_opening_multiple_files() const noexcept;
+
+    [[nodiscard]] std::optional<std::vector<std::string>>
+    expand_exec(std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
+    void expand_single(std::vector<std::string>& commands,
+                       std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
+    void expand_list(std::vector<std::string>& commands,
+                     std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
+
     void exec_desktop(const std::filesystem::path& working_dir,
                       std::span<const std::shared_ptr<vfs::file>> files) const noexcept;
 

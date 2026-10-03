@@ -27,6 +27,8 @@
 #include <string_view>
 #include <vector>
 
+#include <cstdint>
+
 #include <glibmm.h>
 #include <gtkmm.h>
 
@@ -290,80 +292,223 @@ vfs::desktop::supported_mime_types() const noexcept
 }
 
 bool
-vfs::desktop::open_multiple_files() const noexcept
+vfs::desktop::is_opening_multiple_files() const noexcept
 {
     return desktop_entry_.exec.contains("%F") || desktop_entry_.exec.contains("%U");
 }
 
-std::optional<std::vector<std::vector<std::string>>>
-vfs::desktop::app_exec_generate_desktop_argv(std::span<const std::shared_ptr<vfs::file>> files,
-                                             bool quote_file_list) const noexcept
+void
+vfs::desktop::expand_list(std::vector<std::string>& commands,
+                          std::span<const std::shared_ptr<vfs::file>> files) const noexcept
 {
-    // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
-
-    std::vector<std::vector<std::string>> commands = {{ztd::split(desktop_entry_.exec, " ")}};
-
-    bool add_files = false;
-
-    if (desktop_entry_.exec.contains("%F") || desktop_entry_.exec.contains("%U"))
+    for (auto& command : commands)
     {
-        // %F and %U must always be at the end
-        // if (!desktop_entry_.exec.ends_with("%F") ||
-        //     !desktop_entry_.exec.ends_with("%U"))
-        // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %F and %U must always be at the end: {}", path_);
-        //     return std::nullopt;
-        // }
-
-        for (auto& argv : commands)
         {
-            argv.pop_back(); // remove open_files_key
-            for (const auto& file : files)
+            const auto pos = command.find("%F");
+            if (pos != std::string::npos)
             {
-                if (quote_file_list)
+                std::string file_list;
+
+                for (const auto& file : files)
                 {
-                    argv.push_back(vfs::execute::quote(file->path()));
+                    if (!file_list.empty())
+                    {
+                        file_list += ' ';
+                    }
+
+                    file_list += vfs::execute::quote(file->path());
                 }
-                else
-                {
-                    argv.push_back(file->path().string());
-                }
+
+                command.replace(pos, 2, file_list);
             }
         }
 
-        add_files = true;
+        {
+            const auto pos = command.find("%U");
+            if (pos != std::string::npos)
+            {
+                std::string url_list;
+
+                for (const auto& file : files)
+                {
+                    if (!url_list.empty())
+                    {
+                        url_list += ' ';
+                    }
+
+                    url_list += file->uri();
+                }
+
+                command.replace(pos, 2, url_list);
+            }
+        }
+    }
+}
+
+void
+vfs::desktop::expand_single(std::vector<std::string>& commands,
+                            std::span<const std::shared_ptr<vfs::file>> files) const noexcept
+{
+    std::vector<std::string> expanded;
+    expanded.reserve(commands.size() * files.size());
+
+    for (const auto& command : commands)
+    {
+        for (const auto& file : files)
+        {
+            auto result = command;
+
+            {
+                const auto pos = result.find("%f");
+                if (pos != std::string::npos)
+                {
+                    result.replace(pos, 2, vfs::execute::quote(file->path()));
+                }
+            }
+
+            {
+                const auto pos = result.find("%u");
+                if (pos != std::string::npos)
+                {
+                    result.replace(pos, 2, file->uri());
+                }
+            }
+
+            expanded.push_back(result);
+        }
     }
 
-    if (desktop_entry_.exec.contains("%f") || desktop_entry_.exec.contains("%e"))
+    commands = expanded;
+}
+
+std::optional<std::vector<std::string>>
+vfs::desktop::expand_exec(std::span<const std::shared_ptr<vfs::file>> files) const noexcept
+{
+    // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+    // Code   Description
+    // ------------------
+    // %f     single file
+    // %F     list of files
+    // %u     single URL
+    // %U     list of URLs
+    // %d     Deprecated
+    // %D     Deprecated
+    // %n     Deprecated
+    // %N     Deprecated
+    // %i     icon
+    // %c     translated name
+    // %k     desktop file location
+    // %v     Deprecated
+    // %m     Deprecated
+
+    std::vector<std::string> commands{desktop_entry_.exec};
+
+    bool add_files = false;
+    bool multiple_files = false;
+    bool single_file = false;
+
+    for (auto& command : commands)
     {
-        // %f and %u must always be at the end
-        // if (!desktop_entry_.exec.ends_with("%f") ||
-        //     !desktop_entry_.exec.ends_with("%u"))
-        // {
-        //     logger::error<logger::vfs>("Malformed desktop file, %f and %u must always be at the end: {}", path_);
-        //     return std::nullopt;
-        // }
+        std::string result;
+        bool skip_next = false;
 
-        // desktop files with these keys can only open one file.
-        // spawn multiple copies of the program for each selected file
-        commands.insert(commands.cbegin(), files.size() - 1, commands.front());
-
-        for (auto& argv : commands)
+        for (const auto pos : std::views::iota(0uz, command.size()))
         {
-            argv.pop_back(); // remove open_file_key
-            for (const auto& file : files)
+            if (skip_next)
             {
-                if (quote_file_list)
+                skip_next = false;
+                continue;
+            }
+
+            if (command[pos] != '%')
+            {
+                result += command[pos];
+                continue;
+            }
+
+            if (pos + 1 == command.size())
+            {
+                result += '%';
+                break;
+            }
+
+            skip_next = true;
+
+            const auto key = command[pos + 1];
+            switch (key)
+            {
+                case 'F':
+                case 'U':
                 {
-                    argv.push_back(vfs::execute::quote(file->path()));
+                    add_files = true;
+                    multiple_files = true;
+
+                    result += '%';
+                    result += key;
+                    break;
                 }
-                else
+                case 'f':
+                case 'u':
                 {
-                    argv.push_back(file->path());
+                    add_files = true;
+                    single_file = true;
+
+                    result += '%';
+                    result += key;
+                    break;
+                }
+                case 'c':
+                {
+                    result += display_name();
+                    break;
+                }
+                case 'k':
+                {
+                    result += path_;
+                    break;
+                }
+                case 'i':
+                {
+                    const auto icon = icon_name();
+
+                    if (!icon.empty())
+                    {
+                        result += "--icon ";
+                        result += vfs::execute::quote(icon);
+                    }
+
+                    break;
+                }
+                case 'd':
+                case 'D':
+                case 'n':
+                case 'N':
+                case 'v':
+                case 'm':
+                {
+                    logger::warn<logger::vfs>("Deprecated desktop Exec key '%{}' in: {}",
+                                              key,
+                                              path_);
+
+                    result += '%';
+                    result += key;
+                    break;
+                }
+                case '%':
+                {
+                    result += '%';
+                    break;
+                }
+                default:
+                {
+                    result += '%';
+                    result += key;
+                    break;
                 }
             }
         }
-        add_files = true;
+
+        command = result;
     }
 
     logger::warn_if<logger::vfs>(
@@ -372,49 +517,18 @@ vfs::desktop::app_exec_generate_desktop_argv(std::span<const std::shared_ptr<vfs
         "keys with a file list: {}",
         path_);
 
-    if (desktop_entry_.exec.contains("%c"))
-    {
-        for (auto& argv : commands)
-        {
-            for (const auto [index, arg] : std::views::enumerate(argv))
-            {
-                if (arg != "%c")
-                {
-                    argv[static_cast<std::size_t>(index)] = display_name();
-                    break;
-                }
-            }
-        }
-    }
+    logger::warn_if<logger::vfs>(multiple_files && single_file,
+                                 "Malformed desktop file, Exec contains both single-file and "
+                                 "multiple-file keys: {}",
+                                 path_);
 
-    if (desktop_entry_.exec.contains("%k"))
+    if (multiple_files)
     {
-        for (auto& argv : commands)
-        {
-            for (const auto [index, arg] : std::views::enumerate(argv))
-            {
-                if (arg == "%k")
-                {
-                    argv[static_cast<std::size_t>(index)] = path_;
-                    break;
-                }
-            }
-        }
+        expand_list(commands, files);
     }
-
-    if (desktop_entry_.exec.contains("%i"))
+    else if (single_file)
     {
-        for (auto& argv : commands)
-        {
-            for (const auto [index, arg] : std::views::enumerate(argv))
-            {
-                if (arg == "%i")
-                {
-                    argv[static_cast<std::size_t>(index)] = std::format("--icon {}", icon_name());
-                    break;
-                }
-            }
-        }
+        expand_single(commands, files);
     }
 
     return commands;
@@ -447,7 +561,7 @@ vfs::desktop::open_files(const std::filesystem::path& working_dir,
         return false;
     }
 
-    if (open_multiple_files())
+    if (is_opening_multiple_files())
     {
         exec_desktop(working_dir, files);
     }
@@ -469,16 +583,18 @@ void
 vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
                            std::span<const std::shared_ptr<vfs::file>> files) const noexcept
 {
-    const auto desktop_commands = app_exec_generate_desktop_argv(files, use_terminal());
-    if (!desktop_commands)
+    const auto commands = expand_exec(files);
+    if (!commands)
     {
         return;
     }
 
     const auto cwd = !desktop_entry_.path.empty() ? desktop_entry_.path : working_dir.string();
 
-    for (auto& args : desktop_commands.value())
+    for (const auto& command : *commands)
     {
+        std::vector<std::string> args = Glib::shell_parse_argv(command);
+
         if (use_terminal())
         {
             // TODO, prepend terminal exec args
