@@ -37,7 +37,7 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-#include "vfs/notify-cpp/notify.hxx"
+#include "notify-cpp/notify.hxx"
 
 // #define PRINT_DBG
 #if defined(PRINT_DBG)

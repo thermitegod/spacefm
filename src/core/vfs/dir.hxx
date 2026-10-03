@@ -35,8 +35,9 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/thumbnailer.hxx"
+
+#include "notify-cpp/controller.hxx"
 
 namespace vfs
 {

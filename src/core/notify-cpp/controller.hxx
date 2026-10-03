@@ -29,7 +29,7 @@
 
 #include <sigc++/sigc++.h>
 
-#include "vfs/notify-cpp/notify.hxx"
+#include "notify-cpp/notify.hxx"
 
 namespace notify
 {

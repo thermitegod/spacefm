@@ -18,8 +18,9 @@
 
 #include "vfs/execute.hxx"
 #include "vfs/mime-monitor.hxx"
-#include "vfs/notify-cpp/controller.hxx"
 #include "vfs/user-dirs.hxx"
+
+#include "notify-cpp/controller.hxx"
 
 namespace
 {

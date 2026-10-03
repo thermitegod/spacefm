@@ -33,10 +33,11 @@ sources += files(
     'src/vfs/utils/file-ops.cxx',
     'src/vfs/utils/permissions.cxx',
 
-    'src/vfs/notify-cpp/controller.cxx',
-
     # vfs - chrome
     'src/vfs/mime-type/chrome/mime-utils.cxx',
+
+    # notify-cpp
+    'src/notify-cpp/controller.cxx',
 )
 
 test_suite_exe = executable(

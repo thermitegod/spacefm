@@ -25,7 +25,7 @@
 #include <stop_token>
 #include <utility>
 
-#include "vfs/notify-cpp/controller.hxx"
+#include "notify-cpp/controller.hxx"
 
 notify::controller::controller(const std::filesystem::path& path, std::set<event> events)
     : notify_(path, events)

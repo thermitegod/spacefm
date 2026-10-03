@@ -29,8 +29,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/notify-cpp/controller.hxx"
-
+#include "notify-cpp/controller.hxx"
 #include "utils.hxx"
 
 struct event_counter

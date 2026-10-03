@@ -30,12 +30,6 @@ natsort_dep = declare_dependency(
     include_directories: include_directories('.'),
 )
 
-# reflections
-
-reflection_dep = declare_dependency(
-    include_directories: include_directories('.'),
-)
-
 # glycin wrapper static library
 
 glycin_wrapper_lib = static_library(
@@ -73,6 +67,25 @@ libudevpp_dep = declare_dependency(
     dependencies: libudev_dep,
 )
 
+# notify static library
+
+notify_lib = static_library(
+    'notify',
+    files(
+        'notify-cpp/controller.cxx',
+        'notify-cpp/notify.cxx',
+    ),
+    include_directories: include_directories('.'),
+    dependencies: sigc_dep,
+    install: false,
+)
+
+notify_dep = declare_dependency(
+    link_with: notify_lib,
+    include_directories: include_directories('.'),
+    dependencies: sigc_dep,
+)
+
 # vfs static library
 
 vfs_sources = files(
@@ -105,9 +118,6 @@ vfs_sources = files(
     'vfs/mime-type/mime-action.cxx',
     'vfs/mime-type/mime-type.cxx',
     'vfs/mime-type/chrome/mime-utils.cxx',
-
-    'vfs/notify-cpp/controller.cxx',
-    'vfs/notify-cpp/notify.cxx',
 )
 
 vfs_dependencies = [
@@ -116,9 +126,9 @@ vfs_dependencies = [
     logger_dep,
     pugixml_dep,
     botan_dep,
-    reflection_dep,
     glycin_wrapper_dep,
     libudevpp_dep,
+    notify_dep,
 ]
 
 vfs_lib = static_library(

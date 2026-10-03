@@ -220,7 +220,6 @@ pugixml_dep = dependency('pugixml', required: true)
 
 base_dependencies = [
     cli11_dep,
-    libudev_dep,
     pugixml_dep,
     botan_dep,
 ]
