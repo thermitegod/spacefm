@@ -343,7 +343,7 @@ vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!user_hidden_files_)
     {
-        user_hidden_files_ = {};
+        user_hidden_files_ = std::unordered_set<std::filesystem::path>{};
     }
 
     user_hidden_files_->insert(file->name().data());
@@ -356,7 +356,7 @@ vfs::dir::add_hidden(std::span<const std::shared_ptr<vfs::file>> files) noexcept
 {
     if (!user_hidden_files_)
     {
-        user_hidden_files_ = {};
+        user_hidden_files_ = std::unordered_set<std::filesystem::path>{};
     }
 
     for (const auto& file : files)
