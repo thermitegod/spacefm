@@ -23,15 +23,17 @@
 #include <queue>
 #include <stop_token>
 
+#include <cstdint>
+
 #include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
 
-namespace vfs
+namespace vfs::thumbnail
 {
-class thumbnailer
+class manager final
 {
   public:
     struct request_data final
@@ -60,4 +62,4 @@ class thumbnailer
     // Signals
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_thumbnail_created_;
 };
-} // namespace vfs
+} // namespace vfs::thumbnail

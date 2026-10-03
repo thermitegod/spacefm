@@ -32,7 +32,7 @@
 
 #include "vfs/dir.hxx"
 #include "vfs/file.hxx"
-#include "vfs/thumbnailer.hxx"
+#include "vfs/thumbnail_manager.hxx"
 #include "vfs/volume-manager.hxx"
 
 #include "vfs/utils/file-ops.hxx"
@@ -74,12 +74,12 @@ vfs::dir::dir(const std::filesystem::path& path) noexcept
     notifier_thread_ = std::jthread([this](std::stop_token stoken) { notifier_.run(stoken); });
     pthread_setname_np(notifier_thread_.native_handle(), "notifier");
 
-    thumbnailer_.signal_thumbnail_created().connect([this](auto f)
-                                                    { signal_thumbnail_loaded().emit(f); });
+    thumbnail_manager_.signal_thumbnail_created().connect([this](auto f)
+                                                          { signal_thumbnail_loaded().emit(f); });
 
-    thumbnailer_thread_ =
-        std::jthread([this](std::stop_token stoken) { thumbnailer_.run(stoken); });
-    pthread_setname_np(thumbnailer_thread_.native_handle(), "thumbnailer");
+    thumbnail_manager_thread_ =
+        std::jthread([this](std::stop_token stoken) { thumbnail_manager_.run(stoken); });
+    pthread_setname_np(thumbnail_manager_thread_.native_handle(), "thumbnails");
 
     update_avoid_changes();
 
@@ -91,8 +91,8 @@ vfs::dir::~dir() noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), path_);
 
-    thumbnailer_thread_.request_stop();
-    thumbnailer_thread_.join();
+    thumbnail_manager_thread_.request_stop();
+    thumbnail_manager_thread_.join();
 
     notifier_thread_.request_stop();
     notifier_thread_.join();
@@ -414,7 +414,7 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int3
     if (enable_thumbnails_)
     {
         // logger::debug<logger::vfs>("vfs::dir::load_thumbnail()  {}", file->name());
-        thumbnailer_.request({file, size});
+        thumbnail_manager_.request({file, size});
     }
 }
 

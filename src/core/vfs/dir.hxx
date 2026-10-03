@@ -35,7 +35,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
-#include "vfs/thumbnailer.hxx"
+#include "vfs/thumbnail_manager.hxx"
 
 #include "notify-cpp/controller.hxx"
 
@@ -107,8 +107,8 @@ class dir : public std::enable_shared_from_this<dir>
     std::jthread loader_thread_;
     std::mutex loader_mutex_;
 
-    vfs::thumbnailer thumbnailer_;
-    std::jthread thumbnailer_thread_;
+    vfs::thumbnail::manager thumbnail_manager_;
+    std::jthread thumbnail_manager_thread_;
 
     notify::controller notifier_;
     std::jthread notifier_thread_;

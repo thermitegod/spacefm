@@ -99,7 +99,7 @@ vfs_sources = files(
     'vfs/mime-monitor.cxx',
     'vfs/terminals.cxx',
     'vfs/task-manager.cxx',
-    'vfs/thumbnailer.cxx',
+    'vfs/thumbnail_manager.cxx',
     'vfs/trash-can.cxx',
     'vfs/user-dirs.cxx',
     'vfs/volume-manager.cxx',

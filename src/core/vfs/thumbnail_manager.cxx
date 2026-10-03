@@ -23,10 +23,10 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/thumbnailer.hxx"
+#include "vfs/thumbnail_manager.hxx"
 
 void
-vfs::thumbnailer::request(const request_data& request) noexcept
+vfs::thumbnail::manager::request(const request_data& request) noexcept
 {
     {
         std::scoped_lock lock(mutex_);
@@ -36,7 +36,7 @@ vfs::thumbnailer::request(const request_data& request) noexcept
 }
 
 void
-vfs::thumbnailer::run(std::stop_token stoken) noexcept
+vfs::thumbnail::manager::run(std::stop_token stoken) noexcept
 {
     while (!stoken.stop_requested())
     {
@@ -45,7 +45,7 @@ vfs::thumbnailer::run(std::stop_token stoken) noexcept
 }
 
 void
-vfs::thumbnailer::run_once(std::stop_token stoken) noexcept
+vfs::thumbnail::manager::run_once(std::stop_token stoken) noexcept
 {
     request_data request;
     {
