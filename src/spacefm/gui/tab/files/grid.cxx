@@ -352,9 +352,10 @@ gui::grid::on_background_click(std::int32_t n_press, double x, double y) noexcep
         if (!selection->is_empty())
         {
             selection_model_->unselect_all();
-            grab_focus();
         }
     }
+
+    grab_focus();
 }
 
 Glib::RefPtr<Gdk::ContentProvider>
