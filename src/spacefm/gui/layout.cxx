@@ -119,7 +119,7 @@ gui::layout::create_browser(config::panel_id panel_id) noexcept
                 alert->show(parent_);
                 return;
             }
-            browser->new_tab(path);
+            browser->new_tab(path, settings_->behavior.switch_to_new_tabs);
         });
     browser->signal_paste_in_panel().connect(
         [this](const config::panel_id panel)

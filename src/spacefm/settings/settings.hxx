@@ -218,6 +218,13 @@ struct settings_on_disk
     };
     interface interface;
 
+    struct behavior final
+    {
+        bool switch_to_new_tabs{true};
+        bool switch_to_restored_tabs{true};
+    };
+    behavior behavior;
+
     struct dialog final
     {
         struct create final

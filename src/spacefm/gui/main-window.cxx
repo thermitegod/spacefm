@@ -414,7 +414,7 @@ gui::main_window::on_open_bookmark_manager() noexcept
             auto* browser = layout_.get_browser(config::panel_id::panel_1);
             if (browser)
             {
-                browser->new_tab(path);
+                browser->new_tab(path, settings_->behavior.switch_to_new_tabs);
             }
         });
 }

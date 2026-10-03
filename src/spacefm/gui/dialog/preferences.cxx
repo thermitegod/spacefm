@@ -194,6 +194,7 @@ gui::dialog::preferences::preferences(Gtk::ApplicationWindow& parent,
 
     init_general_tab();
     init_interface_tab();
+    init_behavior_tab();
     init_dialog_tab();
     init_defaults_tab();
 
@@ -295,6 +296,19 @@ gui::dialog::preferences::init_interface_tab() noexcept
     page->add_checkbox("Show Home Button", settings_->interface.show_toolbar_home);
     page->add_checkbox("Show Refresh Button", settings_->interface.show_toolbar_refresh);
     page->add_checkbox("Show Search Bar", settings_->interface.show_toolbar_search);
+}
+
+void
+gui::dialog::preferences::init_behavior_tab() noexcept
+{
+    auto* page = Gtk::make_managed<preference_page>();
+    notebook_.append_page(*page, "Behavior");
+
+    page->add_section("Tab Switching");
+
+    page->add_checkbox("Always Switch To A New Tabs", settings_->behavior.switch_to_new_tabs);
+    page->add_checkbox("Always Switch To A Restored Tabs",
+                       settings_->behavior.switch_to_restored_tabs);
 }
 
 void

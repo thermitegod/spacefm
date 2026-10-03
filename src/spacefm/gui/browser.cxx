@@ -50,7 +50,9 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint32_t window
     action_close_ = action_group_->add_action("close", [this]() { close_tab(); });
     action_restore_ = action_group_->add_action("restore", [this]() { restore_tab(); });
     action_restore_->set_enabled(false);
-    action_tab_ = action_group_->add_action("new_tab", [this]() { new_tab(vfs::user::home()); });
+    action_tab_ = action_group_->add_action(
+        "new_tab",
+        [this]() { new_tab(vfs::user::home(), settings_->behavior.switch_to_new_tabs); });
     action_tab_here_ = action_group_->add_action("new_tab_here", [this]() { new_tab_here(); });
     insert_action_group("browser", action_group_);
 
@@ -127,7 +129,7 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint32_t window
         {
             if (settings_->general.auto_open_mounted_volumes)
             { // TODO need to only open in active browser, not all browsers
-                new_tab(path);
+                new_tab(path, settings_->behavior.switch_to_new_tabs);
             }
         });
 
@@ -156,7 +158,7 @@ gui::browser::add_shortcuts() noexcept
                 }
                 else
                 {
-                    new_tab(vfs::user::home());
+                    new_tab(vfs::user::home(), settings_->behavior.switch_to_new_tabs);
                 }
                 set_current_page(get_n_pages() - 1);
                 return true;
@@ -368,7 +370,7 @@ gui::browser::new_tab(const config::tab_state& state, const bool set_active) noe
     tab->signal_new_tab().connect(
         [this](const std::filesystem::path& path)
         { //
-            new_tab(path);
+            new_tab(path, settings_->behavior.switch_to_new_tabs);
         });
     tab->signal_paste_in_tab().connect(
         [this](std::int32_t tab)
@@ -489,7 +491,7 @@ gui::browser::new_tab_here() noexcept
 
     if (tab)
     {
-        new_tab(tab->cwd());
+        new_tab(tab->cwd(), settings_->behavior.switch_to_new_tabs);
     }
 }
 
@@ -530,7 +532,7 @@ gui::browser::restore_tab() noexcept
         const auto state = restore_tabs_.back();
         restore_tabs_.pop();
 
-        new_tab(state, true);
+        new_tab(state, settings_->behavior.switch_to_restored_tabs);
     }
 }
 

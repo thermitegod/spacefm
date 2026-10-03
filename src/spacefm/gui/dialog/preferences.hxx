@@ -39,6 +39,7 @@ class preferences : public Gtk::ApplicationWindow
 
     void init_general_tab() noexcept;
     void init_interface_tab() noexcept;
+    void init_behavior_tab() noexcept;
     void init_dialog_tab() noexcept;
     void init_defaults_tab() noexcept;
 
