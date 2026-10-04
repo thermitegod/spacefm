@@ -32,6 +32,8 @@ class thumbnailer
     explicit thumbnailer(const std::filesystem::path& path);
 
   public:
+    thumbnailer() = delete;
+
     [[nodiscard]] static std::shared_ptr<vfs::thumbnail::thumbnailer>
     create(const std::filesystem::path& path) noexcept;
 
