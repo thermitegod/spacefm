@@ -506,7 +506,7 @@ gui::files_base::on_files_created(std::span<const std::shared_ptr<vfs::file>> fi
             Glib::PRIORITY_DEFAULT);
 #endif
 
-        if (enable_thumbnail_ && (file->mime_type()->is_video() || file->mime_type()->is_image()))
+        if (enable_thumbnail_)
         {
             const auto size = std::to_underlying(thumbnail_size_);
 
