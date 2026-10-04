@@ -40,9 +40,9 @@
 
 #include "logger.hxx"
 
-namespace global
+namespace
 {
-static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
+ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
 vfs::dir::dir(const std::filesystem::path& path) noexcept
@@ -106,9 +106,9 @@ std::shared_ptr<vfs::dir>
 vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
-    if (global::dir_smart_cache.contains(path))
+    if (dir_smart_cache.contains(path))
     {
-        dir = global::dir_smart_cache.at(path);
+        dir = dir_smart_cache.at(path);
         // logger::debug<logger::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), path_);
     }
     else
@@ -118,7 +118,7 @@ vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexce
             hack(const std::filesystem::path& path) : dir(path) {}
         };
 
-        dir = global::dir_smart_cache.create(
+        dir = dir_smart_cache.create(
             path,
             [&path]() { return std::make_shared<hack>(path); },
             permanent);
