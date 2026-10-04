@@ -505,16 +505,6 @@ gui::files_base::on_files_created(std::span<const std::shared_ptr<vfs::file>> fi
             },
             Glib::PRIORITY_DEFAULT);
 #endif
-
-        if (enable_thumbnail_)
-        {
-            const auto size = std::to_underlying(thumbnail_size_);
-
-            if (!file->is_thumbnail_loaded(size))
-            {
-                dir_->load_thumbnail(file, size);
-            }
-        }
     }
 }
 
@@ -568,18 +558,6 @@ gui::files_base::on_files_changed(std::span<const std::shared_ptr<vfs::file>> fi
         {
             auto item = dir_model_->get_item(position);
             item->signal_changed().emit();
-        }
-
-        const auto now = std::chrono::system_clock::now();
-        if (enable_thumbnail_ && (now - file->mtime() > std::chrono::seconds(5)) &&
-            (file->mime_type()->is_video() || file->mime_type()->is_image()))
-        {
-            const auto size = std::to_underlying(thumbnail_size_);
-
-            if (!file->is_thumbnail_loaded(size))
-            {
-                dir_->load_thumbnail(file, size);
-            }
         }
     }
 }

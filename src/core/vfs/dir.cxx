@@ -35,6 +35,7 @@
 #include "vfs/file.hxx"
 
 #include "vfs/thumbnails/manager.hxx"
+#include "vfs/thumbnails/utils.hxx"
 #include "vfs/utils/file-ops.hxx"
 
 #include "logger.hxx"
@@ -258,6 +259,11 @@ vfs::dir::load_thread(std::stop_token stoken) noexcept
         if (file)
         {
             files.push_back(file);
+
+            for (const auto size : thumbnail_sizes_)
+            {
+                load_thumbnail(file, size);
+            }
         }
     }
 
@@ -338,6 +344,11 @@ vfs::dir::refresh_thread(std::stop_token stoken) noexcept
                 xhidden_count_ += 1;
                 continue;
             }
+
+            for (const auto size : thumbnail_sizes_)
+            {
+                load_thumbnail(file, size);
+            }
         }
     }
 
@@ -409,6 +420,12 @@ vfs::dir::write_hidden() const noexcept
 }
 
 void
+vfs::dir::set_thumbnail_size(const std::int32_t size) noexcept
+{
+    thumbnail_sizes_.insert(vfs::thumbnail::get_spec_size(size));
+}
+
+void
 vfs::dir::enable_thumbnails(const bool enabled) noexcept
 {
     enable_thumbnails_ = enabled;
@@ -423,14 +440,16 @@ vfs::dir::load_thumbnails(const std::int32_t size) noexcept
     }
 
     std::shared_lock lock(files_mutex_);
+    const auto thumbnail_size = vfs::thumbnail::get_spec_size(size);
     for (const auto& file : files_)
     {
-        load_thumbnail(file, size);
+        load_thumbnail(file, thumbnail_size);
     }
 }
 
 void
-vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int32_t size) noexcept
+vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
+                         const vfs::thumbnail::thumbnail_size size) noexcept
 {
     if (enable_thumbnails_)
     {
@@ -595,17 +614,19 @@ vfs::dir::update_created_files() noexcept
                 continue;
             }
 
-            auto file = find_file(path.filename());
-            if (!file)
+            if (!find_file(path.filename()))
             {
-                auto new_file = vfs::file::create(path);
-                if (!new_file)
+                auto file = vfs::file::create(path);
+                if (file)
                 {
-                    continue;
-                }
+                    files_.push_back(file);
+                    created_files.push_back(file);
 
-                files_.push_back(new_file);
-                created_files.push_back(new_file);
+                    for (const auto size : thumbnail_sizes_)
+                    {
+                        load_thumbnail(file, size);
+                    }
+                }
             }
             else
             {

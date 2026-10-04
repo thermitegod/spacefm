@@ -34,6 +34,7 @@
 #include "vfs/file.hxx"
 
 #include "vfs/thumbnails/thumbnailer.hxx"
+#include "vfs/thumbnails/utils.hxx"
 
 namespace vfs::thumbnail
 {
@@ -43,7 +44,7 @@ class manager final
     struct request_data final
     {
         std::shared_ptr<vfs::file> file;
-        std::int32_t size;
+        vfs::thumbnail::thumbnail_size size;
     };
 
     manager() noexcept;

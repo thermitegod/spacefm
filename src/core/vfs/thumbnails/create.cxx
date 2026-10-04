@@ -38,6 +38,7 @@
 
 #include "vfs/thumbnails/create.hxx"
 #include "vfs/thumbnails/thumbnailer.hxx"
+#include "vfs/thumbnails/utils.hxx"
 
 #include "glycin/glycin.hxx"
 #include "logger.hxx"
@@ -143,7 +144,7 @@ static std::string
 thumbnailer_exec(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
                  const std::shared_ptr<vfs::file>& file,
                  const std::filesystem::path& thumbnail_file,
-                 const std::int32_t thumb_size) noexcept
+                 const vfs::thumbnail::thumbnail_size size) noexcept
 {
     // Code   Description
     // ------------------
@@ -201,7 +202,9 @@ thumbnailer_exec(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer
             {
                 // max 4 digits
                 std::array<char, 4> buffer{};
-                std::to_chars(buffer.data(), buffer.data() + buffer.size(), thumb_size);
+                std::to_chars(buffer.data(),
+                              buffer.data() + buffer.size(),
+                              std::to_underlying(size));
 
                 result += buffer.data();
                 break;
@@ -226,35 +229,9 @@ thumbnailer_exec(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer
 Glib::RefPtr<Gdk::Texture>
 vfs::thumbnail::create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
                        const std::shared_ptr<vfs::file>& file,
-                       const std::int32_t thumb_size) noexcept
+                       const vfs::thumbnail::thumbnail_size size) noexcept
 {
-    static thread_local auto cache_dirs = vfs::user::thumbnail_cache();
-
-    const auto [thumbnail_create_size, thumbnail_cache] = std::invoke(
-        [](const auto size) -> std::pair<std::int32_t, std::filesystem::path>
-        {
-            if (size <= 128)
-            {
-                return {std::to_underlying(thumbnail_size::normal), cache_dirs.normal};
-            }
-            else if (size <= 256)
-            {
-                return {std::to_underlying(thumbnail_size::large), cache_dirs.large};
-            }
-            else if (size <= 512)
-            {
-                return {std::to_underlying(thumbnail_size::x_large), cache_dirs.x_large};
-            }
-            else if (size <= 1024)
-            {
-                return {std::to_underlying(thumbnail_size::xx_large), cache_dirs.xx_large};
-            }
-            else
-            {
-                std::unreachable();
-            }
-        },
-        thumb_size);
+    const auto thumbnail_cache = vfs::thumbnail::get_cache_path(size);
 
     const auto hash = std::invoke(
         [](const auto& file)
@@ -266,14 +243,14 @@ vfs::thumbnail::create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumb
         file);
 
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
-    const auto fail_file = cache_dirs.fail / std::format("{}.json", hash);
+    const auto fail_file = vfs::thumbnail::cache_fail() / std::format("{}.json", hash);
     if (std::filesystem::exists(fail_file))
     {
         logger::trace<logger::vfs>("failed to create thumbnail in the past: {}", file->path());
         return nullptr;
     }
 
-    // logger::debug<logger::vfs>("path={}, uri={}, thumb_size={}", file->path(), file->uri(), thumb_size);
+    // logger::debug<logger::vfs>("path={}, uri={}, size={}", file->path(), file->uri(), std::to_underlying(size));
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
@@ -345,8 +322,7 @@ vfs::thumbnail::create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumb
             std::filesystem::create_directories(thumbnail_cache);
         }
 
-        const auto command =
-            thumbnailer_exec(thumbnailer, file, thumbnail_file, thumbnail_create_size);
+        const auto command = thumbnailer_exec(thumbnailer, file, thumbnail_file, size);
 
         const auto result = vfs::execute::command_line_sync(command);
 

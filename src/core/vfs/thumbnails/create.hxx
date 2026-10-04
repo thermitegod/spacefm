@@ -26,10 +26,11 @@
 #include "vfs/file.hxx"
 
 #include "vfs/thumbnails/thumbnailer.hxx"
+#include "vfs/thumbnails/utils.hxx"
 
 namespace vfs::thumbnail
 {
 Glib::RefPtr<Gdk::Texture> create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
                                   const std::shared_ptr<vfs::file>& file,
-                                  const std::int32_t thumb_size) noexcept;
+                                  const thumbnail_size size) noexcept;
 } // namespace vfs::thumbnail

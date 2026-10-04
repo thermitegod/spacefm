@@ -31,6 +31,8 @@
 #include "vfs/file.hxx"
 #include "vfs/user-dirs.hxx"
 
+#include "vfs/thumbnails/utils.hxx"
+
 #include "logger.hxx"
 
 int
@@ -67,24 +69,24 @@ main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    auto thumbnail_size = std::invoke(
+    const auto thumbnail_size = std::invoke(
         [](std::string_view size) noexcept
         {
             if (size == "normal")
             {
-                return 128;
+                return vfs::thumbnail::thumbnail_size::normal;
             }
             else if (size == "large")
             {
-                return 256;
+                return vfs::thumbnail::thumbnail_size::large;
             }
             else if (size == "xlarge")
             {
-                return 512;
+                return vfs::thumbnail::thumbnail_size::x_large;
             }
             else if (size == "xxlarge")
             {
-                return 1024;
+                return vfs::thumbnail::thumbnail_size::xx_large;
             }
             std::unreachable();
         },

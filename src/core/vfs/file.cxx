@@ -37,6 +37,7 @@
 
 #include "vfs/thumbnails/create.hxx"
 #include "vfs/thumbnails/thumbnailer.hxx"
+#include "vfs/thumbnails/utils.hxx"
 #include "vfs/utils/icon.hxx"
 #include "vfs/utils/permissions.hxx"
 #include "vfs/utils/utils.hxx"
@@ -501,10 +502,10 @@ vfs::file::thumbnail(const std::int32_t size) const noexcept
 
 void
 vfs::file::load_thumbnail(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumbnailer,
-                          const std::int32_t size, bool force_reload) noexcept
+                          const vfs::thumbnail::thumbnail_size size, bool force_reload) noexcept
 {
-    static const auto thumbnail_cache = vfs::user::thumbnail_cache();
-    if (std::ranges::starts_with(path_, thumbnail_cache.parent))
+    static const auto thumbnail_cache_root = vfs::thumbnail::cache_parent();
+    if (std::ranges::starts_with(path_, thumbnail_cache_root))
     {
         // TODO use cache images directly
         logger::debug<logger::vfs>("Not generating thumbnails in cache path: {}", path_);
@@ -516,45 +517,45 @@ vfs::file::load_thumbnail(const std::shared_ptr<vfs::thumbnail::thumbnailer>& th
         return;
     }
 
-    const auto raw = thumbnail_data::get_raw_size(size);
-
-    auto thumbnail =
-        vfs::thumbnail::create(thumbnailer, shared_from_this(), std::to_underlying(raw));
+    auto thumbnail = thumbnail::create(thumbnailer, shared_from_this(), size);
     if (thumbnail)
     {
-        thumbnail_.set(raw, thumbnail);
+        thumbnail_.set(size, thumbnail);
     }
 }
 
 bool
 vfs::file::is_thumbnail_loaded(const std::int32_t size) const noexcept
 {
+    return thumbnail_.is_loaded(vfs::thumbnail::get_spec_size(size));
+}
+
+bool
+vfs::file::is_thumbnail_loaded(const vfs::thumbnail::thumbnail_size size) const noexcept
+{
     return thumbnail_.is_loaded(size);
 }
 
 void
-vfs::file::thumbnail_data::set(const raw_size size,
+vfs::file::thumbnail_data::set(const thumbnail::thumbnail_size size,
                                const Glib::RefPtr<Gdk::Texture>& texture) noexcept
 {
-    if (size == raw_size::normal)
+    switch (size)
     {
-        normal = texture;
-    }
-    else if (size == raw_size::large)
-    {
-        large = texture;
-    }
-    else if (size == raw_size::x_large)
-    {
-        x_large = texture;
-    }
-    else if (size == raw_size::xx_large)
-    {
-        xx_large = texture;
-    }
-    else
-    {
-        std::unreachable();
+        case thumbnail::thumbnail_size::normal:
+            normal = texture;
+            break;
+        case thumbnail::thumbnail_size::large:
+            large = texture;
+            break;
+        case thumbnail::thumbnail_size::x_large:
+            x_large = texture;
+            break;
+        case thumbnail::thumbnail_size::xx_large:
+            xx_large = texture;
+            break;
+        default:
+            std::unreachable();
     }
 }
 
@@ -562,25 +563,22 @@ Glib::RefPtr<Gdk::Paintable>
 vfs::file::thumbnail_data::get(const std::int32_t size) const noexcept
 {
     Glib::RefPtr<Gdk::Texture> thumbnail;
-    if (size <= 128)
+    switch (vfs::thumbnail::get_spec_size(size))
     {
-        thumbnail = normal;
-    }
-    else if (size <= 256)
-    {
-        thumbnail = large;
-    }
-    else if (size <= 512)
-    {
-        thumbnail = x_large;
-    }
-    else if (size <= 1024)
-    {
-        thumbnail = xx_large;
-    }
-    else
-    {
-        std::unreachable();
+        case thumbnail::thumbnail_size::normal:
+            thumbnail = normal;
+            break;
+        case thumbnail::thumbnail_size::large:
+            thumbnail = large;
+            break;
+        case thumbnail::thumbnail_size::x_large:
+            thumbnail = x_large;
+            break;
+        case thumbnail::thumbnail_size::xx_large:
+            thumbnail = xx_large;
+            break;
+        default:
+            std::unreachable();
     }
 
     if (!thumbnail)
@@ -608,52 +606,20 @@ vfs::file::thumbnail_data::get(const std::int32_t size) const noexcept
 }
 
 bool
-vfs::file::thumbnail_data::is_loaded(const std::int32_t size) const noexcept
+vfs::file::thumbnail_data::is_loaded(const vfs::thumbnail::thumbnail_size size) const noexcept
 {
-    if (size <= 128)
+    switch (size)
     {
-        return normal != nullptr;
-    }
-    else if (size <= 256)
-    {
-        return large != nullptr;
-    }
-    else if (size <= 512)
-    {
-        return x_large != nullptr;
-    }
-    else if (size <= 1024)
-    {
-        return xx_large != nullptr;
-    }
-    else
-    {
-        std::unreachable();
-    }
-}
-
-vfs::file::thumbnail_data::raw_size
-vfs::file::thumbnail_data::get_raw_size(const std::int32_t size) noexcept
-{
-    if (size <= 128)
-    {
-        return raw_size::normal;
-    }
-    else if (size <= 256)
-    {
-        return raw_size::large;
-    }
-    else if (size <= 512)
-    {
-        return raw_size::x_large;
-    }
-    else if (size <= 1024)
-    {
-        return raw_size::xx_large;
-    }
-    else
-    {
-        std::unreachable();
+        case thumbnail::thumbnail_size::normal:
+            return normal != nullptr;
+        case thumbnail::thumbnail_size::large:
+            return large != nullptr;
+        case thumbnail::thumbnail_size::x_large:
+            return x_large != nullptr;
+        case thumbnail::thumbnail_size::xx_large:
+            return xx_large != nullptr;
+        default:
+            std::unreachable();
     }
 }
 

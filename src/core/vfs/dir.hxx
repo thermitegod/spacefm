@@ -37,6 +37,7 @@
 #include "vfs/file.hxx"
 
 #include "vfs/thumbnails/manager.hxx"
+#include "vfs/thumbnails/utils.hxx"
 
 #include "notify-cpp/controller.hxx"
 
@@ -77,8 +78,9 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) noexcept;
     [[nodiscard]] bool add_hidden(std::span<const std::shared_ptr<vfs::file>> files) noexcept;
 
+    void set_thumbnail_size(const std::int32_t size) noexcept;
+
     void load_thumbnails(const std::int32_t size) noexcept;
-    void load_thumbnail(const std::shared_ptr<vfs::file>& file, const std::int32_t size) noexcept;
     void unload_thumbnails(const std::int32_t size) noexcept;
     void enable_thumbnails(const bool enabled) noexcept;
 
@@ -95,6 +97,9 @@ class dir : public std::enable_shared_from_this<dir>
     void load_user_hidden_files() noexcept;
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::unordered_set<std::filesystem::path>> user_hidden_files_{std::nullopt};
+
+    void load_thumbnail(const std::shared_ptr<vfs::file>& file,
+                        const vfs::thumbnail::thumbnail_size size) noexcept;
 
     // handle file events
     void on_file_created(const std::filesystem::path& path) noexcept;
@@ -113,6 +118,7 @@ class dir : public std::enable_shared_from_this<dir>
 
     vfs::thumbnail::manager thumbnail_manager_;
     std::jthread thumbnail_manager_thread_;
+    std::unordered_set<vfs::thumbnail::thumbnail_size> thumbnail_sizes_;
 
     notify::controller notifier_;
     std::jthread notifier_thread_;

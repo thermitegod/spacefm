@@ -96,23 +96,6 @@ namespace vfs::user
  * @return The XDG directory XDG_RUNTIME_DIR.
  */
 [[nodiscard]] std::filesystem::path runtime() noexcept;
-
-struct thumbnail_cache_data final
-{
-    // https://specifications.freedesktop.org/thumbnail-spec/latest/directory.html
-    std::filesystem::path parent;
-    std::filesystem::path normal;
-    std::filesystem::path large;
-    std::filesystem::path x_large;
-    std::filesystem::path xx_large;
-    std::filesystem::path fail;
-};
-
-/**
- * @brief User thumbnail cache directory
- * @return The XDG directory XDG_CACHE_HOME/thumbnails/<size>.
- */
-[[nodiscard]] thumbnail_cache_data thumbnail_cache() noexcept;
 } // namespace vfs::user
 
 namespace vfs::program

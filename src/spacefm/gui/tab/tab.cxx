@@ -2261,23 +2261,24 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mo
     signal_directory_refresh_.disconnect();
 
     dir_ = vfs::dir::create(path);
+    dir_->set_thumbnail_size(std::to_underlying(grid_state_.icon_size));
     signal_directory_loaded_ = dir_->signal_directory_loaded().connect(
         [this]()
         {
             on_dir_file_listed();
 
-            if (view_mode_ == config::view_mode::grid)
-            {
-                dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
-            }
+            // if (view_mode_ == config::view_mode::grid)
+            // {
+            //     dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+            // }
         });
     signal_directory_refresh_ = dir_->signal_directory_refresh().connect(
         [this]()
         {
-            if (view_mode_ == config::view_mode::grid)
-            {
-                dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
-            }
+            // if (view_mode_ == config::view_mode::grid)
+            // {
+            //     dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
+            // }
         });
     dir_->load();
 

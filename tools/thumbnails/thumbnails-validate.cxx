@@ -28,7 +28,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/user-dirs.hxx"
+#include "vfs/thumbnails/utils.hxx"
 
 #include "logger.hxx"
 
@@ -61,24 +61,22 @@ main(int argc, char** argv)
 
     CLI11_PARSE(cli, argc, argv);
 
-    auto cache = vfs::user::thumbnail_cache();
-
     std::vector<std::filesystem::path> cache_paths;
     if (size == "normal" || size == "all")
     {
-        cache_paths.push_back(cache.normal);
+        cache_paths.push_back(vfs::thumbnail::cache_normal());
     }
     if (size == "large" || size == "all")
     {
-        cache_paths.push_back(cache.large);
+        cache_paths.push_back(vfs::thumbnail::cache_large());
     }
     if (size == "xlarge" || size == "all")
     {
-        cache_paths.push_back(cache.x_large);
+        cache_paths.push_back(vfs::thumbnail::cache_x_large());
     }
     if (size == "xxlarge" || size == "all")
     {
-        cache_paths.push_back(cache.xx_large);
+        cache_paths.push_back(vfs::thumbnail::cache_xx_large());
     }
 
     struct stats
