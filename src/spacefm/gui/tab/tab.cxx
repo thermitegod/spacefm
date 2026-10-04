@@ -2261,9 +2261,6 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mo
     signal_directory_refresh_.disconnect();
 
     dir_ = vfs::dir::create(path);
-
-    signal_chdir_begin().emit();
-
     signal_directory_loaded_ = dir_->signal_directory_loaded().connect(
         [this]()
         {
@@ -2282,12 +2279,9 @@ gui::tab::chdir(const std::filesystem::path& path, const gui::utils::history::mo
                 dir_->load_thumbnails(std::to_underlying(grid_state_.icon_size));
             }
         });
+    dir_->load();
 
-    if (dir_->is_loaded())
-    {
-        // if the dir gets loaded from cache then it will not emit the signal_directory_loaded() signal.
-        on_dir_file_listed();
-    }
+    signal_chdir_begin().emit();
 
     toolbar_.update(cwd(), history_.has_back(), history_.has_forward(), cwd() != "/");
 }

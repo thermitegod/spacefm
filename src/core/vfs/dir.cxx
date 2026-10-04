@@ -58,6 +58,8 @@ vfs::dir::dir(const std::filesystem::path& path) noexcept
 {
     // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), path_);
 
+    update_avoid_changes();
+
     // create events
     notifier_.signal_create().connect([this](const auto& p) { on_file_created(p); });
     notifier_.signal_moved_to().connect([this](const auto& p) { on_file_created(p); });
@@ -71,20 +73,8 @@ vfs::dir::dir(const std::filesystem::path& path) noexcept
     notifier_.signal_delete_self().connect([this](const auto& p) { on_self_deleted(p); });
     notifier_.signal_umount().connect([this](const auto& p) { on_self_deleted(p); });
 
-    notifier_thread_ = std::jthread([this](std::stop_token stoken) { notifier_.run(stoken); });
-    pthread_setname_np(notifier_thread_.native_handle(), "notifier");
-
     thumbnail_manager_.signal_thumbnail_created().connect([this](auto f)
                                                           { signal_thumbnail_loaded().emit(f); });
-
-    thumbnail_manager_thread_ =
-        std::jthread([this](std::stop_token stoken) { thumbnail_manager_.run(stoken); });
-    pthread_setname_np(thumbnail_manager_thread_.native_handle(), "thumbnails");
-
-    update_avoid_changes();
-
-    loader_thread_ = std::jthread([this](std::stop_token stoken) { load_thread(stoken); });
-    pthread_setname_np(loader_thread_.native_handle(), "loader");
 }
 
 vfs::dir::~dir() noexcept
@@ -108,7 +98,7 @@ vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexce
     if (dir_smart_cache.contains(path))
     {
         dir = dir_smart_cache.at(path);
-        // logger::debug<logger::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), path_);
+        // logger::debug<logger::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), path);
     }
     else
     {
@@ -121,10 +111,35 @@ vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexce
             path,
             [&path]() { return std::make_shared<hack>(path); },
             permanent);
-        // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), path_);
+        // logger::debug<logger::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), path);
     }
-    // logger::debug<logger::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path_);
+    // logger::debug<logger::vfs>("vfs::dir::dir({})     {}", logger::utils::ptr(dir.get()), path);
     return dir;
+}
+
+void
+vfs::dir::load() noexcept
+{
+    if (initialized_)
+    {
+        if (!load_running_)
+        {
+            signal_directory_loaded().emit();
+        }
+
+        return;
+    }
+    initialized_ = true;
+
+    notifier_thread_ = std::jthread([this](std::stop_token stoken) { notifier_.run(stoken); });
+    pthread_setname_np(notifier_thread_.native_handle(), "notifier");
+
+    thumbnail_manager_thread_ =
+        std::jthread([this](std::stop_token stoken) { thumbnail_manager_.run(stoken); });
+    pthread_setname_np(thumbnail_manager_thread_.native_handle(), "thumbnails");
+
+    loader_thread_ = std::jthread([this](std::stop_token stoken) { load_thread(stoken); });
+    pthread_setname_np(loader_thread_.native_handle(), "loader");
 }
 
 const std::filesystem::path&

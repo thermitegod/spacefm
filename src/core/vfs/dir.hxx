@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <memory>
@@ -57,6 +56,8 @@ class dir : public std::enable_shared_from_this<dir>
   public:
     [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
                                                           const bool permanent = false) noexcept;
+
+    void load() noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> files() const noexcept;
@@ -108,6 +109,7 @@ class dir : public std::enable_shared_from_this<dir>
 
     std::jthread loader_thread_;
     std::mutex loader_mutex_;
+    bool initialized_ = false;
 
     vfs::thumbnail::manager thumbnail_manager_;
     std::jthread thumbnail_manager_thread_;
@@ -116,9 +118,9 @@ class dir : public std::enable_shared_from_this<dir>
     std::jthread notifier_thread_;
 
     bool enable_thumbnails_{true};
-    bool avoid_changes_{false};           // disable file events, for nfs mount locations.
-    std::atomic_bool load_running_{true}; // is dir loaded, initial load or refresh
-    u64 xhidden_count_;                   // filenames starting with '.' and user hidden files
+    bool avoid_changes_{false}; // disable file events, for nfs mount locations.
+    bool load_running_{false};  // is dir loaded, initial load or refresh
+    u64 xhidden_count_;         // filenames starting with '.' and user hidden files
 
     // batch handling for file events
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
