@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <expected>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -35,13 +34,16 @@
 
 namespace vfs
 {
-class desktop final
+class desktop
 {
+  private:
+    explicit desktop(const std::filesystem::path& path);
+
   public:
     desktop() = delete;
 
-    [[nodiscard]] static std::expected<desktop, std::error_code>
-    create(const std::filesystem::path& desktop_file) noexcept;
+    [[nodiscard]] static std::shared_ptr<desktop>
+    create(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] std::string_view name() const noexcept;
     [[nodiscard]] std::string_view display_name() const noexcept;
@@ -58,8 +60,6 @@ class desktop final
     [[nodiscard]] std::vector<std::string> supported_mime_types() const noexcept;
 
   private:
-    desktop(const std::filesystem::path& desktop_file) noexcept;
-
     [[nodiscard]] vfs::error_code parse_desktop_file() noexcept;
 
     [[nodiscard]] bool is_opening_multiple_files() const noexcept;

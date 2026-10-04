@@ -16,15 +16,14 @@
  */
 
 #include <chrono>
-#include <expected>
 #include <filesystem>
-#include <flat_map>
 #include <format>
 #include <optional>
 #include <ranges>
 #include <span>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include <cstdint>
@@ -43,52 +42,76 @@
 
 #include "logger.hxx"
 
+namespace
+{
 struct desktop_cache_data final
 {
-    vfs::desktop desktop;
+    std::shared_ptr<vfs::desktop> desktop;
     std::chrono::system_clock::time_point mtime;
 };
 
-static std::flat_map<std::filesystem::path, desktop_cache_data> desktops_cache;
+std::mutex desktops_cache_mutex;
+std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
+} // namespace
 
-std::expected<vfs::desktop, std::error_code>
-vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
+std::shared_ptr<vfs::desktop>
+vfs::desktop::create(const std::filesystem::path& path) noexcept
 {
-    if (desktops_cache.contains(desktop_file))
-    {
-        // logger::info<logger::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file);
-        const auto& cache = desktops_cache.at(desktop_file);
+    std::scoped_lock lock(desktops_cache_mutex);
 
-        const auto desktop_stat = ztd::stat::create(cache.desktop.path());
-        if (desktop_stat && desktop_stat->mtime() == cache.mtime)
+    {
+        const auto it = desktops_cache.find(path);
+        if (it != desktops_cache.cend())
         {
-            return cache.desktop;
+            // logger::trace<logger::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(it->second.desktop), path);
+            const auto stat = ztd::stat::create(it->second.desktop->path());
+            if (stat && stat->mtime() == it->second.mtime)
+            {
+                return it->second.desktop;
+            }
+            // logger::trace<logger::vfs>("vfs::desktop({})  changed on disk, reloading", logger::utils::ptr(it->second.desktop));
         }
-        // logger::info<logger::vfs>("vfs::desktop({}) changed on disk, reloading", logger::utils::ptr(desktop));
     }
 
-    auto desktop = vfs::desktop(desktop_file);
-    const auto result = desktop.parse_desktop_file();
-    if (result != vfs::error_code::none)
+    struct hack : public vfs::desktop
     {
-        return std::unexpected(result);
+        hack(const std::filesystem::path& path) : desktop(path) {}
+    };
+
+    std::shared_ptr<vfs::desktop> desktop;
+    try
+    {
+        desktop = std::make_shared<hack>(path);
+    }
+    catch (...)
+    {
+        return nullptr;
     }
 
-    const auto stat = ztd::stat::create(desktop.path());
+    const auto stat = ztd::stat::create(desktop->path());
     if (!stat)
     {
-        return std::unexpected(vfs::error_code::file_not_found);
+        return nullptr;
     }
 
-    desktops_cache.insert({desktop_file, {desktop, stat->mtime()}});
-    // logger::info<logger::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file);
-    return desktop;
+    const auto [it, _] = desktops_cache.insert_or_assign(path,
+                                                         desktop_cache_data{
+                                                             std::move(desktop),
+                                                             stat->mtime(),
+                                                         });
+    // logger::trace<logger::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(it->second.desktop), path);
+    return it->second.desktop;
 }
 
-vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
-    : filename_(desktop_file.filename()), path_(desktop_file)
+vfs::desktop::desktop(const std::filesystem::path& path) : filename_(path.filename()), path_(path)
 {
     // logger::info<logger::vfs>("vfs::desktop::desktop({})", logger::utils::ptr(this));
+
+    auto result = parse_desktop_file();
+    if (result != vfs::error_code::none)
+    {
+        throw std::runtime_error("Failed to parse");
+    }
 }
 
 vfs::error_code
