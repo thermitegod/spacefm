@@ -180,7 +180,7 @@ class dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] auto
     signal_thumbnail_loaded() noexcept
     {
-        return signal_file_thumbnail_loaded_;
+        return signal_thumbnail_loaded_;
     }
 
     /**
@@ -199,7 +199,7 @@ class dir : public std::enable_shared_from_this<dir>
     sigc::signal<void(std::vector<std::shared_ptr<vfs::file>>)> signal_files_deleted_;
     sigc::signal<void()> signal_directory_loaded_;
     sigc::signal<void()> signal_directory_refresh_;
-    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_file_thumbnail_loaded_;
+    sigc::signal<void(const std::shared_ptr<vfs::file>&)> signal_thumbnail_loaded_;
     sigc::signal<void()> signal_directory_deleted_;
 };
 } // namespace vfs
