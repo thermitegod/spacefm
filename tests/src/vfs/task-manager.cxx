@@ -99,7 +99,7 @@ count_files(const std::filesystem::path& path, bool recursive = false) noexcept
     return count;
 }
 
-TEST_SUITE("vfs::task_manager" * doctest::description(""))
+TEST_SUITE("vfs::task_manager")
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "task-manager";
     // const auto root = std::filesystem::path() / "/tmp" / PACKAGE_NAME / "task-manager";

@@ -22,7 +22,7 @@
 
 #include "vfs/linux/mountinfo.hxx"
 
-TEST_SUITE("vfs::proc" * doctest::description(""))
+TEST_SUITE("vfs::proc")
 {
     const auto root = std::filesystem::path() / TEST_DATA_PATH / "vfs/linux";
 

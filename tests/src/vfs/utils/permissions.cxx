@@ -21,7 +21,7 @@
 
 #include "vfs/utils/permissions.hxx"
 
-TEST_SUITE("utils::permissions" * doctest::description(""))
+TEST_SUITE("utils::permissions")
 {
     TEST_CASE("has_read_permission")
     {

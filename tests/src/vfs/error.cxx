@@ -19,7 +19,7 @@
 
 #include "vfs/error.hxx"
 
-TEST_SUITE("vfs::error_code" * doctest::description(""))
+TEST_SUITE("vfs::error_code")
 {
     TEST_CASE("vfs::error_code")
     {

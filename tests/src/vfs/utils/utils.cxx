@@ -23,7 +23,7 @@
 
 #include "utils.hxx"
 
-TEST_SUITE("vfs::utils" * doctest::description(""))
+TEST_SUITE("vfs::utils")
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "vfs-utils";
 

@@ -24,7 +24,7 @@
 
 #include "vfs/user-dirs.hxx"
 
-TEST_SUITE("navigation/selection history" * doctest::description(""))
+TEST_SUITE("navigation/selection history")
 {
     // clang-format off
     const std::filesystem::path p1 = "/tmp/p1";

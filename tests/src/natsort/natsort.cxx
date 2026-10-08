@@ -39,7 +39,7 @@ shuffle_vector(std::vector<T>& vec) noexcept
     std::shuffle(vec.begin(), vec.end(), rng);
 }
 
-TEST_SUITE("natsort" * doctest::description(""))
+TEST_SUITE("natsort")
 {
     TEST_CASE("natsort::compare")
     {

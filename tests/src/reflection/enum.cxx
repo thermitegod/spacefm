@@ -26,7 +26,7 @@ enum class test_enum
     value3,
 };
 
-TEST_SUITE("reflection" * doctest::description(""))
+TEST_SUITE("reflection")
 {
     TEST_CASE("reflection::enum_count")
     {

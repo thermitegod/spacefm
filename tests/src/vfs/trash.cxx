@@ -25,7 +25,7 @@
 
 #include "vfs/trash-can.hxx"
 
-TEST_SUITE("vfs::trash" * doctest::description(""))
+TEST_SUITE("vfs::trash")
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "trash";
     // const auto root = std::filesystem::path() / "/tmp" / PACKAGE_NAME / "trash";

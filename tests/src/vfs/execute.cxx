@@ -24,7 +24,7 @@
 
 #include "vfs/execute.hxx"
 
-TEST_SUITE("vfs::execute" * doctest::description(""))
+TEST_SUITE("vfs::execute")
 {
     TEST_CASE("vfs::execute::quote")
     {

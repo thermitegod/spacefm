@@ -24,7 +24,7 @@
 
 using namespace std::string_literals;
 
-TEST_SUITE("vfs::utils file-ops" * doctest::description(""))
+TEST_SUITE("vfs::utils file-ops")
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "file-ops";
 

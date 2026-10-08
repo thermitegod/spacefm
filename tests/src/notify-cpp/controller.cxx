@@ -79,7 +79,7 @@ struct event_counter
     }
 };
 
-TEST_SUITE("notify-cpp" * doctest::description(""))
+TEST_SUITE("notify-cpp")
 {
     const auto root = std::filesystem::temp_directory_path() / PACKAGE_NAME / "notify-cpp";
 
