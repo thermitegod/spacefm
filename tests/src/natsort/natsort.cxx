@@ -62,10 +62,39 @@ TEST_SUITE("natsort")
         }
     }
 
-    TEST_CASE_TEMPLATE("natsort::sorter", T, std::string, std::string_view, std::filesystem::path)
+    TEST_CASE_TEMPLATE("natsort::sorter",
+                       TestType,
+                       std::string,
+                       std::string_view,
+                       std::filesystem::path)
     {
-        auto test_transformations = [](std::vector<std::string> raw_sorted, bool test_zfill = true)
+        struct test_options
         {
+            bool test_zfill = true;
+            // TODO
+        };
+
+        auto test_transformations =
+            [](std::vector<TestType> raw_sorted_input, test_options options = {})
+        {
+            std::vector<std::string> raw_sorted;
+            raw_sorted.reserve(raw_sorted_input.size());
+            for (const auto& item : raw_sorted_input)
+            {
+                if constexpr (std::is_same_v<TestType, std::string>)
+                {
+                    raw_sorted.push_back(item);
+                }
+                else if constexpr (std::is_same_v<TestType, std::string_view>)
+                {
+                    raw_sorted.emplace_back(item);
+                }
+                else if constexpr (std::is_same_v<TestType, std::filesystem::path>)
+                {
+                    raw_sorted.push_back(item.string());
+                }
+            }
+
             REQUIRE(!raw_sorted.empty());
 
             auto append_ext = [](std::vector<std::string>& vec, std::string_view ext)
@@ -184,7 +213,7 @@ TEST_SUITE("natsort")
                     append_ext(raw_sorted, ".7z");
                 }
 
-                if (test_zfill)
+                if (options.test_zfill)
                 {
                     SUBCASE("padded leading zero")
                     {
@@ -205,8 +234,8 @@ TEST_SUITE("natsort")
 
             /////////////////////////////////////////////////////
 
-            std::vector<T> sorted(raw_sorted.begin(), raw_sorted.end());
-            std::vector<T> unsorted = sorted;
+            std::vector<TestType> sorted(raw_sorted.begin(), raw_sorted.end());
+            std::vector<TestType> unsorted = sorted;
 
             REQUIRE(!unsorted.empty());
             REQUIRE(!sorted.empty());
@@ -267,7 +296,7 @@ TEST_SUITE("natsort")
                     "2026-3-15",
                     "2026-7-25",
                 },
-                false);
+                {.test_zfill = false});
             // clang-format on
         }
 
@@ -371,7 +400,7 @@ TEST_SUITE("natsort")
                 "x2-y7",
                 "x2-y08",
                 "x8-y8",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
 
@@ -450,7 +479,7 @@ TEST_SUITE("natsort")
                 "19.5",
                 "20",
                 "20.5",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
 
@@ -471,7 +500,7 @@ TEST_SUITE("natsort")
                 "1.9",
                 "2.0",
                 "10.0",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
 
@@ -509,7 +538,7 @@ TEST_SUITE("natsort")
                 "A-9",
                 "B",
                 "B-1",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
 
@@ -529,7 +558,7 @@ TEST_SUITE("natsort")
                 "40-9",
                 "41",
                 "41-1",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
 
@@ -560,7 +589,7 @@ TEST_SUITE("natsort")
                 "z.toml",
                 "z.txt",
                 "z.zip",
-            }, false);
+            }, {.test_zfill = false});
             // clang-format on
         }
     }
