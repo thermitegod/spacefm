@@ -121,45 +121,45 @@ TEST_SUITE("notify-cpp")
 
         std::jthread thread([&notifier](std::stop_token stoken) { notifier.run(stoken); });
 
-        REQUIRE_EQ(counter.access, 0);
-        REQUIRE_EQ(counter.modify, 0);
-        REQUIRE_EQ(counter.attrib, 0);
-        REQUIRE_EQ(counter.close_write, 0);
-        REQUIRE_EQ(counter.close_nowrite, 0);
-        REQUIRE_EQ(counter.open, 0);
-        REQUIRE_EQ(counter.moved_from, 0);
-        REQUIRE_EQ(counter.moved_to, 0);
-        REQUIRE_EQ(counter.create, 0);
-        REQUIRE_EQ(counter.delete_sub, 0);
-        REQUIRE_EQ(counter.delete_self, 0);
-        REQUIRE_EQ(counter.move_self, 0);
-        REQUIRE_EQ(counter.umount, 0);
-        REQUIRE_EQ(counter.queue_overflow, 0);
-        REQUIRE_EQ(counter.ignored, 0);
-        REQUIRE_EQ(counter.close, 0);
-        REQUIRE_EQ(counter.move, 0);
+        REQUIRE(counter.access == 0);
+        REQUIRE(counter.modify == 0);
+        REQUIRE(counter.attrib == 0);
+        REQUIRE(counter.close_write == 0);
+        REQUIRE(counter.close_nowrite == 0);
+        REQUIRE(counter.open == 0);
+        REQUIRE(counter.moved_from == 0);
+        REQUIRE(counter.moved_to == 0);
+        REQUIRE(counter.create == 0);
+        REQUIRE(counter.delete_sub == 0);
+        REQUIRE(counter.delete_self == 0);
+        REQUIRE(counter.move_self == 0);
+        REQUIRE(counter.umount == 0);
+        REQUIRE(counter.queue_overflow == 0);
+        REQUIRE(counter.ignored == 0);
+        REQUIRE(counter.close == 0);
+        REQUIRE(counter.move == 0);
 
         /////////////////////////////////////////////////////
 
         SUBCASE("no events")
         {
-            CHECK_EQ(counter.access, 0);
-            CHECK_EQ(counter.modify, 0);
-            CHECK_EQ(counter.attrib, 0);
-            CHECK_EQ(counter.close_write, 0);
-            CHECK_EQ(counter.close_nowrite, 0);
-            CHECK_EQ(counter.open, 0);
-            CHECK_EQ(counter.moved_from, 0);
-            CHECK_EQ(counter.moved_to, 0);
-            CHECK_EQ(counter.create, 0);
-            CHECK_EQ(counter.delete_sub, 0);
-            CHECK_EQ(counter.delete_self, 0);
-            CHECK_EQ(counter.move_self, 0);
-            CHECK_EQ(counter.umount, 0);
-            CHECK_EQ(counter.queue_overflow, 0);
-            CHECK_EQ(counter.ignored, 0);
-            CHECK_EQ(counter.close, 0);
-            CHECK_EQ(counter.move, 0);
+            CHECK(counter.access == 0);
+            CHECK(counter.modify == 0);
+            CHECK(counter.attrib == 0);
+            CHECK(counter.close_write == 0);
+            CHECK(counter.close_nowrite == 0);
+            CHECK(counter.open == 0);
+            CHECK(counter.moved_from == 0);
+            CHECK(counter.moved_to == 0);
+            CHECK(counter.create == 0);
+            CHECK(counter.delete_sub == 0);
+            CHECK(counter.delete_self == 0);
+            CHECK(counter.move_self == 0);
+            CHECK(counter.umount == 0);
+            CHECK(counter.queue_overflow == 0);
+            CHECK(counter.ignored == 0);
+            CHECK(counter.close == 0);
+            CHECK(counter.move == 0);
         }
 
         SUBCASE("create")
@@ -167,23 +167,23 @@ TEST_SUITE("notify-cpp")
             create_file(test_path / "create.test");
             std::this_thread::sleep_for(50ms);
 
-            CHECK_EQ(counter.access, 0);
-            CHECK_EQ(counter.modify, 1);
-            CHECK_EQ(counter.attrib, 0);
-            CHECK_EQ(counter.close_write, 1);
-            CHECK_EQ(counter.close_nowrite, 0);
-            CHECK_EQ(counter.open, 1);
-            CHECK_EQ(counter.moved_from, 0);
-            CHECK_EQ(counter.moved_to, 0);
-            CHECK_EQ(counter.create, 1);
-            CHECK_EQ(counter.delete_sub, 0);
-            CHECK_EQ(counter.delete_self, 0);
-            CHECK_EQ(counter.move_self, 0);
-            CHECK_EQ(counter.umount, 0);
-            CHECK_EQ(counter.queue_overflow, 0);
-            CHECK_EQ(counter.ignored, 0);
-            CHECK_EQ(counter.close, 1);
-            CHECK_EQ(counter.move, 0);
+            CHECK(counter.access == 0);
+            CHECK(counter.modify == 1);
+            CHECK(counter.attrib == 0);
+            CHECK(counter.close_write == 1);
+            CHECK(counter.close_nowrite == 0);
+            CHECK(counter.open == 1);
+            CHECK(counter.moved_from == 0);
+            CHECK(counter.moved_to == 0);
+            CHECK(counter.create == 1);
+            CHECK(counter.delete_sub == 0);
+            CHECK(counter.delete_self == 0);
+            CHECK(counter.move_self == 0);
+            CHECK(counter.umount == 0);
+            CHECK(counter.queue_overflow == 0);
+            CHECK(counter.ignored == 0);
+            CHECK(counter.close == 1);
+            CHECK(counter.move == 0);
 
             SUBCASE("read")
             {
@@ -192,23 +192,23 @@ TEST_SUITE("notify-cpp")
                 auto _ = read_file(test_path / "create.test");
                 std::this_thread::sleep_for(50ms);
 
-                CHECK_EQ(counter.access, 1);
-                CHECK_EQ(counter.modify, 0);
-                CHECK_EQ(counter.attrib, 0);
-                CHECK_EQ(counter.close_write, 0);
-                CHECK_EQ(counter.close_nowrite, 1);
-                CHECK_EQ(counter.open, 1);
-                CHECK_EQ(counter.moved_from, 0);
-                CHECK_EQ(counter.moved_to, 0);
-                CHECK_EQ(counter.create, 0);
-                CHECK_EQ(counter.delete_sub, 0);
-                CHECK_EQ(counter.delete_self, 0);
-                CHECK_EQ(counter.move_self, 0);
-                CHECK_EQ(counter.umount, 0);
-                CHECK_EQ(counter.queue_overflow, 0);
-                CHECK_EQ(counter.ignored, 0);
-                CHECK_EQ(counter.close, 1);
-                CHECK_EQ(counter.move, 0);
+                CHECK(counter.access == 1);
+                CHECK(counter.modify == 0);
+                CHECK(counter.attrib == 0);
+                CHECK(counter.close_write == 0);
+                CHECK(counter.close_nowrite == 1);
+                CHECK(counter.open == 1);
+                CHECK(counter.moved_from == 0);
+                CHECK(counter.moved_to == 0);
+                CHECK(counter.create == 0);
+                CHECK(counter.delete_sub == 0);
+                CHECK(counter.delete_self == 0);
+                CHECK(counter.move_self == 0);
+                CHECK(counter.umount == 0);
+                CHECK(counter.queue_overflow == 0);
+                CHECK(counter.ignored == 0);
+                CHECK(counter.close == 1);
+                CHECK(counter.move == 0);
             }
 
             SUBCASE("delete")
@@ -218,23 +218,23 @@ TEST_SUITE("notify-cpp")
                 std::filesystem::remove(test_path / "create.test");
                 std::this_thread::sleep_for(50ms);
 
-                CHECK_EQ(counter.access, 0);
-                CHECK_EQ(counter.modify, 0);
-                CHECK_EQ(counter.attrib, 0);
-                CHECK_EQ(counter.close_write, 0);
-                CHECK_EQ(counter.close_nowrite, 0);
-                CHECK_EQ(counter.open, 0);
-                CHECK_EQ(counter.moved_from, 0);
-                CHECK_EQ(counter.moved_to, 0);
-                CHECK_EQ(counter.create, 0);
-                CHECK_EQ(counter.delete_sub, 1);
-                CHECK_EQ(counter.delete_self, 0);
-                CHECK_EQ(counter.move_self, 0);
-                CHECK_EQ(counter.umount, 0);
-                CHECK_EQ(counter.queue_overflow, 0);
-                CHECK_EQ(counter.ignored, 0);
-                CHECK_EQ(counter.close, 0);
-                CHECK_EQ(counter.move, 0);
+                CHECK(counter.access == 0);
+                CHECK(counter.modify == 0);
+                CHECK(counter.attrib == 0);
+                CHECK(counter.close_write == 0);
+                CHECK(counter.close_nowrite == 0);
+                CHECK(counter.open == 0);
+                CHECK(counter.moved_from == 0);
+                CHECK(counter.moved_to == 0);
+                CHECK(counter.create == 0);
+                CHECK(counter.delete_sub == 1);
+                CHECK(counter.delete_self == 0);
+                CHECK(counter.move_self == 0);
+                CHECK(counter.umount == 0);
+                CHECK(counter.queue_overflow == 0);
+                CHECK(counter.ignored == 0);
+                CHECK(counter.close == 0);
+                CHECK(counter.move == 0);
             }
         }
 

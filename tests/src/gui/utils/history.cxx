@@ -56,181 +56,181 @@ TEST_SUITE("navigation/selection history")
 
         history.new_forward(p1);
         history.set_selection(p1, std::vector{p1});
-        CHECK_EQ(history.path(), p1);
-        CHECK_EQ(history.get_selection(p1).value(), std::vector{p1});
+        CHECK(history.path() == p1);
+        CHECK(history.get_selection(p1).value() == std::vector{p1});
 
         history.new_forward(p2);
         history.set_selection(p2, std::vector{p2});
-        CHECK_EQ(history.path(), p2);
-        CHECK_EQ(history.get_selection(p2).value(), std::vector{p2});
+        CHECK(history.path() == p2);
+        CHECK(history.get_selection(p2).value() == std::vector{p2});
 
         history.new_forward(p3);
         history.set_selection(p3, std::vector{p3});
-        CHECK_EQ(history.path(), p3);
-        CHECK_EQ(history.get_selection(p3).value(), std::vector{p3});
+        CHECK(history.path() == p3);
+        CHECK(history.get_selection(p3).value() == std::vector{p3});
 
         history.new_forward(p4);
         history.set_selection(p4, std::vector{p4});
-        CHECK_EQ(history.path(), p4);
-        CHECK_EQ(history.get_selection(p4).value(), std::vector{p4});
+        CHECK(history.path() == p4);
+        CHECK(history.get_selection(p4).value() == std::vector{p4});
 
         SUBCASE("go_back()")
         {
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), false);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p1);
+            CHECK_FALSE(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back(); // NOP
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), false);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p1);
+            CHECK_FALSE(history.has_back());
+            CHECK(history.has_forward());
         }
 
         SUBCASE("go_forward()")
         {
             history.go_forward(); // NOP
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), false);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p1);
+            CHECK_FALSE(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_forward(); // NOP
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
         }
 
         SUBCASE("new_forward()")
         {
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == p4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.new_forward(z3);
-            CHECK_EQ(history.path(), z3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == z3);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_forward(); // NOP
-            CHECK_EQ(history.path(), z3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == z3);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
 
             history.go_forward();
-            CHECK_EQ(history.path(), z3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == z3);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.new_forward(z4);
-            CHECK_EQ(history.path(), z4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == z4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
 
             history.go_forward(); // NOP
-            CHECK_EQ(history.path(), z4);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
+            CHECK(history.path() == z4);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
         }
 
         SUBCASE("path(), modes")
         {
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.path(gui::utils::history::mode::back), p3);
-            CHECK_EQ(history.path(gui::utils::history::mode::forward), p4); // NOP
+            CHECK(history.path() == p4);
+            CHECK(history.path(gui::utils::history::mode::back) == p3);
+            CHECK(history.path(gui::utils::history::mode::forward) == p4); // NOP
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.path(gui::utils::history::mode::back), p2);
-            CHECK_EQ(history.path(gui::utils::history::mode::forward), p4);
+            CHECK(history.path() == p3);
+            CHECK(history.path(gui::utils::history::mode::back) == p2);
+            CHECK(history.path(gui::utils::history::mode::forward) == p4);
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.path(gui::utils::history::mode::back), p1);
-            CHECK_EQ(history.path(gui::utils::history::mode::forward), p3);
+            CHECK(history.path() == p2);
+            CHECK(history.path(gui::utils::history::mode::back) == p1);
+            CHECK(history.path(gui::utils::history::mode::forward) == p3);
 
             history.go_back();
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.path(gui::utils::history::mode::back), p1); // NOP
-            CHECK_EQ(history.path(gui::utils::history::mode::forward), p2);
+            CHECK(history.path() == p1);
+            CHECK(history.path(gui::utils::history::mode::back) == p1); // NOP
+            CHECK(history.path(gui::utils::history::mode::forward) == p2);
         }
     }
 
@@ -242,76 +242,76 @@ TEST_SUITE("navigation/selection history")
 
         history.new_forward(p4);
         history.set_selection(p4, p4_files);
-        CHECK_EQ(history.path(), p4);
-        CHECK_EQ(history.get_selection(p4).value(), p4_files);
+        CHECK(history.path() == p4);
+        CHECK(history.get_selection(p4).value() == p4_files);
 
         history.new_forward(p3);
         history.set_selection(p3, p3_files);
-        CHECK_EQ(history.path(), p3);
-        CHECK_EQ(history.get_selection(p3).value(), p3_files);
+        CHECK(history.path() == p3);
+        CHECK(history.get_selection(p3).value() == p3_files);
 
         history.new_forward(p2);
         history.set_selection(p2, p2_files);
-        CHECK_EQ(history.path(), p2);
-        CHECK_EQ(history.get_selection(p2).value(), p2_files);
+        CHECK(history.path() == p2);
+        CHECK(history.get_selection(p2).value() == p2_files);
 
         history.new_forward(p1);
         history.set_selection(p1, p1_files);
-        CHECK_EQ(history.path(), p1);
-        CHECK_EQ(history.get_selection(p1).value(), p1_files);
+        CHECK(history.path() == p1);
+        CHECK(history.get_selection(p1).value() == p1_files);
 
         SUBCASE("go_back(), check selected")
         {
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
-            CHECK_EQ(history.get_selection(p1).value(), p1_files);
+            CHECK(history.path() == p1);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
+            CHECK(history.get_selection(p1).value() == p1_files);
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
-            CHECK_EQ(history.get_selection(p2).value(), p2_files);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
+            CHECK(history.get_selection(p2).value() == p2_files);
 
             history.go_back();
-            CHECK_EQ(history.path(), p3);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
-            CHECK_EQ(history.get_selection(p3).value(), p3_files);
+            CHECK(history.path() == p3);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
+            CHECK(history.get_selection(p3).value() == p3_files);
 
             history.go_back();
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), false);
-            CHECK_EQ(history.has_forward(), true);
-            CHECK_EQ(history.get_selection(p4).value(), p4_files);
+            CHECK(history.path() == p4);
+            CHECK_FALSE(history.has_back());
+            CHECK(history.has_forward());
+            CHECK(history.get_selection(p4).value() == p4_files);
 
             history.go_back(); // NOP
-            CHECK_EQ(history.path(), p4);
-            CHECK_EQ(history.has_back(), false);
-            CHECK_EQ(history.has_forward(), true);
-            CHECK_EQ(history.get_selection(p4).value(), p4_files);
+            CHECK(history.path() == p4);
+            CHECK_FALSE(history.has_back());
+            CHECK(history.has_forward());
+            CHECK(history.get_selection(p4).value() == p4_files);
         }
 
         SUBCASE("go_forward(), change selected")
         {
             history.go_forward(); // NOP
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
-            CHECK_EQ(history.get_selection(p1).value(), p1_files);
+            CHECK(history.path() == p1);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
+            CHECK(history.get_selection(p1).value() == p1_files);
             history.set_selection(p1, p1_files_alt);
 
             history.go_back();
-            CHECK_EQ(history.path(), p2);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), true);
-            CHECK_EQ(history.get_selection(p2).value(), p2_files);
+            CHECK(history.path() == p2);
+            CHECK(history.has_back());
+            CHECK(history.has_forward());
+            CHECK(history.get_selection(p2).value() == p2_files);
 
             history.go_forward();
-            CHECK_EQ(history.path(), p1);
-            CHECK_EQ(history.has_back(), true);
-            CHECK_EQ(history.has_forward(), false);
-            CHECK_EQ(history.get_selection(p1).value(), p1_files_alt);
+            CHECK(history.path() == p1);
+            CHECK(history.has_back());
+            CHECK_FALSE(history.has_forward());
+            CHECK(history.get_selection(p1).value() == p1_files_alt);
         }
     }
 
@@ -320,14 +320,14 @@ TEST_SUITE("navigation/selection history")
         gui::utils::history history;
 
         history.new_forward(p1);
-        CHECK_EQ(history.path(), p1);
+        CHECK(history.path() == p1);
 
         history.new_forward(p2);
         history.new_forward(p2);
         history.new_forward(p2);
-        CHECK_EQ(history.path(), p2);
+        CHECK(history.path() == p2);
 
         history.go_back();
-        CHECK_EQ(history.path(), p1);
+        CHECK(history.path() == p1);
     }
 }

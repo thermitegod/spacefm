@@ -159,8 +159,8 @@ TEST_SUITE("vfs::task_manager")
             manager->add(vfs::create_file_task{.path = path});
             sync.wait();
 
-            CHECK_EQ(sync.error, 1);
-            CHECK_EQ(sync.completed, 0);
+            CHECK(sync.error == 1);
+            CHECK(sync.completed == 0);
         }
 
         SUBCASE("create loop")
@@ -176,9 +176,9 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(count_files(test_path), loop);
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, loop);
+            CHECK(count_files(test_path) == loop);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == loop);
         }
 
         SUBCASE("create nested loop")
@@ -195,9 +195,9 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(count_files(nested_path), loop);
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, loop);
+            CHECK(count_files(nested_path) == loop);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == loop);
         }
 
         if (std::filesystem::exists(test_path))
@@ -265,9 +265,9 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(count_files(test_path), loop);
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, loop);
+            CHECK(count_files(test_path) == loop);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == loop);
         }
 
         SUBCASE("create nested loop")
@@ -284,9 +284,9 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(count_files(nested_path), loop);
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, loop);
+            CHECK(count_files(nested_path) == loop);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == loop);
         }
 
         if (std::filesystem::exists(test_path))
@@ -331,8 +331,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::is_symlink(link));
             CHECK(std::filesystem::read_symlink(link) == target);
@@ -349,8 +349,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 1);
-            CHECK_EQ(sync.completed, 0);
+            CHECK(sync.error == 1);
+            CHECK(sync.completed == 0);
         }
 
         SUBCASE("create loop")
@@ -367,8 +367,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, loop);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == loop);
         }
 
         SUBCASE("create force")
@@ -378,8 +378,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::is_symlink(link));
             CHECK(std::filesystem::read_symlink(link) == target);
@@ -396,8 +396,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::is_symlink(link));
             CHECK(std::filesystem::read_symlink(link) == target);
@@ -443,8 +443,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK_FALSE(std::filesystem::exists(path));
         }
@@ -461,8 +461,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK_FALSE(std::filesystem::exists(path));
         }
@@ -488,8 +488,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK_FALSE(std::filesystem::exists(path));
         }
@@ -501,8 +501,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 1);
-            CHECK_EQ(sync.completed, 0);
+            CHECK(sync.error == 1);
+            CHECK(sync.completed == 0);
         }
 
         if (std::filesystem::exists(test_path))
@@ -546,13 +546,13 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             const auto expected = destination / "test.txt";
             CHECK(std::filesystem::exists(expected));
             CHECK(std::filesystem::is_regular_file(expected));
-            CHECK_EQ(read_file(expected), "data");
+            CHECK(read_file(expected) == "data");
         }
 
         SUBCASE("copy directory empty")
@@ -565,12 +565,12 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory"));
             CHECK(std::filesystem::is_directory(destination / "directory"));
-            CHECK_EQ(count_files(destination / "directory", true), 0);
+            CHECK(count_files(destination / "directory", true) == 0);
         }
 
         SUBCASE("copy directory with files")
@@ -590,16 +590,16 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
-            CHECK_EQ(count_files(destination / "directory", true), loop);
+            CHECK(count_files(destination / "directory", true) == loop);
 
             for (const auto& entry : std::filesystem::directory_iterator(destination / "directory"))
             {
                 CHECK(std::filesystem::exists(entry.path()));
                 CHECK(std::filesystem::is_regular_file(entry.path()));
-                CHECK_EQ(read_file(entry.path()), entry.path().filename());
+                CHECK(read_file(entry.path()) == entry.path().filename());
             }
         }
 
@@ -616,14 +616,14 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/b.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/c.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/d.txt"));
-            CHECK_EQ(count_files(destination / "directory", true), 5);
+            CHECK(count_files(destination / "directory", true) == 5);
         }
 
         SUBCASE("copy directory merge")
@@ -637,8 +637,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/b.txt"));
@@ -657,8 +657,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/a.txt"));
@@ -707,13 +707,13 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             const auto expected = destination / "test.txt";
             CHECK(std::filesystem::exists(expected));
             CHECK(std::filesystem::is_regular_file(expected));
-            CHECK_EQ(read_file(expected), "data");
+            CHECK(read_file(expected) == "data");
         }
 
         SUBCASE("move directory empty")
@@ -726,12 +726,12 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory"));
             CHECK(std::filesystem::is_directory(destination / "directory"));
-            CHECK_EQ(count_files(destination / "directory", true), 0);
+            CHECK(count_files(destination / "directory", true) == 0);
         }
 
         SUBCASE("move directory with files")
@@ -751,16 +751,16 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
-            CHECK_EQ(count_files(destination / "directory", true), loop);
+            CHECK(count_files(destination / "directory", true) == loop);
 
             for (const auto& entry : std::filesystem::directory_iterator(destination / "directory"))
             {
                 CHECK(std::filesystem::exists(entry.path()));
                 CHECK(std::filesystem::is_regular_file(entry.path()));
-                CHECK_EQ(read_file(entry.path()), entry.path().filename());
+                CHECK(read_file(entry.path()) == entry.path().filename());
             }
         }
 
@@ -777,14 +777,14 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/b.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/c.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/d.txt"));
-            CHECK_EQ(count_files(destination / "directory", true), 5);
+            CHECK(count_files(destination / "directory", true) == 5);
         }
 
         SUBCASE("move directory merge")
@@ -800,8 +800,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/b.txt"));
@@ -822,8 +822,8 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK(std::filesystem::exists(destination / "directory/a.txt"));
             CHECK(std::filesystem::exists(destination / "directory/nested/a.txt"));
@@ -873,14 +873,14 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             const auto expected = destination / "renamed.txt";
             CHECK_FALSE(std::filesystem::exists(file));
             CHECK(std::filesystem::exists(expected));
             CHECK(std::filesystem::is_regular_file(expected));
-            CHECK_EQ(read_file(expected), "data");
+            CHECK(read_file(expected) == "data");
         }
 
         SUBCASE("rename directory empty")
@@ -894,13 +894,13 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
             CHECK_FALSE(std::filesystem::exists(directory));
             CHECK(std::filesystem::exists(destination / "renamed"));
             CHECK(std::filesystem::is_directory(destination / "renamed"));
-            CHECK_EQ(count_files(destination / "renamed", true), 0);
+            CHECK(count_files(destination / "renamed", true) == 0);
         }
 
         SUBCASE("rename directory with files")
@@ -921,16 +921,16 @@ TEST_SUITE("vfs::task_manager")
 
             CHECK(manager->empty());
 
-            CHECK_EQ(sync.error, 0);
-            CHECK_EQ(sync.completed, 1);
+            CHECK(sync.error == 0);
+            CHECK(sync.completed == 1);
 
-            CHECK_EQ(count_files(destination / "renamed", true), loop);
+            CHECK(count_files(destination / "renamed", true) == loop);
 
             for (const auto& entry : std::filesystem::directory_iterator(destination / "renamed"))
             {
                 CHECK(std::filesystem::exists(entry.path()));
                 CHECK(std::filesystem::is_regular_file(entry.path()));
-                CHECK_EQ(read_file(entry.path()), entry.path().filename());
+                CHECK(read_file(entry.path()) == entry.path().filename());
             }
         }
 

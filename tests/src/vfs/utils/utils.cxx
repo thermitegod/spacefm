@@ -40,37 +40,37 @@ TEST_SUITE("vfs::utils")
         SUBCASE("file no collision")
         {
             const auto result = vfs::utils::unique_path(test_path, "test");
-            CHECK_EQ(result, test_path / "test");
+            CHECK(result == test_path / "test");
         }
 
         SUBCASE("file no collision with tag")
         {
             const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
-            CHECK_EQ(result, test_path / "test");
+            CHECK(result == test_path / "test");
         }
 
         SUBCASE("file single extension no collision")
         {
             const auto result = vfs::utils::unique_path(test_path, "test.txt");
-            CHECK_EQ(result, test_path / "test.txt");
+            CHECK(result == test_path / "test.txt");
         }
 
         SUBCASE("file single extension no collision with tag")
         {
             const auto result = vfs::utils::unique_path(test_path, "test.txt", "-copy");
-            CHECK_EQ(result, test_path / "test.txt");
+            CHECK(result == test_path / "test.txt");
         }
 
         SUBCASE("file multiple extension no collision")
         {
             const auto result = vfs::utils::unique_path(test_path, "test.tar.gz");
-            CHECK_EQ(result, test_path / "test.tar.gz");
+            CHECK(result == test_path / "test.tar.gz");
         }
 
         SUBCASE("file multiple extension no collision with tag")
         {
             const auto result = vfs::utils::unique_path(test_path, "test.tar.gz", "-copy");
-            CHECK_EQ(result, test_path / "test.tar.gz");
+            CHECK(result == test_path / "test.tar.gz");
         }
 
         SUBCASE("file no extension")
@@ -89,7 +89,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test10");
 
             const auto result = vfs::utils::unique_path(test_path, "test");
-            CHECK_EQ(result, test_path / "test11");
+            CHECK(result == test_path / "test11");
         }
 
         SUBCASE("file no extension with tag")
@@ -108,7 +108,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test-copy10");
 
             const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
-            CHECK_EQ(result, test_path / "test-copy11");
+            CHECK(result == test_path / "test-copy11");
         }
 
         SUBCASE("file single extension")
@@ -127,7 +127,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test10.txt");
 
             const auto result = vfs::utils::unique_path(test_path, "test.txt");
-            CHECK_EQ(result, test_path / "test11.txt");
+            CHECK(result == test_path / "test11.txt");
         }
 
         SUBCASE("file single extension with tag")
@@ -146,7 +146,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test-copy10.txt");
 
             const auto result = vfs::utils::unique_path(test_path, "test.txt", "-copy");
-            CHECK_EQ(result, test_path / "test-copy11.txt");
+            CHECK(result == test_path / "test-copy11.txt");
         }
 
         SUBCASE("file multiple extension")
@@ -165,7 +165,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test10.tar.gz");
 
             const auto result = vfs::utils::unique_path(test_path, "test.tar.gz");
-            CHECK_EQ(result, test_path / "test11.tar.gz");
+            CHECK(result == test_path / "test11.tar.gz");
         }
 
         SUBCASE("file multiple extension with tag")
@@ -184,7 +184,7 @@ TEST_SUITE("vfs::utils")
             create_file(test_path / "test-copy10.tar.gz");
 
             const auto result = vfs::utils::unique_path(test_path, "test.tar.gz", "-copy");
-            CHECK_EQ(result, test_path / "test-copy11.tar.gz");
+            CHECK(result == test_path / "test-copy11.tar.gz");
         }
 
         SUBCASE("directory")
@@ -203,7 +203,7 @@ TEST_SUITE("vfs::utils")
             std::filesystem::create_directories(test_path / "test10");
 
             const auto result = vfs::utils::unique_path(test_path, "test");
-            CHECK_EQ(result, test_path / "test11");
+            CHECK(result == test_path / "test11");
         }
 
         SUBCASE("directory with tag")
@@ -222,7 +222,7 @@ TEST_SUITE("vfs::utils")
             std::filesystem::create_directories(test_path / "test-copy10");
 
             const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
-            CHECK_EQ(result, test_path / "test-copy11");
+            CHECK(result == test_path / "test-copy11");
         }
 
         SUBCASE("mixed")
@@ -241,7 +241,7 @@ TEST_SUITE("vfs::utils")
             std::filesystem::create_directories(test_path / "test10");
 
             const auto result = vfs::utils::unique_path(test_path, "test");
-            CHECK_EQ(result, test_path / "test11");
+            CHECK(result == test_path / "test11");
         }
 
         SUBCASE("mixed with tag")
@@ -260,7 +260,7 @@ TEST_SUITE("vfs::utils")
             std::filesystem::create_directories(test_path / "test-copy10");
 
             const auto result = vfs::utils::unique_path(test_path, "test", "-copy");
-            CHECK_EQ(result, test_path / "test-copy11");
+            CHECK(result == test_path / "test-copy11");
         }
 
         if (std::filesystem::exists(test_path))
@@ -275,48 +275,48 @@ TEST_SUITE("vfs::utils")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension("");
 
-            CHECK_EQ(stem, "");
-            CHECK_EQ(extension, "");
+            CHECK(stem == "");
+            CHECK(extension == "");
         }
 
         SUBCASE("no extension")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test");
 
-            CHECK_EQ(stem, "test");
-            CHECK_EQ(extension, "");
+            CHECK(stem == "test");
+            CHECK(extension == "");
         }
 
         SUBCASE("multiple extension")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test.tar.gz");
 
-            CHECK_EQ(stem, "test");
-            CHECK_EQ(extension, ".tar.gz");
+            CHECK(stem == "test");
+            CHECK(extension == ".tar.gz");
         }
 
         SUBCASE("single extension")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension("test.txt");
 
-            CHECK_EQ(stem, "test");
-            CHECK_EQ(extension, ".txt");
+            CHECK(stem == "test");
+            CHECK(extension == ".txt");
         }
 
         SUBCASE("hidden no extension")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension(".hidden");
 
-            CHECK_EQ(stem, ".hidden");
-            CHECK_EQ(extension, "");
+            CHECK(stem == ".hidden");
+            CHECK(extension == "");
         }
 
         SUBCASE("hidden single extension")
         {
             const auto [stem, extension] = vfs::utils::filename_stem_and_extension(".hidden.txt");
 
-            CHECK_EQ(stem, ".hidden");
-            CHECK_EQ(extension, ".txt");
+            CHECK(stem == ".hidden");
+            CHECK(extension == ".txt");
         }
 
         SUBCASE("hidden multiple extension")
@@ -324,8 +324,8 @@ TEST_SUITE("vfs::utils")
             const auto [stem, extension] =
                 vfs::utils::filename_stem_and_extension(".hidden.tar.zst");
 
-            CHECK_EQ(stem, ".hidden");
-            CHECK_EQ(extension, ".tar.zst");
+            CHECK(stem == ".hidden");
+            CHECK(extension == ".tar.zst");
         }
     }
 }

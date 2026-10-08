@@ -45,35 +45,35 @@ TEST_SUITE("vfs::utils file-ops")
         {
             auto data = vfs::utils::read_file(test_path / "test.txt");
             REQUIRE(data);
-            CHECK_EQ(*data, "data"s);
+            CHECK(*data == "data"s);
         }
 
         SUBCASE("good read /proc")
         {
             auto data = vfs::utils::read_file("/proc/version");
             REQUIRE(data);
-            CHECK_GE(data.value().size(), 10uz);
+            CHECK(data.value().size() >= 10uz);
         }
 
         SUBCASE("read /proc max size")
         {
             auto data = vfs::utils::read_file("/proc/version", 1uz);
             REQUIRE(!data);
-            CHECK_EQ(data.error(), vfs::error_code::file_too_large);
+            CHECK(data.error() == vfs::error_code::file_too_large);
         }
 
         SUBCASE("file max size")
         {
             auto data = vfs::utils::read_file(test_path / "test.txt", 1uz);
             REQUIRE(!data);
-            CHECK_EQ(data.error(), vfs::error_code::file_too_large);
+            CHECK(data.error() == vfs::error_code::file_too_large);
         }
 
         SUBCASE("file open failure")
         {
             auto data = vfs::utils::read_file(test_path / "bad_path" / "test.txt");
             REQUIRE(!data);
-            CHECK_EQ(data.error(), vfs::error_code::file_open_failure);
+            CHECK(data.error() == vfs::error_code::file_open_failure);
         }
 
         if (std::filesystem::exists(test_path))
@@ -95,13 +95,13 @@ TEST_SUITE("vfs::utils file-ops")
         SUBCASE("good write")
         {
             auto result = vfs::utils::write_file(test_path / "test.txt", "data"s);
-            CHECK_EQ(result, std::error_code{});
+            CHECK(result == std::error_code{});
         }
 
         SUBCASE("file open failure")
         {
             auto result = vfs::utils::write_file(test_path / "bad_path" / "test.txt", "data"s);
-            CHECK_EQ(result, vfs::error_code::file_open_failure);
+            CHECK(result == vfs::error_code::file_open_failure);
         }
 
         if (std::filesystem::exists(test_path))

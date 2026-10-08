@@ -210,7 +210,7 @@ TEST_SUITE("natsort")
 
             REQUIRE(!unsorted.empty());
             REQUIRE(!sorted.empty());
-            REQUIRE_EQ(unsorted.size(), sorted.size());
+            REQUIRE(unsorted.size() == sorted.size());
 
             std::size_t attempts = 0;
             do

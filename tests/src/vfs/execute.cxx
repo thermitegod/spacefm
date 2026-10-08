@@ -37,7 +37,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("")");
+                CHECK(result == R"("")");
             }
 
             SUBCASE("basic")
@@ -47,7 +47,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("Test Test")");
+                CHECK(result == R"("Test Test")");
             }
 
             SUBCASE("path")
@@ -57,7 +57,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("/usr/bin/yes")");
+                CHECK(result == R"("/usr/bin/yes")");
             }
 
             SUBCASE("quotes")
@@ -67,7 +67,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("Double \" Quote")");
+                CHECK(result == R"("Double \" Quote")");
             }
 
             SUBCASE("special shell characters")
@@ -77,7 +77,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("$ !")");
+                CHECK(result == R"("$ !")");
             }
         }
 
@@ -90,7 +90,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("")");
+                CHECK(result == R"("")");
             }
 
             SUBCASE("basic")
@@ -100,7 +100,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("Test Test")");
+                CHECK(result == R"("Test Test")");
             }
 
             SUBCASE("path")
@@ -110,7 +110,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("/usr/bin/yes")");
+                CHECK(result == R"("/usr/bin/yes")");
             }
 
             SUBCASE("quotes")
@@ -120,7 +120,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("Double \" Quote")");
+                CHECK(result == R"("Double \" Quote")");
             }
 
             SUBCASE("special shell characters")
@@ -130,7 +130,7 @@ TEST_SUITE("vfs::execute")
                 const auto result = vfs::execute::quote(input);
 
                 CHECK(!result.empty());
-                CHECK_EQ(result, R"("$ !")");
+                CHECK(result == R"("$ !")");
             }
         }
     }
@@ -142,9 +142,9 @@ TEST_SUITE("vfs::execute")
             const auto result =
                 vfs::execute::command_line_sync("{} {}", "echo", vfs::execute::quote("Test Test"));
 
-            CHECK_EQ(result.exit_status, 0);
-            CHECK_EQ(ztd::strip(result.standard_output), "Test Test");
-            CHECK_EQ(ztd::strip(result.standard_error), "");
+            CHECK(result.exit_status == 0);
+            CHECK(ztd::strip(result.standard_output) == "Test Test");
+            CHECK(ztd::strip(result.standard_error) == "");
         }
 
         SUBCASE("quotes")
@@ -152,9 +152,9 @@ TEST_SUITE("vfs::execute")
             const auto result =
                 vfs::execute::command_line_sync("{} {}", "echo", vfs::execute::quote(R"("")"));
 
-            CHECK_EQ(result.exit_status, 0);
-            CHECK_EQ(ztd::strip(result.standard_output), R"("")");
-            CHECK_EQ(ztd::strip(result.standard_error), "");
+            CHECK(result.exit_status == 0);
+            CHECK(ztd::strip(result.standard_output) == R"("")");
+            CHECK(ztd::strip(result.standard_error) == "");
         }
 
         SUBCASE("special shell characters")
@@ -162,27 +162,27 @@ TEST_SUITE("vfs::execute")
             const auto result =
                 vfs::execute::command_line_sync("{} {}", "echo", vfs::execute::quote(R"($ !)"));
 
-            CHECK_EQ(result.exit_status, 0);
-            CHECK_EQ(ztd::strip(result.standard_output), R"($ !)");
-            CHECK_EQ(ztd::strip(result.standard_error), "");
+            CHECK(result.exit_status == 0);
+            CHECK(ztd::strip(result.standard_output) == R"($ !)");
+            CHECK(ztd::strip(result.standard_error) == "");
         }
 
         SUBCASE("true")
         {
             const auto result = vfs::execute::command_line_sync("true");
 
-            CHECK_EQ(result.exit_status, 0);
-            CHECK_EQ(ztd::strip(result.standard_output), "");
-            CHECK_EQ(ztd::strip(result.standard_error), "");
+            CHECK(result.exit_status == 0);
+            CHECK(ztd::strip(result.standard_output) == "");
+            CHECK(ztd::strip(result.standard_error) == "");
         }
 
         SUBCASE("false")
         {
             const auto result = vfs::execute::command_line_sync("false");
 
-            CHECK_EQ(result.exit_status, 256);
-            CHECK_EQ(ztd::strip(result.standard_output), "");
-            CHECK_EQ(ztd::strip(result.standard_error), "");
+            CHECK(result.exit_status == 256);
+            CHECK(ztd::strip(result.standard_output) == "");
+            CHECK(ztd::strip(result.standard_error) == "");
         }
     }
 

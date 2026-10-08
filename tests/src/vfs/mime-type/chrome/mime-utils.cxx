@@ -33,14 +33,14 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
 
         SUBCASE("no ext")
         {
             const auto type = GetFileMimeType("file");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 
@@ -52,14 +52,14 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("file.jpg");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
 
         SUBCASE("ext jpeg")
         {
             const auto type = GetFileMimeType("file.jpeg");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 
@@ -71,7 +71,7 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("file.jxl");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 
@@ -83,7 +83,7 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("file.png");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 
@@ -95,7 +95,7 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("file.png");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 
@@ -107,7 +107,7 @@ TEST_SUITE("vfs::detail::mime_type::chrome")
         {
             const auto type = GetFileMimeType("file.txt");
 
-            CHECK_EQ(type, mime_type);
+            CHECK(type == mime_type);
         }
     }
 }

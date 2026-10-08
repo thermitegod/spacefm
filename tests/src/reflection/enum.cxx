@@ -31,43 +31,43 @@ TEST_SUITE("reflection")
     TEST_CASE("reflection::enum_count")
     {
         constexpr auto count = reflection::enum_count<test_enum>();
-        CHECK_EQ(count, 3);
+        CHECK(count == 3);
     }
 
     TEST_CASE("reflection::enum_name")
     {
-        CHECK_EQ(reflection::enum_name(test_enum::value1), "value1");
-        CHECK_EQ(reflection::enum_name(test_enum::value2), "value2");
-        CHECK_EQ(reflection::enum_name(test_enum::value3), "value3");
+        CHECK(reflection::enum_name(test_enum::value1) == "value1");
+        CHECK(reflection::enum_name(test_enum::value2) == "value2");
+        CHECK(reflection::enum_name(test_enum::value3) == "value3");
     }
 
     TEST_CASE("reflection::enum_names")
     {
         constexpr auto names = reflection::enum_names<test_enum>();
-        CHECK_EQ(names.size(), 3);
-        CHECK_EQ(names[0], "value1");
-        CHECK_EQ(names[1], "value2");
-        CHECK_EQ(names[2], "value3");
+        CHECK(names.size() == 3);
+        CHECK(names[0] == "value1");
+        CHECK(names[1] == "value2");
+        CHECK(names[2] == "value3");
     }
 
     TEST_CASE("reflection::enum_values")
     {
         constexpr auto values = reflection::enum_values<test_enum>();
-        CHECK_EQ(values.size(), 3);
-        CHECK_EQ(values[0], test_enum::value1);
-        CHECK_EQ(values[1], test_enum::value2);
-        CHECK_EQ(values[2], test_enum::value3);
+        CHECK(values.size() == 3);
+        CHECK(values[0] == test_enum::value1);
+        CHECK(values[1] == test_enum::value2);
+        CHECK(values[2] == test_enum::value3);
     }
 
     TEST_CASE("reflection::enum_cast")
     {
         constexpr auto value1 = reflection::enum_cast<test_enum>("value1");
-        CHECK_EQ(value1.value(), test_enum::value1);
+        CHECK(value1.value() == test_enum::value1);
 
         constexpr auto value2 = reflection::enum_cast<test_enum>("value2");
-        CHECK_EQ(value2.value(), test_enum::value2);
+        CHECK(value2.value() == test_enum::value2);
 
         constexpr auto value3 = reflection::enum_cast<test_enum>("value3");
-        CHECK_EQ(value3.value(), test_enum::value3);
+        CHECK(value3.value() == test_enum::value3);
     }
 }

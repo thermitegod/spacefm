@@ -56,19 +56,17 @@ TEST_SUITE("vfs::proc")
 
             REQUIRE(entry);
 
-            // clang-format off
-            CHECK_EQ(entry->mount_id(), 48);
-            CHECK_EQ(entry->parent_id(), 1);
-            CHECK_EQ(entry->major(), 0);
-            CHECK_EQ(entry->minor(), 24);
-            CHECK_EQ(entry->root(), "/");
-            CHECK_EQ(entry->mount_point(), "/");
-            CHECK_EQ(entry->mount_options(), "rw,noatime");
-            CHECK_EQ(entry->optional_fields(), "shared:1");
-            CHECK_EQ(entry->filesystem_type(), "zfs");
-            CHECK_EQ(entry->mount_source(), "zroot/ROOT/gentoo");
-            CHECK_EQ(entry->super_options(), "rw,xattr,posixacl,casesensitive");
-            // clang-format on
+            CHECK(entry->mount_id() == 48);
+            CHECK(entry->parent_id() == 1);
+            CHECK(entry->major() == 0);
+            CHECK(entry->minor() == 24);
+            CHECK(entry->root() == "/");
+            CHECK(entry->mount_point() == "/");
+            CHECK(entry->mount_options() == "rw,noatime");
+            CHECK(entry->optional_fields() == "shared:1");
+            CHECK(entry->filesystem_type() == "zfs");
+            CHECK(entry->mount_source() == "zroot/ROOT/gentoo");
+            CHECK(entry->super_options() == "rw,xattr,posixacl,casesensitive");
         }
 
         SUBCASE("ext4")
@@ -81,19 +79,17 @@ TEST_SUITE("vfs::proc")
 
             REQUIRE(entry);
 
-            // clang-format off
-            CHECK_EQ(entry->mount_id(), 32);
-            CHECK_EQ(entry->parent_id(), 2);
-            CHECK_EQ(entry->major(), 259);
-            CHECK_EQ(entry->minor(), 2);
-            CHECK_EQ(entry->root(), "/");
-            CHECK_EQ(entry->mount_point(), "/");
-            CHECK_EQ(entry->mount_options(), "rw,relatime");
-            CHECK_EQ(entry->optional_fields(), "shared:1");
-            CHECK_EQ(entry->filesystem_type(), "ext4");
-            CHECK_EQ(entry->mount_source(), "/dev/nvme0n1p2");
-            CHECK_EQ(entry->super_options(), "rw");
-            // clang-format on
+            CHECK(entry->mount_id() == 32);
+            CHECK(entry->parent_id() == 2);
+            CHECK(entry->major() == 259);
+            CHECK(entry->minor() == 2);
+            CHECK(entry->root() == "/");
+            CHECK(entry->mount_point() == "/");
+            CHECK(entry->mount_options() == "rw,relatime");
+            CHECK(entry->optional_fields() == "shared:1");
+            CHECK(entry->filesystem_type() == "ext4");
+            CHECK(entry->mount_source() == "/dev/nvme0n1p2");
+            CHECK(entry->super_options() == "rw");
         }
 
         SUBCASE("sshfs")
@@ -106,19 +102,18 @@ TEST_SUITE("vfs::proc")
 
             REQUIRE(entry);
 
-            // clang-format off
-            CHECK_EQ(entry->mount_id(), 280);
-            CHECK_EQ(entry->parent_id(), 32);
-            CHECK_EQ(entry->major(), 0);
-            CHECK_EQ(entry->minor(), 113);
-            CHECK_EQ(entry->root(), "/");
-            CHECK_EQ(entry->mount_point(), "/home/brandon/media/sshfs");
-            CHECK_EQ(entry->mount_options(), "rw,nosuid,nodev,relatime");
-            CHECK_EQ(entry->optional_fields(), "shared:254");
-            CHECK_EQ(entry->filesystem_type(), "fuse.sshfs");
-            CHECK_EQ(entry->mount_source(), "brandon@192.168.0.244:/mnt/anime");
-            CHECK_EQ(entry->super_options(), "rw,user_id=1000,group_id=1000,default_permissions,allow_other");
-            // clang-format on
+            CHECK(entry->mount_id() == 280);
+            CHECK(entry->parent_id() == 32);
+            CHECK(entry->major() == 0);
+            CHECK(entry->minor() == 113);
+            CHECK(entry->root() == "/");
+            CHECK(entry->mount_point() == "/home/brandon/media/sshfs");
+            CHECK(entry->mount_options() == "rw,nosuid,nodev,relatime");
+            CHECK(entry->optional_fields() == "shared:254");
+            CHECK(entry->filesystem_type() == "fuse.sshfs");
+            CHECK(entry->mount_source() == "brandon@192.168.0.244:/mnt/anime");
+            CHECK(entry->super_options() ==
+                  "rw,user_id=1000,group_id=1000,default_permissions,allow_other");
         }
 
         SUBCASE("empty file")

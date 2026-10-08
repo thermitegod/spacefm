@@ -32,7 +32,7 @@ create_file(const std::filesystem::path& path, std::string_view content = "data"
     std::filesystem::create_directories(path.parent_path());
 
     auto result = vfs::utils::write_file(path, content);
-    REQUIRE_EQ(result, std::error_code{});
+    REQUIRE(result == std::error_code{});
     REQUIRE(std::filesystem::exists(path));
 }
 
