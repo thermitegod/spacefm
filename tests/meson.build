@@ -1,6 +1,6 @@
 ## Test only dependencies
 
-doctest_dep = dependency('doctest', required: true)
+doctest_dep = dependency('doctest', include_type: 'system', required: true)
 
 ## Spacefm Test Source files
 

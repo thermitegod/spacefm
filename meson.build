@@ -213,10 +213,10 @@ add_project_link_arguments(link_flags, language: ['c', 'cpp'])
 
 ## Dependencies
 
-cli11_dep = dependency('CLI11', required: true)
-libudev_dep = dependency('libudev', required: true)
-botan_dep = dependency('botan-3', required: true)
-pugixml_dep = dependency('pugixml', required: true)
+cli11_dep = dependency('CLI11', include_type: 'system', required: true)
+libudev_dep = dependency('libudev', include_type: 'system', required: true)
+botan_dep = dependency('botan-3', include_type: 'system', required: true)
+pugixml_dep = dependency('pugixml', include_type: 'system', required: true)
 
 base_dependencies = [
     cli11_dep,
@@ -224,11 +224,11 @@ base_dependencies = [
     botan_dep,
 ]
 
-gtkmm_dep = dependency('gtkmm-4.0', required: true, version: '>=4.18.0')
-glibmm_dep = dependency('glibmm-2.68', required: true)
-giomm_dep = dependency('giomm-2.68', required: true)
-sigc_dep = dependency('sigc++-3.0', required: true)
-glycin_dep = dependency('glycin-gtk4-2', required: true)
+gtkmm_dep = dependency('gtkmm-4.0', include_type: 'system', required: true, version: '>=4.18.0')
+glibmm_dep = dependency('glibmm-2.68', include_type: 'system', required: true)
+giomm_dep = dependency('giomm-2.68', include_type: 'system', required: true)
+sigc_dep = dependency('sigc++-3.0', include_type: 'system', required: true)
+glycin_dep = dependency('glycin-gtk4-2', include_type: 'system', required: true)
 
 gtk_dependencies = [
     gtkmm_dep,
@@ -239,7 +239,7 @@ gtk_dependencies = [
 ]
 
 if get_option('with-system-glaze')
-    base_dependencies += dependency('glaze', required: true, version: '>=6.3.0')
+    base_dependencies += dependency('glaze', include_type: 'system', required: true, version: '>=6.3.0')
 else
     incdir += include_directories('subprojects/glaze/include')
 endif
@@ -290,15 +290,15 @@ endif
 media_dependencies = []
 if get_option('media')
     # ffmpeg
-    libavcodec_dep = dependency('libavcodec')
-    # libavdevice_dep = dependency('libavdevice')
-    # libavfilter_dep = dependency('libavfilter')
-    libavformat_dep = dependency('libavformat')
-    libavutil_dep = dependency('libavutil')
-    # libswresample_dep = dependency('libswresample')
-    # libswscale_dep = dependency('libswscale')
+    libavcodec_dep = dependency('libavcodec', include_type: 'system', required: true)
+    # libavdevice_dep = dependency('libavdevice', include_type: 'system', required: true)
+    # libavfilter_dep = dependency('libavfilter', include_type: 'system', required: true)
+    libavformat_dep = dependency('libavformat', include_type: 'system', required: true)
+    libavutil_dep = dependency('libavutil', include_type: 'system', required: true)
+    # libswresample_dep = dependency('libswresample', include_type: 'system', required: true)
+    # libswscale_dep = dependency('libswscale', include_type: 'system', required: true)
 
-    gexiv_dep = dependency('gexiv2')
+    gexiv_dep = dependency('gexiv2', include_type: 'system', required: true)
 
     media_dependencies += [
         libavcodec_dep,
