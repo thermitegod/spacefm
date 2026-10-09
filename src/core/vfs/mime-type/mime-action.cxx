@@ -218,6 +218,40 @@ get_actions(const std::filesystem::path& dir, std::string_view mime_type,
     }
 }
 
+/**
+ * @brief Move
+ *
+ * - Move vector element to new position
+ *
+ * @param[in,out] v The std::vector<T> to be rearranged
+ * @param[in] old_index The index being moved
+ * @param[in] new_index The index to move to
+ */
+template<typename T>
+static void
+move(std::vector<T>& v, const std::size_t old_index, const std::size_t new_index) noexcept
+{
+    if (old_index == new_index || old_index >= v.size() || new_index >= v.size())
+    {
+        return;
+    }
+
+    using diff_t = std::vector<T>::difference_type;
+
+    if (old_index < new_index)
+    {
+        std::rotate(v.begin() + static_cast<diff_t>(old_index),
+                    v.begin() + static_cast<diff_t>(old_index) + 1,
+                    v.begin() + static_cast<diff_t>(new_index) + 1);
+    }
+    else
+    {
+        std::rotate(v.begin() + static_cast<diff_t>(new_index),
+                    v.begin() + static_cast<diff_t>(old_index),
+                    v.begin() + static_cast<diff_t>(old_index) + 1);
+    }
+}
+
 std::vector<std::string>
 vfs::detail::mime_type::get_actions(std::string_view mime_type) noexcept
 {
@@ -259,7 +293,7 @@ vfs::detail::mime_type::get_actions(std::string_view mime_type) noexcept
             const auto index = std::ranges::distance(actions.cbegin(), it);
             if (index != 0)
             {
-                ztd::move(actions, static_cast<std::size_t>(index), 0);
+                move(actions, static_cast<std::size_t>(index), 0);
             }
         }
     }
