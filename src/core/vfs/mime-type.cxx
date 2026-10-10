@@ -20,8 +20,10 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include <glibmm.h>
@@ -37,29 +39,35 @@
 
 #include "logger.hxx"
 
-namespace global
+namespace
 {
-static std::flat_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
-static std::mutex mime_map_lock;
-} // namespace global
+std::shared_mutex mime_cache_mutex;
+std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_cache;
+} // namespace
 
 std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create(std::string_view type) noexcept
 {
-    std::scoped_lock lock(global::mime_map_lock);
-    if (global::mime_map.contains(type.data()))
     {
-        return global::mime_map.at(type.data());
+        std::shared_lock lock(mime_cache_mutex);
+        const auto it = mime_cache.find(type.data());
+        if (it != mime_cache.cend())
+        {
+            // logger::trace<logger::vfs>("vfs::mime_type({})  cache   {}", logger::utils::ptr(it->second), type);
+            return it->second;
+        }
     }
 
     struct hack : public vfs::mime_type
     {
         hack(std::string_view type) : mime_type(type) {}
     };
-
     const auto mime_type = std::make_shared<hack>(type);
-    global::mime_map.insert({type.data(), mime_type});
-    return mime_type;
+
+    std::unique_lock lock(mime_cache_mutex);
+    const auto [it, _] = mime_cache.try_emplace(type.data(), mime_type);
+    // logger::trace<logger::vfs>("vfs::mime_type({})  new     {}", logger::utils::ptr(it->second), type);
+    return it->second;
 }
 
 std::shared_ptr<vfs::mime_type>
