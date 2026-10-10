@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -36,16 +37,15 @@ struct thumbnailer_cache_data final
     std::chrono::system_clock::time_point mtime;
 };
 
-std::mutex thumbnailers_cache_mutex;
+std::shared_mutex thumbnailers_cache_mutex;
 std::unordered_map<std::filesystem::path, thumbnailer_cache_data> thumbnailers_cache;
 } // namespace
 
 std::shared_ptr<vfs::thumbnail::thumbnailer>
 vfs::thumbnail::thumbnailer::create(const std::filesystem::path& path) noexcept
 {
-    std::scoped_lock lock(thumbnailers_cache_mutex);
-
     {
+        std::shared_lock lock(thumbnailers_cache_mutex);
         const auto it = thumbnailers_cache.find(path);
         if (it != thumbnailers_cache.cend())
         {
@@ -80,6 +80,7 @@ vfs::thumbnail::thumbnailer::create(const std::filesystem::path& path) noexcept
         return nullptr;
     }
 
+    std::unique_lock lock(thumbnailers_cache_mutex);
     const auto [it, _] = thumbnailers_cache.insert_or_assign(path,
                                                              thumbnailer_cache_data{
                                                                  std::move(thumbnailer),
