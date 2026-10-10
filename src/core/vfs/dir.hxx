@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <span>
 #include <stop_token>
 #include <thread>
@@ -58,7 +59,7 @@ class dir : public std::enable_shared_from_this<dir>
                                                           const bool permanent = false) noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> files() noexcept;
+    [[nodiscard]] std::vector<std::shared_ptr<vfs::file>> files() const noexcept;
 
     void refresh() noexcept;
 
@@ -84,9 +85,9 @@ class dir : public std::enable_shared_from_this<dir>
     void load_thread(std::stop_token stoken) noexcept;
     void refresh_thread(std::stop_token stoken) noexcept;
 
+    // note, must have a files_mutex_ before using
     [[nodiscard]] std::shared_ptr<vfs::file>
-    find_file(const std::filesystem::path& filename) noexcept;
-    [[nodiscard]] bool update_file(const std::shared_ptr<vfs::file>& file) noexcept;
+    find_file(const std::filesystem::path& filename) const noexcept;
 
     // dir .hidden file
     [[nodiscard]] bool write_hidden() const noexcept;
@@ -103,7 +104,7 @@ class dir : public std::enable_shared_from_this<dir>
     std::filesystem::path path_;
 
     std::vector<std::shared_ptr<vfs::file>> files_;
-    std::mutex files_lock_;
+    mutable std::shared_mutex files_mutex_;
 
     std::jthread loader_thread_;
     std::mutex loader_mutex_;
@@ -132,13 +133,13 @@ class dir : public std::enable_shared_from_this<dir>
     {
         // filenames only
 
-        std::mutex deleted_lock;
+        std::mutex deleted_mutex;
         std::unordered_set<std::filesystem::path> deleted;
 
-        std::mutex changed_lock;
+        std::mutex changed_mutex;
         std::unordered_set<std::filesystem::path> changed;
 
-        std::mutex created_lock;
+        std::mutex created_mutex;
         std::unordered_set<std::filesystem::path> created;
     };
     file_events events_;

@@ -21,6 +21,7 @@
 #include <mutex>
 #include <optional>
 #include <stop_token>
+#include <unordered_set>
 #include <vector>
 
 #include <pthread.h>
@@ -134,9 +135,9 @@ vfs::dir::path() const noexcept
 }
 
 std::vector<std::shared_ptr<vfs::file>>
-vfs::dir::files() noexcept
+vfs::dir::files() const noexcept
 {
-    std::scoped_lock files_lock(files_lock_);
+    std::shared_lock lock(files_mutex_);
     return files_;
 }
 
@@ -243,7 +244,7 @@ vfs::dir::load_thread(std::stop_token stoken) noexcept
     }
 
     {
-        std::scoped_lock files_lock(files_lock_);
+        std::unique_lock files_lock(files_mutex_);
         files_ = std::move(files);
     }
 
@@ -291,14 +292,20 @@ vfs::dir::refresh_thread(std::stop_token stoken) noexcept
         }
 
         const auto filename = dfile.path().filename();
-        if (find_file(filename) == nullptr)
+        bool exists = false;
+        {
+            std::shared_lock lock(files_mutex_);
+            exists = find_file(filename) != nullptr;
+        }
+        if (!exists)
         {
             on_file_created(filename);
         }
     }
 
+    std::vector<std::filesystem::path> hidden_files;
     {
-        std::scoped_lock files_lock(files_lock_);
+        std::shared_lock files_lock(files_mutex_);
         for (const auto& file : files_)
         {
             if (stoken.stop_requested())
@@ -309,13 +316,16 @@ vfs::dir::refresh_thread(std::stop_token stoken) noexcept
             // Check if existing files have been hidden
             if (is_file_user_hidden(file->path()))
             {
-                // Use the delete signal to properly remove this file from the file list.
-                on_file_deleted(file->name());
-
+                hidden_files.push_back(file->path());
                 xhidden_count_ += 1;
                 continue;
             }
         }
+    }
+
+    for (const auto& hidden : hidden_files)
+    {
+        on_file_deleted(hidden);
     }
 
     load_running_ = false;
@@ -324,18 +334,12 @@ vfs::dir::refresh_thread(std::stop_token stoken) noexcept
 }
 
 std::shared_ptr<vfs::file>
-vfs::dir::find_file(const std::filesystem::path& filename) noexcept
+vfs::dir::find_file(const std::filesystem::path& filename) const noexcept
 {
-    std::scoped_lock files_lock(files_lock_);
-
     const auto it =
         std::ranges::find_if(files_,
                              [&filename](const auto& file) { return file->name() == filename; });
-    if (it != files_.cend())
-    {
-        return *it;
-    }
-    return nullptr;
+    return (it != files_.cend()) ? *it : nullptr;
 }
 
 bool
@@ -395,13 +399,12 @@ vfs::dir::enable_thumbnails(const bool enabled) noexcept
 void
 vfs::dir::load_thumbnails(const std::int32_t size) noexcept
 {
-    std::scoped_lock files_lock(files_lock_);
-
     if (!enable_thumbnails_)
     {
         return;
     }
 
+    std::shared_lock lock(files_mutex_);
     for (const auto& file : files_)
     {
         load_thumbnail(file, size);
@@ -423,8 +426,7 @@ vfs::dir::unload_thumbnails(const std::int32_t size) noexcept
 {
     (void)size;
 #if 0 // TODO
-    std::scoped_lock files_lock(files_lock_);
-
+    std::shared_lock lock(files_mutex_);
     for (const auto& file : files_)
     {
         file->unload_thumbnail(size);
@@ -447,21 +449,8 @@ vfs::dir::is_loaded() const noexcept
 bool
 vfs::dir::is_directory_empty() const noexcept
 {
+    std::shared_lock lock(files_mutex_);
     return files_.empty();
-}
-
-bool
-vfs::dir::update_file(const std::shared_ptr<vfs::file>& file) noexcept
-{
-    const bool updated = file->update();
-    if (!updated)
-    { /* The file does not exist */
-        if (std::ranges::contains(files_, file))
-        {
-            on_file_deleted(file->path());
-        }
-    }
-    return updated;
 }
 
 void
@@ -488,102 +477,130 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
 void
 vfs::dir::update_deleted_files() noexcept
 {
-    std::scoped_lock lock(events_.deleted_lock);
-
-    if (events_.deleted.empty())
+    std::unordered_set<std::filesystem::path> deleted;
     {
-        return;
+        std::scoped_lock lock(events_.deleted_mutex);
+        if (events_.deleted.empty())
+        {
+            return;
+        }
+        deleted.swap(events_.deleted);
     }
 
     std::vector<std::shared_ptr<vfs::file>> deleted_files;
     {
-        for (const auto& filename : events_.deleted)
+        std::unique_lock files_lock(files_mutex_);
+        for (const auto& filename : deleted)
         {
-            const auto file = find_file(filename);
+            auto file = find_file(filename);
             if (file)
             {
-                std::scoped_lock files_lock(files_lock_);
                 std::erase_if(files_, [&](const auto& f) { return f == file; });
-
                 deleted_files.push_back(file);
             }
         }
     }
 
     signal_files_deleted().emit(deleted_files);
-
-    events_.deleted.clear();
 }
 
 void
 vfs::dir::update_changed_files() noexcept
 {
-    std::scoped_lock lock(events_.changed_lock);
-
-    if (events_.changed.empty())
+    std::unordered_set<std::filesystem::path> changed;
     {
-        return;
+        std::scoped_lock lock(events_.changed_mutex);
+        if (events_.changed.empty())
+        {
+            return;
+        }
+        changed.swap(events_.changed);
     }
 
+    std::vector<std::filesystem::path> deleted;
     std::vector<std::shared_ptr<vfs::file>> changed_files;
-    for (const auto& filename : events_.changed)
     {
-        const auto file = find_file(filename);
-        if (file && update_file(file))
+        std::unique_lock files_lock(files_mutex_);
+        for (const auto& filename : changed)
         {
-            changed_files.push_back(file);
+            auto file = find_file(filename);
+            if (file)
+            {
+                const bool updated = file->update();
+                if (!updated)
+                { // file no longer exists, need to trigger a delete event
+                    deleted.push_back(file->path());
+                    continue;
+                }
+
+                changed_files.push_back(file);
+            }
         }
     }
-    signal_files_changed().emit(changed_files);
 
-    events_.changed.clear();
+    for (const auto& path : deleted)
+    {
+        on_file_deleted(path);
+    }
+
+    signal_files_changed().emit(changed_files);
 }
 
 void
 vfs::dir::update_created_files() noexcept
 {
-    std::scoped_lock lock(events_.created_lock);
-
-    if (events_.created.empty())
+    std::unordered_set<std::filesystem::path> created;
     {
-        return;
+        std::scoped_lock lock(events_.created_mutex);
+        if (events_.created.empty())
+        {
+            return;
+        }
+        created.swap(events_.created);
     }
 
+    std::vector<std::filesystem::path> changed;
     std::vector<std::shared_ptr<vfs::file>> created_files;
-    for (const auto& filename : events_.created)
     {
-        const auto file = find_file(filename);
-        if (!file)
+        std::unique_lock files_lock(files_mutex_);
+        for (const auto& filename : created)
         {
-            // file is not in files_
-            const auto file_path = path_ / filename;
-            if (std::filesystem::exists(file_path))
+            const auto path = path_ / filename;
+            if (!std::filesystem::exists(path))
             {
-                if (is_file_user_hidden(filename))
-                {
-                    xhidden_count_ += 1;
-                    continue;
-                }
+                continue;
+            }
 
-                std::scoped_lock files_lock(files_lock_);
+            if (is_file_user_hidden(filename))
+            {
+                xhidden_count_ += 1;
+                continue;
+            }
 
-                const auto new_file = vfs::file::create(file_path);
+            auto file = find_file(path.filename());
+            if (!file)
+            {
+                auto new_file = vfs::file::create(path);
+
                 files_.push_back(new_file);
                 created_files.push_back(new_file);
             }
-        }
-        else
-        {
-            // file already exists in files_
-            if (update_file(file))
+            else
             {
-                created_files.push_back(file);
+                logger::debug<logger::vfs>(
+                    "vfs::dir::update_created_files({}) existing file in create event handler",
+                    path);
+                changed.push_back(path);
             }
         }
     }
-    signal_files_created().emit(created_files);
 
-    events_.created.clear();
+    for (const auto& path : changed)
+    {
+        on_file_changed(path);
+    }
+
+    signal_files_created().emit(created_files);
 }
 
 void
@@ -595,7 +612,7 @@ vfs::dir::on_file_created(const std::filesystem::path& path) noexcept
     }
 
     {
-        std::scoped_lock lock(events_.created_lock);
+        std::scoped_lock lock(events_.created_mutex);
         events_.created.insert(path.filename());
     }
 
@@ -611,7 +628,7 @@ vfs::dir::on_file_deleted(const std::filesystem::path& path) noexcept
     }
 
     {
-        std::scoped_lock lock(events_.deleted_lock);
+        std::scoped_lock lock(events_.deleted_mutex);
         events_.deleted.insert(path.filename());
     }
 
@@ -632,7 +649,7 @@ vfs::dir::on_file_changed(const std::filesystem::path& path) noexcept
     }
 
     {
-        std::scoped_lock lock(events_.changed_lock);
+        std::scoped_lock lock(events_.changed_mutex);
         events_.changed.insert(path.filename());
     }
 
