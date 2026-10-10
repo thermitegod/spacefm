@@ -281,38 +281,38 @@ gui::dialog::properties::calc_worker::calc_total_size_of_files(
         return;
     }
 
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(path, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(path);
+    if (!file_stat)
     {
         return;
     }
 
-    total_size += file_stat.size().data();
-    size_on_disk += file_stat.size_on_disk().data();
+    total_size += file_stat->size().data();
+    size_on_disk += file_stat->size_on_disk().data();
 
     if (!std::filesystem::is_directory(path) || !vfs::utils::check_directory_permissions(path))
     {
         return;
     }
 
+    std::error_code ec;
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path, ec))
     {
-        if (stoken.stop_requested())
+        if (stoken.stop_requested() || ec)
         {
             return;
         }
 
-        const auto stat = ztd::lstat(entry, ec);
-        if (ec)
+        const auto stat = ztd::lstat::create(entry);
+        if (!stat)
         {
             continue;
         }
 
-        total_size += stat.size().data();
-        size_on_disk += stat.size_on_disk().data();
+        total_size += stat->size().data();
+        size_on_disk += stat->size_on_disk().data();
 
-        if (stat.is_directory())
+        if (stat->is_directory())
         {
             total_count_dir += 1;
             dispatcher.emit();
