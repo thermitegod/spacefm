@@ -18,8 +18,10 @@
 #include <chrono>
 #include <filesystem>
 #include <format>
+#include <mutex>
 #include <optional>
 #include <ranges>
+#include <shared_mutex>
 #include <span>
 #include <string>
 #include <string_view>
@@ -50,16 +52,15 @@ struct desktop_cache_data final
     std::chrono::system_clock::time_point mtime;
 };
 
-std::mutex desktops_cache_mutex;
+std::shared_mutex desktops_cache_mutex;
 std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 } // namespace
 
 std::shared_ptr<vfs::desktop>
 vfs::desktop::create(const std::filesystem::path& path) noexcept
 {
-    std::scoped_lock lock(desktops_cache_mutex);
-
     {
+        std::shared_lock lock(desktops_cache_mutex);
         const auto it = desktops_cache.find(path);
         if (it != desktops_cache.cend())
         {
@@ -94,6 +95,7 @@ vfs::desktop::create(const std::filesystem::path& path) noexcept
         return nullptr;
     }
 
+    std::unique_lock lock(desktops_cache_mutex);
     const auto [it, _] = desktops_cache.insert_or_assign(path,
                                                          desktop_cache_data{
                                                              std::move(desktop),
