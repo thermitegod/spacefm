@@ -130,8 +130,6 @@ class file : public std::enable_shared_from_this<file>
     std::string display_size_;                  // displayed human-readable file size
     std::string display_size_bytes_;            // displayed file size in bytes
     std::string display_disk_size_;             // displayed human-readable file size on disk
-    std::string display_owner_;                 // displayed owner
-    std::string display_group_;                 // displayed group
     std::string display_atime_;                 // displayed accessed time
     std::string display_btime_;                 // displayed created time
     std::string display_ctime_;                 // displayed last status change time

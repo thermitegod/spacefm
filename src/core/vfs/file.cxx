@@ -18,9 +18,12 @@
 #include <filesystem>
 #include <format>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <unordered_map>
 #include <utility>
 
 #include <glibmm.h>
@@ -39,6 +42,59 @@
 #include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
+
+namespace
+{
+std::shared_mutex passwd_cache_mutex;
+std::unordered_map<std::uint32_t, std::string> passwd_cache;
+
+std::shared_mutex group_cache_mutex;
+std::unordered_map<std::uint32_t, std::string> group_cache;
+} // namespace
+
+[[nodiscard]] static std::string_view
+passwd_name(const std::uint32_t uid) noexcept
+{
+    {
+        std::shared_lock lock(passwd_cache_mutex);
+        const auto it = passwd_cache.find(uid);
+        if (it != passwd_cache.cend())
+        {
+            // logger::trace<logger::vfs>("passwd({})  cache   {}", uid, it->second);
+            return it->second;
+        }
+    }
+
+    const auto pw = ztd::passwd::create(uid);
+    std::string name = pw ? pw->name() : std::format("{}", uid);
+
+    std::lock_guard lock(passwd_cache_mutex);
+    const auto [it, _] = passwd_cache.try_emplace(uid, std::move(name));
+    // logger::trace<logger::vfs>("passwd({})  new     {}", uid, it->second);
+    return it->second;
+}
+
+[[nodiscard]] static std::string_view
+group_name(const std::uint32_t gid) noexcept
+{
+    {
+        std::shared_lock lock(group_cache_mutex);
+        const auto it = group_cache.find(gid);
+        if (it != group_cache.cend())
+        {
+            // logger::trace<logger::vfs>("group({})  cache   {}", gid, it->second);
+            return it->second;
+        }
+    }
+
+    const auto gr = ztd::group::create(gid);
+    std::string name = gr ? gr->name() : std::format("{}", gid);
+
+    std::lock_guard lock(group_cache_mutex);
+    const auto [it, _] = group_cache.try_emplace(gid, std::move(name));
+    // logger::trace<logger::vfs>("group({})  new     {}", gid, it->second);
+    return it->second;
+}
 
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path) noexcept
@@ -101,20 +157,6 @@ vfs::file::update() noexcept
 
     // disk file size formated
     display_disk_size_ = vfs::utils::format_file_size(size_on_disk());
-
-    // owner
-    const auto pw = ztd::passwd::create(stat_.uid().data());
-    if (pw)
-    {
-        display_owner_ = pw->name();
-    }
-
-    // group
-    const auto gr = ztd::group::create(stat_.gid().data());
-    if (gr)
-    {
-        display_group_ = gr->name();
-    }
 
     // time
     display_atime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(atime()));
@@ -236,13 +278,13 @@ vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 std::string_view
 vfs::file::display_owner() const noexcept
 {
-    return display_owner_;
+    return passwd_name(stat_.uid().data());
 }
 
 std::string_view
 vfs::file::display_group() const noexcept
 {
-    return display_group_;
+    return group_name(stat_.gid().data());
 }
 
 std::string_view
