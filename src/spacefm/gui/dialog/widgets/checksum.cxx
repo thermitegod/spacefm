@@ -175,14 +175,14 @@ gui::widget::Checksum::on_calculate_hash_finished() noexcept
 }
 
 bool
-gui::widget::Checksum::has_checksum() noexcept
+gui::widget::Checksum::has_checksum() const noexcept
 {
     std::scoped_lock lock(result_mutex_);
     return !hash_result_.empty() && !hash_result_.contains("Error");
 }
 
 std::string
-gui::widget::Checksum::get_checksum() noexcept
+gui::widget::Checksum::get_checksum() const noexcept
 {
     std::scoped_lock lock(result_mutex_);
     return hash_result_;

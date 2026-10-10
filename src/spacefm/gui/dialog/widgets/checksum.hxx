@@ -34,8 +34,8 @@ class Checksum : public Gtk::Box
     Checksum(std::string_view type, const std::filesystem::path& path);
     ~Checksum() override;
 
-    [[nodiscard]] bool has_checksum() noexcept;
-    [[nodiscard]] std::string get_checksum() noexcept;
+    [[nodiscard]] bool has_checksum() const noexcept;
+    [[nodiscard]] std::string get_checksum() const noexcept;
 
     void reset() noexcept;
 
@@ -49,7 +49,7 @@ class Checksum : public Gtk::Box
     std::string algo_type_;
 
     std::string hash_result_;
-    std::mutex result_mutex_;
+    mutable std::mutex result_mutex_;
 
     Glib::Dispatcher dispatcher_;
     std::jthread thread_;
