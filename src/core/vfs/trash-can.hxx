@@ -17,8 +17,8 @@
 
 #include <chrono>
 #include <filesystem>
-#include <flat_map>
 #include <memory>
+#include <optional>
 #include <system_error>
 
 #include <ztd/ztd.hxx>
@@ -35,7 +35,7 @@ namespace vfs
 //
 // https://specifications.freedesktop.org/trash/1.0/
 
-struct trashinfo
+struct trashinfo final
 {
     std::filesystem::path path;
     std::chrono::system_clock::time_point time;
@@ -47,10 +47,11 @@ std::optional<trashinfo> trashinfo_read(const std::filesystem::path& infopath) n
 class trash_can
 {
   private:
-    trash_can() noexcept;
+    explicit trash_can(const std::filesystem::path& path) noexcept;
 
   public:
-    [[nodiscard]] static std::shared_ptr<vfs::trash_can> create() noexcept;
+    [[nodiscard]] static std::shared_ptr<vfs::trash_can>
+    create(const std::filesystem::path& path) noexcept;
 
     // Move a file or directory into the trash.
     [[nodiscard]] static bool trash(const std::filesystem::path& path) noexcept;
@@ -63,34 +64,22 @@ class trash_can
     // Currently a NOOP
     static void empty(const std::filesystem::path& path) noexcept;
 
+    [[nodiscard]] std::filesystem::path
+    unique_filename(const std::filesystem::path& path) const noexcept;
+    void create_trash_dir() const noexcept;
+    void create_trash_info(const std::filesystem::path& path,
+                           const std::filesystem::path& target_filename) const noexcept;
+    void move(const std::filesystem::path& path,
+              const std::filesystem::path& target_filename) const noexcept;
+
+    [[nodiscard]] bool is_trash_dir(const std::filesystem::path& path) const noexcept;
+
   private:
-    class trash_dir final
-    {
-      public:
-        explicit trash_dir(const std::filesystem::path& path) noexcept;
-
-        [[nodiscard]] std::filesystem::path
-        unique_filename(const std::filesystem::path& path) const noexcept;
-        void create_trash_dir() const noexcept;
-        void create_trash_info(const std::filesystem::path& path,
-                               const std::filesystem::path& target_filename) const noexcept;
-        void move(const std::filesystem::path& path,
-                  const std::filesystem::path& target_filename) const noexcept;
-
-        [[nodiscard]] bool is_trash_dir(const std::filesystem::path& path) const noexcept;
-
-      private:
-        std::filesystem::path trash_path_;
-        std::filesystem::path files_path_;
-        std::filesystem::path info_path_;
-    };
-
     [[nodiscard]] static u64 mount_id(const std::filesystem::path& path) noexcept;
     [[nodiscard]] static std::filesystem::path toplevel(const std::filesystem::path& path) noexcept;
 
-    [[nodiscard]] std::shared_ptr<trash_dir>
-    get_trash_dir(const std::filesystem::path& path) noexcept;
-
-    std::flat_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
+    std::filesystem::path trash_path_;
+    std::filesystem::path files_path_;
+    std::filesystem::path info_path_;
 };
 } // namespace vfs

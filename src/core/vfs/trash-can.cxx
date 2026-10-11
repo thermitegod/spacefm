@@ -17,9 +17,11 @@
 #include <filesystem>
 #include <format>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
-#include <string_view>
 #include <system_error>
+#include <unordered_map>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -29,27 +31,20 @@
 #include "vfs/trash-can.hxx"
 #include "vfs/user-dirs.hxx"
 
-#include "vfs/utils/file-ops.hxx"
 #include "vfs/utils/utils.hxx"
 
 #include "logger.hxx"
 
-// TODO
-// - create_trash_info() reuse mount_id and toplevel, merge into vfs::trash_can::trash?
-
-namespace global
+namespace
 {
-const std::shared_ptr<vfs::trash_can> trash_can = vfs::trash_can::create();
-}
+std::shared_mutex trash_cache_mutex;
+std::unordered_map<u64, std::shared_ptr<vfs::trash_can>> trash_cache;
+} // namespace
 
-vfs::trash_can::trash_can() noexcept
+vfs::trash_can::trash_can(const std::filesystem::path& path) noexcept
+    : trash_path_(path), files_path_(path / "files"), info_path_(path / "info")
 {
-    const auto stat = ztd::statx::create(vfs::user::home(), ztd::statx::symlink::follow);
-
-    const auto home_id = stat->mount_id();
-    const auto user_trash = vfs::user::data() / "Trash";
-
-    trash_dirs_[home_id] = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
+    // create_trash_dir();
 }
 
 u64
@@ -60,14 +55,38 @@ vfs::trash_can::mount_id(const std::filesystem::path& path) noexcept
 }
 
 std::shared_ptr<vfs::trash_can>
-vfs::trash_can::create() noexcept
+vfs::trash_can::create(const std::filesystem::path& path) noexcept
 {
+    const auto id = mount_id(path);
+
+    {
+        std::shared_lock lock(trash_cache_mutex);
+        const auto it = trash_cache.find(id);
+        if (it != trash_cache.cend())
+        {
+            return it->second;
+        }
+    }
+
+    std::filesystem::path trash_path;
+    if (id == mount_id(vfs::user::home()))
+    {
+        trash_path = vfs::user::data() / "Trash";
+    }
+    else
+    {
+        trash_path = toplevel(path) / std::format(".Trash-{}", getuid());
+    }
+
     struct hack : public vfs::trash_can
     {
-        hack() : trash_can() {}
+        hack(const std::filesystem::path& path) : trash_can(path) {}
     };
+    const auto trash = std::make_shared<hack>(trash_path);
 
-    return std::make_shared<hack>();
+    std::unique_lock lock(trash_cache_mutex);
+    const auto [it, _] = trash_cache.try_emplace(id, trash);
+    return it->second;
 }
 
 std::filesystem::path
@@ -87,47 +106,27 @@ vfs::trash_can::toplevel(const std::filesystem::path& path) noexcept
     return last_path;
 }
 
-std::shared_ptr<vfs::trash_can::trash_dir>
-vfs::trash_can::get_trash_dir(const std::filesystem::path& path) noexcept
-{
-    const auto id = mount_id(path);
-
-    if (trash_dirs_.contains(id))
-    {
-        return trash_dirs_[id];
-    }
-
-    // path on another device, cannot use $HOME trashcan
-    const auto trash_path = toplevel(path) / std::format(".Trash-{}", getuid());
-
-    auto trash_dir = std::make_shared<vfs::trash_can::trash_dir>(trash_path);
-    trash_dirs_[id] = trash_dir;
-
-    return trash_dir;
-}
-
 bool
 vfs::trash_can::trash(const std::filesystem::path& path) noexcept
 {
-    const auto trash_dir = global::trash_can->get_trash_dir(path);
-    if (!trash_dir)
+    const auto trash = vfs::trash_can::create(path);
+    if (!trash)
     {
         return false;
     }
 
-    if (trash_dir->is_trash_dir(path))
+    if (trash->is_trash_dir(path))
     {
         logger::warn<logger::vfs>("Refusing to trash a Trash Dir: {}", path);
         return false;
     }
 
-    trash_dir->create_trash_dir();
+    trash->create_trash_dir();
 
-    const auto target_name = trash_dir->unique_filename(path);
-    trash_dir->create_trash_info(path, target_name);
-    trash_dir->move(path, target_name);
-
-    // logger::info<logger::vfs>("moved to trash: {}", path);
+    const auto target_name = trash->unique_filename(path);
+    trash->create_trash_info(path, target_name);
+    trash->move(path, target_name);
+    // logger::debug<logger::vfs>("vfs::trash_can({}) trash   {}", trash->trash_path_, path);
 
     return true;
 }
@@ -147,20 +146,14 @@ vfs::trash_can::empty(const std::filesystem::path& path) noexcept
     // NOOP
 }
 
-vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept
-    : trash_path_(path), files_path_(path / "files"), info_path_(path / "info")
-{
-    create_trash_dir();
-}
-
 std::filesystem::path
-vfs::trash_can::trash_dir::unique_filename(const std::filesystem::path& path) const noexcept
+vfs::trash_can::unique_filename(const std::filesystem::path& path) const noexcept
 {
     return vfs::utils::unique_path(files_path_, path.filename(), "_").filename();
 }
 
 void
-vfs::trash_can::trash_dir::create_trash_dir() const noexcept
+vfs::trash_can::create_trash_dir() const noexcept
 {
     const auto create_dir = [](const std::filesystem::path& path)
     {
@@ -177,8 +170,8 @@ vfs::trash_can::trash_dir::create_trash_dir() const noexcept
 }
 
 void
-vfs::trash_can::trash_dir::create_trash_info(
-    const std::filesystem::path& path, const std::filesystem::path& target_filename) const noexcept
+vfs::trash_can::create_trash_info(const std::filesystem::path& path,
+                                  const std::filesystem::path& target_filename) const noexcept
 {
     const auto path_value = std::invoke(
         [](const auto& path) -> std::string
@@ -208,8 +201,8 @@ vfs::trash_can::trash_dir::create_trash_info(
 }
 
 void
-vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
-                                const std::filesystem::path& target_filename) const noexcept
+vfs::trash_can::move(const std::filesystem::path& path,
+                     const std::filesystem::path& target_filename) const noexcept
 {
     std::error_code ec;
     std::filesystem::rename(path, files_path_ / target_filename, ec);
@@ -218,7 +211,7 @@ vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
 }
 
 bool
-vfs::trash_can::trash_dir::is_trash_dir(const std::filesystem::path& path) const noexcept
+vfs::trash_can::is_trash_dir(const std::filesystem::path& path) const noexcept
 {
     return path == trash_path_ || path == files_path_ || path == info_path_;
 }
