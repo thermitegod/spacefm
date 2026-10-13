@@ -27,13 +27,6 @@ option(
 )
 
 option(
-    'socket',
-    type: 'boolean',
-    value: true,
-    description: 'Enable socket commands'
-)
-
-option(
     'media',
     type: 'boolean',
     value: true,
