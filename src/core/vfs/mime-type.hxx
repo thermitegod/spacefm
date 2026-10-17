@@ -69,7 +69,7 @@ class mime_type
     void set_default_action(std::string_view desktop_id) const noexcept;
 
     // If user-custom desktop file is created, it is returned in custom_desktop.
-    [[nodiscard]] std::string add_action(std::string_view desktop_id) const noexcept;
+    [[nodiscard]] std::optional<std::string> add_action(std::string_view desktop_id) const noexcept;
 
     [[nodiscard]] bool is_unknown() const noexcept;
     [[nodiscard]] bool is_archive() const noexcept;

@@ -112,30 +112,22 @@ vfs::mime_type::description() const noexcept
 std::vector<std::string>
 vfs::mime_type::actions() const noexcept
 {
-    return vfs::mime::get_actions(type_);
+    return vfs::mime_action::actions(type_);
 }
 
 std::optional<std::string>
 vfs::mime_type::default_action() const noexcept
 {
-    auto def = vfs::mime::get_default_action(type_);
-
-    /* FIXME:
-     * If default app is not set, choose one from all availble actions.
-     * Is there any better way to do this?
-     * Should we put this fallback handling here, or at API of higher level?
-     */
-    if (def)
-    {
-        return def;
+    auto action = vfs::mime_action::default_action(type_);
+    if (!action)
+    { // no default action is set, using first available action
+        auto actions = vfs::mime_action::actions(type_);
+        if (!actions.empty())
+        {
+            action = actions.front();
+        }
     }
-
-    const std::vector<std::string> actions = vfs::mime::get_actions(type_);
-    if (!actions.empty())
-    {
-        return actions.at(0).data();
-    }
-    return std::nullopt;
+    return action;
 }
 
 /*
@@ -151,19 +143,20 @@ vfs::mime_type::set_default_action(std::string_view desktop_id) const noexcept
         return;
     }
 
-    const auto custom_desktop = add_action(desktop_id);
-
-    vfs::mime::set_default_action(type_, custom_desktop.empty() ? desktop_id : custom_desktop);
+    const auto action = add_action(desktop_id);
+    if (action)
+    {
+        vfs::mime_action::set_default_action(type_, action ? *action : desktop_id);
+    }
 }
 
-/* If user-custom desktop file is created, it is returned in custom_desktop. */
-std::string
+std::optional<std::string>
 vfs::mime_type::add_action(std::string_view desktop_id) const noexcept
 {
     // do not create custom desktop file if desktop_id is not a command
     if (!desktop_id.ends_with(".desktop"))
     {
-        return vfs::mime::add_action(type_, desktop_id);
+        return vfs::mime_action::add_action(type_, desktop_id);
     }
     return desktop_id.data();
 }

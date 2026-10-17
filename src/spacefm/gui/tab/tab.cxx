@@ -3240,7 +3240,11 @@ gui::tab::show_app_chooser_dialog() noexcept
             }
             else if (type->type() != vfs::mime_type::directory)
             {
-                app = type->add_action(response.app);
+                auto action = type->add_action(response.app);
+                if (action)
+                {
+                    app = *action;
+                }
             }
 
             open_selected_files_with_app(app);
