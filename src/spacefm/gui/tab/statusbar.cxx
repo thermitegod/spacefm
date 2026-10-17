@@ -67,10 +67,15 @@ gui::statusbar::update(const std::shared_ptr<vfs::dir>& dir,
 
     if (std::filesystem::exists(cwd))
     {
-        const auto fs_stat = ztd::statvfs(cwd);
+        std::string free_size;
+        std::string disk_size;
 
-        const auto free_size = vfs::utils::format_file_size(fs_stat.bsize() * fs_stat.bavail());
-        const auto disk_size = vfs::utils::format_file_size(fs_stat.frsize() * fs_stat.blocks());
+        const auto fs_stat = ztd::statvfs::create(cwd);
+        if (fs_stat)
+        {
+            free_size = vfs::utils::format_file_size(fs_stat->bsize() * fs_stat->bavail());
+            disk_size = vfs::utils::format_file_size(fs_stat->frsize() * fs_stat->blocks());
+        }
 
         text.append(std::format(" {} / {}   ", free_size, disk_size));
     }
