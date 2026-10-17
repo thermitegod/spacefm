@@ -87,10 +87,4 @@ class mime_type
     std::string description_;
     Glib::RefPtr<Gio::Icon> icon_;
 };
-
-[[nodiscard]] std::optional<std::filesystem::path>
-mime_type_locate_desktop_file(std::string_view desktop_id) noexcept;
-[[nodiscard]] std::optional<std::filesystem::path>
-mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                              std::string_view desktop_id) noexcept;
 } // namespace vfs
