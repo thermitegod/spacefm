@@ -18,7 +18,6 @@
 #pragma once
 
 #include <filesystem>
-#include <flat_map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -26,46 +25,39 @@
 #include <vector>
 
 #include <gdkmm.h>
+#include <giomm.h>
 #include <gtkmm.h>
-
-#include <ztd/ztd.hxx>
 
 namespace vfs
 {
-namespace constants::mime_type
-{
-inline constexpr std::string_view unknown{"application/octet-stream"};
-inline constexpr std::string_view directory{"inode/directory"};
-inline constexpr std::string_view executable{"application/x-executable"};
-inline constexpr std::string_view plain_text{"text/plain"};
-inline constexpr std::string_view zerosize{"application/x-zerosize"};
-} // namespace constants::mime_type
-
 class mime_type
 {
   private:
-    mime_type() = delete;
     explicit mime_type(std::string_view type) noexcept;
-    ~mime_type() noexcept;
+
+  public:
+    static constexpr auto unknown{"application/octet-stream"};
+    static constexpr auto directory{"inode/directory"};
+    static constexpr auto executable{"application/x-executable"};
+    static constexpr auto plain_text{"text/plain"};
+    static constexpr auto zerosize{"application/x-zerosize"};
+
+    mime_type() = delete;
+    ~mime_type() = default;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
     mime_type& operator=(const mime_type& other) = delete;
     mime_type& operator=(mime_type&& other) = delete;
 
-  public:
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_file(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_type(std::string_view type) noexcept;
 
-    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) noexcept;
-
-    // Get mime-type string
     [[nodiscard]] std::string_view type() const noexcept;
-
-    // Get human-readable description of mime-type
     [[nodiscard]] std::string_view description() const noexcept;
+    [[nodiscard]] Glib::RefPtr<Gtk::IconPaintable> icon(const std::int32_t size) const noexcept;
 
     // Get available actions (applications) for this mime-type
     [[nodiscard]] std::vector<std::string> actions() const noexcept;
@@ -79,6 +71,7 @@ class mime_type
     // If user-custom desktop file is created, it is returned in custom_desktop.
     [[nodiscard]] std::string add_action(std::string_view desktop_id) const noexcept;
 
+    [[nodiscard]] bool is_unknown() const noexcept;
     [[nodiscard]] bool is_archive() const noexcept;
     [[nodiscard]] bool is_executable() const noexcept;
     [[nodiscard]] bool is_text() const noexcept;
@@ -92,8 +85,7 @@ class mime_type
 
     std::string type_;
     std::string description_;
-
-    std::flat_map<std::int32_t, Glib::RefPtr<Gtk::IconPaintable>> icons_;
+    Glib::RefPtr<Gio::Icon> icon_;
 };
 
 [[nodiscard]] std::optional<std::filesystem::path>

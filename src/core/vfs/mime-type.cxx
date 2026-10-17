@@ -16,7 +16,6 @@
  */
 
 #include <filesystem>
-#include <flat_map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -34,7 +33,6 @@
 #include "vfs/mime-type.hxx"
 
 #include "vfs/mime-type/mime-action.hxx"
-#include "vfs/mime-type/mime-type.hxx"
 #include "vfs/utils/icon.hxx"
 
 #include "logger.hxx"
@@ -73,7 +71,10 @@ vfs::mime_type::create(std::string_view type) noexcept
 std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
 {
-    return vfs::mime_type::create(vfs::detail::mime_type::get_by_file(path));
+    [[maybe_unused]] bool uncertain;
+    auto type = Gio::content_type_guess(path, nullptr, 0, uncertain);
+
+    return vfs::mime_type::create(type.raw());
 }
 
 std::shared_ptr<vfs::mime_type>
@@ -82,113 +83,17 @@ vfs::mime_type::create_from_type(std::string_view type) noexcept
     return vfs::mime_type::create(type);
 }
 
-vfs::mime_type::mime_type(std::string_view type) noexcept : type_(type)
-{
-    const auto icon_data = vfs::detail::mime_type::get_desc_icon(type_);
-    description_ = icon_data[1];
-    if (description_.empty() && type_ != vfs::constants::mime_type::unknown)
-    {
-        logger::warn<logger::vfs>("mime-type {} has no description (comment)", type_);
-
-        const auto mime_unknown =
-            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-        if (mime_unknown)
-        {
-            description_ = mime_unknown->description();
-        }
-    }
-}
-
-vfs::mime_type::~mime_type() noexcept
+vfs::mime_type::mime_type(std::string_view type) noexcept
+    : type_(type), description_(Gio::content_type_get_description(type_)),
+      icon_(Gio::content_type_get_icon(type_))
 {
     //
 }
 
 Glib::RefPtr<Gtk::IconPaintable>
-vfs::mime_type::icon(const std::int32_t size) noexcept
+vfs::mime_type::icon(const std::int32_t size) const noexcept
 {
-    if (icons_.contains(size))
-    {
-        return icons_.at(size);
-    }
-
-    Glib::RefPtr<Gtk::IconPaintable> icon = nullptr;
-
-    if (type_ == vfs::constants::mime_type::directory)
-    {
-        icon = vfs::utils::load_icon("folder", size);
-        icons_.insert({size, icon});
-
-        return icon;
-    }
-
-    // get description and icon from freedesktop XML - these are fetched
-    // together for performance.
-    const auto [mime_icon, mime_desc] = vfs::detail::mime_type::get_desc_icon(type_);
-
-    if (!mime_icon.empty())
-    {
-        icon = vfs::utils::load_icon(mime_icon, size);
-    }
-    if (!mime_desc.empty())
-    {
-        if (description_.empty())
-        {
-            description_ = mime_desc;
-        }
-    }
-    if (description_.empty())
-    {
-        logger::warn<logger::vfs>("mime-type {} has no description (comment)", type_);
-        const auto vfs_mime = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-        if (vfs_mime)
-        {
-            description_ = vfs_mime->description();
-        }
-    }
-
-    if (!icon)
-    {
-        // guess icon
-        if (type_.contains('/'))
-        {
-            // convert mime-type foo/bar to foo-bar
-            const std::string icon_name = ztd::replace(type_, "/", "-");
-
-            // is there an icon named foo-bar?
-            icon = vfs::utils::load_icon(icon_name, size);
-            // fallback try foo-x-generic
-            if (!icon)
-            {
-                const auto mime = ztd::partition(type_, "/")[0];
-                const std::string generic_icon_name = std::format("{}-x-generic", mime);
-                icon = vfs::utils::load_icon(generic_icon_name, size);
-            }
-        }
-    }
-
-    if (!icon)
-    {
-        /* prevent endless recursion of mime_type::type::unknown */
-        if (type_ != vfs::constants::mime_type::unknown)
-        {
-            /* FIXME: fallback to icon of parent mime-type */
-            const auto unknown =
-                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-            icon = unknown->icon(size);
-        }
-        else /* unknown */
-        {
-            icon = vfs::utils::load_icon("unknown", size);
-        }
-    }
-
-    if (!icons_.contains(size))
-    {
-        icons_.insert({size, icon});
-    }
-
-    return icon;
+    return vfs::utils::load_icon(icon_, size);
 }
 
 std::string_view
@@ -207,13 +112,13 @@ vfs::mime_type::description() const noexcept
 std::vector<std::string>
 vfs::mime_type::actions() const noexcept
 {
-    return vfs::detail::mime_type::get_actions(type_);
+    return vfs::mime::get_actions(type_);
 }
 
 std::optional<std::string>
 vfs::mime_type::default_action() const noexcept
 {
-    auto def = vfs::detail::mime_type::get_default_action(type_);
+    auto def = vfs::mime::get_default_action(type_);
 
     /* FIXME:
      * If default app is not set, choose one from all availble actions.
@@ -225,7 +130,7 @@ vfs::mime_type::default_action() const noexcept
         return def;
     }
 
-    const std::vector<std::string> actions = vfs::detail::mime_type::get_actions(type_);
+    const std::vector<std::string> actions = vfs::mime::get_actions(type_);
     if (!actions.empty())
     {
         return actions.at(0).data();
@@ -248,9 +153,7 @@ vfs::mime_type::set_default_action(std::string_view desktop_id) const noexcept
 
     const auto custom_desktop = add_action(desktop_id);
 
-    vfs::detail::mime_type::set_default_action(type_,
-                                               custom_desktop.empty() ? desktop_id
-                                                                      : custom_desktop);
+    vfs::mime::set_default_action(type_, custom_desktop.empty() ? desktop_id : custom_desktop);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
@@ -260,45 +163,123 @@ vfs::mime_type::add_action(std::string_view desktop_id) const noexcept
     // do not create custom desktop file if desktop_id is not a command
     if (!desktop_id.ends_with(".desktop"))
     {
-        return vfs::detail::mime_type::add_action(type_, desktop_id);
+        return vfs::mime::add_action(type_, desktop_id);
     }
     return desktop_id.data();
 }
 
 bool
+vfs::mime_type::is_unknown() const noexcept
+{
+    return type_ == vfs::mime_type::unknown;
+}
+
+bool
 vfs::mime_type::is_archive() const noexcept
 {
-    return vfs::detail::mime_type::is_archive(type_);
+    // Taken from file-roller .desktop file
+    static constexpr std::array<std::string_view, 67> archive_mime_types{
+        "application/bzip2",
+        "application/gzip",
+        "application/vnd.android.package-archive",
+        "application/vnd.ms-cab-compressed",
+        "application/vnd.debian.binary-package",
+        "application/vnd.rar",
+        "application/x-7z-compressed",
+        "application/x-7z-compressed-tar",
+        "application/x-ace",
+        "application/x-alz",
+        "application/x-apple-diskimage",
+        "application/x-ar",
+        "application/x-archive",
+        "application/x-arj",
+        "application/x-brotli",
+        "application/x-bzip-brotli-tar",
+        "application/x-bzip",
+        "application/x-bzip-compressed-tar",
+        "application/x-bzip1",
+        "application/x-bzip1-compressed-tar",
+        "application/x-bzip3",
+        "application/x-bzip3-compressed-tar",
+        "application/x-cabinet",
+        "application/x-cd-image",
+        "application/x-compress",
+        "application/x-compressed-tar",
+        "application/x-cpio",
+        "application/x-chrome-extension",
+        "application/x-deb",
+        "application/x-ear",
+        "application/x-ms-dos-executable",
+        "application/x-gtar",
+        "application/x-gzip",
+        "application/x-gzpostscript",
+        "application/x-java-archive",
+        "application/x-lha",
+        "application/x-lhz",
+        "application/x-lrzip",
+        "application/x-lrzip-compressed-tar",
+        "application/x-lz4",
+        "application/x-lzip",
+        "application/x-lzip-compressed-tar",
+        "application/x-lzma",
+        "application/x-lzma-compressed-tar",
+        "application/x-lzop",
+        "application/x-lz4-compressed-tar",
+        "application/x-ms-wim",
+        "application/x-rar",
+        "application/x-rar-compressed",
+        "application/x-rpm",
+        "application/x-source-rpm",
+        "application/x-rzip",
+        "application/x-rzip-compressed-tar",
+        "application/x-tar",
+        "application/x-tarz",
+        "application/x-tzo",
+        "application/x-stuffit",
+        "application/x-war",
+        "application/x-xar",
+        "application/x-xz",
+        "application/x-xz-compressed-tar",
+        "application/x-zip",
+        "application/x-zip-compressed",
+        "application/x-zstd-compressed-tar",
+        "application/x-zoo",
+        "application/zip",
+        "application/zstd",
+    };
+
+    return std::ranges::contains(archive_mime_types, type_);
 }
 
 bool
 vfs::mime_type::is_executable() const noexcept
 {
-    return vfs::detail::mime_type::is_executable(type_);
+    return Gio::content_type_can_be_executable(type_) || type_ == vfs::mime_type::executable ||
+           type_ == "application/x-shellscript";
 }
 
 bool
 vfs::mime_type::is_text() const noexcept
 {
-    return vfs::detail::mime_type::is_text(type_);
+    return Gio::content_type_is_a(type_, "text/plain");
 }
 
 bool
 vfs::mime_type::is_image() const noexcept
 {
-    return vfs::detail::mime_type::is_image(type_);
+    return type_.starts_with("image/");
 }
 
 bool
 vfs::mime_type::is_video() const noexcept
 {
-    return vfs::detail::mime_type::is_video(type_);
+    return type_.starts_with("video/");
 }
 
 bool
 vfs::mime_type::is_audio() const noexcept
 {
-    return vfs::detail::mime_type::is_audio(type_);
+    return type_.starts_with("audio/");
 }
 
 bool
@@ -310,12 +291,12 @@ vfs::mime_type::is_media() const noexcept
 std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(std::string_view desktop_id) noexcept
 {
-    return vfs::detail::mime_type::locate_desktop_file(desktop_id);
+    return vfs::mime::locate_desktop_file(desktop_id);
 }
 
 std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(const std::filesystem::path& dir,
                                    std::string_view desktop_id) noexcept
 {
-    return vfs::detail::mime_type::locate_desktop_file(dir, desktop_id);
+    return vfs::mime::locate_desktop_file(dir, desktop_id);
 }

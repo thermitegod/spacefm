@@ -33,9 +33,6 @@ sources += files(
     'src/vfs/utils/file-ops.cxx',
     'src/vfs/utils/permissions.cxx',
 
-    # vfs - chrome
-    'src/vfs/mime-type/chrome/mime-utils.cxx',
-
     # notify-cpp
     'src/notify-cpp/controller.cxx',
 )

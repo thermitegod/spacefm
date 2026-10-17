@@ -117,8 +117,6 @@ vfs_sources = files(
     'vfs/linux/sysfs.cxx',
 
     'vfs/mime-type/mime-action.cxx',
-    'vfs/mime-type/mime-type.cxx',
-    'vfs/mime-type/chrome/mime-utils.cxx',
 )
 
 vfs_dependencies = [

@@ -23,7 +23,7 @@
 #include <string_view>
 #include <vector>
 
-namespace vfs::detail::mime_type
+namespace vfs::mime
 {
 enum class action : std::uint8_t
 {
@@ -68,4 +68,4 @@ void set_default_action(std::string_view mime_type, std::string_view desktop_id)
 locate_desktop_file(std::string_view desktop_id) noexcept;
 [[nodiscard]] std::optional<std::filesystem::path>
 locate_desktop_file(const std::filesystem::path& dir, std::string_view desktop_id) noexcept;
-} // namespace vfs::detail::mime_type
+} // namespace vfs::mime

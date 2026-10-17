@@ -142,7 +142,7 @@ vfs::file::update() noexcept
     const auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
-        mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+        mime_type_ = vfs::mime_type::create_from_type(vfs::mime_type::unknown);
         return false;
     }
     stat_ = stat.value();

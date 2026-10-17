@@ -3238,7 +3238,7 @@ gui::tab::show_app_chooser_dialog() noexcept
             { // The selected app is set to default action
                 type->set_default_action(response.app);
             }
-            else if (type->type() != vfs::constants::mime_type::directory)
+            else if (type->type() != vfs::mime_type::directory)
             {
                 app = type->add_action(response.app);
             }

@@ -147,7 +147,7 @@ gui::action::open_files_auto(Gtk::ApplicationWindow& parent, const std::filesyst
         if (!app_desktop && mime_type->is_text())
         {
             // FIXME: special handling for plain text file
-            mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::plain_text);
+            mime_type = vfs::mime_type::create_from_type(vfs::mime_type::plain_text);
             app_desktop = mime_type->default_action();
         }
 

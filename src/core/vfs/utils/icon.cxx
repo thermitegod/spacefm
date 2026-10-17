@@ -27,8 +27,7 @@
 #include "logger.hxx"
 
 Glib::RefPtr<Gtk::IconPaintable>
-vfs::utils::load_icon(std::string_view icon_name, const i32 icon_size,
-                      std::string_view fallback) noexcept
+vfs::utils::load_icon(std::string_view icon, const i32 size, std::string_view fallback) noexcept
 {
     auto display = Gdk::Display::get_default();
     if (!display)
@@ -36,15 +35,33 @@ vfs::utils::load_icon(std::string_view icon_name, const i32 icon_size,
         return nullptr;
     }
 
-    const auto icon_theme = Gtk::IconTheme::get_for_display(display);
+    const auto theme = Gtk::IconTheme::get_for_display(display);
 
-    if (!icon_theme->has_icon(icon_name.data()))
+    if (!theme->has_icon(icon.data()))
     {
-        logger::warn("Icon theme '{}' is missing icon name = {}",
-                     icon_theme->property_theme_name().get_value().data(),
-                     icon_name);
-        return icon_theme->lookup_icon(fallback.data(), icon_size.data());
+        logger::warn("Icon theme '{}' is missing icon: {}",
+                     theme->property_theme_name().get_value().data(),
+                     icon);
+        return theme->lookup_icon(fallback.data(), size.data());
     }
 
-    return icon_theme->lookup_icon(icon_name.data(), icon_size.data());
+    return theme->lookup_icon(icon.data(), size.data());
+}
+
+Glib::RefPtr<Gtk::IconPaintable>
+vfs::utils::load_icon(const Glib::RefPtr<Gio::Icon>& icon, const i32 size) noexcept
+{
+    auto display = Gdk::Display::get_default();
+    if (!display)
+    {
+        return nullptr;
+    }
+
+    const auto theme = Gtk::IconTheme::get_for_display(display);
+
+    return theme->lookup_icon(icon,
+                              size.data(),
+                              1,
+                              Gtk::TextDirection::NONE,
+                              Gtk::IconLookupFlags::NONE);
 }

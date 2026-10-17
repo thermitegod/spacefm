@@ -203,7 +203,7 @@ get_actions(const std::filesystem::path& dir, std::string_view mime_type,
                 if (!is_removed && !std::ranges::contains(actions, app))
                 {
                     /* check for app existence */
-                    if (vfs::detail::mime_type::locate_desktop_file(app))
+                    if (vfs::mime::locate_desktop_file(app))
                     {
                         // logger::info<logger::vfs>("                EXISTS");
                         actions.push_back(app);
@@ -253,7 +253,7 @@ move(std::vector<T>& v, const std::size_t old_index, const std::size_t new_index
 }
 
 std::vector<std::string>
-vfs::detail::mime_type::get_actions(std::string_view mime_type) noexcept
+vfs::mime::get_actions(std::string_view mime_type) noexcept
 {
     std::vector<std::string> actions;
 
@@ -319,7 +319,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id) noexcep
 
     if (is_desktop)
     {
-        const auto filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
+        const auto filename = vfs::mime::locate_desktop_file(desktop_id);
         if (!filename)
         {
             return false;
@@ -371,7 +371,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id) noexcep
         cmd = desktop_id.data();
     }
 
-    const std::vector<std::string> actions = vfs::detail::mime_type::get_actions(type);
+    const std::vector<std::string> actions = vfs::mime::get_actions(type);
     if (actions.empty())
     {
         return found;
@@ -387,7 +387,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id) noexcep
         }
         else /* Then, try to match by "Exec" and "Name" keys */
         {
-            const auto filename = vfs::detail::mime_type::locate_desktop_file(action);
+            const auto filename = vfs::mime::locate_desktop_file(action);
             if (!filename)
             {
                 return false;
@@ -441,7 +441,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
 
     if (desktop_id.ends_with(desktop_ext))
     {
-        const auto filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
+        const auto filename = vfs::mime::locate_desktop_file(desktop_id);
         if (!filename)
         {
             return "";
@@ -528,7 +528,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
 std::string
-vfs::detail::mime_type::add_action(std::string_view type, std::string_view desktop_id) noexcept
+vfs::mime::add_action(std::string_view type, std::string_view desktop_id) noexcept
 {
     if (mime_type_has_action(type, desktop_id))
     {
@@ -568,14 +568,14 @@ locate_desktop_file(const std::filesystem::path& dir, std::string_view desktop_i
 }
 
 std::optional<std::filesystem::path>
-vfs::detail::mime_type::locate_desktop_file(const std::filesystem::path& dir,
-                                            std::string_view desktop_id) noexcept
+vfs::mime::locate_desktop_file(const std::filesystem::path& dir,
+                               std::string_view desktop_id) noexcept
 {
     return ::locate_desktop_file(dir, desktop_id);
 }
 
 std::optional<std::filesystem::path>
-vfs::detail::mime_type::locate_desktop_file(std::string_view desktop_id) noexcept
+vfs::mime::locate_desktop_file(std::string_view desktop_id) noexcept
 {
     const auto data_dir = vfs::user::data();
 
@@ -598,7 +598,7 @@ vfs::detail::mime_type::locate_desktop_file(std::string_view desktop_id) noexcep
 }
 
 std::optional<std::string>
-vfs::detail::mime_type::get_default_action(std::string_view mime_type) noexcept
+vfs::mime::get_default_action(std::string_view mime_type) noexcept
 {
     assert(mime_type.empty() != true);
 
@@ -612,8 +612,7 @@ vfs::detail::mime_type::get_default_action(std::string_view mime_type) noexcept
 }
 
 void
-vfs::detail::mime_type::set_default_action(std::string_view mime_type,
-                                           std::string_view desktop_id) noexcept
+vfs::mime::set_default_action(std::string_view mime_type, std::string_view desktop_id) noexcept
 {
     assert(mime_type.empty() != true);
     assert(desktop_id.empty() != true);
