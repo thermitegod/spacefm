@@ -44,7 +44,8 @@ class app_chooser : public Gtk::ApplicationWindow
     {
       public:
         void init(app_chooser* parent, const std::shared_ptr<vfs::mime_type>& mime_type);
-        std::uint32_t position_ = 0; // selected item
+
+        [[nodiscard]] Glib::RefPtr<Gio::AppInfo> selected_application() const noexcept;
 
       protected:
         Glib::RefPtr<Gio::ListModel>
@@ -56,6 +57,7 @@ class app_chooser : public Gtk::ApplicationWindow
         void activate(const std::uint32_t position);
 
         Gtk::ListView* list_;
+        Glib::RefPtr<Gtk::SingleSelection> selection_model_;
         app_chooser* parent_;
     };
 
@@ -92,6 +94,8 @@ class app_chooser : public Gtk::ApplicationWindow
 
   private:
     std::shared_ptr<vfs::file> file_;
+    bool show_command_ = false;
+    bool show_default_ = false;
 
   public:
     [[nodiscard]] auto

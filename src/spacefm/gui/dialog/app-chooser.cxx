@@ -27,7 +27,7 @@
 gui::dialog::app_chooser::app_chooser(Gtk::ApplicationWindow& parent,
                                       const std::shared_ptr<vfs::file>& file, bool focus_all_apps,
                                       bool show_command, bool show_default)
-    : file_(file)
+    : file_(file), show_command_(show_command), show_default_(show_default)
 {
     set_transient_for(parent);
     set_modal(true);
@@ -54,7 +54,7 @@ gui::dialog::app_chooser::app_chooser(Gtk::ApplicationWindow& parent,
     file_type_hbox_.append(file_type_);
     box_.append(file_type_hbox_);
 
-    if (show_command)
+    if (show_command_)
     {
         entry_hbox_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
         entry_label_.set_label("Command:");
@@ -75,7 +75,7 @@ gui::dialog::app_chooser::app_chooser(Gtk::ApplicationWindow& parent,
 
     btn_open_in_terminal_.set_label("Open in a terminal");
     box_.append(btn_open_in_terminal_);
-    if (show_default)
+    if (show_default_)
     {
         btn_set_as_default_.set_label("Set as the default application for this file type");
         box_.append(btn_set_as_default_);
@@ -128,36 +128,46 @@ gui::dialog::app_chooser::on_button_ok_clicked()
     std::string app;
     bool is_desktop = false;
 
-    if (entry_.get_text_length() > 0)
+    const auto command = entry_.get_text();
+
+    if (show_command_ && !command.empty())
     { // use command text
-        is_desktop = false;
-        app = entry_.get_text();
+        app = command;
     }
     else
     { // use selected app
-        is_desktop = true;
-
         const auto current_page = notebook_.get_current_page();
-        auto* page = dynamic_cast<app_chooser::page*>(notebook_.get_nth_page(current_page));
 
-        auto* list = dynamic_cast<Gtk::ListView*>(page->get_child());
-        auto model = std::dynamic_pointer_cast<Gio::ListModel>(list->get_model());
-        auto item = model->get_object(page->position_);
-        if (auto app_info = std::dynamic_pointer_cast<Gio::AppInfo>(item))
+        auto* selected_page = dynamic_cast<page*>(notebook_.get_nth_page(current_page));
+
+        if (!selected_page)
         {
-            app = app_info->get_id();
+            return;
         }
+
+        const auto app_info = selected_page->selected_application();
+
+        if (!app_info)
+        {
+            return;
+        }
+
+        app = app_info->get_id();
+
+        if (app.empty())
+        {
+            return;
+        }
+
+        is_desktop = true;
     }
 
-    if (app.empty())
-    {
-        on_button_close_clicked();
-    }
-
-    signal_confirm().emit(chooser_response{.file = file_,
-                                           .app = app,
-                                           .is_desktop = is_desktop,
-                                           .set_default = btn_set_as_default_.get_active()});
+    signal_confirm_.emit(chooser_response{
+        .file = file_,
+        .app = std::move(app),
+        .is_desktop = is_desktop,
+        .set_default = show_default_ && btn_set_as_default_.get_active(),
+    });
 
     close();
 }
@@ -181,7 +191,11 @@ gui::dialog::app_chooser::page::init(app_chooser* parent,
     factory->signal_bind().connect(sigc::mem_fun(*this, &app_chooser::page::on_bind_item));
 
     auto model = create_application_list(mime_type);
-    list_ = Gtk::make_managed<Gtk::ListView>(Gtk::SingleSelection::create(model), factory);
+
+    selection_model_ = Gtk::SingleSelection::create(model);
+    selection_model_->set_autoselect(false);
+
+    list_ = Gtk::make_managed<Gtk::ListView>(selection_model_, factory);
     list_->signal_activate().connect(sigc::mem_fun(*this, &app_chooser::page::activate));
 
     set_child(*list_);
@@ -242,6 +256,29 @@ gui::dialog::app_chooser::page::on_bind_item(const Glib::RefPtr<Gtk::ListItem>& 
 void
 gui::dialog::app_chooser::page::activate(const std::uint32_t position)
 {
-    position_ = position;
+    if (!selection_model_ || position >= selection_model_->get_model()->get_n_items())
+    {
+        return;
+    }
+
+    selection_model_->set_selected(position);
     parent_->on_button_ok_clicked();
+}
+
+Glib::RefPtr<Gio::AppInfo>
+gui::dialog::app_chooser::page::selected_application() const noexcept
+{
+    if (!selection_model_)
+    {
+        return {};
+    }
+
+    const auto position = selection_model_->get_selected();
+    if (position == GTK_INVALID_LIST_POSITION)
+    {
+        return {};
+    }
+
+    return std::dynamic_pointer_cast<Gio::AppInfo>(
+        selection_model_->get_model()->get_object(position));
 }
