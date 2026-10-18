@@ -426,6 +426,7 @@ gui::dialog::rename::on_key_press(std::uint32_t keyval, std::uint32_t keycode,
     if (keyval == GDK_KEY_Escape)
     {
         on_button_cancel_clicked();
+        return true;
     }
     return false;
 }

@@ -151,10 +151,12 @@ gui::dialog::pattern::on_key_press(std::uint32_t keyval, std::uint32_t keycode,
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
         on_button_select_clicked();
+        return true;
     }
     if (keyval == GDK_KEY_Escape)
     {
         on_button_cancel_clicked();
+        return true;
     }
     return false;
 }

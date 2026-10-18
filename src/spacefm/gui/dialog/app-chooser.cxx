@@ -112,10 +112,12 @@ gui::dialog::app_chooser::on_key_press(std::uint32_t keyval, std::uint32_t keyco
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
         on_button_ok_clicked();
+        return true;
     }
     if (keyval == GDK_KEY_Escape)
     {
         on_button_close_clicked();
+        return true;
     }
     return false;
 }

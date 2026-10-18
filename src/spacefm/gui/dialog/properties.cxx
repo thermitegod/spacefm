@@ -244,6 +244,7 @@ gui::dialog::properties::on_key_press(std::uint32_t keyval, std::uint32_t keycod
     if (keyval == GDK_KEY_Escape)
     {
         on_button_close_clicked();
+        return true;
     }
     return false;
 }
