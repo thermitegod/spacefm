@@ -57,20 +57,19 @@ class file : public std::enable_shared_from_this<file>
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
 
-    [[nodiscard]] std::string_view display_size() const noexcept;
-    [[nodiscard]] std::string_view display_size_in_bytes() const noexcept;
-    [[nodiscard]] std::string_view display_size_on_disk() const noexcept;
-
     [[nodiscard]] u64 blocks() const noexcept;
 
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
 
+    [[nodiscard]] std::string_view display_size() noexcept;
+    [[nodiscard]] std::string_view display_size_in_bytes() noexcept;
+    [[nodiscard]] std::string_view display_size_on_disk() noexcept;
     [[nodiscard]] std::string_view display_owner() const noexcept;
     [[nodiscard]] std::string_view display_group() const noexcept;
-    [[nodiscard]] std::string_view display_atime() const noexcept;
-    [[nodiscard]] std::string_view display_btime() const noexcept;
-    [[nodiscard]] std::string_view display_ctime() const noexcept;
-    [[nodiscard]] std::string_view display_mtime() const noexcept;
+    [[nodiscard]] std::string_view display_atime() noexcept;
+    [[nodiscard]] std::string_view display_btime() noexcept;
+    [[nodiscard]] std::string_view display_ctime() noexcept;
+    [[nodiscard]] std::string_view display_mtime() noexcept;
     [[nodiscard]] std::string_view display_permissions() noexcept;
 
     [[nodiscard]] std::chrono::system_clock::time_point atime() const noexcept;

@@ -139,6 +139,15 @@ vfs::file::~file() noexcept
 bool
 vfs::file::update() noexcept
 {
+    display_size_.clear();
+    display_size_bytes_.clear();
+    display_disk_size_.clear();
+    display_atime_.clear();
+    display_btime_.clear();
+    display_ctime_.clear();
+    display_mtime_.clear();
+    display_perm_.clear();
+
     const auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
@@ -150,22 +159,6 @@ vfs::file::update() noexcept
     // logger::debug<logger::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), name, file_stat.size());
 
     mime_type_ = vfs::mime_type::create_from_file(path_);
-
-    // file size formated
-    display_size_ = vfs::utils::format_file_size(size());
-    display_size_bytes_ = std::format("{:L}", size());
-
-    // disk file size formated
-    display_disk_size_ = vfs::utils::format_file_size(size_on_disk());
-
-    // time
-    display_atime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(atime()));
-    display_btime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(btime()));
-    display_ctime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(ctime()));
-    display_mtime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(mtime()));
-
-    // Cause file prem string to be regenerated as needed
-    display_perm_.clear();
 
     return true;
 }
@@ -201,20 +194,32 @@ vfs::file::size_on_disk() const noexcept
 }
 
 std::string_view
-vfs::file::display_size() const noexcept
+vfs::file::display_size() noexcept
 {
+    if (display_size_.empty())
+    {
+        display_size_ = vfs::utils::format_file_size(size());
+    }
     return display_size_;
 }
 
 std::string_view
-vfs::file::display_size_in_bytes() const noexcept
+vfs::file::display_size_in_bytes() noexcept
 {
+    if (display_size_bytes_.empty())
+    {
+        display_size_bytes_ = std::format("{:L}", size());
+    }
     return display_size_bytes_;
 }
 
 std::string_view
-vfs::file::display_size_on_disk() const noexcept
+vfs::file::display_size_on_disk() noexcept
 {
+    if (display_disk_size_.empty())
+    {
+        display_disk_size_ = vfs::utils::format_file_size(size_on_disk());
+    }
     return display_disk_size_;
 }
 
@@ -288,26 +293,42 @@ vfs::file::display_group() const noexcept
 }
 
 std::string_view
-vfs::file::display_atime() const noexcept
+vfs::file::display_atime() noexcept
 {
+    if (display_atime_.empty())
+    {
+        display_atime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(atime()));
+    }
     return display_atime_;
 }
 
 std::string_view
-vfs::file::display_btime() const noexcept
+vfs::file::display_btime() noexcept
 {
+    if (display_btime_.empty())
+    {
+        display_btime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(btime()));
+    }
     return display_btime_;
 }
 
 std::string_view
-vfs::file::display_ctime() const noexcept
+vfs::file::display_ctime() noexcept
 {
+    if (display_ctime_.empty())
+    {
+        display_ctime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(ctime()));
+    }
     return display_ctime_;
 }
 
 std::string_view
-vfs::file::display_mtime() const noexcept
+vfs::file::display_mtime() noexcept
 {
+    if (display_mtime_.empty())
+    {
+        display_mtime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(mtime()));
+    }
     return display_mtime_;
 }
 
