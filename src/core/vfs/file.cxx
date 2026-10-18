@@ -99,36 +99,33 @@ group_name(const std::uint32_t gid) noexcept
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path) noexcept
 {
+    auto stat = ztd::statx::create(path, ztd::statx::symlink::no_follow);
+    if (!stat)
+    {
+        logger::error<logger::vfs>("vfs::file::create({}) {}", path, stat.error().message());
+        return nullptr;
+    }
+
     struct hack : public vfs::file
     {
-        hack(const std::filesystem::path& path) : file(path) {}
+        hack(const std::filesystem::path& path, ztd::statx stat) : file(path, std::move(stat)) {}
     };
 
-    return std::make_shared<hack>(path);
+    return std::make_shared<hack>(path, std::move(stat.value()));
 }
 
-vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
+vfs::file::file(const std::filesystem::path& path, ztd::statx stat) noexcept
+    : stat_(std::move(stat)), path_(path), uri_(Glib::filename_to_uri(path_)),
+      name_(path_ == "/" ? "/" : path_.filename()),
+      mime_type_(vfs::mime_type::create_from_file(path_))
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), path_);
 
-    if (path_ == "/")
-    {
-        // special case, using std::filesystem::path::filename() on the root
-        // directory returns an empty string. that causes subtle bugs
-        // so hard code "/" as the value for root.
-        name_ = "/";
-    }
-    else
-    {
-        name_ = path_.filename();
-    }
+    // special case for name_, using std::filesystem::path::filename() on
+    // the root directory returns an empty string. that causes subtle bugs
+    // so hard code "/" as the value for root.
 
-    // Is a hidden file
     is_hidden_ = name_.starts_with('.');
-
-    const auto result = update();
-
-    logger::error_if<logger::vfs>(!result, "Failed to create vfs::file for {}", path);
 }
 
 vfs::file::~file() noexcept
@@ -148,13 +145,13 @@ vfs::file::update() noexcept
     display_mtime_.clear();
     display_perm_.clear();
 
-    const auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
+    auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
         mime_type_ = vfs::mime_type::create_from_type(vfs::mime_type::unknown);
         return false;
     }
-    stat_ = stat.value();
+    stat_ = std::move(stat.value());
 
     // logger::debug<logger::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), name, file_stat.size());
 
@@ -175,10 +172,10 @@ vfs::file::path() const noexcept
     return path_;
 }
 
-std::string
+std::string_view
 vfs::file::uri() const noexcept
 {
-    return Glib::filename_to_uri(path_);
+    return uri_;
 }
 
 u64

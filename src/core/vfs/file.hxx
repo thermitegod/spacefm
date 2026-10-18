@@ -37,22 +37,23 @@ namespace vfs
 class file : public std::enable_shared_from_this<file>
 {
   private:
+    explicit file(const std::filesystem::path& path, ztd::statx stat) noexcept;
+
+  public:
     file() = delete;
-    explicit file(const std::filesystem::path& file_path) noexcept;
     ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
     file& operator=(const file& other) = delete;
     file& operator=(file&& other) = delete;
 
-  public:
     [[nodiscard]] static std::shared_ptr<vfs::file>
     create(const std::filesystem::path& path) noexcept;
 
     [[nodiscard]] std::string_view name() const noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] std::string uri() const noexcept;
+    [[nodiscard]] std::string_view uri() const noexcept;
 
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
@@ -122,19 +123,19 @@ class file : public std::enable_shared_from_this<file>
 
   private:
     ztd::statx stat_;
+    std::filesystem::path path_;
+    std::string uri_;
+    std::string name_;
+    std::shared_ptr<vfs::mime_type> mime_type_;
 
-    std::filesystem::path path_; // real path on file system
-
-    std::string name_;                          // real name on file system
-    std::string display_size_;                  // displayed human-readable file size
-    std::string display_size_bytes_;            // displayed file size in bytes
-    std::string display_disk_size_;             // displayed human-readable file size on disk
-    std::string display_atime_;                 // displayed accessed time
-    std::string display_btime_;                 // displayed created time
-    std::string display_ctime_;                 // displayed last status change time
-    std::string display_mtime_;                 // displayed modification time
-    std::string display_perm_;                  // displayed permission in string form
-    std::shared_ptr<vfs::mime_type> mime_type_; // mime type related information
+    std::string display_size_;       // displayed human-readable file size
+    std::string display_size_bytes_; // displayed file size in bytes
+    std::string display_disk_size_;  // displayed human-readable file size on disk
+    std::string display_atime_;      // displayed accessed time
+    std::string display_btime_;      // displayed created time
+    std::string display_ctime_;      // displayed last status change time
+    std::string display_mtime_;      // displayed modification time
+    std::string display_perm_;       // displayed permission in string form
 
     bool is_special_desktop_entry_{false}; // is a .desktop file
     bool is_hidden_{false};                // if the filename starts with '.'
