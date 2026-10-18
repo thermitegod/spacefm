@@ -30,9 +30,9 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/mime-action.hxx"
 #include "vfs/mime-type.hxx"
 
-#include "vfs/mime-type/mime-action.hxx"
 #include "vfs/utils/icon.hxx"
 
 #include "logger.hxx"

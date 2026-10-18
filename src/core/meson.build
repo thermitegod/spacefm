@@ -95,6 +95,7 @@ vfs_sources = files(
     'vfs/dir.cxx',
     'vfs/error.cxx',
     'vfs/file.cxx',
+    'vfs/mime-action.cxx',
     'vfs/mime-type.cxx',
     'vfs/mime-monitor.cxx',
     'vfs/terminals.cxx',
@@ -115,8 +116,6 @@ vfs_sources = files(
     'vfs/linux/mountinfo.cxx',
     'vfs/linux/self.cxx',
     'vfs/linux/sysfs.cxx',
-
-    'vfs/mime-type/mime-action.cxx',
 )
 
 vfs_dependencies = [

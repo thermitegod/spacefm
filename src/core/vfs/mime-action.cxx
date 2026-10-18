@@ -45,9 +45,9 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/execute.hxx"
+#include "vfs/mime-action.hxx"
 #include "vfs/user-dirs.hxx"
 
-#include "vfs/mime-type/mime-action.hxx"
 #include "vfs/utils/file-ops.hxx"
 
 static void
