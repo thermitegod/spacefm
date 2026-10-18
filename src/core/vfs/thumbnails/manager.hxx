@@ -62,7 +62,7 @@ class manager final
     std::unordered_map<std::string, std::shared_ptr<vfs::thumbnail::thumbnailer>> thumbnailers_;
 
   public:
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_thumbnail_created() noexcept
     {
         return signal_thumbnail_created_;

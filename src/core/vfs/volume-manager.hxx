@@ -113,13 +113,13 @@ class volume : public std::enable_shared_from_this<volume>
     bool ever_mounted_{false};
 
   public:
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_mounted() noexcept
     {
         return signal_mounted_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_unmounted() noexcept
     {
         return signal_unmounted_;
@@ -186,37 +186,37 @@ class volume_manager
     std::vector<std::shared_ptr<device_mount>> devmounts_;
 
   public:
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_added() noexcept
     {
         return signal_added_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_removed() noexcept
     {
         return signal_removed_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_changed() noexcept
     {
         return signal_changed_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_eject() noexcept
     {
         return signal_eject_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_mounted() noexcept
     {
         return signal_mounted_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_unmounted() noexcept
     {
         return signal_unmounted_;

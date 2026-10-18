@@ -47,73 +47,73 @@ class controller
   public:
     // Supported events
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_access() noexcept
     {
         return signal_access_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_modify() noexcept
     {
         return signal_modify_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_attrib() noexcept
     {
         return signal_attrib_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_close_write() noexcept
     {
         return signal_close_write_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_close_nowrite() noexcept
     {
         return signal_close_nowrite_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_open() noexcept
     {
         return signal_open_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_moved_from() noexcept
     {
         return signal_moved_from_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_moved_to() noexcept
     {
         return signal_moved_to_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_create() noexcept
     {
         return signal_create_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_delete() noexcept
     {
         return signal_delete_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_delete_self() noexcept
     {
         return signal_delete_self_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_move_self() noexcept
     {
         return signal_move_self_;
@@ -121,19 +121,19 @@ class controller
 
     // Events sent by the kernel.
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_umount() noexcept
     {
         return signal_umount_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_queue_overflow() noexcept
     {
         return signal_queue_overflow_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_ignored() noexcept
     {
         return signal_ignored_;
@@ -141,13 +141,13 @@ class controller
 
     // Helper events
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_close() noexcept
     {
         return signal_close_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_move() noexcept
     {
         return signal_move_;

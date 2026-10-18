@@ -147,37 +147,37 @@ class dir : public std::enable_shared_from_this<dir>
   public:
     // Signals
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_files_changed() noexcept
     {
         return signal_files_changed_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_files_created() noexcept
     {
         return signal_files_created_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_files_deleted() noexcept
     {
         return signal_files_deleted_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_directory_loaded() noexcept
     {
         return signal_directory_loaded_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_directory_refresh() noexcept
     {
         return signal_directory_refresh_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_thumbnail_loaded() noexcept
     {
         return signal_thumbnail_loaded_;
@@ -186,7 +186,7 @@ class dir : public std::enable_shared_from_this<dir>
     /**
      * The directory this vfs::dir was created for has been deleted
      */
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_directory_deleted() noexcept
     {
         return signal_directory_deleted_;

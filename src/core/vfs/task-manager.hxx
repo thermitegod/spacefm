@@ -265,25 +265,25 @@ class task_manager
                      const vfs::collision_resolve default_action) noexcept;
 
   public:
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_task_added() noexcept
     {
         return signal_task_added_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_task_finished() noexcept
     {
         return signal_task_finished_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_task_error() noexcept
     {
         return signal_task_error_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_task_collision() noexcept
     {
         return signal_task_collision_;

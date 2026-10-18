@@ -46,13 +46,13 @@ class bookmarks
     std::chrono::system_clock::time_point bookmark_mtime_;
 
   public:
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_load_error() noexcept
     {
         return signal_load_error_;
     }
 
-    [[nodiscard]] auto
+    [[nodiscard]] auto&
     signal_save_error() noexcept
     {
         return signal_save_error_;
