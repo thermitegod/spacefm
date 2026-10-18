@@ -97,7 +97,6 @@ vfs_sources = files(
     'vfs/file.cxx',
     'vfs/mime-action.cxx',
     'vfs/mime-type.cxx',
-    'vfs/mime-monitor.cxx',
     'vfs/terminals.cxx',
     'vfs/task-manager.cxx',
     'vfs/trash-can.cxx',
