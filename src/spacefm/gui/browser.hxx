@@ -27,7 +27,7 @@
 #include "gui/tab/tab.hxx"
 
 #include "vfs/task-manager.hxx"
-#include "vfs/volume-manager.hxx"
+#include "vfs/volume/manager.hxx"
 
 namespace gui
 {

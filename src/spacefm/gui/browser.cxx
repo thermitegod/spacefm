@@ -32,7 +32,7 @@
 
 #include "vfs/task-manager.hxx"
 #include "vfs/user-dirs.hxx"
-#include "vfs/volume-manager.hxx"
+#include "vfs/volume/manager.hxx"
 
 #include "logger.hxx"
 

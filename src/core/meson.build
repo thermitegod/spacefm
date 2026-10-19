@@ -91,7 +91,6 @@ notify_dep = declare_dependency(
 vfs_sources = files(
     'vfs/app-desktop.cxx',
     'vfs/bookmarks.cxx',
-    'vfs/device.cxx',
     'vfs/dir.cxx',
     'vfs/error.cxx',
     'vfs/file.cxx',
@@ -101,7 +100,11 @@ vfs_sources = files(
     'vfs/task-manager.cxx',
     'vfs/trash-can.cxx',
     'vfs/user-dirs.cxx',
-    'vfs/volume-manager.cxx',
+
+    'vfs/volume/device.cxx',
+    'vfs/volume/device-mount.cxx',
+    'vfs/volume/manager.cxx',
+    'vfs/volume/volume.cxx',
 
     # 'vfs/utils/editor.cxx', # TODO move to gui/utils
     'vfs/utils/icon.cxx',

@@ -13,16 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 
 #include <fcntl.h>
+#include <sys/types.h>
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/device.hxx"
+#include "vfs/volume/device.hxx"
 
 #include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"

@@ -18,17 +18,17 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <optional>
-#include <span>
 #include <string>
 #include <string_view>
+
+#include <sys/types.h>
 
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
-
-#include "libudevpp/libudevpp.hxx"
 
 namespace vfs
 {
@@ -36,7 +36,17 @@ class device;
 
 class volume : public std::enable_shared_from_this<volume>
 {
+  private:
+    volume(const std::shared_ptr<vfs::device>& device) noexcept;
+
   public:
+    volume() = delete;
+    ~volume() = default;
+    volume(const volume& other) = delete;
+    volume(volume&& other) = delete;
+    volume& operator=(const volume& other) = delete;
+    volume& operator=(volume&& other) = delete;
+
     enum class device_type : std::uint8_t
     {
         block,
@@ -44,16 +54,6 @@ class volume : public std::enable_shared_from_this<volume>
         other, // eg fuseiso mounted file
     };
 
-  private:
-    volume() = delete;
-    volume(const std::shared_ptr<vfs::device>& device) noexcept;
-    ~volume() = default;
-    volume(const volume& other) = delete;
-    volume(volume&& other) = delete;
-    volume& operator=(const volume& other) = delete;
-    volume& operator=(volume&& other) = delete;
-
-  public:
     [[nodiscard]] static std::shared_ptr<vfs::volume>
     create(const std::shared_ptr<vfs::device>& device) noexcept;
 
@@ -73,7 +73,7 @@ class volume : public std::enable_shared_from_this<volume>
     [[nodiscard]] std::optional<std::string> device_mount_cmd() noexcept;
     [[nodiscard]] std::optional<std::string> device_unmount_cmd() noexcept;
 
-    [[nodiscard]] bool is_device_type(const vfs::volume::device_type type) const noexcept;
+    [[nodiscard]] bool is_device_type(const device_type type) const noexcept;
 
     [[nodiscard]] bool is_mounted() const noexcept;
     [[nodiscard]] bool is_removable() const noexcept;
@@ -99,7 +99,7 @@ class volume : public std::enable_shared_from_this<volume>
     std::string label_;
     std::string fstype_;
 
-    vfs::volume::device_type device_type_{vfs::volume::device_type::block};
+    device_type device_type_{device_type::block};
 
     bool is_mounted_{false};
     bool is_removable_{false};
@@ -126,110 +126,6 @@ class volume : public std::enable_shared_from_this<volume>
     }
 
   private:
-    // Mount point
-    sigc::signal<void(std::filesystem::path)> signal_mounted_;
-    sigc::signal<void(std::filesystem::path)> signal_unmounted_;
-};
-
-class volume_manager
-{
-  private:
-    volume_manager();
-    ~volume_manager();
-
-  public:
-    [[nodiscard]] static std::shared_ptr<vfs::volume_manager> create() noexcept;
-
-    [[nodiscard]] std::span<const std::shared_ptr<vfs::volume>> get_all() noexcept;
-
-    [[nodiscard]] bool avoid_changes(const std::filesystem::path& dir) const noexcept;
-
-  private:
-    class device_mount
-    {
-      protected:
-        device_mount() = delete;
-        device_mount(dev_t major, dev_t minor) noexcept;
-        ~device_mount() = default;
-        device_mount(const device_mount& other) = delete;
-        device_mount(device_mount&& other) = delete;
-        device_mount& operator=(const device_mount& other) = delete;
-        device_mount& operator=(device_mount&& other) = delete;
-
-      public:
-        [[nodiscard]] static std::shared_ptr<device_mount> create(dev_t major,
-                                                                  dev_t minor) noexcept;
-
-        dev_t major{0};
-        dev_t minor{0};
-        std::string mount_points;
-        std::string fstype;
-        std::vector<std::string> mounts;
-    };
-
-    [[nodiscard]] std::optional<std::string> devmount_fstype(const dev_t device) const noexcept;
-    [[nodiscard]] std::shared_ptr<vfs::volume>
-    read_by_device(const libudev::device& udevice) const noexcept;
-
-    void parse_mounts(const bool report) noexcept;
-
-    std::vector<std::shared_ptr<vfs::volume>> volumes_;
-
-    libudev::udev udev_;
-    libudev::monitor umonitor_;
-
-    Glib::RefPtr<Glib::IOChannel> uchannel_ = nullptr;
-    Glib::RefPtr<Glib::IOChannel> mchannel_ = nullptr;
-    sigc::scoped_connection signal_uchannel_;
-    sigc::scoped_connection signal_mchannel_;
-
-    std::vector<std::shared_ptr<device_mount>> devmounts_;
-
-  public:
-    [[nodiscard]] auto&
-    signal_added() noexcept
-    {
-        return signal_added_;
-    }
-
-    [[nodiscard]] auto&
-    signal_removed() noexcept
-    {
-        return signal_removed_;
-    }
-
-    [[nodiscard]] auto&
-    signal_changed() noexcept
-    {
-        return signal_changed_;
-    }
-
-    [[nodiscard]] auto&
-    signal_eject() noexcept
-    {
-        return signal_eject_;
-    }
-
-    [[nodiscard]] auto&
-    signal_mounted() noexcept
-    {
-        return signal_mounted_;
-    }
-
-    [[nodiscard]] auto&
-    signal_unmounted() noexcept
-    {
-        return signal_unmounted_;
-    }
-
-  private:
-    // Block device
-    sigc::signal<void(std::filesystem::path)> signal_added_;
-    sigc::signal<void(std::filesystem::path)> signal_removed_;
-    sigc::signal<void(std::filesystem::path)> signal_changed_;
-
-    sigc::signal<void(std::filesystem::path)> signal_eject_;
-
     // Mount point
     sigc::signal<void(std::filesystem::path)> signal_mounted_;
     sigc::signal<void(std::filesystem::path)> signal_unmounted_;

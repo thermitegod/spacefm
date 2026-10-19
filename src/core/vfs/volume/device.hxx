@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <sys/types.h>
+
 #include <ztd/ztd.hxx>
 
 #include "libudevpp/libudevpp.hxx"
@@ -29,15 +31,16 @@ namespace vfs
 class device
 {
   private:
-    device() = delete;
     device(const libudev::device& udevice) noexcept;
+
+  public:
+    device() = delete;
     ~device() = default;
     device(const device& other) = delete;
     device(device&& other) = delete;
     device& operator=(const device& other) = delete;
     device& operator=(device&& other) = delete;
 
-  public:
     [[nodiscard]] static std::shared_ptr<vfs::device>
     create(const libudev::device& udevice) noexcept;
 
