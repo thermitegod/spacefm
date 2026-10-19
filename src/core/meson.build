@@ -115,7 +115,6 @@ vfs_sources = files(
     'vfs/thumbnails/manager.cxx',
     'vfs/thumbnails/thumbnailer.cxx',
 
-    'vfs/linux/mountinfo.cxx',
     'vfs/linux/self.cxx',
     'vfs/linux/sysfs.cxx',
 )

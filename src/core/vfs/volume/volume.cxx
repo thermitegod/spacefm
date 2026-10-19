@@ -36,7 +36,6 @@
 #include "vfs/volume/device.hxx"
 #include "vfs/volume/volume.hxx"
 
-#include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 #include "vfs/utils/utils.hxx"
 

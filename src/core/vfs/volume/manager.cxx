@@ -35,7 +35,6 @@
 #include "vfs/volume/manager.hxx"
 #include "vfs/volume/volume.hxx"
 
-#include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 
 #include "libudevpp/libudevpp.hxx"
@@ -308,7 +307,8 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
     std::vector<std::shared_ptr<device_mount>> newmounts;
     std::unordered_map<dev_t, std::shared_ptr<device_mount>> device_map;
 
-    for (const auto& mount : vfs::proc::mountinfo())
+    const auto listmounts = ztd::listmount::create();
+    for (const auto& mount : listmounts->statmounts())
     {
         // mount where only a subtree of a filesystem is mounted?
         const bool subdir_mount = mount.root() != "/";
@@ -318,9 +318,9 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
             continue;
         }
 
-        // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.major(), mount.minor(), mount.mount_point());
-        const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(mount.major()),
-                                             static_cast<std::uint32_t>(mount.minor()));
+        // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.dev_major(), mount.dev_minor(), mount.mount_point());
+        const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(mount.dev_major()),
+                                             static_cast<std::uint32_t>(mount.dev_minor()));
 
         auto& devmount = device_map[devnum];
 
@@ -339,8 +339,8 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
 
             if (report || is_block)
             {
-                devmount = device_mount::create(mount.major(), mount.minor());
-                devmount->fstype = mount.filesystem_type();
+                devmount = device_mount::create(mount.dev_major(), mount.dev_minor());
+                devmount->fstype = mount.fs_type();
                 newmounts.push_back(devmount);
             }
             else
@@ -355,7 +355,7 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
             // logger::debug<logger::vfs>("    prepended");
             if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
             {
-                devmount->mounts.push_back(mount.mount_point());
+                devmount->mounts.push_back(std::string(mount.mount_point()));
                 devmount->mount_points = ztd::join(devmount->mounts, ",");
             }
         }

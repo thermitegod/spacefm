@@ -25,10 +25,13 @@
 
 #include "vfs/volume/device.hxx"
 
-#include "vfs/linux/mountinfo.hxx"
 #include "vfs/linux/sysfs.hxx"
 
 #include "libudevpp/libudevpp.hxx"
+
+#undef major
+#undef minor
+#undef makedev
 
 std::shared_ptr<vfs::device>
 vfs::device::create(const libudev::device& udevice) noexcept
@@ -150,22 +153,10 @@ vfs::device::info_mount_points() const noexcept
 
     // TODO MAYBE - pass devmounts as an argument to the constructor?
 
-    // if we have the mount point list, use this instead of reading mountinfo
-    // if (!devmounts.empty())
-    // {
-    //     for (const devmount_t& devmount : devmounts)
-    //     {
-    //         if (devmount->major == dmajor && devmount->minor == dminor)
-    //         {
-    //             return devmount->mount_points;
-    //         }
-    //     }
-    //     return std::nullopt;
-    // }
+    std::vector<std::string_view> device_mount_points;
 
-    std::vector<std::string> device_mount_points;
-
-    for (const auto& mount : vfs::proc::mountinfo())
+    const auto listmounts = ztd::listmount::create();
+    for (const auto& mount : listmounts->statmounts())
     {
         // ignore mounts where only a subtree of a filesystem is mounted
         // this function is only used for block devices.
@@ -174,7 +165,7 @@ vfs::device::info_mount_points() const noexcept
             continue;
         }
 
-        if (mount.major() != dmajor || mount.minor() != dminor)
+        if (mount.dev_major() != dmajor || mount.dev_minor() != dminor)
         {
             continue;
         }
