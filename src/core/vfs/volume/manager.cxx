@@ -204,24 +204,28 @@ vfs::volume_manager::volume_manager()
         uchannel_,
         Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
-    mchannel_ = Glib::IOChannel::create_from_file(vfs::proc::MOUNTINFO, "r");
+    mchannel_ = Glib::IOChannel::create_from_file("/proc/self/mountinfo", "r");
     mchannel_->set_close_on_unref(true);
 
     signal_mchannel_ = Glib::signal_io().connect(
         [this](const Glib::IOCondition condition)
         {
-            if (condition == Glib::IOCondition::IO_ERR)
+            if ((condition & Glib::IOCondition::IO_PRI) != Glib::IOCondition{})
             {
-                return true;
+                parse_mounts(true);
             }
 
-            // logger::debug<logger::vfs>("@@@ {} changed", vfs::proc::MOUNTINFO);
-            parse_mounts(true);
+            if ((condition & (Glib::IOCondition::IO_ERR | Glib::IOCondition::IO_HUP |
+                              Glib::IOCondition::IO_NVAL)) != Glib::IOCondition{})
+            {
+                return false;
+            }
 
             return true;
         },
         mchannel_,
-        Glib::IOCondition::IO_ERR);
+        Glib::IOCondition::IO_PRI | Glib::IOCondition::IO_ERR | Glib::IOCondition::IO_HUP |
+            Glib::IOCondition::IO_NVAL);
 }
 
 vfs::volume_manager::~volume_manager()
