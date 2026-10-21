@@ -13,15 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <filesystem>
-#include <format>
 #include <memory>
-#include <optional>
-#include <span>
-#include <string>
 #include <string_view>
-#include <vector>
 
 #include <sys/types.h>
 
@@ -29,26 +23,59 @@
 
 #include "vfs/volume/device-mount.hxx"
 
-#include "logger.hxx"
-
 #undef major
 #undef minor
 #undef makedev
 
-vfs::device_mount::device_mount(dev_t major, dev_t minor) noexcept : major(major), minor(minor)
+vfs::device_mount::device_mount(const ztd::statmount& statmount) noexcept
+    : mount_id_(statmount.mount_id()), dev_major_(statmount.dev_major()),
+      dev_minor_(statmount.dev_minor()), fs_type_(statmount.fs_type()),
+      mount_point_(statmount.mount_point()), root_(statmount.root())
 {
-    mount_points = ztd::join(mounts, ",");
-
-    // logger::debug<logger::vfs>("device {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
 }
 
 std::shared_ptr<vfs::device_mount>
-vfs::device_mount::create(dev_t major, dev_t minor) noexcept
+vfs::device_mount::create(const ztd::statmount& statmount) noexcept
 {
     struct hack : public vfs::device_mount
     {
-        hack(dev_t major, dev_t minor) : device_mount(major, minor) {}
+        hack(const ztd::statmount& statmount) : device_mount(statmount) {}
     };
+    return std::make_shared<hack>(statmount);
+}
 
-    return std::make_shared<hack>(major, minor);
+std::uint64_t
+vfs::device_mount::mount_id() const noexcept
+{
+    return mount_id_;
+}
+
+std::uint32_t
+vfs::device_mount::dev_major() const noexcept
+{
+    return dev_major_;
+}
+
+std::uint32_t
+vfs::device_mount::dev_minor() const noexcept
+{
+    return dev_minor_;
+}
+
+std::string_view
+vfs::device_mount::fs_type() const noexcept
+{
+    return fs_type_;
+}
+
+const std::filesystem::path&
+vfs::device_mount::mount_point() const noexcept
+{
+    return mount_point_;
+}
+
+const std::filesystem::path&
+vfs::device_mount::root() const noexcept
+{
+    return root_;
 }

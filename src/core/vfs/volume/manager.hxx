@@ -52,7 +52,8 @@ class volume_manager
     [[nodiscard]] bool avoid_changes(const std::filesystem::path& dir) const noexcept;
 
   private:
-    [[nodiscard]] std::optional<std::string> devmount_fstype(const dev_t device) const noexcept;
+    [[nodiscard]] std::optional<std::string_view>
+    devmount_fstype(const dev_t device) const noexcept;
     [[nodiscard]] std::shared_ptr<vfs::volume>
     read_by_device(const libudev::device& udevice) const noexcept;
 

@@ -21,6 +21,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <sys/types.h>
@@ -265,7 +266,7 @@ vfs::volume_manager::get_all() noexcept
     return volumes_;
 }
 
-std::optional<std::string>
+std::optional<std::string_view>
 vfs::volume_manager::devmount_fstype(const dev_t device) const noexcept
 {
     const auto major = gnu_dev_major(device);
@@ -273,9 +274,9 @@ vfs::volume_manager::devmount_fstype(const dev_t device) const noexcept
 
     for (const auto& devmount : devmounts_)
     {
-        if (devmount->major == major && devmount->minor == minor)
+        if (devmount->dev_major() == major && devmount->dev_minor() == minor)
         {
-            return devmount->fstype;
+            return devmount->fs_type();
         }
     }
     return std::nullopt;
@@ -304,162 +305,170 @@ vfs::volume_manager::parse_mounts(const bool report) noexcept
 {
     // logger::debug<logger::vfs>("parse_mounts() report={}", report);
 
-    std::vector<std::shared_ptr<device_mount>> newmounts;
-    std::unordered_map<dev_t, std::shared_ptr<device_mount>> device_map;
+    std::vector<std::shared_ptr<device_mount>> new_mounts;
+    std::unordered_set<dev_t> changed_devices;
 
     const auto listmounts = ztd::listmount::create();
     for (const auto& mount : listmounts->statmounts())
     {
-        // mount where only a subtree of a filesystem is mounted?
-        const bool subdir_mount = mount.root() != "/";
+        const auto mount_point = mount.mount_point();
 
-        if (mount.mount_point().empty())
+        if (mount_point.empty())
         {
             continue;
         }
 
-        // logger::debug<logger::vfs>("mount_point({}:{})={}", mount.dev_major(), mount.dev_minor(), mount.mount_point());
+        const bool subdir_mount = mount.root() != "/";
+
         const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(mount.dev_major()),
                                              static_cast<std::uint32_t>(mount.dev_minor()));
 
-        auto& devmount = device_map[devnum];
+        const auto udevice = udev_.device_from_devnum('b', devnum);
+        const bool is_block = udevice && udevice->is_initialized();
 
-        if (!devmount)
+        if (subdir_mount && is_block)
         {
-            // logger::debug<logger::vfs>("     new devmount {}", mount.mount_point());
-            const auto udevice = udev_.device_from_devnum('b', devnum);
-            const bool is_block = udevice && udevice->is_initialized();
-
-            if (subdir_mount && is_block)
-            {
-                // is block device with subdir mount - ignore
-                device_map.erase(devnum);
-                continue;
-            }
-
-            if (report || is_block)
-            {
-                devmount = device_mount::create(mount.dev_major(), mount.dev_minor());
-                devmount->fstype = mount.fs_type();
-                newmounts.push_back(devmount);
-            }
-            else
-            {
-                device_map.erase(devnum);
-                continue;
-            }
+            // logger::debug<logger::vfs>("ignore subdirectory mount {} ({}:{})", mount_point, mount.dev_major(), mount.dev_minor());
+            continue;
         }
 
-        if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
-        {
-            // logger::debug<logger::vfs>("    prepended");
-            if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point()))
-            {
-                devmount->mounts.push_back(std::string(mount.mount_point()));
-                devmount->mount_points = ztd::join(devmount->mounts, ",");
-            }
-        }
+        new_mounts.push_back(device_mount::create(mount));
     }
 
-    std::vector<std::shared_ptr<device_mount>> changed;
-    if (report)
+    if (!report)
     {
-        for (const auto& devmount : newmounts)
-        {
-            // logger::debug<logger::vfs>("finding {}:{}", devmount->major, devmount->minor);
-
-            auto it = std::ranges::find_if(devmounts_,
-                                           [&](const auto& search)
-                                           {
-                                               return search && devmount->major == search->major &&
-                                                      devmount->minor == search->minor;
-                                           });
-
-            if (it != devmounts_.cend())
-            {
-                // logger::debug<logger::vfs>("    found");
-                if ((*it)->mount_points == devmount->mount_points)
-                {
-                    // logger::debug<logger::vfs>("    freed");
-                    // no change to mount points, so remove from old list
-                    devmounts_.erase(it);
-                }
-            }
-            else
-            {
-                // new mount
-                // logger::debug<logger::vfs>("    new mount {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
-                const auto devcopy = device_mount::create(devmount->major, devmount->minor);
-                devcopy->mount_points = devmount->mount_points;
-                devcopy->mounts = devmount->mounts;
-                devcopy->fstype = devmount->fstype;
-
-                for (const auto& mount : devcopy->mounts)
-                {
-                    signal_mounted().emit(mount);
-                }
-
-                changed.push_back(devcopy);
-            }
-        }
-
-        // logger::debug<logger::vfs>("REMAINING");
-        // any remaining devices in old list have changed mount status
-        for (const auto& devmount : devmounts_)
-        {
-            // logger::debug<logger::vfs>("remain {}:{}", devmount->major, devmount->minor);
-            if (devmount)
-            {
-                changed.push_back(devmount);
-            }
-        }
+        devmounts_ = std::move(new_mounts);
+        return;
     }
 
-    devmounts_ = newmounts;
-
-    if (report && !changed.empty())
+    auto create_map = [](const auto& mounts)
     {
-        for (const auto& devmount : changed)
+        std::unordered_map<std::uint64_t, std::shared_ptr<device_mount>> map;
+        map.reserve(mounts.size());
+        for (const auto& mount : mounts)
         {
-            const dev_t devnum = gnu_dev_makedev(static_cast<std::uint32_t>(devmount->major),
-                                                 static_cast<std::uint32_t>(devmount->minor));
-            const auto udevice = udev_.device_from_devnum('b', devnum);
-
-            if (!udevice || !udevice->is_initialized())
+            if (mount)
             {
-                continue;
+                map.try_emplace(mount->mount_id(), mount);
             }
+        }
+        return map;
+    };
+    auto old_id = create_map(devmounts_);
+    auto new_id = create_map(new_mounts);
 
-            const auto devnode = udevice->get_devnode().value_or("");
-            if (devnode.empty())
+    for (const auto& mount : new_mounts)
+    {
+        if (!mount)
+        {
+            continue;
+        }
+
+        const auto old_it = old_id.find(mount->mount_id());
+
+        const dev_t devnum = gnu_dev_makedev(mount->dev_major(), mount->dev_minor());
+
+        if (old_it == old_id.end())
+        {
+            logger::debug<logger::vfs>("mount added:   id={} point={} device={}:{} fs={}",
+                                       mount->mount_id(),
+                                       mount->mount_point(),
+                                       mount->dev_major(),
+                                       mount->dev_minor(),
+                                       mount->fs_type());
+
+            signal_mounted().emit(mount->mount_point());
+            changed_devices.insert(devnum);
+            continue;
+        }
+
+        const auto& old_mount = old_it->second;
+
+        if (old_mount->mount_point() != mount->mount_point())
+        {
+            logger::debug<logger::vfs>("mount moved:   id={} from {} to {}",
+                                       mount->mount_id(),
+                                       old_mount->mount_point(),
+                                       mount->mount_point());
+
+            signal_unmounted().emit(old_mount->mount_point());
+            signal_mounted().emit(mount->mount_point());
+            changed_devices.insert(devnum);
+        }
+    }
+
+    for (const auto& mount : devmounts_)
+    {
+        if (!mount)
+        {
+            continue;
+        }
+
+        if (!new_id.contains(mount->mount_id()))
+        {
+            logger::debug<logger::vfs>("mount removed: id={} point={} device={}:{}",
+                                       mount->mount_id(),
+                                       mount->mount_point(),
+                                       mount->dev_major(),
+                                       mount->dev_minor());
+
+            signal_unmounted().emit(mount->mount_point());
+
+            const dev_t devnum = gnu_dev_makedev(mount->dev_major(), mount->dev_minor());
+            changed_devices.insert(devnum);
+        }
+    }
+
+    devmounts_ = std::move(new_mounts);
+
+    for (const dev_t devnum : changed_devices)
+    {
+        const auto udevice = udev_.device_from_devnum('b', devnum);
+        if (!udevice || !udevice->is_initialized())
+        {
+            // logger::debug<logger::vfs>("block device udev init failed {}", devnum);
+            continue;
+        }
+
+        const auto devnode = udevice->get_devnode();
+        if (!devnode)
+        {
+            // logger::debug<logger::vfs>("block device missing devnode {}", devnum);
+            continue;
+        }
+
+        const auto device_data = vfs::device::create(udevice.value());
+        if (!device_data || !device_data->is_valid())
+        {
+            // logger::debug<logger::vfs>("block device unable to refresh {}", *devnode);
+            continue;
+        }
+
+        const auto it = std::ranges::find_if(volumes_,
+                                             [devnum](const auto& volume)
+                                             { return volume && volume->devnum() == devnum; });
+
+        if (it != volumes_.end())
+        {
+            logger::debug<logger::vfs>("volume changed {}", *devnode);
+
+            (*it)->update_from_device(device_data);
+            signal_changed().emit(*devnode);
+        }
+        else
+        {
+            auto new_volume = vfs::volume::create(device_data);
+            if (new_volume)
             {
-                continue;
-            }
+                logger::debug<logger::vfs>("volume added {}", *devnode);
 
-            logger::info<logger::vfs>("mount changed: {}", devnode);
-
-            const auto device_data = vfs::device::create(udevice.value());
-            if (device_data && device_data->is_valid())
-            {
-                auto it =
-                    std::ranges::find_if(volumes_,
-                                         [devnum](const auto& v) { return v->devnum() == devnum; });
-
-                if (it != volumes_.cend())
-                {
-                    (*it)->update_from_device(device_data);
-                    signal_changed().emit(devnode);
-                }
-                else
-                {
-                    auto new_volume = vfs::volume::create(device_data);
-                    volumes_.push_back(new_volume);
-                    signal_added().emit(devnode);
-                }
+                volumes_.push_back(std::move(new_volume));
+                signal_added().emit(*devnode);
             }
         }
     }
-    // logger::debug<logger::vfs>("END PARSE");
+
+    // logger::debug<logger::vfs>("parse_mounts() {} mounts, {} affected devices", devmounts_.size(), changed_devices.size());
 }
 
 bool

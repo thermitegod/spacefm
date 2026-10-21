@@ -15,32 +15,48 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
+
+#include <cstdint>
 
 #include <sys/types.h>
+
+#include <ztd/ztd.hxx>
+
 namespace vfs
 {
 class device_mount
 {
   private:
-    device_mount(dev_t major, dev_t minor) noexcept;
+    explicit device_mount(const ztd::statmount& statmount) noexcept;
 
   public:
     device_mount() = delete;
-    device_mount(const device_mount& other) = delete;
-    device_mount(device_mount&& other) = delete;
-    device_mount& operator=(const device_mount& other) = delete;
-    device_mount& operator=(device_mount&& other) = delete;
+    device_mount(const device_mount&) = default;
+    device_mount(device_mount&&) noexcept = default;
+    device_mount& operator=(const device_mount&) = default;
+    device_mount& operator=(device_mount&&) noexcept = default;
     ~device_mount() = default;
 
-    [[nodiscard]] static std::shared_ptr<device_mount> create(dev_t major, dev_t minor) noexcept;
+    [[nodiscard]] static std::shared_ptr<device_mount>
+    create(const ztd::statmount& statmount) noexcept;
 
-    dev_t major{0};
-    dev_t minor{0};
-    std::string mount_points;
-    std::string fstype;
-    std::vector<std::string> mounts;
+    [[nodiscard]] std::uint64_t mount_id() const noexcept;
+    [[nodiscard]] std::uint32_t dev_major() const noexcept;
+    [[nodiscard]] std::uint32_t dev_minor() const noexcept;
+    [[nodiscard]] std::string_view fs_type() const noexcept;
+    [[nodiscard]] const std::filesystem::path& mount_point() const noexcept;
+    [[nodiscard]] const std::filesystem::path& root() const noexcept;
+
+  private:
+    std::uint64_t mount_id_;
+    std::uint32_t dev_major_;
+    std::uint32_t dev_minor_;
+    std::string fs_type_;
+    std::filesystem::path mount_point_;
+    std::filesystem::path root_;
 };
 } // namespace vfs
