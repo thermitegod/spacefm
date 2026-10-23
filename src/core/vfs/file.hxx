@@ -62,16 +62,16 @@ class file : public std::enable_shared_from_this<file>
 
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
 
-    [[nodiscard]] std::string_view display_size() noexcept;
-    [[nodiscard]] std::string_view display_size_in_bytes() noexcept;
-    [[nodiscard]] std::string_view display_size_on_disk() noexcept;
+    [[nodiscard]] std::string display_size() const noexcept;
+    [[nodiscard]] std::string display_size_in_bytes() const noexcept;
+    [[nodiscard]] std::string display_size_on_disk() const noexcept;
     [[nodiscard]] std::string_view display_owner() const noexcept;
     [[nodiscard]] std::string_view display_group() const noexcept;
-    [[nodiscard]] std::string_view display_atime() noexcept;
-    [[nodiscard]] std::string_view display_btime() noexcept;
-    [[nodiscard]] std::string_view display_ctime() noexcept;
-    [[nodiscard]] std::string_view display_mtime() noexcept;
-    [[nodiscard]] std::string_view display_permissions() noexcept;
+    [[nodiscard]] std::string display_atime() const noexcept;
+    [[nodiscard]] std::string display_btime() const noexcept;
+    [[nodiscard]] std::string display_ctime() const noexcept;
+    [[nodiscard]] std::string display_mtime() const noexcept;
+    [[nodiscard]] std::string display_permissions() const noexcept;
 
     [[nodiscard]] std::chrono::system_clock::time_point atime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point btime() const noexcept;
@@ -127,15 +127,6 @@ class file : public std::enable_shared_from_this<file>
     std::string uri_;
     std::string name_;
     std::shared_ptr<vfs::mime_type> mime_type_;
-
-    std::string display_size_;       // displayed human-readable file size
-    std::string display_size_bytes_; // displayed file size in bytes
-    std::string display_disk_size_;  // displayed human-readable file size on disk
-    std::string display_atime_;      // displayed accessed time
-    std::string display_btime_;      // displayed created time
-    std::string display_ctime_;      // displayed last status change time
-    std::string display_mtime_;      // displayed modification time
-    std::string display_perm_;       // displayed permission in string form
 
     bool is_special_desktop_entry_{false}; // is a .desktop file
     bool is_hidden_{false};                // if the filename starts with '.'

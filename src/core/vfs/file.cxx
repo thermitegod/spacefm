@@ -134,15 +134,6 @@ vfs::file::~file() noexcept
 bool
 vfs::file::update() noexcept
 {
-    display_size_.clear();
-    display_size_bytes_.clear();
-    display_disk_size_.clear();
-    display_atime_.clear();
-    display_btime_.clear();
-    display_ctime_.clear();
-    display_mtime_.clear();
-    display_perm_.clear();
-
     auto stat = ztd::statx::create(path_, ztd::statx::symlink::no_follow);
     if (!stat)
     {
@@ -188,34 +179,22 @@ vfs::file::size_on_disk() const noexcept
     return stat_.size_on_disk();
 }
 
-std::string_view
-vfs::file::display_size() noexcept
+std::string
+vfs::file::display_size() const noexcept
 {
-    if (display_size_.empty())
-    {
-        display_size_ = vfs::utils::format_file_size(size());
-    }
-    return display_size_;
+    return vfs::utils::format_file_size(size());
 }
 
-std::string_view
-vfs::file::display_size_in_bytes() noexcept
+std::string
+vfs::file::display_size_in_bytes() const noexcept
 {
-    if (display_size_bytes_.empty())
-    {
-        display_size_bytes_ = std::format("{:L}", size());
-    }
-    return display_size_bytes_;
+    return std::format("{:L}", size());
 }
 
-std::string_view
-vfs::file::display_size_on_disk() noexcept
+std::string
+vfs::file::display_size_on_disk() const noexcept
 {
-    if (display_disk_size_.empty())
-    {
-        display_disk_size_ = vfs::utils::format_file_size(size_on_disk());
-    }
-    return display_disk_size_;
+    return vfs::utils::format_file_size(size_on_disk());
 }
 
 u64
@@ -287,44 +266,28 @@ vfs::file::display_group() const noexcept
     return group_name(stat_.gid());
 }
 
-std::string_view
-vfs::file::display_atime() noexcept
+std::string
+vfs::file::display_atime() const noexcept
 {
-    if (display_atime_.empty())
-    {
-        display_atime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(atime()));
-    }
-    return display_atime_;
+    return std::format("{}", std::chrono::floor<std::chrono::seconds>(atime()));
 }
 
-std::string_view
-vfs::file::display_btime() noexcept
+std::string
+vfs::file::display_btime() const noexcept
 {
-    if (display_btime_.empty())
-    {
-        display_btime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(btime()));
-    }
-    return display_btime_;
+    return std::format("{}", std::chrono::floor<std::chrono::seconds>(btime()));
 }
 
-std::string_view
-vfs::file::display_ctime() noexcept
+std::string
+vfs::file::display_ctime() const noexcept
 {
-    if (display_ctime_.empty())
-    {
-        display_ctime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(ctime()));
-    }
-    return display_ctime_;
+    return std::format("{}", std::chrono::floor<std::chrono::seconds>(ctime()));
 }
 
-std::string_view
-vfs::file::display_mtime() noexcept
+std::string
+vfs::file::display_mtime() const noexcept
 {
-    if (display_mtime_.empty())
-    {
-        display_mtime_ = std::format("{}", std::chrono::floor<std::chrono::seconds>(mtime()));
-    }
-    return display_mtime_;
+    return std::format("{}", std::chrono::floor<std::chrono::seconds>(mtime()));
 }
 
 std::chrono::system_clock::time_point
@@ -351,14 +314,10 @@ vfs::file::mtime() const noexcept
     return stat_.mtime();
 }
 
-std::string_view
-vfs::file::display_permissions() noexcept
+std::string
+vfs::file::display_permissions() const noexcept
 {
-    if (display_perm_.empty())
-    {
-        display_perm_ = stat_.perms_fancy();
-    }
-    return display_perm_;
+    return stat_.perms_fancy();
 }
 
 bool
