@@ -494,7 +494,7 @@ vfs::volume_manager::avoid_changes(const std::filesystem::path& dir) const noexc
     }
     // logger::debug<logger::vfs>("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
-    const auto fstype = devmount_fstype(stat->dev().data());
+    const auto fstype = devmount_fstype(stat->dev());
     if (!fstype)
     {
         return false;

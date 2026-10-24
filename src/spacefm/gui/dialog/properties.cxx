@@ -288,8 +288,8 @@ gui::dialog::properties::calc_worker::calc_total_size_of_files(
         return;
     }
 
-    total_size += file_stat->size().data();
-    size_on_disk += file_stat->size_on_disk().data();
+    total_size += file_stat->size();
+    size_on_disk += file_stat->size_on_disk();
 
     if (!std::filesystem::is_directory(path) || !vfs::utils::check_directory_permissions(path))
     {
@@ -310,8 +310,8 @@ gui::dialog::properties::calc_worker::calc_total_size_of_files(
             continue;
         }
 
-        total_size += stat->size().data();
-        size_on_disk += stat->size_on_disk().data();
+        total_size += stat->size();
+        size_on_disk += stat->size_on_disk();
 
         if (stat->is_directory())
         {

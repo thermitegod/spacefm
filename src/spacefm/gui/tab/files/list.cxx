@@ -374,7 +374,7 @@ gui::list::on_bind_size(const Glib::RefPtr<Gtk::ListItem>& item) noexcept
             return;
         }
 
-        label->set_text(col->file->display_size().data());
+        label->set_text(col->file->display_size());
     };
 
     update_label();

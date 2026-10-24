@@ -66,10 +66,9 @@ passwd_name(const std::uint32_t uid) noexcept
     }
 
     const auto pw = ztd::passwd::create(uid);
-    std::string name = pw ? pw->name() : std::format("{}", uid);
 
     std::lock_guard lock(passwd_cache_mutex);
-    const auto [it, _] = passwd_cache.try_emplace(uid, std::move(name));
+    const auto [it, _] = passwd_cache.try_emplace(uid, std::move(std::string(pw->name())));
     // logger::trace<logger::vfs>("passwd({})  new     {}", uid, it->second);
     return it->second;
 }
@@ -88,10 +87,9 @@ group_name(const std::uint32_t gid) noexcept
     }
 
     const auto gr = ztd::group::create(gid);
-    std::string name = gr ? gr->name() : std::format("{}", gid);
 
     std::lock_guard lock(group_cache_mutex);
-    const auto [it, _] = group_cache.try_emplace(gid, std::move(name));
+    const auto [it, _] = group_cache.try_emplace(gid, std::move(std::string(gr->name())));
     // logger::trace<logger::vfs>("group({})  new     {}", gid, it->second);
     return it->second;
 }
@@ -280,13 +278,13 @@ vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 std::string_view
 vfs::file::display_owner() const noexcept
 {
-    return passwd_name(stat_.uid().data());
+    return passwd_name(stat_.uid());
 }
 
 std::string_view
 vfs::file::display_group() const noexcept
 {
-    return group_name(stat_.gid().data());
+    return group_name(stat_.gid());
 }
 
 std::string_view
