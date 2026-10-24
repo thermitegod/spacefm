@@ -59,7 +59,7 @@ class volume : public std::enable_shared_from_this<volume>
 
     void update_from_device(const std::shared_ptr<vfs::device>& device) noexcept;
 
-    [[nodiscard]] std::string_view display_name() const noexcept;
+    [[nodiscard]] std::string display_name() const noexcept;
     [[nodiscard]] std::string_view mount_point() const noexcept;
     [[nodiscard]] std::string_view device_file() const noexcept;
     [[nodiscard]] std::string_view fstype() const noexcept;
@@ -87,28 +87,11 @@ class volume : public std::enable_shared_from_this<volume>
     [[nodiscard]] bool ever_mounted() const noexcept;
 
   private:
-    void set_info() noexcept;
+    std::shared_ptr<device> device_;
 
-    dev_t devnum_{0};
-    std::string device_file_;
-    std::string udi_;
-    std::string disp_name_;
-    std::string icon_;
     std::string mount_point_;
-    u64 size_{0};
-    std::string label_;
-    std::string fstype_;
 
     device_type device_type_{device_type::block};
-
-    bool is_mounted_{false};
-    bool is_removable_{false};
-    bool is_mountable_{false};
-
-    bool is_user_visible_{false};
-
-    bool is_optical_{false};
-    bool requires_eject_{false};
 
     bool ever_mounted_{false};
 
