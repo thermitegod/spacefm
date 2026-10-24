@@ -239,7 +239,11 @@ vfs::dir::load_thread(std::stop_token stoken) noexcept
             continue;
         }
 
-        files.push_back(vfs::file::create(dfile.path()));
+        auto file = vfs::file::create(dfile.path());
+        if (file)
+        {
+            files.push_back(file);
+        }
     }
 
     {
@@ -580,6 +584,10 @@ vfs::dir::update_created_files() noexcept
             if (!file)
             {
                 auto new_file = vfs::file::create(path);
+                if (!new_file)
+                {
+                    continue;
+                }
 
                 files_.push_back(new_file);
                 created_files.push_back(new_file);
