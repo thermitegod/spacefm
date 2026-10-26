@@ -15,7 +15,11 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
+#include <span>
+
+#include <cstdint>
 
 #include <gtkmm.h>
 
@@ -37,6 +41,10 @@ class main_window : public Gtk::ApplicationWindow
     main_window(const Glib::RefPtr<Gtk::Application>& app, const std::uint32_t window_id,
                 const std::shared_ptr<config::settings>& settings);
     ~main_window();
+
+    void open_files(config::panel_id panel, std::span<const std::filesystem::path> paths) noexcept;
+    // void new_window(std::span<const std::filesystem::path> paths) noexcept;
+    void new_window() noexcept;
 
   private:
     std::uint32_t window_id_;

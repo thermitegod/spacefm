@@ -288,6 +288,17 @@ struct settings_on_disk
 struct settings final : public settings_on_disk
 {
   public:
+    std::uint32_t
+    next_window_id() const noexcept
+    {
+        std::uint32_t id = 0;
+        while (windows.contains(id))
+        {
+            id += 1;
+        }
+        return id;
+    }
+
     [[nodiscard]] auto
     signal_autosave_request() noexcept
     {

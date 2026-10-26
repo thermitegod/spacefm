@@ -1,8 +1,6 @@
 sources = files(
     'main.cxx',
 
-    'commandline/commandline.cxx',
-
     'gui/archiver.cxx',
     'gui/browser.cxx',
     'gui/clipboard.cxx',

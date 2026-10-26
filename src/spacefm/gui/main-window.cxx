@@ -13,7 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <memory>
+#include <span>
+
 #include <cassert>
+#include <cstdint>
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -326,23 +331,35 @@ gui::main_window::on_open_terminal() noexcept
 void
 gui::main_window::on_open_new_window() noexcept
 {
-    std::uint32_t new_window_id = 0;
-    for (const auto& [window_id, _] : settings_->windows)
-    {
-        if (window_id > new_window_id)
-        {
-            break;
-        }
-        if (window_id == new_window_id)
-        {
-            new_window_id++;
-        }
-    }
+    const auto new_window_id = settings_->next_window_id();
 
     settings_->windows.emplace(new_window_id, config::window_state{});
 
     auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
     window->present();
+}
+
+void
+gui::main_window::new_window() noexcept
+{
+    gui::main_window::on_open_new_window();
+}
+
+void
+gui::main_window::open_files(config::panel_id panel,
+                             std::span<const std::filesystem::path> paths) noexcept
+{
+    auto* browser = layout_.get_browser(panel);
+    if (!browser)
+    {
+        // TODO open panel?
+        return;
+    }
+
+    for (const auto& path : paths)
+    {
+        browser->new_tab(path, true);
+    }
 }
 
 void
