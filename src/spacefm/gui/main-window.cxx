@@ -80,20 +80,20 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
     box_.append(tasks_);
     tasks_.set_visible(false);
 
-    app->add_action("open", [this]() { on_open(); });
-    app->add_action("search", [this]() { on_open_search(); });
-    app->add_action("close", [this]() { on_close(); });
-    app->add_action("quit", [this]() { on_quit(); });
-    app->add_action("terminal", [this]() { on_open_terminal(); });
-    app->add_action("new_window", [this]() { on_open_new_window(); });
-    app->add_action("title", [this]() { on_set_title(); });
-    app->add_action("fullscreen", [this]() { on_fullscreen(); });
-    app->add_action("keybindings", [this]() { on_open_keybindings(); });
-    app->add_action("preferences", [this]() { on_open_preferences(); });
-    app->add_action("donate", [this]() { on_open_donate(); });
-    app->add_action("about", [this]() { on_open_about(); });
-    app->add_action("bookmark_add", [this]() { on_bookmark_add(); });
-    app->add_action("bookmark_manager", [this]() { on_open_bookmark_manager(); });
+    add_action("open", [this]() { on_open(); });
+    add_action("search", [this]() { on_open_search(); });
+    add_action("close", [this]() { on_close(); });
+    add_action("quit", [this]() { on_quit(); });
+    add_action("terminal", [this]() { on_open_terminal(); });
+    add_action("new_window", [this]() { on_open_new_window(); });
+    add_action("title", [this]() { on_set_title(); });
+    add_action("fullscreen", [this]() { on_fullscreen(); });
+    add_action("keybindings", [this]() { on_open_keybindings(); });
+    add_action("preferences", [this]() { on_open_preferences(); });
+    add_action("donate", [this]() { on_open_donate(); });
+    add_action("about", [this]() { on_open_about(); });
+    add_action("bookmark_add", [this]() { on_bookmark_add(); });
+    add_action("bookmark_manager", [this]() { on_open_bookmark_manager(); });
 
     const std::vector<std::pair<config::panel_id, Glib::ustring>> panel_map = {
         {config::panel_id::panel_1, "panel_1"},
@@ -102,7 +102,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
         {config::panel_id::panel_4, "panel_4"}};
     for (const auto& [panel_id, name] : panel_map)
     {
-        app->add_action_bool(
+        add_action_bool(
             name,
             [this, app, panel_id, name]()
             {
@@ -124,14 +124,14 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
             settings_->windows[window_id_].panels[panel_id].is_visible);
     }
 
-    app->add_action("todo",
-                    [this]()
-                    {
-                        auto alert = Gtk::AlertDialog::create("Not Implemented");
-                        alert->set_detail("TODO");
-                        alert->set_modal(true);
-                        alert->show(*this);
-                    });
+    add_action("todo",
+               [this]()
+               {
+                   auto alert = Gtk::AlertDialog::create("Not Implemented");
+                   alert->set_detail("TODO");
+                   alert->set_modal(true);
+                   alert->show(*this);
+               });
 
     // Load panels / tabs
     for (const auto [id, state] : settings_->windows[window_id_].panels)
@@ -174,7 +174,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Open Terminal
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_F4);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.terminal"); });
+                                                  { return activate_action("win.terminal"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -182,7 +182,7 @@ gui::main_window::add_shortcuts() noexcept
     { // New Window
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_n, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.new_window"); });
+                                                  { return activate_action("win.new_window"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -190,7 +190,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Toggle Panel 1
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_1, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.panel_1"); });
+                                                  { return activate_action("win.panel_1"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -198,7 +198,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Toggle Panel 2
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_2, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.panel_2"); });
+                                                  { return activate_action("win.panel_2"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -206,7 +206,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Toggle Panel 3
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_3, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.panel_3"); });
+                                                  { return activate_action("win.panel_3"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -214,7 +214,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Toggle Panel 4
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_4, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.panel_4"); });
+                                                  { return activate_action("win.panel_4"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -222,7 +222,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Add Bookmark
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_d, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.bookmark_add"); });
+                                                  { return activate_action("win.bookmark_add"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -233,7 +233,7 @@ gui::main_window::add_shortcuts() noexcept
                                                       Gdk::ModifierType::SHIFT_MASK);
         auto action =
             Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                        { return activate_action("app.bookmark_manager"); });
+                                        { return activate_action("win.bookmark_manager"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -241,7 +241,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Quit
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_q, Gdk::ModifierType::CONTROL_MASK);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.quit"); });
+                                                  { return activate_action("win.quit"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -249,7 +249,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Preferences
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_F12);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.preferences"); });
+                                                  { return activate_action("win.preferences"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -257,7 +257,7 @@ gui::main_window::add_shortcuts() noexcept
     { // Fullscreen
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_F11);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.fullscreen"); });
+                                                  { return activate_action("win.fullscreen"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
@@ -265,7 +265,7 @@ gui::main_window::add_shortcuts() noexcept
     { // About
         auto trigger = Gtk::KeyvalTrigger::create(GDK_KEY_F1);
         auto action = Gtk::CallbackAction::create([this](Gtk::Widget&, const Glib::VariantBase&)
-                                                  { return activate_action("app.about"); });
+                                                  { return activate_action("win.about"); });
         auto shortcut = Gtk::Shortcut::create(trigger, action);
         controller->add_shortcut(shortcut);
     }
