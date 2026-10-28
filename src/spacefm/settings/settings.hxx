@@ -16,8 +16,10 @@
 #pragma once
 
 #include <flat_map>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cstdint>
@@ -25,6 +27,8 @@
 #include <sigc++/sigc++.h>
 
 #include "vfs/user-dirs.hxx"
+
+#include "logger.hxx"
 
 namespace config
 {
@@ -147,31 +151,41 @@ struct window_state final
 {
     std::flat_map<panel_id, panel_state> panels = {
         {panel_id::panel_1,
-         {.is_visible = true,
-          .active_tab = 0,
-          .tabs = {{
-              .path = vfs::user::home(),
-          }}}},
+         panel_state{
+             .is_visible = true,
+             .active_tab = 0,
+             .tabs = {{
+                 .path = vfs::user::home(),
+             }},
+         }},
         {panel_id::panel_2,
-         {.is_visible = false,
-          .active_tab = 0,
-          .tabs = {{
-              .path = vfs::user::home(),
-          }}}},
+         panel_state{
+             .is_visible = false,
+             .active_tab = 0,
+             .tabs = {{
+                 .path = vfs::user::home(),
+             }},
+         }},
         {panel_id::panel_3,
-         {.is_visible = false,
-          .active_tab = 0,
-          .tabs = {{
-              .path = vfs::user::home(),
-          }}}},
+         panel_state{
+             .is_visible = false,
+             .active_tab = 0,
+             .tabs = {{
+                 .path = vfs::user::home(),
+             }},
+         }},
         {panel_id::panel_4,
-         {.is_visible = false,
-          .active_tab = 0,
-          .tabs = {{
-              .path = vfs::user::home(),
-          }}}},
+         panel_state{
+             .is_visible = false,
+             .active_tab = 0,
+             .tabs = {{
+                 .path = vfs::user::home(),
+             }},
+         }},
     };
 };
+
+struct settings;
 
 struct settings_on_disk
 {
@@ -278,8 +292,11 @@ struct settings_on_disk
     };
     defaults defaults;
 
-    std::flat_map<std::uint32_t, window_state> windows = {
-        {0, {}},
+  private:
+    friend settings;
+
+    std::flat_map<std::uint32_t, std::optional<window_state>> windows = {
+        {0, window_state{}},
     };
 };
 
@@ -288,17 +305,151 @@ struct settings_on_disk
 struct settings final : public settings_on_disk
 {
   public:
-    std::uint32_t
+    [[nodiscard]] std::uint32_t
     next_window_id() const noexcept
     {
+        std::scoped_lock lock(state_mutex_);
+
         std::uint32_t id = 0;
-        while (windows.contains(id))
+        while (true)
         {
+            const auto it = windows.find(id);
+            // if (it == windows.end() || !it->second.has_value())
+            if (it == windows.end())
+            {
+                return id;
+            }
             id += 1;
         }
-        return id;
     }
 
+    void
+    create_window_state(const std::uint32_t window_id) noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        logger::trace("creating window_id {}", window_id);
+
+        auto [it, inserted] = windows.try_emplace(window_id, std::nullopt);
+        if (!inserted && it->second.has_value())
+        {
+            logger::error("settings for window_id {} already exist", window_id);
+            return;
+        }
+        it->second.emplace();
+    }
+
+    void
+    create_window_state(const std::uint32_t window_id, const window_state& state) noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        logger::trace("creating window_id {}", window_id);
+
+        auto [it, inserted] = windows.try_emplace(window_id, std::nullopt);
+        if (!inserted && it->second.has_value())
+        {
+            logger::error("settings for window_id {} already exist", window_id);
+            return;
+        }
+        it->second = state;
+    }
+
+    void
+    remove_window_state(const std::uint32_t window_id) noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        logger::trace("removing window_id {}", window_id);
+
+        const auto it = windows.find(window_id);
+        if (it == windows.end() || !it->second.has_value())
+        {
+            logger::error("trying to remove invalid window_id {}", window_id);
+            return;
+        }
+        it->second = std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<window_state>
+    get_window_state(const std::uint32_t window_id) const noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        const auto it = windows.find(window_id);
+        if (it == windows.end() || !it->second.has_value())
+        {
+            logger::error("trying to get invalid window_id {}", window_id);
+            return std::nullopt;
+        }
+        return it->second;
+    }
+
+    void
+    set_window_state(const std::uint32_t window_id, const window_state& state) noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        windows[window_id] = state;
+    }
+
+    [[nodiscard]] std::optional<panel_state>
+    get_panel_state(const std::uint32_t window_id, const config::panel_id panel_id) const noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        const auto window_it = windows.find(window_id);
+        if (window_it == windows.end() || !window_it->second.has_value())
+        {
+            logger::error("trying to get invalid window_id {}", window_id);
+            return std::nullopt;
+        }
+
+        const auto& panels = window_it->second->panels;
+        const auto panel_it = panels.find(panel_id);
+        if (panel_it == panels.end())
+        {
+            logger::error("trying to get invalid panel_id {} in window_id {}",
+                          std::to_underlying(panel_id),
+                          window_id);
+            return std::nullopt;
+        }
+        return panel_it->second;
+    }
+
+    void
+    set_panel_state(const std::uint32_t window_id, const config::panel_id panel_id,
+                    const panel_state& state) noexcept
+    {
+        if (!is_valid_window_state(window_id))
+        {
+            return;
+        }
+
+        std::scoped_lock lock(state_mutex_);
+
+        auto& window = windows[window_id];
+        window->panels[panel_id] = state;
+    }
+
+    [[nodiscard]] auto
+    get_windows() const noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        return windows;
+    }
+
+    [[nodiscard]] bool
+    is_valid_window_state(const std::uint32_t window_id) noexcept
+    {
+        return get_window_state(window_id) != std::nullopt;
+    }
+
+  private:
+    mutable std::mutex state_mutex_;
+
+  public:
     [[nodiscard]] auto
     signal_autosave_request() noexcept
     {

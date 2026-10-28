@@ -137,7 +137,7 @@ main(int argc, char* argv[])
                 initialized = true;
 
                 gui::main_window* window = nullptr;
-                for (const auto& [window_id, _] : settings->windows)
+                for (const auto& [window_id, _] : settings->get_windows())
                 {
                     window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
                     window->present();

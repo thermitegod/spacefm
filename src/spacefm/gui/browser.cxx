@@ -75,15 +75,15 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint32_t window
     set_visible(true);
 
     // load saved tabs, do this before connecting to notebook signals
-    const auto panel_state = settings_->windows[window_id_].panels[panel_id_];
-    for (const auto [idx, state] : std::views::enumerate(panel_state.tabs))
+    const auto panel_state = settings_->get_panel_state(window_id_, panel_id_);
+    for (const auto [idx, state] : std::views::enumerate(panel_state->tabs))
     {
         try
         {
             if (std::filesystem::exists(state.path))
             {
                 // logger::info("set active {}, {}", idx, get_n_pages() == panel_state.active_tab);
-                new_tab(state, get_n_pages() == panel_state.active_tab);
+                new_tab(state, get_n_pages() == panel_state->active_tab);
             }
         }
         catch (const std::filesystem::filesystem_error& e)
@@ -566,7 +566,19 @@ gui::browser::save_tab_state() noexcept
         tabs.push_back(tab->get_tab_state());
     }
 
-    settings_->windows[window_id_].panels[panel_id_].tabs = tabs;
-    settings_->windows[window_id_].panels[panel_id_].active_tab = current_page;
+    const auto panel_state = settings_->get_panel_state(window_id_, panel_id_);
+    if (!panel_state)
+    {
+        return;
+    }
+
+    settings_->set_panel_state(window_id_,
+                               panel_id_,
+                               config::panel_state{
+                                   .is_visible = panel_state->is_visible,
+                                   .active_tab = current_page,
+                                   .tabs = tabs,
+                               });
+
     settings_->signal_autosave_request().emit();
 }

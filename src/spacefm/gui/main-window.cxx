@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <memory>
 #include <span>
+#include <utility>
 
 #include <cassert>
 #include <cstdint>
@@ -47,6 +48,13 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
 
     set_application(app);
     assert(get_application() != nullptr);
+
+    if (!settings->is_valid_window_state(window_id_))
+    {
+        logger::warn("need to create window state before creating window");
+        settings_->create_window_state(window_id_);
+    }
+    const auto window_state = settings_->get_window_state(window_id_);
 
     bookmark_manager_->signal_load_error().connect(
         [this](std::string_view msg)
@@ -107,26 +115,43 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
         {config::panel_id::panel_4, "panel_4"}};
     for (const auto& [panel_id, name] : panel_map)
     {
+        const auto is_visible = settings_->get_panel_state(window_id_, panel_id)->is_visible;
+
         add_action_bool(
             name,
             [this, app, panel_id, name]()
             {
-                auto& window = settings_->windows[window_id_];
+                bool make_visible = false;
+                const auto panel_state = settings_->get_panel_state(window_id_, panel_id);
+                if (!panel_state->is_visible)
+                { // create new panel
+                    make_visible = true;
+                }
+                else
+                { // removing existing panel
+                    make_visible = false;
+                }
 
-                const bool state = !window.panels[panel_id].is_visible;
-                window.panels[panel_id].is_visible = state;
+                settings_->set_panel_state(window_id_,
+                                           panel_id,
+                                           {
+                                               .is_visible = !panel_state->is_visible,
+                                               .active_tab = panel_state->active_tab,
+                                               .tabs = panel_state->tabs,
+                                           });
+
                 settings_->signal_autosave_request().emit();
 
-                layout_.set_pane_visible(panel_id, state);
+                layout_.set_pane_visible(panel_id, make_visible);
 
-                auto action = app->lookup_action(name);
+                auto action = lookup_action(name);
                 auto simple_action = std::dynamic_pointer_cast<Gio::SimpleAction>(action);
                 if (simple_action)
                 {
-                    simple_action->set_state(Glib::Variant<bool>::create(state));
+                    simple_action->set_state(Glib::Variant<bool>::create(make_visible));
                 }
             },
-            settings_->windows[window_id_].panels[panel_id].is_visible);
+            is_visible);
     }
 
     add_action("todo",
@@ -139,11 +164,11 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
                });
 
     // Load panels / tabs
-    for (const auto [id, state] : settings_->windows[window_id_].panels)
+    for (const auto [panel_id, panel_state] : window_state->panels)
     {
-        if (state.is_visible)
+        if (panel_state.is_visible)
         {
-            layout_.set_pane_visible(id, true);
+            layout_.set_pane_visible(panel_id, true);
         }
     }
 
@@ -157,7 +182,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
             // to save all windows state use quit
             if (windows.size() > 1 && !keep_state_)
             {
-                settings_->windows.erase(window_id_);
+                settings_->remove_window_state(window_id_);
             }
             return false;
         },
@@ -333,7 +358,7 @@ gui::main_window::on_open_new_window() noexcept
 {
     const auto new_window_id = settings_->next_window_id();
 
-    settings_->windows.emplace(new_window_id, config::window_state{});
+    settings_->create_window_state(new_window_id);
 
     auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
     window->present();
