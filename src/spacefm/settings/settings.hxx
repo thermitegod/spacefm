@@ -295,9 +295,7 @@ struct settings_on_disk
   private:
     friend settings;
 
-    std::flat_map<std::uint32_t, std::optional<window_state>> windows = {
-        {0, window_state{}},
-    };
+    std::flat_map<std::uint32_t, std::optional<window_state>> windows;
 };
 
 // TODO use getters and setters for settings?

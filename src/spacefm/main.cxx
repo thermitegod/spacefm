@@ -137,10 +137,19 @@ main(int argc, char* argv[])
                 initialized = true;
 
                 gui::main_window* window = nullptr;
-                for (const auto& [window_id, _] : settings->get_windows())
-                {
-                    window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
+                auto windows = settings->get_windows();
+                if (windows.empty())
+                { // No saved state
+                    window = Gtk::make_managed<gui::main_window>(app, 0, settings);
                     window->present();
+                }
+                else
+                {
+                    for (const auto& [window_id, _] : settings->get_windows())
+                    {
+                        window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
+                        window->present();
+                    }
                 }
 
                 // open cli files in last window, this should be good enough for now
