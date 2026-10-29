@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <deque>
 #include <flat_map>
 #include <mutex>
 #include <optional>
@@ -321,7 +322,7 @@ struct settings final : public settings_on_disk
         }
     }
 
-    void
+    [[nodiscard]] bool
     create_window_state(const std::uint32_t window_id) noexcept
     {
         std::scoped_lock lock(state_mutex_);
@@ -332,12 +333,13 @@ struct settings final : public settings_on_disk
         if (!inserted && it->second.has_value())
         {
             logger::error("settings for window_id {} already exist", window_id);
-            return;
+            return false;
         }
         it->second.emplace();
+        return true;
     }
 
-    void
+    [[nodiscard]] bool
     create_window_state(const std::uint32_t window_id, const window_state& state) noexcept
     {
         std::scoped_lock lock(state_mutex_);
@@ -348,12 +350,13 @@ struct settings final : public settings_on_disk
         if (!inserted && it->second.has_value())
         {
             logger::error("settings for window_id {} already exist", window_id);
-            return;
+            return false;
         }
         it->second = state;
+        return true;
     }
 
-    void
+    [[nodiscard]] bool
     remove_window_state(const std::uint32_t window_id) noexcept
     {
         std::scoped_lock lock(state_mutex_);
@@ -364,9 +367,23 @@ struct settings final : public settings_on_disk
         if (it == windows.end() || !it->second.has_value())
         {
             logger::error("trying to remove invalid window_id {}", window_id);
-            return;
+            return false;
         }
+        restore_window.push_back(*it->second);
         it->second = std::nullopt;
+        return true;
+    }
+
+    [[nodiscard]] bool
+    restore_window_state(const std::uint32_t window_id) noexcept
+    {
+        if (restore_window.empty())
+        {
+            return false;
+        }
+        auto state = restore_window.back();
+        restore_window.pop_back();
+        return create_window_state(window_id, state);
     }
 
     [[nodiscard]] std::optional<window_state>
@@ -446,6 +463,8 @@ struct settings final : public settings_on_disk
 
   private:
     mutable std::mutex state_mutex_;
+
+    std::deque<window_state> restore_window;
 
   public:
     [[nodiscard]] auto

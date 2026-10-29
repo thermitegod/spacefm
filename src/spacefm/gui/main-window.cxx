@@ -52,7 +52,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
     if (!settings->is_valid_window_state(window_id_))
     {
         logger::warn("need to create window state before creating window");
-        settings_->create_window_state(window_id_);
+        auto _ = settings_->create_window_state(window_id_);
     }
     const auto window_state = settings_->get_window_state(window_id_);
 
@@ -99,6 +99,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
     add_action("quit", [this]() { on_quit(); });
     add_action("terminal", [this]() { on_open_terminal(); });
     add_action("new_window", [this]() { on_open_new_window(); });
+    add_action("restore_window", [this]() { on_restore_window(); });
     add_action("title", [this]() { on_set_title(); });
     add_action("fullscreen", [this]() { on_fullscreen(); });
     add_action("keybindings", [this]() { on_open_keybindings(); });
@@ -182,7 +183,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
             // to save all windows state use quit
             if (windows.size() > 1 && !keep_state_)
             {
-                settings_->remove_window_state(window_id_);
+                auto _ = settings_->remove_window_state(window_id_);
             }
             return false;
         },
@@ -358,7 +359,7 @@ gui::main_window::on_open_new_window() noexcept
 {
     const auto new_window_id = settings_->next_window_id();
 
-    settings_->create_window_state(new_window_id);
+    auto _ = settings_->create_window_state(new_window_id);
 
     auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
     window->present();
@@ -368,6 +369,21 @@ void
 gui::main_window::new_window() noexcept
 {
     gui::main_window::on_open_new_window();
+}
+
+void
+gui::main_window::on_restore_window() noexcept
+{
+    const auto new_window_id = settings_->next_window_id();
+
+    auto restored = settings_->restore_window_state(new_window_id);
+    if (!restored)
+    {
+        return;
+    }
+
+    auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
+    window->present();
 }
 
 void

@@ -69,6 +69,7 @@ class main_window : public Gtk::ApplicationWindow
     void on_open_search() noexcept;
     void on_open_terminal() noexcept;
     void on_open_new_window() noexcept;
+    void on_restore_window() noexcept;
     void on_close() noexcept;
     void on_quit() noexcept;
     void on_set_title() noexcept;

@@ -63,6 +63,7 @@ gui::menubar::create_file() noexcept
         section->append_item(item);
 
         section->append("Close Window", "win.close");
+        section->append("Restore Closed Window", "win.restore_window");
 
         menu->append_section(section);
     }
