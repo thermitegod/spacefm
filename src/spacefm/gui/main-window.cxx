@@ -52,7 +52,7 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
     if (!settings->is_valid_window_state(window_id_))
     {
         logger::warn("need to create window state before creating window");
-        auto _ = settings_->create_window_state(window_id_);
+        window_id_ = *settings_->create_window_state();
     }
     const auto window_state = settings_->get_window_state(window_id_);
 
@@ -357,11 +357,15 @@ gui::main_window::on_open_terminal() noexcept
 void
 gui::main_window::on_open_new_window() noexcept
 {
-    const auto new_window_id = settings_->next_window_id();
+    const auto new_window_id = settings_->create_window_state();
+    if (!new_window_id)
+    {
+        logger::error("Failed to create new window state");
+        return;
+    }
 
-    auto _ = settings_->create_window_state(new_window_id);
-
-    auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
+    auto* window =
+        Gtk::make_managed<gui::main_window>(get_application(), *new_window_id, settings_);
     window->present();
 }
 
@@ -374,15 +378,14 @@ gui::main_window::new_window() noexcept
 void
 gui::main_window::on_restore_window() noexcept
 {
-    const auto new_window_id = settings_->next_window_id();
-
-    auto restored = settings_->restore_window_state(new_window_id);
-    if (!restored)
+    const auto restored_window_id = settings_->restore_window_state();
+    if (!restored_window_id)
     {
         return;
     }
 
-    auto* window = Gtk::make_managed<gui::main_window>(get_application(), new_window_id, settings_);
+    auto* window =
+        Gtk::make_managed<gui::main_window>(get_application(), *restored_window_id, settings_);
     window->present();
 }
 

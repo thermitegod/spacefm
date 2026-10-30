@@ -304,28 +304,12 @@ struct settings_on_disk
 struct settings final : public settings_on_disk
 {
   public:
-    [[nodiscard]] std::uint64_t
-    next_window_id() const noexcept
+    [[nodiscard]] std::optional<std::uint64_t>
+    create_window_state(std::optional<window_state> state = std::nullopt) noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
-        std::uint64_t id = 0;
-        while (true)
-        {
-            const auto it = windows.find(id);
-            // if (it == windows.end() || !it->second.has_value())
-            if (it == windows.end())
-            {
-                return id;
-            }
-            id += 1;
-        }
-    }
-
-    [[nodiscard]] bool
-    create_window_state(const std::uint64_t window_id) noexcept
-    {
-        std::scoped_lock lock(state_mutex_);
+        const auto window_id = next_window_id();
 
         logger::trace("creating window_id {}", window_id);
 
@@ -333,27 +317,19 @@ struct settings final : public settings_on_disk
         if (!inserted && it->second.has_value())
         {
             logger::error("settings for window_id {} already exist", window_id);
-            return false;
+            return std::nullopt;
         }
-        it->second.emplace();
-        return true;
-    }
 
-    [[nodiscard]] bool
-    create_window_state(const std::uint64_t window_id, const window_state& state) noexcept
-    {
-        std::scoped_lock lock(state_mutex_);
-
-        logger::trace("creating window_id {}", window_id);
-
-        auto [it, inserted] = windows.try_emplace(window_id, std::nullopt);
-        if (!inserted && it->second.has_value())
+        if (state)
         {
-            logger::error("settings for window_id {} already exist", window_id);
-            return false;
+            it->second = *state;
         }
-        it->second = state;
-        return true;
+        else
+        {
+            it->second = window_state{};
+        }
+
+        return window_id;
     }
 
     [[nodiscard]] bool
@@ -374,8 +350,8 @@ struct settings final : public settings_on_disk
         return true;
     }
 
-    [[nodiscard]] bool
-    restore_window_state(const std::uint64_t window_id) noexcept
+    [[nodiscard]] std::optional<std::uint64_t>
+    restore_window_state() noexcept
     {
         if (restore_window.empty())
         {
@@ -383,7 +359,7 @@ struct settings final : public settings_on_disk
         }
         auto state = restore_window.back();
         restore_window.pop_back();
-        return create_window_state(window_id, state);
+        return create_window_state(state);
     }
 
     [[nodiscard]] std::optional<window_state>
@@ -462,6 +438,22 @@ struct settings final : public settings_on_disk
     }
 
   private:
+    [[nodiscard]] std::uint64_t
+    next_window_id() const noexcept
+    {
+        std::uint64_t id = 0;
+        while (true)
+        {
+            const auto it = windows.find(id);
+            // if (it == windows.end() || !it->second.has_value())
+            if (it == windows.end())
+            {
+                return id;
+            }
+            id += 1;
+        }
+    }
+
     mutable std::mutex state_mutex_;
 
     std::deque<window_state> restore_window;
