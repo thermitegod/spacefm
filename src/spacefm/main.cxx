@@ -38,6 +38,7 @@
 struct commandline_opts final
 {
     std::vector<std::filesystem::path> files;
+    bool no_saved_state{false};
     bool new_window{false};
     std::int32_t panel{1};
     bool version{false};
@@ -54,10 +55,15 @@ parse_options(auto& argc, auto& argv) noexcept
 
         Glib::OptionGroup group("main", PACKAGE_NAME_FANCY, "Application options");
 
-        Glib::OptionEntry no_new_window;
-        no_new_window.set_long_name("new-window");
-        no_new_window.set_description("Open a new window");
-        group.add_entry(no_new_window, options.new_window);
+        Glib::OptionEntry no_saved_state;
+        no_saved_state.set_long_name("no-saved-state");
+        no_saved_state.set_description("Do not restore saved state");
+        group.add_entry(no_saved_state, options.no_saved_state);
+
+        Glib::OptionEntry new_window;
+        new_window.set_long_name("new-window");
+        new_window.set_description("Open a new window");
+        group.add_entry(new_window, options.new_window);
 
         Glib::OptionEntry panel_entry;
         panel_entry.set_long_name("panel");
@@ -136,11 +142,18 @@ main(int argc, char* argv[])
                 config_manager->load();
                 initialized = true;
 
+                if (options->no_saved_state)
+                { // remove saved state
+                    settings->clear_windows();
+                }
+
                 gui::main_window* window = nullptr;
                 auto windows = settings->get_windows();
                 if (windows.empty())
                 { // No saved state
-                    window = Gtk::make_managed<gui::main_window>(app, 0, settings);
+                    const auto window_id = *settings->create_window_state();
+
+                    window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
                     window->present();
                 }
                 else

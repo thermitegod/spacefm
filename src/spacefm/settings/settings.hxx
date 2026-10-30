@@ -431,6 +431,14 @@ struct settings final : public settings_on_disk
         return windows;
     }
 
+    void
+    clear_windows() noexcept
+    {
+        std::scoped_lock lock(state_mutex_);
+
+        windows.clear();
+    }
+
     [[nodiscard]] bool
     is_valid_window_state(const std::uint64_t window_id) noexcept
     {
