@@ -40,7 +40,7 @@
 #include "logger.hxx"
 
 gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
-                              const std::uint32_t window_id,
+                              const std::uint64_t window_id,
                               const std::shared_ptr<config::settings>& settings)
     : window_id_(window_id), settings_(settings)
 {

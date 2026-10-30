@@ -31,7 +31,7 @@ namespace gui
 class layout : public Gtk::Paned
 {
   public:
-    layout(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
+    layout(Gtk::ApplicationWindow& parent, const std::uint64_t window_id,
            const std::shared_ptr<vfs::volume_manager>& volume_manager,
            const std::shared_ptr<vfs::task_manager>& task_manager,
            const std::shared_ptr<config::settings>& settings);
@@ -47,7 +47,7 @@ class layout : public Gtk::Paned
     void update_container_visibility() noexcept;
 
     Gtk::ApplicationWindow& parent_;
-    std::uint32_t window_id_;
+    std::uint64_t window_id_;
     std::shared_ptr<vfs::volume_manager> volume_manager_;
     std::shared_ptr<vfs::task_manager> task_manager_;
     std::shared_ptr<config::settings> settings_;

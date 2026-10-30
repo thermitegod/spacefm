@@ -38,7 +38,7 @@ namespace gui
 class main_window : public Gtk::ApplicationWindow
 {
   public:
-    main_window(const Glib::RefPtr<Gtk::Application>& app, const std::uint32_t window_id,
+    main_window(const Glib::RefPtr<Gtk::Application>& app, const std::uint64_t window_id,
                 const std::shared_ptr<config::settings>& settings);
     ~main_window();
 
@@ -47,7 +47,7 @@ class main_window : public Gtk::ApplicationWindow
     void new_window() noexcept;
 
   private:
-    std::uint32_t window_id_;
+    std::uint64_t window_id_;
     std::shared_ptr<config::settings> settings_;
     std::shared_ptr<vfs::bookmarks> bookmark_manager_ = std::make_shared<vfs::bookmarks>();
     std::shared_ptr<vfs::task_manager> task_manager_ = vfs::task_manager::create();

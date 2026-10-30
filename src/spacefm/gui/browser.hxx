@@ -34,7 +34,7 @@ namespace gui
 class browser final : public Gtk::Notebook
 {
   public:
-    browser(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
+    browser(Gtk::ApplicationWindow& parent, const std::uint64_t window_id,
             const config::panel_id panel,
             const std::shared_ptr<vfs::volume_manager>& volume_manager,
             const std::shared_ptr<vfs::task_manager>& task_manager,
@@ -60,7 +60,7 @@ class browser final : public Gtk::Notebook
     void save_tab_state() noexcept;
 
     Gtk::ApplicationWindow& parent_;
-    std::uint32_t window_id_;
+    std::uint64_t window_id_;
     config::panel_id panel_id_;
     std::shared_ptr<vfs::volume_manager> volume_manager_;
     std::shared_ptr<vfs::task_manager> task_manager_;

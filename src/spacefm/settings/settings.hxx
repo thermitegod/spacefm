@@ -296,7 +296,7 @@ struct settings_on_disk
   private:
     friend settings;
 
-    std::flat_map<std::uint32_t, std::optional<window_state>> windows;
+    std::flat_map<std::uint64_t, std::optional<window_state>> windows;
 };
 
 // TODO use getters and setters for settings?
@@ -304,12 +304,12 @@ struct settings_on_disk
 struct settings final : public settings_on_disk
 {
   public:
-    [[nodiscard]] std::uint32_t
+    [[nodiscard]] std::uint64_t
     next_window_id() const noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
-        std::uint32_t id = 0;
+        std::uint64_t id = 0;
         while (true)
         {
             const auto it = windows.find(id);
@@ -323,7 +323,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] bool
-    create_window_state(const std::uint32_t window_id) noexcept
+    create_window_state(const std::uint64_t window_id) noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -340,7 +340,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] bool
-    create_window_state(const std::uint32_t window_id, const window_state& state) noexcept
+    create_window_state(const std::uint64_t window_id, const window_state& state) noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -357,7 +357,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] bool
-    remove_window_state(const std::uint32_t window_id) noexcept
+    remove_window_state(const std::uint64_t window_id) noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -375,7 +375,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] bool
-    restore_window_state(const std::uint32_t window_id) noexcept
+    restore_window_state(const std::uint64_t window_id) noexcept
     {
         if (restore_window.empty())
         {
@@ -387,7 +387,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] std::optional<window_state>
-    get_window_state(const std::uint32_t window_id) const noexcept
+    get_window_state(const std::uint64_t window_id) const noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -401,7 +401,7 @@ struct settings final : public settings_on_disk
     }
 
     void
-    set_window_state(const std::uint32_t window_id, const window_state& state) noexcept
+    set_window_state(const std::uint64_t window_id, const window_state& state) noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -409,7 +409,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] std::optional<panel_state>
-    get_panel_state(const std::uint32_t window_id, const config::panel_id panel_id) const noexcept
+    get_panel_state(const std::uint64_t window_id, const config::panel_id panel_id) const noexcept
     {
         std::scoped_lock lock(state_mutex_);
 
@@ -433,7 +433,7 @@ struct settings final : public settings_on_disk
     }
 
     void
-    set_panel_state(const std::uint32_t window_id, const config::panel_id panel_id,
+    set_panel_state(const std::uint64_t window_id, const config::panel_id panel_id,
                     const panel_state& state) noexcept
     {
         if (!is_valid_window_state(window_id))
@@ -456,7 +456,7 @@ struct settings final : public settings_on_disk
     }
 
     [[nodiscard]] bool
-    is_valid_window_state(const std::uint32_t window_id) noexcept
+    is_valid_window_state(const std::uint64_t window_id) noexcept
     {
         return get_window_state(window_id) != std::nullopt;
     }

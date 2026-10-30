@@ -29,7 +29,7 @@
 #include "logger.hxx"
 #include "reflection/enum.hxx"
 
-gui::layout::layout(Gtk::ApplicationWindow& parent, const std::uint32_t window_id,
+gui::layout::layout(Gtk::ApplicationWindow& parent, const std::uint64_t window_id,
                     const std::shared_ptr<vfs::volume_manager>& volume_manager,
                     const std::shared_ptr<vfs::task_manager>& task_manager,
                     const std::shared_ptr<config::settings>& settings)
