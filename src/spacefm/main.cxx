@@ -142,6 +142,22 @@ main(int argc, char* argv[])
                 config_manager->load();
                 initialized = true;
 
+                auto volume_manager = vfs::volume_manager::create();
+                volume_manager->signal_mounted().connect(
+                    [app, settings](const std::filesystem::path& path)
+                    {
+                        if (settings->general.auto_open_mounted_volumes)
+                        {
+                            auto* window =
+                                dynamic_cast<gui::main_window*>(app->get_active_window());
+                            if (window)
+                            {
+                                // TODO use the current active panel
+                                window->open_files(config::panel_id::panel_1, std::vector{path});
+                            }
+                        }
+                    });
+
                 if (options->no_saved_state)
                 { // remove saved state
                     settings->clear_windows();
@@ -153,14 +169,20 @@ main(int argc, char* argv[])
                 { // No saved state
                     const auto window_id = *settings->create_window_state();
 
-                    window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
+                    window = Gtk::make_managed<gui::main_window>(app,
+                                                                 window_id,
+                                                                 volume_manager,
+                                                                 settings);
                     window->present();
                 }
                 else
                 {
                     for (const auto& [window_id, _] : settings->get_windows())
                     {
-                        window = Gtk::make_managed<gui::main_window>(app, window_id, settings);
+                        window = Gtk::make_managed<gui::main_window>(app,
+                                                                     window_id,
+                                                                     volume_manager,
+                                                                     settings);
                         window->present();
                     }
                 }

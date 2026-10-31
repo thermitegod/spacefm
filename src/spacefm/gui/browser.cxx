@@ -124,15 +124,6 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint64_t window
             }
         });
 
-    volume_manager_->signal_mounted().connect(
-        [this](const auto& path)
-        {
-            if (settings_->general.auto_open_mounted_volumes)
-            { // TODO need to only open in active browser, not all browsers
-                new_tab(path, settings_->behavior.switch_to_new_tabs);
-            }
-        });
-
     // need to do it this way to stop every loaded tabs signal_chdir_after() from causing unneeded save requests
     Glib::signal_idle().connect_once([this]() { enable_state_ = true; }, Glib::PRIORITY_DEFAULT);
 }

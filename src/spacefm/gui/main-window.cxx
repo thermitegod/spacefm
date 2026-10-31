@@ -41,8 +41,9 @@
 
 gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
                               const std::uint64_t window_id,
+                              const std::shared_ptr<vfs::volume_manager>& volume_manager,
                               const std::shared_ptr<config::settings>& settings)
-    : window_id_(window_id), settings_(settings)
+    : window_id_(window_id), volume_manager_(volume_manager), settings_(settings)
 {
     logger::debug("gui::main_window::main_window({})", window_id_);
 
@@ -364,8 +365,10 @@ gui::main_window::on_open_new_window() noexcept
         return;
     }
 
-    auto* window =
-        Gtk::make_managed<gui::main_window>(get_application(), *new_window_id, settings_);
+    auto* window = Gtk::make_managed<gui::main_window>(get_application(),
+                                                       *new_window_id,
+                                                       volume_manager_,
+                                                       settings_);
     window->present();
 }
 
@@ -384,8 +387,10 @@ gui::main_window::on_restore_window() noexcept
         return;
     }
 
-    auto* window =
-        Gtk::make_managed<gui::main_window>(get_application(), *restored_window_id, settings_);
+    auto* window = Gtk::make_managed<gui::main_window>(get_application(),
+                                                       *restored_window_id,
+                                                       volume_manager_,
+                                                       settings_);
     window->present();
 }
 
