@@ -33,7 +33,7 @@
 
 namespace config
 {
-enum class panel_id : std::uint8_t
+enum class panel_id : std::int32_t
 {
     panel_1,
     panel_2,
@@ -41,14 +41,14 @@ enum class panel_id : std::uint8_t
     panel_4,
 };
 
-enum class view_mode : std::uint8_t
+enum class view_mode : std::int32_t
 {
     grid,
     list,
     compact,
 };
 
-enum class sort_by : std::uint8_t
+enum class sort_by : std::int32_t
 {
     name,
     size,
@@ -64,20 +64,20 @@ enum class sort_by : std::uint8_t
     mtime,
 };
 
-enum class sort_type : std::uint8_t
+enum class sort_type : std::int32_t
 {
     ascending,
     descending,
 };
 
-enum class sort_dir : std::uint8_t
+enum class sort_dir : std::int32_t
 {
     first,
     mixed,
     last,
 };
 
-enum class sort_hidden : std::uint8_t
+enum class sort_hidden : std::int32_t
 {
     first,
     last,

@@ -327,7 +327,7 @@ gui::tab::add_actions() noexcept
     // View
     actions_.view_mode =
         Gio::SimpleAction::create("view_mode",
-                                  Glib::VariantType("y"),
+                                  Glib::VariantType("i"), // int
                                   Glib::Variant<std::underlying_type_t<config::view_mode>>::create(
                                       std::to_underlying(view_mode_)));
     actions_.view_mode->signal_activate().connect(
@@ -451,7 +451,7 @@ gui::tab::add_actions() noexcept
     // View > Sort > By
     actions_.sort_by =
         Gio::SimpleAction::create("sort_by",
-                                  Glib::VariantType("y"),
+                                  Glib::VariantType("i"), // int
                                   Glib::Variant<std::underlying_type_t<config::sort_by>>::create(
                                       std::to_underlying(sorting_.sort_by)));
     actions_.sort_by->signal_activate().connect(
@@ -472,7 +472,7 @@ gui::tab::add_actions() noexcept
     // View > Sort > Type
     actions_.sort_type =
         Gio::SimpleAction::create("sort_type",
-                                  Glib::VariantType("y"),
+                                  Glib::VariantType("i"), // int
                                   Glib::Variant<std::underlying_type_t<config::sort_type>>::create(
                                       std::to_underlying(sorting_.sort_type)));
     actions_.sort_type->signal_activate().connect(
@@ -493,7 +493,7 @@ gui::tab::add_actions() noexcept
     // View > Sort > Directories
     actions_.sort_dir =
         Gio::SimpleAction::create("sort_dir",
-                                  Glib::VariantType("y"),
+                                  Glib::VariantType("i"), // int
                                   Glib::Variant<std::underlying_type_t<config::sort_dir>>::create(
                                       std::to_underlying(sorting_.sort_dir)));
     actions_.sort_dir->signal_activate().connect(
@@ -514,7 +514,7 @@ gui::tab::add_actions() noexcept
     // View > Sort > Hidden
     actions_.sort_hidden = Gio::SimpleAction::create(
         "sort_hidden",
-        Glib::VariantType("y"),
+        Glib::VariantType("i"), // int
         Glib::Variant<std::underlying_type_t<config::sort_hidden>>::create(
             std::to_underlying(sorting_.sort_hidden)));
     actions_.sort_hidden->signal_activate().connect(
