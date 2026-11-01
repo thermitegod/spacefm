@@ -395,7 +395,7 @@ gui::tab::add_actions() noexcept
         list_state_.compact);
     actions_.icon_size =
         Gio::SimpleAction::create("icon_size",
-                                  Glib::VariantType("y"),
+                                  Glib::VariantType("i"), // int
                                   Glib::Variant<std::underlying_type_t<config::icon_size>>::create(
                                       std::to_underlying(grid_state_.icon_size)));
     actions_.icon_size->signal_activate().connect(
@@ -1412,6 +1412,9 @@ gui::tab::create_context_menu_model() noexcept
             add_menu_item("X Large Icons", config::icon_size::x_large);
             add_menu_item("XX Large Icons", config::icon_size::xx_large);
             add_menu_item("XXX Large Icons", config::icon_size::xxx_large);
+            add_menu_item("Huge Icons", config::icon_size::huge);
+            add_menu_item("X Huge Icons", config::icon_size::x_huge);
+            add_menu_item("XX Huge Icons", config::icon_size::xx_huge);
 
             smenu->append_section(smenu_sort);
         }

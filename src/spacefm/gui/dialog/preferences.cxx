@@ -421,7 +421,7 @@ gui::dialog::preferences::init_defaults_tab() noexcept
     page->add_section("Grid");
 
     {
-        constexpr std::array<std::pair<config::icon_size, std::string_view>, 9> data = {{
+        constexpr std::array<std::pair<config::icon_size, std::string_view>, 12> data = {{
             {config::icon_size::xxx_small, "XXX Small Icons"},
             {config::icon_size::xx_small, "XX Small Icons"},
             {config::icon_size::x_small, "X Small Icons"},
@@ -431,6 +431,9 @@ gui::dialog::preferences::init_defaults_tab() noexcept
             {config::icon_size::x_large, "X Large Icons"},
             {config::icon_size::xx_large, "XX Large Icons"},
             {config::icon_size::xxx_large, "XXX Large Icons"},
+            {config::icon_size::huge, "Huge Icons"},
+            {config::icon_size::x_huge, "X Huge Icons"},
+            {config::icon_size::xx_huge, "XX Huge Icons"},
         }};
         page->add_dropdown("Icon Size", data, settings_->defaults.grid.icon_size);
     }

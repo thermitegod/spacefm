@@ -83,7 +83,7 @@ enum class sort_hidden : std::uint8_t
     last,
 };
 
-enum class icon_size : std::uint8_t
+enum class icon_size : std::int32_t
 {
     xxx_small = 22,
     xx_small = 24,
@@ -94,6 +94,9 @@ enum class icon_size : std::uint8_t
     x_large = 72,
     xx_large = 96,
     xxx_large = 128,
+    huge = 256,
+    x_huge = 512,
+    xx_huge = 1024,
 };
 
 struct sorting final
