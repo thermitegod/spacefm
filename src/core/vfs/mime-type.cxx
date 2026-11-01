@@ -71,10 +71,17 @@ vfs::mime_type::create(std::string_view type) noexcept
 std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
 {
-    [[maybe_unused]] bool uncertain;
-    auto type = Gio::content_type_guess(path, nullptr, 0, uncertain);
+    if (std::filesystem::is_directory(path))
+    {
+        return create_from_type(vfs::mime_type::directory);
+    }
+    else
+    {
+        [[maybe_unused]] bool uncertain;
+        const auto type = Gio::content_type_guess(path, nullptr, 0, uncertain);
 
-    return vfs::mime_type::create(type.raw());
+        return create_from_type(type.raw());
+    }
 }
 
 std::shared_ptr<vfs::mime_type>
