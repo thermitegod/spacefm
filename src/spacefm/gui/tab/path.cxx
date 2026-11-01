@@ -39,7 +39,24 @@ gui::path::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Modifi
     (void)state;
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
-        signal_confirm().emit(get_text().raw());
+        auto text = get_text().raw();
+        if (text.empty())
+        {
+            return false;
+        }
+
+        const auto pos = text.find_last_not_of('/');
+        if (pos != std::string::npos)
+        {
+            text.erase(pos + 1);
+        }
+        else
+        {
+            // path is root
+            text = "/";
+        }
+
+        signal_confirm().emit(text);
         return true;
     }
     return false;
