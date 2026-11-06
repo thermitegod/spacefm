@@ -29,6 +29,9 @@
 #include <glibmm.h>
 #include <gtkmm.h>
 
+#include <botan/hash.h>
+#include <botan/hex.h>
+
 #include <ztd/ztd.hxx>
 
 #include "vfs/file.hxx"
@@ -114,8 +117,17 @@ vfs::file::create(const std::filesystem::path& path) noexcept
 }
 
 vfs::file::file(const std::filesystem::path& path, ztd::statx stat) noexcept
-    : stat_(std::move(stat)), path_(path), uri_(Glib::filename_to_uri(path_)),
+    : stat_(std::move(stat)),
+      path_(path),
       name_(path_ == "/" ? "/" : path_.filename()),
+      uri_(Glib::filename_to_uri(path_)),
+      uri_hash_(
+          [this]
+          {
+              static thread_local auto hash = Botan::HashFunction::create("MD5");
+              hash->update(uri_);
+              return Botan::hex_encode(hash->final(), false);
+          }()),
       mime_type_(vfs::mime_type::create_from_file(path_))
 {
     // logger::debug<logger::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), path_);
@@ -166,6 +178,12 @@ std::string_view
 vfs::file::uri() const noexcept
 {
     return uri_;
+}
+
+std::string_view
+vfs::file::uri_hash() const noexcept
+{
+    return uri_hash_;
 }
 
 u64

@@ -26,9 +26,6 @@
 
 #include <glaze/json.hpp>
 
-#include <botan/hash.h>
-#include <botan/hex.h>
-
 #include <ztd/extra/glaze.hxx>
 #include <ztd/ztd.hxx>
 
@@ -233,17 +230,9 @@ vfs::thumbnail::create(const std::shared_ptr<vfs::thumbnail::thumbnailer>& thumb
 {
     const auto thumbnail_cache = vfs::thumbnail::get_cache_path(size);
 
-    const auto hash = std::invoke(
-        [](const auto& file)
-        {
-            const auto md5 = Botan::HashFunction::create("MD5");
-            md5->update(file->uri());
-            return Botan::hex_encode(md5->final(), false);
-        },
-        file);
-
-    const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
-    const auto fail_file = vfs::thumbnail::cache_fail() / std::format("{}.json", hash);
+    const auto uri_hash = file->uri_hash();
+    const auto thumbnail_file = thumbnail_cache / uri_hash += ".png";
+    const auto fail_file = vfs::thumbnail::cache_fail() / uri_hash += ".json";
     if (std::filesystem::exists(fail_file))
     {
         logger::trace<logger::vfs>("failed to create thumbnail in the past: {}", file->path());

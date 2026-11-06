@@ -55,6 +55,7 @@ class file : public std::enable_shared_from_this<file>
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] std::string_view uri() const noexcept;
+    [[nodiscard]] std::string_view uri_hash() const noexcept;
 
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
@@ -128,8 +129,9 @@ class file : public std::enable_shared_from_this<file>
   private:
     ztd::statx stat_;
     std::filesystem::path path_;
-    std::string uri_;
     std::string name_;
+    std::string uri_;
+    std::string uri_hash_;
     std::shared_ptr<vfs::mime_type> mime_type_;
 
     bool is_special_desktop_entry_{false}; // is a .desktop file
