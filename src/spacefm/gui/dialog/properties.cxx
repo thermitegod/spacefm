@@ -195,7 +195,9 @@ gui::dialog::properties::properties(Gtk::ApplicationWindow& parent,
                                     const std::filesystem::path& cwd,
                                     std::span<const std::shared_ptr<vfs::file>> files,
                                     const std::shared_ptr<config::settings>& settings) noexcept
-    : settings_(settings), files_(files.begin(), files.end()), cwd_(cwd)
+    : settings_(settings),
+      files_(files.begin(), files.end()),
+      cwd_(cwd)
 {
     set_transient_for(parent);
     set_modal(false);

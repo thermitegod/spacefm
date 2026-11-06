@@ -27,7 +27,9 @@
 gui::dialog::app_chooser::app_chooser(Gtk::ApplicationWindow& parent,
                                       const std::shared_ptr<vfs::file>& file, bool focus_all_apps,
                                       bool show_command, bool show_default)
-    : file_(file), show_command_(show_command), show_default_(show_default)
+    : file_(file),
+      show_command_(show_command),
+      show_default_(show_default)
 {
     set_transient_for(parent);
     set_modal(true);

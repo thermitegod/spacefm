@@ -53,7 +53,10 @@ class bookmarks : public Gtk::ApplicationWindow
       protected:
         explicit ModelColumns(std::string_view name, const std::filesystem::path& path,
                               const std::chrono::system_clock::time_point created) noexcept
-            : Glib::ObjectBase(typeid(ModelColumns)), name_(name), path_(path), created_(created)
+            : Glib::ObjectBase(typeid(ModelColumns)),
+              name_(name),
+              path_(path),
+              created_(created)
         {
         }
     };

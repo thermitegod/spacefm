@@ -43,7 +43,9 @@ gui::main_window::main_window(const Glib::RefPtr<Gtk::Application>& app,
                               const std::uint64_t window_id,
                               const std::shared_ptr<vfs::volume_manager>& volume_manager,
                               const std::shared_ptr<config::settings>& settings)
-    : window_id_(window_id), volume_manager_(volume_manager), settings_(settings)
+    : window_id_(window_id),
+      volume_manager_(volume_manager),
+      settings_(settings)
 {
     logger::debug("gui::main_window::main_window({})", window_id_);
 

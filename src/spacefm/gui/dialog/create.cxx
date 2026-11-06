@@ -38,7 +38,9 @@ gui::dialog::create::create(Gtk::ApplicationWindow& parent, const std::filesyste
                             const std::shared_ptr<vfs::file>& file,
                             const gui::dialog::create_mode mode,
                             const std::shared_ptr<config::settings>& settings)
-    : settings_(settings), file_(file), mode_(mode)
+    : settings_(settings),
+      file_(file),
+      mode_(mode)
 {
     set_transient_for(parent);
     set_modal(true);

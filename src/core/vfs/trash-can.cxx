@@ -42,7 +42,9 @@ std::unordered_map<u64, std::shared_ptr<vfs::trash_can>> trash_cache;
 } // namespace
 
 vfs::trash_can::trash_can(const std::filesystem::path& path) noexcept
-    : trash_path_(path), files_path_(path / "files"), info_path_(path / "info")
+    : trash_path_(path),
+      files_path_(path / "files"),
+      info_path_(path / "info")
 {
     // create_trash_dir();
 }

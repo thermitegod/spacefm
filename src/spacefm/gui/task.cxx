@@ -28,7 +28,8 @@
 
 gui::task::task(Gtk::ApplicationWindow& parent,
                 const std::shared_ptr<vfs::task_manager>& task_manager)
-    : parent_(parent), task_manager_(task_manager)
+    : parent_(parent),
+      task_manager_(task_manager)
 {
     set_orientation(Gtk::Orientation::VERTICAL);
 

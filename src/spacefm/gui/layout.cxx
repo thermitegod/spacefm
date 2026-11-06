@@ -33,8 +33,11 @@ gui::layout::layout(Gtk::ApplicationWindow& parent, const std::uint64_t window_i
                     const std::shared_ptr<vfs::volume_manager>& volume_manager,
                     const std::shared_ptr<vfs::task_manager>& task_manager,
                     const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), window_id_(window_id), volume_manager_(volume_manager),
-      task_manager_(task_manager), settings_(settings)
+    : parent_(parent),
+      window_id_(window_id),
+      volume_manager_(volume_manager),
+      task_manager_(task_manager),
+      settings_(settings)
 {
     logger::debug("gui::layout::layout({})", window_id_);
 

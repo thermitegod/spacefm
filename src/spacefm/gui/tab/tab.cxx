@@ -60,9 +60,14 @@
 gui::tab::tab(Gtk::ApplicationWindow& parent, const config::tab_state& state,
               const std::shared_ptr<vfs::task_manager>& task_manager,
               const std::shared_ptr<config::settings>& settings) noexcept
-    : parent_(parent), task_manager_(task_manager), settings_(settings), view_mode_(state.view),
-      sorting_(state.sorting), grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
-      list_state_(state.list ? *state.list : settings_->defaults.list), side_(settings_)
+    : parent_(parent),
+      task_manager_(task_manager),
+      settings_(settings),
+      view_mode_(state.view),
+      sorting_(state.sorting),
+      grid_state_(state.grid ? *state.grid : settings_->defaults.grid),
+      list_state_(state.list ? *state.list : settings_->defaults.list),
+      side_(settings_)
 {
     logger::debug("gui::tab::tab({})", cwd());
 

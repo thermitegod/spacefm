@@ -28,9 +28,12 @@
 #undef makedev
 
 vfs::device_mount::device_mount(const ztd::statmount& statmount) noexcept
-    : mount_id_(statmount.mount_id()), dev_major_(statmount.dev_major()),
-      dev_minor_(statmount.dev_minor()), fs_type_(statmount.fs_type()),
-      mount_point_(statmount.mount_point()), root_(statmount.root())
+    : mount_id_(statmount.mount_id()),
+      dev_major_(statmount.dev_major()),
+      dev_minor_(statmount.dev_minor()),
+      fs_type_(statmount.fs_type()),
+      mount_point_(statmount.mount_point()),
+      root_(statmount.root())
 {
 }
 

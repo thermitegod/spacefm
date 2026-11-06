@@ -39,7 +39,8 @@
 
 gui::files_base::files_base(const std::shared_ptr<vfs::task_manager>& task_manager,
                             const std::shared_ptr<config::settings>& settings)
-    : task_manager_(task_manager), settings_(settings)
+    : task_manager_(task_manager),
+      settings_(settings)
 {
     dir_model_ = Gio::ListStore<ModelColumns>::create();
     selection_model_ = Gtk::MultiSelection::create(dir_model_);

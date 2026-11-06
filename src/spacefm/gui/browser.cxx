@@ -41,8 +41,12 @@ gui::browser::browser(Gtk::ApplicationWindow& parent, const std::uint64_t window
                       const std::shared_ptr<vfs::volume_manager>& volume_manager,
                       const std::shared_ptr<vfs::task_manager>& task_manager,
                       const std::shared_ptr<config::settings>& settings)
-    : parent_(parent), window_id_(window_id), panel_id_(panel_id), volume_manager_(volume_manager),
-      task_manager_(task_manager), settings_(settings)
+    : parent_(parent),
+      window_id_(window_id),
+      panel_id_(panel_id),
+      volume_manager_(volume_manager),
+      task_manager_(task_manager),
+      settings_(settings)
 {
     logger::debug("gui::browser::browser({},{})", window_id, std::to_underlying(panel_id_));
 

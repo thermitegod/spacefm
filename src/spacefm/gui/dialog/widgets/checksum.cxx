@@ -33,7 +33,8 @@
 // https://botan.randombit.net/handbook/api_ref/hash.html
 
 gui::widget::Checksum::Checksum(std::string_view type, const std::filesystem::path& path)
-    : path_(path), algo_type_(type)
+    : path_(path),
+      algo_type_(type)
 {
     set_orientation(Gtk::Orientation::HORIZONTAL);
     // set_margin(5);

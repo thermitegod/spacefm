@@ -46,16 +46,17 @@ ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
 vfs::dir::dir(const std::filesystem::path& path) noexcept
-    : path_(path), notifier_(path_, {
-                                        notify::event::create,
-                                        notify::event::moved_to,
-                                        notify::event::delete_self,
-                                        notify::event::delete_sub,
-                                        notify::event::moved_from,
-                                        notify::event::umount,
-                                        notify::event::modify,
-                                        notify::event::attrib,
-                                    })
+    : path_(path),
+      notifier_(path_, {
+                           notify::event::create,
+                           notify::event::moved_to,
+                           notify::event::delete_self,
+                           notify::event::delete_sub,
+                           notify::event::moved_from,
+                           notify::event::umount,
+                           notify::event::modify,
+                           notify::event::attrib,
+                       })
 {
     // logger::debug<logger::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), path_);
 

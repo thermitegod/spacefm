@@ -91,7 +91,8 @@ vfs::mime_type::create_from_type(std::string_view type) noexcept
 }
 
 vfs::mime_type::mime_type(std::string_view type) noexcept
-    : type_(type), description_(Gio::content_type_get_description(type_)),
+    : type_(type),
+      description_(Gio::content_type_get_description(type_)),
       icon_(Gio::content_type_get_icon(type_))
 {
     //

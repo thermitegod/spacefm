@@ -47,7 +47,10 @@ class action : public Gtk::ApplicationWindow
 
       protected:
         ModelColumns(std::string_view name, std::string_view size, const bool is_dir)
-            : Glib::ObjectBase(typeid(ModelColumns)), name_(name), size_(size), is_dir_(is_dir)
+            : Glib::ObjectBase(typeid(ModelColumns)),
+              name_(name),
+              size_(size),
+              is_dir_(is_dir)
         {
         }
     };
